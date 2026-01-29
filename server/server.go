@@ -235,7 +235,7 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	responseText := "Volume creation successfully"
+	responseText := "Volume created successfully"
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
