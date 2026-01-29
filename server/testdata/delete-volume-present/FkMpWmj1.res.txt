@@ -1,0 +1,32 @@
+HTTP/1.1 200 OK
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 14 Nov 2025 19:11:41 GMT
+Server: libzapid-httpd
+Vary: Accept-Encoding,Origin
+X-Content-Type-Options: nosniff
+X-Dot-Ttag: 8803e80002339395
+
+{
+  "records": [
+    {
+      "uuid": "b886f196-c18d-11f0-9213-00a098d39e12",
+      "name": "foople",
+      "svm": {
+        "name": "osc"
+      },
+      "_links": {
+        "self": {
+          "href": "/api/storage/volumes/b886f196-c18d-11f0-9213-00a098d39e12"
+        }
+      }
+    }
+  ],
+  "num_records": 1,
+  "_links": {
+    "self": {
+      "href": "/api/storage/volumes?fields=uuid&name=foople&svm=osc"
+    }
+  }
+}

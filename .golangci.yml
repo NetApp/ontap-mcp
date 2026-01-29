@@ -1,0 +1,98 @@
+version: "2"
+output:
+  formats:
+    text:
+      path: stdout
+linters:
+  default: none
+  enable:
+    - asasalint
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - contextcheck
+    - copyloopvar
+    - dogsled
+    - dupword
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exptostd
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - gocritic
+    - gosec
+    - govet
+    - iface
+    - ineffassign
+    - intrange
+    - iotamixing
+    - makezero
+    - mirror
+    - misspell
+    - modernize
+    - nakedret
+    - nilerr
+    - nilnesserr
+#    - nolintlint
+    - nonamedreturns
+    - nosprintfhostport
+    - perfsprint
+    - prealloc
+    - predeclared
+    - reassign
+    - recvcheck
+    - revive
+    - sloglint
+    - staticcheck
+    - testableexamples
+    - testifylint
+    - thelper
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+  settings:
+    dogsled:
+      max-blank-identifiers: 3
+    gocritic:
+      disabled-checks:
+        - exposedSyncMutex
+        - hugeParam
+        - octalLiteral
+        - paramTypeCombine
+        - rangeValCopy
+        - regexpSimplify
+        - typeDefFirst
+        - unnamedResult
+        - whyNoLint
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
+    sloglint:
+      attr-only: true
+    thelper:
+      test:
+        begin: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - std-error-handling
+    paths:
+      - third_party/.*
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party/.*

@@ -1,0 +1,36 @@
+HTTP/1.1 200 OK
+Content-Length: 570
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 14:40:40 GMT
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+  "records": [
+    {
+      "svm": {
+        "uuid": "e85b5d01-cd08-11eb-9d72-00a098e261fb",
+        "name": "vs_test4",
+        "_links": {
+          "self": {
+            "href": "/api/svm/svms/e85b5d01-cd08-11eb-9d72-00a098e261fb"
+          }
+        }
+      },
+      "name": "cifs1",
+      "_links": {
+        "self": {
+          "href": "/api/protocols/cifs/shares/e85b5d01-cd08-11eb-9d72-00a098e261fb/cifs1"
+        }
+      }
+    }
+  ],
+  "num_records": 1,
+  "_links": {
+    "self": {
+      "href": "/api/protocols/cifs/shares?name=cifs1&svm=vs_test4"
+    }
+  }
+}

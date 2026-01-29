@@ -1,0 +1,19 @@
+HTTP/1.1 200 OK
+Content-Length: 151
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 14:40:39 GMT
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+  "records": [
+  ],
+  "num_records": 0,
+  "_links": {
+    "self": {
+      "href": "/api/protocols/cifs/shares?name=cifs1-not&svm=vs_test"
+    }
+  }
+}

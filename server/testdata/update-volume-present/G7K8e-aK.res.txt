@@ -1,0 +1,33 @@
+HTTP/1.1 200 OK
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 15:05:13 GMT
+Server: libzapid-httpd
+Vary: Accept-Encoding,Origin
+X-Content-Type-Options: nosniff
+X-Dot-Ttag: 8803e800002f7c41
+
+{
+  "uuid": "c0e837b7-f2ec-11f0-b341-00a098d39e12",
+  "description": "PATCH /api/storage/volumes/a31929dd-a4c9-11f0-9211-00a098d39e12",
+  "state": "success",
+  "message": "success",
+  "code": 0,
+  "start_time": "2026-01-17T03:05:11+12:00",
+  "end_time": "2026-01-17T03:05:11+12:00",
+  "svm": {
+    "name": "osc",
+    "uuid": "ff82ac73-d7f8-11eb-80e3-00a098d39e12",
+    "_links": {
+      "self": {
+        "href": "/api/svm/svms/ff82ac73-d7f8-11eb-80e3-00a098d39e12"
+      }
+    }
+  },
+  "_links": {
+    "self": {
+      "href": "/api/cluster/jobs/c0e837b7-f2ec-11f0-b341-00a098d39e12"
+    }
+  }
+}

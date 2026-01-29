@@ -1,0 +1,5 @@
+POST /api/protocols/nfs/export-policies/42949672974/rules HTTP/1.1
+Host: 10.193.48.11
+Content-Type: application/json
+
+{"clients":[{"match":"1.1.1.1/32"}],"ro_rule":["never"],"rw_rule":["never"]}

@@ -1,0 +1,16 @@
+HTTP/1.1 409 Duplicate Entry
+Content-Length: 92
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 11:14:50 GMT
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+  "error": {
+    "message": "duplicate entry",
+    "code": "1",
+    "target": "name"
+  }
+}

@@ -1,0 +1,12 @@
+HTTP/1.1 201 Created
+Content-Length: 3
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 11:07:11 GMT
+Location: /api/storage/qos/policies/81650ad4-f2cb-11f0-96fb-00a098e261fb
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+}

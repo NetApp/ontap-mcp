@@ -1,0 +1,36 @@
+HTTP/1.1 200 OK
+Content-Length: 515
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 14:56:44 GMT
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+  "records": [
+    {
+      "policy": {
+        "id": 42949672974,
+        "name": "export-policy-2"
+      },
+      "index": 1,
+      "clients": [
+        {
+          "match": "0.0.0.0/0"
+        }
+      ],
+      "_links": {
+        "self": {
+          "href": "/api/protocols/nfs/export-policies/42949672974/rules/1"
+        }
+      }
+    }
+  ],
+  "num_records": 1,
+  "_links": {
+    "self": {
+      "href": "/api/protocols/nfs/export-policies/42949672974/rules?clients.match=0.0.0.0%2F0&fields=index"
+    }
+  }
+}
