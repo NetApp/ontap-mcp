@@ -1,0 +1,22 @@
+HTTP/1.1 202 Accepted
+Content-Length: 189
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 21 Nov 2025 14:35:17 GMT
+Location: /api/storage/volumes/4c7f1b60-c6e7-11f0-9c67-00a098d390f2
+Server: libzapid-httpd
+Vary: Origin
+X-Content-Type-Options: nosniff
+X-Dot-Ttag: 8803e90001bbcae3
+
+{
+  "job": {
+    "uuid": "4c7f2d69-c6e7-11f0-9c67-00a098d390f2",
+    "_links": {
+      "self": {
+        "href": "/api/cluster/jobs/4c7f2d69-c6e7-11f0-9c67-00a098d390f2"
+      }
+    }
+  }
+}

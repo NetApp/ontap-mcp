@@ -1,0 +1,17 @@
+HTTP/1.1 400 Bad Request
+Connection: close
+Content-Length: 148
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 13:16:21 GMT
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+  "error": {
+    "message": "Failed to get CIFS server. Reason: CIFS server doesn't exist. ",
+    "code": "655399",
+    "target": "svm.uuid"
+  }
+}

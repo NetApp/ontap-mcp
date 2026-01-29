@@ -1,0 +1,39 @@
+name: Build and make ci
+
+on:
+  push:
+    branches: 
+    - main
+    - 'release/**'
+  pull_request:
+    branches: 
+    - main
+    - 'release/**'
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: taiki-e/install-action@7e574ed8bb89811282a11aecb3fe1d043bf5bf0e
+      with:
+        tool: just
+
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+
+    - name: read environment file
+      run: cat .go.env >> "$GITHUB_ENV"
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: ${{ env.GO_VERSION }}
+        cache: false
+
+    - name: Makefile ci
+      run: |
+        just ci

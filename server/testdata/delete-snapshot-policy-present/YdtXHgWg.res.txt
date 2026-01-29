@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+Content-Length: 406
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 12:53:39 GMT
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+  "records": [
+    {
+      "uuid": "eab9f0a8-f2cf-11f0-96fb-00a098e261fb",
+      "name": "snapshot-policy-1",
+      "_links": {
+        "self": {
+          "href": "/api/storage/snapshot-policies/eab9f0a8-f2cf-11f0-96fb-00a098e261fb"
+        }
+      }
+    }
+  ],
+  "num_records": 1,
+  "_links": {
+    "self": {
+      "href": "/api/storage/snapshot-policies?fields=uuid&name=snapshot-policy-1"
+    }
+  }
+}

@@ -1,0 +1,484 @@
+package rest
+
+import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"time"
+
+	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/ontap"
+)
+
+type Client struct {
+	poller     *config.Poller
+	httpClient *http.Client
+	credCache  credentialsCache
+}
+
+// credentials holds authentication information
+type credentials struct {
+	Username  string
+	Password  string
+	AuthToken string
+}
+
+func (c *Client) DeleteVolume(ctx context.Context, volume ontap.Volume) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+		vol        ontap.GetData
+	)
+	responseHeaders := http.Header{}
+
+	// If we only have the volume name we need to find the volume's UUID
+
+	params := url.Values{}
+	params.Set("fields", "uuid")
+	params.Set("name", volume.Name)
+	params.Set("svm", volume.SVM.Name)
+
+	builder := c.baseRequestBuilder(`/api/storage/volumes`, &statusCode, responseHeaders).
+		Params(params).
+		ToJSON(&vol)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	if vol.NumRecords == 0 {
+		return fmt.Errorf("failed to delete volume=%s on svm=%s because it does not exist", volume.Name, volume.SVM.Name)
+	}
+	if vol.NumRecords != 1 {
+		return fmt.Errorf("failed to delete volume=%s on svm=%s because there are %d matching records",
+			volume.Name, volume.SVM.Name, vol.NumRecords)
+	}
+
+	builder = c.baseRequestBuilder(`/api/storage/volumes/`+vol.Records[0].UUID, &statusCode, responseHeaders).
+		Delete().
+		ToBytesBuffer(&buf)
+
+	err = c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	return c.handleJob(ctx, statusCode, buf)
+}
+
+func (c *Client) handleJob(ctx context.Context, statusCode int, buf bytes.Buffer) error {
+	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
+		var pj ontap.PostJob
+		err := json.Unmarshal(buf.Bytes(), &pj)
+		if err != nil {
+			return err
+		}
+
+		err = c.waitForJob(ctx, `/api/cluster/jobs/`+pj.Job.UUID, 3*time.Minute)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) GetVolume(ctx context.Context, volume ontap.Volume) ([]string, error) {
+	var (
+		vol     ontap.GetData
+		volumes []string
+	)
+	responseHeaders := http.Header{}
+
+	// If we only have the volume name we need to find the volume's UUID
+
+	params := url.Values{}
+	svmName := volume.SVM.Name
+	if svmName != "" {
+		params.Set("svm", svmName)
+	}
+
+	builder := c.baseRequestBuilder(`/api/storage/volumes`, nil, responseHeaders).
+		Params(params).
+		ToJSON(&vol)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	if vol.NumRecords == 0 {
+		if svmName != "" {
+			return []string{}, fmt.Errorf("no volumes found on svm: %s", svmName)
+		}
+		return []string{}, errors.New("no volumes found in the cluster")
+	}
+
+	for _, v := range vol.Records {
+		volumes = append(volumes, v.Name)
+	}
+
+	return volumes, nil
+}
+
+func (c *Client) CreateVolume(ctx context.Context, volume ontap.Volume) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+		oc         ontap.OnlyCount
+	)
+	responseHeaders := http.Header{}
+
+	// If an export policy is included, check if it exists. If it does not, create it
+	if volume.Nas.ExportPolicy.Name != "" {
+		params := url.Values{}
+		params.Set("return_records", "false")
+		params.Set("fields", "name")
+		params.Set("name", volume.Nas.ExportPolicy.Name)
+		params.Set("svm.name", volume.SVM.Name)
+
+		builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, &statusCode, responseHeaders).
+			ToBytesBuffer(&buf).
+			ToJSON(&oc).
+			Params(params)
+
+		err := c.buildAndExecuteRequest(ctx, builder)
+
+		if err != nil {
+			return err
+		}
+
+		if oc.NumRecords == 0 {
+			// This is OK, create it
+			err := c.CreateExportPolicy(ctx, volume)
+			if err != nil {
+				return err
+			}
+		} else if oc.NumRecords != 1 {
+			return fmt.Errorf("failed to create volume=%s on svm=%s with export policy=%s because there are %d matching export policies",
+				volume.Name, volume.SVM.Name, volume.Nas.ExportPolicy.Name, oc.NumRecords)
+		}
+	}
+
+	builder := c.baseRequestBuilder(`/api/storage/volumes`, &statusCode, responseHeaders).
+		BodyJSON(volume).
+		ToBytesBuffer(&buf)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	return c.handleJob(ctx, statusCode, buf)
+}
+
+func (c *Client) UpdateVolume(ctx context.Context, volume ontap.Volume, oldVolumeName string, svmName string) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+		vol        ontap.GetData
+	)
+	responseHeaders := http.Header{}
+
+	// If we only have the volume name we need to find the volume's UUID
+
+	params := url.Values{}
+	params.Set("fields", "uuid")
+	params.Set("name", oldVolumeName)
+	params.Set("svm", svmName)
+
+	builder := c.baseRequestBuilder(`/api/storage/volumes`, &statusCode, responseHeaders).
+		Params(params).
+		ToJSON(&vol)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	if vol.NumRecords == 0 {
+		return fmt.Errorf("failed to update volume=%s on svm=%s because it does not exist", oldVolumeName, svmName)
+	}
+	if vol.NumRecords != 1 {
+		return fmt.Errorf("failed to update volume=%s on svm=%s because there are %d matching records",
+			oldVolumeName, svmName, vol.NumRecords)
+	}
+
+	builder = c.baseRequestBuilder(`/api/storage/volumes/`+vol.Records[0].UUID, &statusCode, responseHeaders).
+		Patch().
+		ToBytesBuffer(&buf).
+		BodyJSON(volume)
+
+	err = c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return fmt.Errorf("error during update volume request: %w", err)
+	}
+
+	return c.handleJob(ctx, statusCode, buf)
+}
+
+//nolint:unparam
+func (c *Client) waitForJob(ctx context.Context, jobLocation string, duration time.Duration) error {
+	var jr ontap.JobResponse
+
+	// Poll every pollInterval seconds, up to duration
+	const pollInterval = 2 * time.Second
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	builder := c.baseRequestBuilder(jobLocation, nil, nil).
+		ToJSON(&jr)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	// If the job state is success or failure, return
+	// otherwise keep trying
+	// queued, running, paused
+	handleJob := func(jobResponse ontap.JobResponse) (bool, error) {
+		switch jobResponse.State {
+		case "success":
+			return true, nil
+		case "failure":
+			if jobResponse.Error != nil {
+				return true, fmt.Errorf("job failed code=%s msg=%s", jobResponse.Error.Code, jobResponse.Error.Message)
+			}
+			return true, fmt.Errorf("job failed code=%d msg=%s", jobResponse.Code, jobResponse.Message)
+		}
+		return false, nil
+	}
+
+	done, err := handleJob(jr)
+	if err != nil {
+		return err
+	}
+	if done {
+		return nil
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			err = c.buildAndExecuteRequest(ctx, builder)
+			if err != nil {
+				return err
+			}
+			done2, err2 := handleJob(jr)
+			if err2 != nil {
+				return err2
+			}
+			if done2 {
+				return nil
+			}
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+}
+
+func ontapValidator(response *http.Response) error {
+	if response.StatusCode >= http.StatusBadRequest {
+		var ontapErr ontap.ClusterError
+		err := requests.ToJSON(&ontapErr)(response)
+		if err != nil {
+			return err
+		}
+		ontapErr.StatusCode = response.StatusCode
+		return ontapErr
+	}
+	return nil
+}
+
+func newClient() *http.Client {
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true, //nolint:gosec
+		},
+	}
+	aClient := &http.Client{
+		Transport: transport,
+		Timeout:   2 * time.Minute,
+	}
+
+	return aClient
+}
+
+func New(p *config.Poller) *Client {
+	return &Client{
+		poller:     p,
+		httpClient: nil,
+	}
+}
+
+// NewWithClient creates a new Client with a custom HTTP client for testing
+func NewWithClient(p *config.Poller, aClient *http.Client) *Client {
+	return &Client{
+		poller:     p,
+		httpClient: aClient,
+	}
+}
+
+// getHTTPClient returns the custom client if set, otherwise creates a new default client
+func (c *Client) getHTTPClient() *http.Client {
+	if c.httpClient != nil {
+		return c.httpClient
+	}
+	return newClient()
+}
+
+// baseRequestBuilder creates a request builder with common configuration:
+// - Base URL with poller address
+// - HTTP client
+// - Response headers copying
+// - Status code validator
+// - ONTAP error validator
+func (c *Client) baseRequestBuilder(endpoint string, statusCode *int, responseHeaders http.Header) *requests.Builder {
+	aClient := c.getHTTPClient()
+	builder := requests.
+		URL(`https://` + c.poller.Addr + endpoint).
+		Client(aClient)
+
+	if responseHeaders != nil {
+		builder = builder.CopyHeaders(responseHeaders)
+	}
+
+	return builder.
+		AddValidator(func(response *http.Response) error {
+			if statusCode != nil {
+				*statusCode = response.StatusCode
+			}
+			return nil
+		}).
+		AddValidator(ontapValidator)
+}
+
+// buildAndExecuteRequest is a helper method that handles the common pattern of:
+// 1. Getting authentication credentials
+// 2. Building a request with authentication
+// 3. Executing the request
+func (c *Client) buildAndExecuteRequest(ctx context.Context, builder *requests.Builder) error {
+	creds, err := c.getAuth(ctx)
+	if err != nil {
+		return err
+	}
+
+	if creds.AuthToken != "" {
+		builder = builder.Bearer(creds.AuthToken)
+	} else {
+		builder = builder.BasicAuth(creds.Username, creds.Password)
+	}
+
+	return builder.Fetch(ctx)
+}
+
+func (c *Client) CreateExportPolicy(ctx context.Context, volume ontap.Volume) error {
+	var statusCode int
+	newExportPolicy := ontap.NameAndSVM{
+		Name: volume.Nas.ExportPolicy.Name,
+		Svm:  volume.SVM,
+	}
+
+	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, &statusCode, nil).
+		BodyJSON(newExportPolicy)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+	if err != nil {
+		return err
+	}
+
+	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
+		return fmt.Errorf(`unexpected status code: %d`, statusCode)
+	}
+
+	return nil
+}
+
+// getAuth returns the appropriate authentication credentials
+// Priority: credentials_script > credentials_file > inline config
+func (c *Client) getAuth(ctx context.Context) (credentials, error) {
+	// If credentials_script is configured, use it
+	if c.poller.CredentialsScript.Path != "" {
+		return c.getScriptCredentials(ctx)
+	}
+
+	// If credentials_file is configured, use it
+	if c.poller.CredentialsFile != "" {
+		return c.getFileCredentials()
+	}
+
+	// Use inline config credentials
+	return credentials{
+		Username:  c.poller.Username,
+		Password:  c.poller.Password,
+		AuthToken: "",
+	}, nil
+}
+
+// getFileCredentials fetches credentials from the configured file
+func (c *Client) getFileCredentials() (credentials, error) {
+	username, password, err := loadCredentialsFile(c.poller.CredentialsFile, c.poller.Name)
+	if err != nil {
+		return credentials{}, err
+	}
+
+	// If username is not in the file, use the one from the main config
+	if username == "" && c.poller.Username != "" {
+		username = c.poller.Username
+	}
+
+	return credentials{
+		Username:  username,
+		Password:  password,
+		AuthToken: "",
+	}, nil
+}
+
+// getScriptCredentials fetches credentials from the configured script
+func (c *Client) getScriptCredentials(ctx context.Context) (credentials, error) {
+	schedule := parseSchedule(c.poller.CredentialsScript.Schedule)
+
+	// Check if we need to refresh credentials
+	if !c.credCache.shouldRefreshCredentials(schedule) {
+		return c.credCache.getCredentials(), nil
+	}
+
+	// Execute the script to get new credentials
+	response, err := executeCredentialsScript(ctx, c.poller)
+	if err != nil {
+		return credentials{}, err
+	}
+
+	// Determine username: use script response if provided, otherwise use config
+	username := response.Username
+	if username == "" && c.poller.Username != "" {
+		username = c.poller.Username
+	}
+
+	// Update cache
+	c.credCache.updateCache(username, response.Password, response.AuthToken)
+
+	return credentials{
+		Username:  username,
+		Password:  response.Password,
+		AuthToken: response.AuthToken,
+	}, nil
+}

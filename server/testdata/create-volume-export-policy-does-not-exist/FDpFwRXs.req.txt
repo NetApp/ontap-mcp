@@ -1,0 +1,5 @@
+POST /api/storage/volumes HTTP/1.1
+Host: 10.193.48.154
+Content-Type: application/json
+
+{"svm":{"name":"osc"},"name":"foople","aggregates":[{"name":"umeng_aff300_aggr2"}],"size":20971520,"nas":{"export_policy":{"name":"export_foople"}}}

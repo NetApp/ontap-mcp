@@ -1,0 +1,5 @@
+PATCH /api/protocols/cifs/shares/e85b5d01-cd08-11eb-9d72-00a098e261fb/cifs1 HTTP/1.1
+Host: 10.193.48.11
+Content-Type: application/json
+
+{"path":"/"}

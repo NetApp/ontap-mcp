@@ -1,0 +1,20 @@
+HTTP/1.1 200 OK
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 15:05:10 GMT
+Server: libzapid-httpd
+Vary: Accept-Encoding,Origin
+X-Content-Type-Options: nosniff
+X-Dot-Ttag: 8803e800002f7c28
+
+{
+  "records": [
+  ],
+  "num_records": 0,
+  "_links": {
+    "self": {
+      "href": "/api/storage/volumes?fields=uuid&name=missing&svm=osc"
+    }
+  }
+}

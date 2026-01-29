@@ -1,0 +1,12 @@
+HTTP/1.1 201 Created
+Content-Length: 3
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 11:18:30 GMT
+Location: /api/protocols/nfs/export-policies/42949672974
+Server: libzapid-httpd
+X-Content-Type-Options: nosniff
+
+{
+}

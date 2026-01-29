@@ -1,0 +1,32 @@
+HTTP/1.1 200 OK
+Cache-Control: no-cache,no-store,must-revalidate
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors: 'self'
+Content-Type: application/hal+json
+Date: Fri, 16 Jan 2026 15:05:10 GMT
+Server: libzapid-httpd
+Vary: Accept-Encoding,Origin
+X-Content-Type-Options: nosniff
+X-Dot-Ttag: 8803e800002f7c29
+
+{
+  "records": [
+    {
+      "uuid": "a31929dd-a4c9-11f0-9211-00a098d39e12",
+      "name": "volHar22",
+      "svm": {
+        "name": "osc"
+      },
+      "_links": {
+        "self": {
+          "href": "/api/storage/volumes/a31929dd-a4c9-11f0-9211-00a098d39e12"
+        }
+      }
+    }
+  ],
+  "num_records": 1,
+  "_links": {
+    "self": {
+      "href": "/api/storage/volumes?fields=uuid&name=volHar22&svm=osc"
+    }
+  }
+}
