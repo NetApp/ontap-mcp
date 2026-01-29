@@ -308,10 +308,10 @@ func ontapValidator(response *http.Response) error {
 	return nil
 }
 
-func newClient() *http.Client {
+func (c *Client) newClient() *http.Client {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true, //nolint:gosec
+			InsecureSkipVerify: c.poller.UseInsecureTLS, //nolint:gosec
 		},
 	}
 	aClient := &http.Client{
@@ -342,7 +342,7 @@ func (c *Client) getHTTPClient() *http.Client {
 	if c.httpClient != nil {
 		return c.httpClient
 	}
-	return newClient()
+	return c.newClient()
 }
 
 // baseRequestBuilder creates a request builder with common configuration:

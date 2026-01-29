@@ -59,7 +59,7 @@ type Poller struct {
 	Recorder          Recorder          `yaml:"recorder,omitempty"`
 	SslCert           string            `yaml:"ssl_cert,omitempty"`
 	SslKey            string            `yaml:"ssl_key,omitempty"`
-	UseInsecureTLS    *bool             `yaml:"use_insecure_tls,omitempty"`
+	UseInsecureTLS    bool              `yaml:"use_insecure_tls,omitempty"`
 	Username          string            `yaml:"username,omitempty"`
 	Name              string
 }
