@@ -26,6 +26,7 @@ type StartCmd struct {
 	Host           string `default:"localhost" help:"Listening address"`
 	Port           int    `default:"8080" help:"Listening port" env:"ONTAP_MCP_PORT"`
 	InspectTraffic bool   `default:"false" help:"Inspect MCP HTTP traffic"`
+	ReadOnly       bool   `default:"false" help:"Run MCP in read-only mode. This disables all tool calls that modify ONTAP state."`
 }
 
 func (a *StartCmd) Run(cli *CLI) error {
@@ -38,6 +39,7 @@ func (a *StartCmd) Run(cli *CLI) error {
 		Host:           cli.Start.Host,
 		Port:           cli.Start.Port,
 		InspectTraffic: cli.Start.InspectTraffic,
+		ReadOnly:       cli.Start.ReadOnly,
 	}
 
 	app := server.NewApp(cfg, opts, logger)
