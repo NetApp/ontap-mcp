@@ -5,10 +5,10 @@ pipeline {
         string(name: 'VERSION', defaultValue: '', description: '[Optional] RPM Version should match ONTAP MCP version with rc or nightly stripped. If not filled default is YY.mm.ddHH. See https://github.com/NetApp/ontap-mcp/wiki/Release-Checklist#version-names for details')
         string(name: 'RELEASE', defaultValue: 'nightly', description: '[Optional] Example: nightly (default) See https://github.com/NetApp/ontap-mcp/wiki/Release-Checklist#rpm-and-debian-names for details ')
         string(name: 'BRANCH', defaultValue: 'main', description: '[Optional] Branch name to clone. Default (main) ')
-		string(name: 'DOCKER_PUBLISH', defaultValue: 'false', description: 'true to publish to dockerhub')
-		string(name: 'RUN_TEST', defaultValue: 'true', description: 'false to skip test')
-		string(name: 'OVERWRITE_DOCKER_LATEST_TAG', defaultValue: 'false', description: 'true to overwrite latest tag at dockerhub. Works only if DOCKER_PUBLISH is true')
-		string(name: 'RUN_TRIVY_SCAN', defaultValue: 'false', description: 'true to run Trivy image scan')
+        string(name: 'DOCKER_PUBLISH', defaultValue: 'false', description: 'true to publish to dockerhub')
+        string(name: 'RUN_TEST', defaultValue: 'true', description: 'false to skip test')
+        string(name: 'OVERWRITE_DOCKER_LATEST_TAG', defaultValue: 'false', description: 'true to overwrite latest tag at dockerhub. Works only if DOCKER_PUBLISH is true')
+        string(name: 'RUN_TRIVY_SCAN', defaultValue: 'false', description: 'true to run Trivy image scan')
     }
 
     environment {
@@ -20,10 +20,7 @@ pipeline {
         echo \"${params.RELEASE}\"
         """).trim()
         BRANCH = getBranchName(env.CHANGE_BRANCH, params.BRANCH)
-		ASUP_MAKE_TARGET =sh (returnStdout: true, script: """
-        echo \"${params.ASUP_MAKE_TARGET}\"
-        """).trim()
-		DOCKER_PUBLISH =sh (returnStdout: true, script: """
+        DOCKER_PUBLISH =sh (returnStdout: true, script: """
         echo \"${params.DOCKER_PUBLISH}\"
         """).trim()
         OVERWRITE_DOCKER_LATEST_TAG =sh (returnStdout: true, script: """
@@ -188,7 +185,7 @@ pipeline {
         stage('Publish Nightly Build to GitHub') {
             when {
                 expression {
-                    return params.RELEASE == 'nightly' && env.BRANCH == 'main' && params.ASUP_MAKE_TARGET == 'production'
+                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
                 }
             }
             steps {
@@ -278,7 +275,7 @@ def getBranchName(gitBranchName, paramBranchName) {
         if (gitBranchName?.trim() && gitBranchName != "main") {
             return gitBranchName
         }
-    }else {
+    } else {
         return paramBranchName
     }
 }
