@@ -1,7 +1,7 @@
 #!/usr/bin/env just --justfile
 
 RELEASE      := "1"
-VERSION      := "expr `date +%Y.%m.%d | cut -c 3-`"
+VERSION      := `date +%Y.%m.%d | cut -c 3-`
 COMMIT       := `git rev-parse --short HEAD`
 BUILD_DATE   := `date +%FT%T%z`
 GOARCH       := "amd64"

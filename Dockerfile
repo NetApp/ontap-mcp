@@ -16,7 +16,7 @@ COPY . .
 RUN ls -R $INSTALL_DIR
 RUN ls -R $BUILD_DIR
 
-RUN GOOS=linux GOARCH=amd64 go build  .
+RUN GOOS=linux GOARCH=amd64 VERSION=$VERSION go build  .
 
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
 RUN mkdir -p $INSTALL_DIR/server/testdata/
