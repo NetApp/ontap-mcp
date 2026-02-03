@@ -16,6 +16,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/carlmjohnson/requests"
@@ -28,6 +29,7 @@ type Client struct {
 	httpClient *http.Client
 	credCache  credentialsCache
 	remote     ontap.Remote
+	initOnce   sync.Once
 }
 
 // credentials holds authentication information
@@ -347,19 +349,20 @@ func NewWithClient(p *config.Poller, aClient *http.Client) *Client {
 
 // getHTTPClient returns the custom client if set, otherwise creates a new default client
 func (c *Client) getHTTPClient() *http.Client {
-	var err error
-
-	if c.httpClient == nil {
-		client := c.newClient()
-		c.httpClient = client
-		c.remote, err = c.GetClusterInfo()
-		if err == nil {
-			err = c.sendMcpVersion()
-			if err != nil {
-				slog.Error("failed to send mcp version", slog.Any("error", err))
+	c.initOnce.Do(func() {
+		if c.httpClient == nil {
+			client := c.newClient()
+			c.httpClient = client
+			remote, err := c.GetClusterInfo()
+			if err == nil {
+				c.remote = remote
+				err = c.sendMcpVersion()
+				if err != nil {
+					slog.Error("failed to send mcp version", slog.Any("error", err))
+				}
 			}
 		}
-	}
+	})
 
 	return c.httpClient
 }
