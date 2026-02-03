@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
@@ -69,38 +68,15 @@ func (c *Client) CreateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 	)
 
 	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	params.Set("fields", "id")
 	params.Set("name", exportPolicyName)
 
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies`).
+	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exportPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exportPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -110,11 +86,11 @@ func (c *Client) CreateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		return fmt.Errorf("failed to get detail of export policy %s because it does not exist", exportPolicyName)
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules`, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules`, &statusCode, responseHeaders).
 		BodyJSON(rule).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
 		return nil
@@ -131,38 +107,15 @@ func (c *Client) UpdateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 	)
 
 	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	params.Set("fields", "id")
 	params.Set("name", exportPolicyName)
 
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies`).
+	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exportPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exportPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -184,30 +137,11 @@ func (c *Client) UpdateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		params.Set("rw_rule", oldRwRule)
 	}
 
-	creds, err = c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder = requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies/` + strconv.Itoa(exportPolicy.Records[0].ID) + `/rules`).
+	builder2 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exportPolicyRule).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exportPolicyRule)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if err != nil {
 		return err
@@ -217,12 +151,12 @@ func (c *Client) UpdateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		return errors.New("failed to get detail of export policy rule because it does not exist")
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules/`+strconv.Itoa(exportPolicyRule.Records[0].Index), &statusCode, responseHeaders).
+	builder3 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules/`+strconv.Itoa(exportPolicyRule.Records[0].Index), &statusCode, responseHeaders).
 		Patch().
 		BodyJSON(rule).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder3)
 
 	if statusCode == http.StatusOK {
 		return nil
@@ -239,38 +173,15 @@ func (c *Client) DeleteNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 	)
 
 	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	params.Set("fields", "id")
 	params.Set("name", exportPolicyName)
 
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies`).
+	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exportPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exportPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -292,30 +203,11 @@ func (c *Client) DeleteNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		params.Set("rw_rule", rule.RWruleStr)
 	}
 
-	creds, err = c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder = requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies/` + strconv.Itoa(exportPolicy.Records[0].ID) + `/rules`).
+	builder2 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exportPolicyRule).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exportPolicyRule)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if err != nil {
 		return err
@@ -325,11 +217,11 @@ func (c *Client) DeleteNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		return errors.New("failed to get detail of export policy rule because it does not exist")
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules/`+strconv.Itoa(exportPolicyRule.Records[0].Index), &statusCode, responseHeaders).
+	builder3 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exportPolicy.Records[0].ID)+`/rules/`+strconv.Itoa(exportPolicyRule.Records[0].Index), &statusCode, responseHeaders).
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder3)
 
 	if statusCode == http.StatusOK {
 		return nil
@@ -345,38 +237,15 @@ func (c *Client) UpdateNFSExportPolicy(ctx context.Context, oldExportPolicyName 
 	)
 
 	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	params.Set("fields", "id")
 	params.Set("name", oldExportPolicyName)
 
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies`).
+	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -386,12 +255,12 @@ func (c *Client) UpdateNFSExportPolicy(ctx context.Context, oldExportPolicyName 
 		return fmt.Errorf("failed to get detail of export policy %s because it does not exist", oldExportPolicyName)
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exPolicy.Records[0].ID), &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exPolicy.Records[0].ID), &statusCode, responseHeaders).
 		Patch().
 		BodyJSON(exportPolicy).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if statusCode == http.StatusOK {
 		return nil
@@ -407,38 +276,15 @@ func (c *Client) DeleteNFSExportPolicy(ctx context.Context, exportPolicy ontap.E
 	)
 
 	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	params.Set("fields", "id")
 	params.Set("name", exportPolicy.Name)
 
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/protocols/nfs/export-policies`).
+	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&exPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&exPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -448,11 +294,11 @@ func (c *Client) DeleteNFSExportPolicy(ctx context.Context, exportPolicy ontap.E
 		return fmt.Errorf("failed to get detail of export policy %s because it does not exist", exportPolicy.Name)
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exPolicy.Records[0].ID), &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/nfs/export-policies/`+strconv.Itoa(exPolicy.Records[0].ID), &statusCode, responseHeaders).
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if statusCode == http.StatusOK {
 		return nil

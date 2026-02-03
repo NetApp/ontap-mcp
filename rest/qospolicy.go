@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
@@ -17,39 +16,17 @@ func (c *Client) GetQoSPolicy(ctx context.Context, qosPolicyGet ontap.QoSPolicy)
 	)
 	responseHeaders := http.Header{}
 	qosPolicies := []string{}
-
-	// If we only have the snapshotPolicy name we need to find the snapshotPolicy's UUID
-	aClient := c.getHTTPClient()
-
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return []string{}, err
-	}
-
 	params := url.Values{}
 	svmName := qosPolicyGet.SVM.Name
 	if svmName != "" {
 		params.Set("svm", svmName)
 	}
 
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/storage/qos/policies`).
+	builder := c.baseRequestBuilder(`/api/storage/qos/policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&qosPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(_ *http.Response) error {
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&qosPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return []string{}, err
@@ -92,39 +69,16 @@ func (c *Client) UpdateQoSPolicy(ctx context.Context, qosPolicy ontap.QoSPolicy,
 		qPolicy    ontap.GetData
 	)
 	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-	aClient := c.getHTTPClient()
-
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
 	params := url.Values{}
 	params.Set("fields", "uuid")
 	params.Set("name", oldQosPolicyName)
 	params.Set("svm", svmName)
 
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/storage/qos/policies`).
+	builder := c.baseRequestBuilder(`/api/storage/qos/policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&qPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&qPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -154,38 +108,16 @@ func (c *Client) DeleteQoSPolicy(ctx context.Context, qosPolicy ontap.QoSPolicy)
 		qPolicy    ontap.GetData
 	)
 	responseHeaders := http.Header{}
-
-	aClient := c.getHTTPClient()
-
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
 	params := url.Values{}
 	params.Set("fields", "uuid")
 	params.Set("name", qosPolicy.Name)
 	params.Set("svm", qosPolicy.SVM.Name)
 
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/storage/qos/policies`).
+	builder := c.baseRequestBuilder(`/api/storage/qos/policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&qPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&qPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
