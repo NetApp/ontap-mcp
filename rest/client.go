@@ -546,7 +546,7 @@ func (c *Client) sendMcpVersion() error {
 		return nil
 	}
 
-	// Send the harvestTag to the ONTAP cluster including the OS name, sha1(hostname), and ONTAP-MCP version
+	// Send the ontapMcpTag to the ONTAP cluster including the OS name, sha1(hostname), and ONTAP-MCP version
 	osName := runtime.GOOS
 	hostname, _ := os.Hostname()
 	sha1Hostname := sha1Sum(hostname)
