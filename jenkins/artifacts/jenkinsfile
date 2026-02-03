@@ -56,7 +56,7 @@ pipeline {
             steps {
                cleanWs()
                sh '''
-                git clone --single-branch --branch $BRANCH https://github.com/NetApp/ontap-mcp.git .
+                git clone --branch $BRANCH https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git .
                 '''
 
                 script {
