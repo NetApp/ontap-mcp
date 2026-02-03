@@ -3,7 +3,7 @@ package rest
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // using sha1 for a hash, not a security risk
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
@@ -553,9 +553,6 @@ func (c *Client) sendMcpVersion() error {
 
 	fields := []string{osName, sha1Hostname, version.VERSION}
 
-	// params := url.Values{}
-	// params.Set("ignore_unknown_fields", "true")
-	// params.Set("fields", "ontapMcpTag,"+strings.Join(fields, ","))
 	u := `/api/cluster?ignore_unknown_fields=true&fields=` + "ontapMcpTag," + strings.Join(fields, ",")
 
 	var statusCode int
