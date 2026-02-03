@@ -3,14 +3,11 @@ package rest
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 func (c *Client) DeleteSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy) error {
@@ -20,37 +17,15 @@ func (c *Client) DeleteSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 		ssPolicy   ontap.GetData
 	)
 	responseHeaders := http.Header{}
-
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return err
-	}
-
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	params.Set("fields", "uuid")
 	params.Set("name", snapshotPolicy.Name)
 
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/storage/snapshot-policies`).
+	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&ssPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(response *http.Response) error {
-			statusCode = response.StatusCode
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&ssPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return err
@@ -64,30 +39,17 @@ func (c *Client) DeleteSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 			snapshotPolicy.Name, snapshotPolicy.SVM.Name, ssPolicy.NumRecords)
 	}
 
-	builder = c.baseRequestBuilder(`/api/storage/snapshot-policies/`+ssPolicy.Records[0].UUID, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/storage/snapshot-policies/`+ssPolicy.Records[0].UUID, &statusCode, responseHeaders).
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if err != nil {
 		return err
 	}
 
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		var pj ontap.PostJob
-		err := json.Unmarshal(buf.Bytes(), &pj)
-		if err != nil {
-			return err
-		}
-
-		err = c.waitForJob(ctx, `/api/cluster/jobs/`+pj.Job.UUID, 3*time.Minute)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return c.handleJob(ctx, statusCode, buf)
 }
 
 func (c *Client) GetSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy) ([]string, error) {
@@ -96,39 +58,17 @@ func (c *Client) GetSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.Sna
 	)
 	responseHeaders := http.Header{}
 	snapshotPolicies := []string{}
-
-	creds, err := c.getAuth(ctx)
-	if err != nil {
-		return []string{}, err
-	}
-
-	// If we only have the snapshotPolicy name we need to find the snapshotPolicy's UUID
-	aClient := c.getHTTPClient()
-
 	params := url.Values{}
 	svmName := snapshotPolicy.SVM.Name
 	if svmName != "" {
 		params.Set("svm", svmName)
 	}
 
-	builder := requests.
-		URL(`https://` + c.poller.Addr + `/api/storage/snapshot-policies`).
+	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`, nil, responseHeaders).
 		Params(params).
-		ToJSON(&ssPolicy).
-		Client(aClient).
-		CopyHeaders(responseHeaders).
-		AddValidator(func(_ *http.Response) error {
-			return nil
-		}).
-		AddValidator(ontapValidator)
+		ToJSON(&ssPolicy)
 
-	if creds.AuthToken != "" {
-		builder = builder.Bearer(creds.AuthToken)
-	} else {
-		builder = builder.BasicAuth(creds.Username, creds.Password)
-	}
-
-	err = builder.Fetch(ctx)
+	err := c.buildAndExecuteRequest(ctx, builder)
 
 	if err != nil {
 		return []string{}, err
@@ -185,11 +125,11 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 			snapshotPolicy.Name, snapshotPolicy.SVM.Name, scheduleName, oc.NumRecords)
 	}
 
-	builder = c.baseRequestBuilder(`/api/storage/snapshot-policies`, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/storage/snapshot-policies`, &statusCode, responseHeaders).
 		BodyJSON(snapshotPolicy).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
+	err = c.buildAndExecuteRequest(ctx, builder2)
 
 	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
 		return nil
