@@ -92,6 +92,7 @@ pipeline {
 
                         sh '''
                         targetLocation=$targetParentLocation$VERSION-$RELEASE-$BRANCH
+                        mkdir -p $targetLocation
                         docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} --build-arg VERSION=$VERSION --build-arg RELEASE=$RELEASE -t ${ghcrOntapMcpImage}:latest -t ${ghcrOntapMcpImage}:$VERSION-$RELEASE . --no-cache
                         docker save -o ${targetLocation}/docker_ontap_mcp.tar ${ghcrOntapMcpImage}:latest
                         '''
