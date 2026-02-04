@@ -25,9 +25,10 @@ import (
 
 type Options struct {
 	Host           string
-	Port           int
 	InspectTraffic bool
 	IsTest         bool
+	Port           int
+	ReadOnly       bool
 	TestHTTPClient *http.Client // Optional HTTP client for testing
 }
 
@@ -46,6 +47,9 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
 }
 
 func (a *App) StartServer() {
+	if a.options.ReadOnly {
+		a.logger.Info("MCP server is running in read-only mode; mutating operations are disabled")
+	}
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
 }
@@ -62,38 +66,49 @@ func (a *App) createMCPServer() *mcp.Server {
 
 	// operation on Volume object
 	addTool(server, "list_volumes", descriptions.ListVolumes, a.ListVolumes)
-	addTool(server, "create_volume", descriptions.CreateVolume, a.CreateVolume)
-	addTool(server, "update_volume", descriptions.UpdateVolume, a.UpdateVolume)
-	addTool(server, "delete_volume", descriptions.DeleteVolume, a.DeleteVolume)
+	if !a.options.ReadOnly {
+		addTool(server, "create_volume", descriptions.CreateVolume, a.CreateVolume)
+		addTool(server, "update_volume", descriptions.UpdateVolume, a.UpdateVolume)
+		addTool(server, "delete_volume", descriptions.DeleteVolume, a.DeleteVolume)
+	}
 
 	// operation on Snapshot Policy object
 	addTool(server, "list_snapshot_policies", descriptions.ListSnapshotPolicy, a.ListSnapshotPolicies)
-	addTool(server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, a.CreateSnapshotPolicy)
-	addTool(server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, a.DeleteSnapshotPolicy)
+	if !a.options.ReadOnly {
+		addTool(server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, a.CreateSnapshotPolicy)
+		addTool(server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, a.DeleteSnapshotPolicy)
+	}
 
 	// operation on QoS Policy object
 	addTool(server, "list_qos_policies", descriptions.ListQoSPolicy, a.ListQoSPolicies)
-	addTool(server, "create_qos_policy", descriptions.CreateQoSPolicy, a.CreateQoSPolicy)
-	addTool(server, "update_qos_policy", descriptions.UpdateQoSPolicy, a.UpdateQosPolicy)
-	addTool(server, "delete_qos_policy", descriptions.DeleteQoSPolicy, a.DeleteQoSPolicy)
+	if !a.options.ReadOnly {
+		addTool(server, "create_qos_policy", descriptions.CreateQoSPolicy, a.CreateQoSPolicy)
+		addTool(server, "update_qos_policy", descriptions.UpdateQoSPolicy, a.UpdateQosPolicy)
+		addTool(server, "delete_qos_policy", descriptions.DeleteQoSPolicy, a.DeleteQoSPolicy)
+	}
 
 	// NFS (lint:gocritic)
 	// operation on NFS Export Policy object
 	addTool(server, "list_nfs_export_policies", descriptions.ListNFSExportPolicy, a.ListNFSExportPolicies)
-	addTool(server, "create_nfs_export_policies", descriptions.CreateNFSExportPolicy, a.CreateNFSExportPolicy)
-	addTool(server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, a.UpdateNFSExportPolicy)
-	addTool(server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, a.DeleteNFSExportPolicy)
-
+	if !a.options.ReadOnly {
+		addTool(server, "create_nfs_export_policies", descriptions.CreateNFSExportPolicy, a.CreateNFSExportPolicy)
+		addTool(server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, a.UpdateNFSExportPolicy)
+		addTool(server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, a.DeleteNFSExportPolicy)
+	}
 	// operation on NFS Export Policy rules object
-	addTool(server, "create_nfs_export_policies_rules", descriptions.CreateNFSExportPolicyRules, a.CreateNFSExportPoliciesRule)
-	addTool(server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, a.UpdateNFSExportPoliciesRule)
-	addTool(server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, a.DeleteNFSExportPoliciesRule)
+	if !a.options.ReadOnly {
+		addTool(server, "create_nfs_export_policies_rules", descriptions.CreateNFSExportPolicyRules, a.CreateNFSExportPoliciesRule)
+		addTool(server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, a.UpdateNFSExportPoliciesRule)
+		addTool(server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, a.DeleteNFSExportPoliciesRule)
+	}
 
 	// operation on CIFS share object
 	addTool(server, "list_cifs_share", descriptions.ListCIFSShare, a.ListCIFSShare)
-	addTool(server, "create_cifs_share", descriptions.CreateCIFSShare, a.CreateCIFSShare)
-	addTool(server, "update_cifs_share", descriptions.UpdateCIFSShare, a.UpdateCIFSShare)
-	addTool(server, "delete_cifs_share", descriptions.DeleteCIFSShare, a.DeleteCIFSShare)
+	if !a.options.ReadOnly {
+		addTool(server, "create_cifs_share", descriptions.CreateCIFSShare, a.CreateCIFSShare)
+		addTool(server, "update_cifs_share", descriptions.UpdateCIFSShare, a.UpdateCIFSShare)
+		addTool(server, "delete_cifs_share", descriptions.DeleteCIFSShare, a.DeleteCIFSShare)
+	}
 
 	return server
 }
@@ -144,6 +159,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		handler.ServeHTTP(w, r)
 	})
 
+	//goland:noinspection HttpUrlsUsage
 	a.logger.Info("MCP server endpoint available", slog.String("url", "http://"+address))
 	a.logger.Info("Server ready to accept connections")
 
