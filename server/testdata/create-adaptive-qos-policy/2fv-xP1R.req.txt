@@ -1,5 +1,0 @@
-POST /api/storage/qos/policies HTTP/1.1
-Host: 10.193.48.11
-Content-Type: application/json
-
-{"svm":{"name":"vs_test"},"name":"qa-adaptive-1","adaptive":{"expected_iops":1000,"peak_iops":10000,"absolute_min_iops":10}}
