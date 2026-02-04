@@ -33,7 +33,7 @@ build: lint ## Build the ONTAP MCP server binary with development checks
 	@GOOS={{GOOS}} GOARCH={{GOARCH}} go build -trimpath -ldflags="{{LD_FLAGS}}" -o {{BINARY_NAME}} .
 	@echo "✅ Build complete: {{BINARY_NAME}}"
 
-docker-build: ## Build Docker image (use DOCKER_TAG to customize tag, e.g., make docker-build DOCKER_TAG=ontap-mcp:dev)
+docker-build: ## Build Docker image (use DOCKER_TAG to customize tag, e.g., just docker-build DOCKER_TAG=ontap-mcp:dev)
 	@echo "Building Docker image..."
-	@docker build -f Dockerfile --build-arg GO_VERSION=$GO_VERSION -t {{DOCKER_TAG}} .
+	@docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} -t {{DOCKER_TAG}} .
 	@echo "✅ Docker image built: {{DOCKER_TAG}}"
