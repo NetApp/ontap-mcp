@@ -148,3 +148,53 @@ type CIFSShare struct {
 	Name string      `json:"name,omitzero" jsonschema:"cifs share name"`
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
+
+const (
+	ASAr2 = "asar2"
+	CDOT  = "cdot"
+)
+
+type Cluster struct {
+	Name          string  `json:"name"`
+	UUID          string  `json:"uuid"`
+	Version       Version `json:"version"`
+	SanOptimized  bool    `json:"san_optimized"`
+	Disaggregated bool    `json:"disaggregated"`
+}
+
+type Version struct {
+	Full       string `json:"full"`
+	Generation int    `json:"generation"`
+	Major      int    `json:"major"`
+	Minor      int    `json:"minor"`
+}
+
+type Remote struct {
+	Name            string
+	Model           string
+	UUID            string
+	Version         Version
+	Serial          string
+	IsSanOptimized  bool
+	IsDisaggregated bool
+	ZAPIsExist      bool
+	ZAPIsChecked    bool
+	HasREST         bool
+	IsClustered     bool
+}
+
+func (r Remote) IsZero() bool {
+	return r.Name == "" && r.Model == "" && r.UUID == ""
+}
+
+func (r Remote) IsKeyPerf() bool {
+	return r.IsDisaggregated
+}
+
+func (r Remote) IsAFX() bool {
+	return r.IsDisaggregated && !r.IsSanOptimized
+}
+
+func (r Remote) IsASAr2() bool {
+	return r.Model == ASAr2
+}
