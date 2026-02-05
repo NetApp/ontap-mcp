@@ -19,6 +19,7 @@ pipeline {
         targetParentLocation = "/opt/home/nightly/"
         ontapMcpPath = "ontap-mcp"
         ghcrOntapMcpImage = "ghcr.io/netapp/ontap-mcp"
+        USERNAME = "hardikl"
         COMMIT_ID = sh(returnStdout: true, script: 'git rev-parse HEAD')
     }
 
@@ -121,7 +122,7 @@ pipeline {
                         /opt/home/gh_2.8.0_linux_386/bin/gh release create nightly --notes "Nightly images may include bugs and other issues. You might want to use the stable image instead." --title "ONTAP MCP Nightly Release" --prerelease --target main
                         # Reuse already built ONTAP MCP Docker image and tag them with 'nightly'
                         docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
-                        echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $DOCKERHUB_USERNAME --password-stdin
+                        echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
                         docker push ${ghcrOntapMcpImage}:nightly
                         '''
                     }
