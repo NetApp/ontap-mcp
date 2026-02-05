@@ -14,7 +14,7 @@ RUN mkdir -p $INSTALL_DIR
 
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 VERSION=$VERSION go build  .
+RUN GOOS=linux GOARCH=amd64 VERSION=$VERSION go build .
 
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
 

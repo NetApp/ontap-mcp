@@ -96,7 +96,8 @@ pipeline {
         stage('Publish Nightly to GitHub') {
             when {
                 expression {
-                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
+                    return params.RELEASE == 'nightly'
+                    // return params.RELEASE == 'nightly' && env.BRANCH == 'main'
                 }
             }
             steps {
@@ -143,7 +144,7 @@ pipeline {
 }
 
 def getBranchName(gitBranchName, paramBranchName) {
-    if(gitBranchName!=null) {
+    if (gitBranchName != null) {
         gitBranchName = gitBranchName.replace('origin/', '')
         if (gitBranchName?.trim() && gitBranchName != "main") {
             return gitBranchName
@@ -160,7 +161,7 @@ def void sendNotification(def status) {
     def prNo = env.CHANGE_ID ?: "N/A"
     def buildState = status
     def PrCommitter = env.CHANGE_AUTHOR_DISPLAY_NAME ?: env.CHANGE_AUTHOR ?: "N/A"
-    def startTime = new Date(currentBuild.startTimeInMillis + currentBuild.duration).format("yyyy-MM-dd HH:mm:ss")
+    def startTime = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd HH:mm:ss")
     def jenkinsImageUrl = "https://www.jenkins.io/images/logos/jenkins/jenkins.png"
     def statusMessage = "Jenkins Build SUCCESS"
     def statusColor = "Good"
@@ -315,7 +316,8 @@ def void updateStatus(def commitId, def statusMsg, def buildUrl, def description
         println("Ignore GitHub check status update")
         return
     }
-    def post = (HttpURLConnection) new URL("https://api.github.com/repos/NetApp/ontap-mcp/statuses/${commitId}").openConnection();
+    def encodedCommitId = java.net.URLEncoder.encode(commitId.toString(), "UTF-8")
+    def post = (HttpURLConnection) new URL("https://api.github.com/repos/NetApp/ontap-mcp/statuses/${encodedCommitId}").openConnection();
     def message = '{ "state" :  "'+statusMsg+'", "target_url": "'+buildUrl+'", "description": "'+description+'", "context" : "Integration test result"  }'
     post.requestMethod = 'POST'
     post.setDoInput(true);
