@@ -1,5 +1,0 @@
-POST /api/protocols/cifs/shares HTTP/1.1
-Host: 10.193.48.11
-Content-Type: application/json
-
-{"svm":{"name":"vs_test4"},"name":"cifs1","path":"/"}

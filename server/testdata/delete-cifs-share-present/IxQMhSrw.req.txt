@@ -1,3 +1,0 @@
-GET /api/protocols/cifs/shares?name=cifs1&svm=vs_test4 HTTP/1.1
-Host: 10.193.48.11
-

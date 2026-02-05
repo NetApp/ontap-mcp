@@ -1,5 +1,0 @@
-PATCH /api/storage/volumes/a31929dd-a4c9-11f0-9211-00a098d39e12 HTTP/1.1
-Host: 10.193.48.154
-Content-Type: application/json
-
-{"name":"volHar"}

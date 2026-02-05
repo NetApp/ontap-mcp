@@ -1,5 +1,0 @@
-POST /api/storage/qos/policies HTTP/1.1
-Host: 10.193.48.11
-Content-Type: application/json
-
-{"svm":{"name":"vs_test"},"name":"qa-fix-1","fixed":{"max_throughput_iops":10000,"min_throughput_iops":10}}

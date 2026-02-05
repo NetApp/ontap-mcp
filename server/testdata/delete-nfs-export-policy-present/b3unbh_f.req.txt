@@ -1,3 +1,0 @@
-DELETE /api/protocols/nfs/export-policies/42949672973 HTTP/1.1
-Host: 10.193.48.11
-

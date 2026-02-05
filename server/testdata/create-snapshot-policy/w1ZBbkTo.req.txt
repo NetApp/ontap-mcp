@@ -1,3 +1,0 @@
-GET /api/cluster/schedules?fields=name&name=daily&return_records=false HTTP/1.1
-Host: 10.193.48.11
-

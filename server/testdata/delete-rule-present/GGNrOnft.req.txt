@@ -1,3 +1,0 @@
-GET /api/protocols/nfs/export-policies?fields=id&name=export-policy-2 HTTP/1.1
-Host: 10.193.48.11
-
