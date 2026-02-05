@@ -92,6 +92,41 @@ pipeline {
                 }
             }
         }
+
+        stage('Publish Nightly to GitHub') {
+            when {
+                expression {
+                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
+                }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'GIT_ONTAP_MCP_TOKEN', variable: 'GIT_ONTAP_MCP_TOKEN')]) {
+                    script {
+                        // Write the GIT_ONTAP_MCP_TOKEN to a temporary file
+                        def gitTokenFile = "${env.WORKSPACE}/git_ontap_mcp_token"
+                        currentStage = 'Publish ONTAP MCP Docker Nightly Image to GitHub'
+                        writeFile file: gitTokenFile, text: env.GIT_ONTAP_MCP_TOKEN
+
+                        sh '''
+                        targetLocation=$targetParentLocation$VERSION-$RELEASE-$BRANCH
+                        wget -q -O /opt/home/gh.tar.gz "https://github.com/cli/cli/releases/download/v2.8.0/gh_2.8.0_linux_386.tar.gz"
+                        tar -C /opt/home -xzf /opt/home/gh.tar.gz
+                        echo $GIT_ONTAP_MCP_TOKEN > mytoken.txt
+                        /opt/home/gh_2.8.0_linux_386/bin/gh auth login --with-token < mytoken.txt
+                        /opt/home/gh_2.8.0_linux_386/bin/gh release view nightly && /opt/home/gh_2.8.0_linux_386/bin/gh release delete nightly || true
+                        if [ $(git tag -l nightly) ]; then
+                            git push https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git --delete nightly
+                        fi
+                        /opt/home/gh_2.8.0_linux_386/bin/gh release create nightly --notes "Nightly images may include bugs and other issues. You might want to use the stable image instead." --title "ONTAP MCP Nightly Release" --prerelease --target main
+                        # Reuse already built ONTAP MCP Docker image and tag them with 'nightly'
+                        docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
+                        echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $DOCKERHUB_USERNAME --password-stdin
+                        docker push ${ghcrOntapMcpImage}:nightly
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {

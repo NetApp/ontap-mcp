@@ -1,4 +1,5 @@
-ARG GO_VERSION=1.25.6
+# GO_VERSION should be overridden by the build script via --build-arg GO_VERSION=$value
+ARG GO_VERSION
 FROM golang:${GO_VERSION} AS builder
 
 SHELL ["/bin/bash", "-c"]
@@ -16,8 +17,6 @@ COPY . .
 RUN GOOS=linux GOARCH=amd64 VERSION=$VERSION go build  .
 
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
-RUN mkdir -p $INSTALL_DIR/server/testdata/
-RUN cp -a $BUILD_DIR/server/testdata/ontap.yaml $INSTALL_DIR/server/testdata/ 2>/dev/null || true
 
 FROM gcr.io/distroless/static-debian12:debug
 
