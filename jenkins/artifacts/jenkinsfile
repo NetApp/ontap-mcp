@@ -97,8 +97,7 @@ pipeline {
         stage('Publish Nightly to GitHub') {
             when {
                 expression {
-                    return params.RELEASE == 'nightly'
-                    // return params.RELEASE == 'nightly' && env.BRANCH == 'main'
+                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
                 }
             }
             steps {
