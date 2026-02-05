@@ -3,12 +3,20 @@ package rest
 import (
 	"bytes"
 	"context"
+	"crypto/sha1" //nolint:gosec // using sha1 for a hash, not a security risk
 	"crypto/tls"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/netapp/ontap-mcp/version"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
+	"runtime"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/carlmjohnson/requests"
@@ -20,6 +28,8 @@ type Client struct {
 	poller     *config.Poller
 	httpClient *http.Client
 	credCache  credentialsCache
+	remote     ontap.Remote
+	initOnce   sync.Once
 }
 
 // credentials holds authentication information
@@ -339,10 +349,52 @@ func NewWithClient(p *config.Poller, aClient *http.Client) *Client {
 
 // getHTTPClient returns the custom client if set, otherwise creates a new default client
 func (c *Client) getHTTPClient() *http.Client {
-	if c.httpClient != nil {
-		return c.httpClient
+	c.initOnce.Do(func() {
+		if c.httpClient == nil {
+			client := c.newClient()
+			c.httpClient = client
+			remote, err := c.GetClusterInfo()
+			if err == nil {
+				c.remote = remote
+				err = c.sendMcpVersion()
+				if err != nil {
+					slog.Error("failed to send mcp version", slog.Any("error", err))
+				}
+			}
+		}
+	})
+
+	return c.httpClient
+}
+
+func (c *Client) GetClusterInfo() (ontap.Remote, error) {
+	var cluster ontap.Cluster
+
+	builder := c.baseRequestBuilder("/api/cluster?fields=*", nil, nil).
+		ToJSON(&cluster)
+
+	ctx := context.Background()
+	err := c.buildAndExecuteRequest(ctx, builder)
+	if err != nil {
+		return ontap.Remote{}, err
 	}
-	return c.newClient()
+
+	r := ontap.Remote{
+		Name:            cluster.Name,
+		UUID:            cluster.UUID,
+		Version:         cluster.Version,
+		IsSanOptimized:  cluster.SanOptimized,
+		IsDisaggregated: cluster.Disaggregated,
+		IsClustered:     true,
+		HasREST:         true,
+		Model:           ontap.CDOT,
+	}
+
+	if r.IsDisaggregated && r.IsSanOptimized {
+		r.Model = ontap.ASAr2
+	}
+
+	return r, nil
 }
 
 // baseRequestBuilder creates a request builder with common configuration:
@@ -368,6 +420,7 @@ func (c *Client) baseRequestBuilder(endpoint string, statusCode *int, responseHe
 			}
 			return nil
 		}).
+		UserAgent("ontap-mcp/" + version.Info()).
 		AddValidator(ontapValidator)
 }
 
@@ -481,4 +534,43 @@ func (c *Client) getScriptCredentials(ctx context.Context) (credentials, error) 
 		Password:  response.Password,
 		AuthToken: response.AuthToken,
 	}, nil
+}
+
+func (c *Client) sendMcpVersion() error {
+	if !c.remote.HasREST {
+		return nil
+	}
+
+	// If the cluster is running ONTAP 9.11.1 or later,
+	// send an ontapmcpTag to the cluster to indicate that the ONTAP MCP is running.
+	// Otherwise, do nothing
+
+	if c.remote.Version.Generation < 9 || c.remote.Version.Major < 11 || c.remote.Version.Minor < 1 {
+		return nil
+	}
+
+	// Send the ontapMcpTag to the ONTAP cluster including the OS name, sha1(hostname), and ONTAP-MCP version
+	osName := runtime.GOOS
+	hostname, _ := os.Hostname()
+	sha1Hostname := sha1Sum(hostname)
+
+	fields := []string{osName, sha1Hostname, version.VERSION}
+
+	u := `/api/cluster?ignore_unknown_fields=true&fields=` + "ontapMcpTag," + strings.Join(fields, ",")
+
+	var statusCode int
+	builder := c.baseRequestBuilder(u, &statusCode, nil)
+	err := c.buildAndExecuteRequest(context.Background(), builder)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func sha1Sum(s string) string {
+	hash := sha1.New() //nolint:gosec // using sha1 for a hash, not a security risk
+	hash.Write([]byte(s))
+	return hex.EncodeToString(hash.Sum(nil))
 }
