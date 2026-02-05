@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/alecthomas/kong"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/server"
@@ -14,7 +15,7 @@ var logger = setupLogger()
 
 type Globals struct {
 	LogLevel   string `enum:"debug,info,warn,error" default:"info" env:"LOG_LEVEL" help:"Log level, one of: ${enum}"`
-	ConfigPath string `name:"config" default:"ontap.yaml" env:"CONFIG" help:"ONTAP-MCP config path"`
+	ConfigPath string `name:"config" default:"ontap.yaml" env:"ONTAP_MCP_CONFIG" help:"ONTAP-MCP config path"`
 }
 
 type CLI struct {
@@ -30,9 +31,14 @@ type StartCmd struct {
 }
 
 func (a *StartCmd) Run(cli *CLI) error {
+	abs, err := filepath.Abs(cli.ConfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to Abs config path=%s err=%w", cli.ConfigPath, err)
+	}
+	logger.Info("Reading config", slog.String("path", abs))
 	cfg, err := config.ReadConfig(cli.ConfigPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read config path=%s err=%w", cli.ConfigPath, err)
 	}
 
 	opts := server.Options{

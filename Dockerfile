@@ -27,4 +27,6 @@ COPY --from=builder $INSTALL_DIR $INSTALL_DIR
 
 WORKDIR $INSTALL_DIR
 
-ENTRYPOINT ["./ontap-mcp", "start", "--config", "server/testdata/ontap.yaml"]
+ENTRYPOINT ["./ontap-mcp"]
+CMD ["start"]
+
