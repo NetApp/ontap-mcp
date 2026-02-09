@@ -1,0 +1,2 @@
+- [Changelog](https://github.com/NetApp/ontap-mcp/blob/main/CHANGELOG.md)
+- [Releases](https://github.com/NetApp/ontap-mcp/releases)

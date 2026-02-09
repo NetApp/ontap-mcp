@@ -11,4 +11,7 @@ lint:
 test:
     @go test ./...
 
+docs:
+    mkdocs serve
+
 ci: license-check lint test
