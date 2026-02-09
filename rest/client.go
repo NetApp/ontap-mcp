@@ -349,20 +349,27 @@ func NewWithClient(p *config.Poller, aClient *http.Client) *Client {
 
 // getHTTPClient returns the custom client if set, otherwise creates a new default client
 func (c *Client) getHTTPClient() *http.Client {
+
+	var wasInitialized bool
+
 	c.initOnce.Do(func() {
 		if c.httpClient == nil {
-			client := c.newClient()
-			c.httpClient = client
-			remote, err := c.GetClusterInfo()
-			if err == nil {
-				c.remote = remote
-				err = c.sendMcpVersion()
-				if err != nil {
-					slog.Error("failed to send mcp version", slog.Any("error", err))
-				}
-			}
+			c.httpClient = c.newClient()
+			wasInitialized = true
 		}
 	})
+
+	// If we just initialized the client, fetch cluster info and send MCP version
+	if wasInitialized {
+		remote, err := c.GetClusterInfo()
+		if err == nil {
+			c.remote = remote
+			err = c.sendMcpVersion()
+			if err != nil {
+				slog.Error("failed to send mcp version", slog.Any("error", err))
+			}
+		}
+	}
 
 	return c.httpClient
 }
