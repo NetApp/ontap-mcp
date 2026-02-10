@@ -31,7 +31,7 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 **Create a QoS Policy**
 
-- On the sar cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops/s
+- On the sar cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.
  
 - On the sar cluster, set the qos policy of the docs volume on the marketing svm to 'gold'
 

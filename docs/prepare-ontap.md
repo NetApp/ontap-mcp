@@ -7,9 +7,14 @@ If you want to limit the ONTAP-MCP's access to specific SVMs or read-only action
 
 ## ontap.yaml configuration
 
-The ONTAP-MCP server uses a configuration file to store cluster connection details. 
+The ONTAP-MCP server uses a configuration file to store cluster connection details.
+
+!!! note "Cluster names in your ontap.yaml"
+
+    The cluster names you specify in the `ontap.yaml` file will be used as identifiers for those clusters in the MCP API, so choose them wisely.
+
 Below is an example `ontap.yaml` configuration file for two clusters, `sar` and `sar2`. 
-If you use Harvest, this file shares the same format as the `harvest.yml`, so you can use your `harvest.yaml` with to the ONTAP-MCP.
+If you use Harvest, this file shares the same format as the `harvest.yml`, so you can use your `harvest.yml` with to the ONTAP-MCP.
 
 ```yaml
 Pollers:
@@ -29,15 +34,15 @@ Pollers:
 
 Below is a table describing the configuration options:
 
-| Option               | Type             | Description                                                                                                                                                                    | Default |
-|----------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| poller-name          | required         | The IP address or hostname of the ONTAP cluster.                                                                                                                               | -       |
-| `addr`               | required         | The IPv4, IPv6 or FQDN of the ONTAP cluster.                                                                                                                                   | -       |
-| `username`           |                  | The username for authentication.                                                                                                                                               | -       |
-| `password`           |                  | The password for authentication. Not recommended for production use. Use `credentials_script` or `credentials_file` instead. See [authentication](#authentication) for details | -       |
-| `use_insecure_tls`   | optinal, bool    | Set to `true` to allow insecure TLS connections (e.g., self-signed certificates). Not recommended for production use.                                                          | false   |
-| `credentials_file`   | optinal, string  | Path to a yaml file that contains cluster credentials. The file should have the same shape as ontap.yml. Path can be relative to ontap.yml or absolute.                        |         |
-| `credentials_script` | optinal, section | Section that defines how ONTAP-MCP should fetch credentials via external script. See [here](#credentials-script) for details. 	                                                               |         |
+| Option               | Type              | Description                                                                                                                                                                    | Default |
+|----------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| poller-name          | required          | The IP address or hostname of the ONTAP cluster.                                                                                                                               | -       |
+| `addr`               | required          | The IPv4, IPv6 or FQDN of the ONTAP cluster.                                                                                                                                   | -       |
+| `username`           |                   | The username for authentication.                                                                                                                                               | -       |
+| `password`           |                   | The password for authentication. Not recommended for production use. Use `credentials_script` or `credentials_file` instead. See [authentication](#authentication) for details | -       |
+| `use_insecure_tls`   | optional, bool    | Set to `true` to allow insecure TLS connections (e.g., self-signed certificates). Not recommended for production use.                                                          | false   |
+| `credentials_file`   | optional, string  | Path to a yaml file that contains cluster credentials. The file should have the same shape as ontap.yaml. Path can be relative to ontap.yaml or absolute.                      |         |
+| `credentials_script` | optional, section | Section that defines how ONTAP-MCP should fetch credentials via external script. See [here](#credentials-script) for details. 	                                                |         |
  
 # Authentication
 
@@ -65,11 +70,11 @@ The `credentials_file` feature allows you to store credentials in a separate YAM
 
 At runtime, the `credentials_file` will be read and the included credentials will be used to authenticate with the matching cluster(s).
 
-The format of the `credentials_file` is similar to `ontap.yml` and can contain multiple cluster credentials. 
+The format of the `credentials_file` is similar to `ontap.yaml` and can contain multiple cluster credentials. 
 
 Example:
 
-Snippet from `ontap.yml`:
+Snippet from `ontap.yaml`:
 
 ```yaml
 Pollers:
@@ -92,15 +97,15 @@ Set restrictive permissions on the credentials file (e.g., `chmod 600 secrets/cl
 ## Credentials Script
 
 The `credentials_script` feature allows you to fetch authentication credentials dynamically via an external script.
-This can be configured in the `Pollers` section of your `ontap.yml` file, as shown in the example below.
+This can be configured in the `Pollers` section of your `ontap.yaml` file, as shown in the example below.
 
 At runtime, ONTAP-MCP will invoke the script specified in the `credentials_script` `path` section. 
 ONTAP-MCP will call the script with one or two arguments depending on how your poller is configured
-in the `ontap.yml` file. The script will be called like this: `./script $addr` or `./script $addr $username`.
+in the `ontap.yaml` file. The script will be called like this: `./script $addr` or `./script $addr $username`.
 
-- The first argument `$addr` is the address of the cluster taken from the `addr` field under the `Pollers` section of your `ontap.yml` file.
-- The second argument `$username` is the username for the cluster taken from the `username` field under the `Pollers` section of your `ontap.yml` file.
-  If your `ontap.yml` does not include a username, nothing will be passed.
+- The first argument `$addr` is the address of the cluster taken from the `addr` field under the `Pollers` section of your `ontap.yaml` file.
+- The second argument `$username` is the username for the cluster taken from the `username` field under the `Pollers` section of your `ontap.yaml` file.
+  If your `ontap.yaml` does not include a username, nothing will be passed.
 
 The script should return the credentials to ONTAP-MCP by writing the response to the script's standard output (stdout) as YAML.
 
@@ -113,7 +118,7 @@ For example, if the script writes the following, ONTAP-MCP will use `myuser` and
    username: myuser
    password: mypassword
    ```
-If only the `password` is provided, ONTAP-MCP will use the `username` from the `ontap.yml` file, if available. 
+If only the `password` is provided, ONTAP-MCP will use the `username` from the `ontap.yaml` file, if available. 
 If your username or password contains spaces, `#`, or other characters with special meaning in YAML, make sure you quote the value like so:
 `password: "my password with spaces"`
 
@@ -127,7 +132,7 @@ When using `authToken`, the `username` and `password` fields are ignored if they
 
 If the script doesn't finish within the specified `timeout`, ONTAP-MCP will terminate the script and any spawned processes.
 
-Credential scripts are defined under the `credentials_script` section within `Pollers` in your `ontap.yml`.
+Credential scripts are defined under the `credentials_script` section within `Pollers` in your `ontap.yaml`.
 Below are the options for the `credentials_script` section:
 
 | parameter | type                    | description                                                                                                                                                                  | default |
@@ -138,7 +143,7 @@ Below are the options for the `credentials_script` section:
 
 ### Example
 
-Here is an example of how to configure the `credentials_script` in the `ontap.yml` file:
+Here is an example of how to configure the `credentials_script` in the `ontap.yaml` file:
 
 ```yaml
 Pollers:
@@ -151,7 +156,7 @@ Pollers:
       timeout: 10s
 ```
 
-In this example, the `get_credentials` script should be located in the same directory as the `ontap.yml` file and should be executable.
+In this example, the `get_credentials` script should be located in the same directory as the `ontap.yaml` file and should be executable.
 It should output the credentials in a YAML format. Here are two example scripts:
 
 `get_credentials` that outputs username and password in YAML format:
@@ -216,7 +221,7 @@ Below are a couple of OAuth2 credential script examples for authenticating with 
 ### Troubleshooting
 
 * Make sure your script is executable
-* When running ONTAP-MCP from a container, ensure that you have mounted the credential script so that it is available inside the container and that you have updated the path in the `ontap.yml` file to reflect the path inside the container.
+* When running ONTAP-MCP from a container, ensure that you have mounted the credential script so that it is available inside the container and that you have updated the path in the `ontap.yaml` file to reflect the path inside the container.
 * If running ONTAP-MCP from a container, ensure that your [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) references an interpreter that exists inside the container. ONTAP-MCP containers are built from [Distroless](https://github.com/GoogleContainerTools/distroless) images, so you may need to use `#!/busybox/sh`.
 * Ensure the user/group that executes your poller also has read and execute permissions on the script.
   One way to test this is to `su` to the user/group that runs ONTAP-MCP

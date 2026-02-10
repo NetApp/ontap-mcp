@@ -19,7 +19,7 @@ The following tools are provided by the ONTAP MCP server.
 
 ## CIFS/SMB Integration
 
-- CIFS list management: create, read, update, delete 
+- CIFS list management: create, read, update, delete
 - Integration with volume provisioning
 
 ## NFS Export Policy Management
@@ -28,13 +28,13 @@ The following tools are provided by the ONTAP MCP server.
 - Volume-to-policy association
 
 ## Performance Management
- 
+
 - QoS policy management: create, read, update, delete
 - QoS policy assignment to SVMs
 - Fixed QoS policies with IOPS/bandwidth limits
 - Adaptive QoS policies with dynamic scaling
 
 ## Multi-Cluster Management
- 
+
 - Unified management of multiple ONTAP clusters
 - Centralized credential management
