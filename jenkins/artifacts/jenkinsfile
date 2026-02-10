@@ -93,6 +93,31 @@ pipeline {
                 }
             }
         }
+
+        stage('Publish Nightly to GitHub') {
+            when {
+                expression {
+                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
+                }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'GIT_ONTAP_MCP_TOKEN', variable: 'GIT_ONTAP_MCP_TOKEN')]) {
+                    script {
+                        // Write the GIT_ONTAP_MCP_TOKEN to a temporary file
+                        def gitTokenFile = "${env.WORKSPACE}/git_ontap_mcp_token"
+                        currentStage = 'Publish ONTAP MCP Docker Nightly Image to GitHub'
+                        writeFile file: gitTokenFile, text: env.GIT_ONTAP_MCP_TOKEN
+
+                        sh '''
+                        # Reuse already built ONTAP MCP Docker image and tag them with 'nightly'
+                        docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
+                        echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+                        docker push ${ghcrOntapMcpImage}:nightly
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
