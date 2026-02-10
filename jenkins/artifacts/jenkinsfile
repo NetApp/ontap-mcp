@@ -109,6 +109,9 @@ pipeline {
                         writeFile file: gitTokenFile, text: env.GIT_ONTAP_MCP_TOKEN
 
                         sh '''
+                        if [ $(git tag -l nightly) ]; then
+                            git push https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git --delete nightly
+                        fi
                         # Reuse already built ONTAP MCP Docker image and tag them with 'nightly'
                         docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
                         echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
