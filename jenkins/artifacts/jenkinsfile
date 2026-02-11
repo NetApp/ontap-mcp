@@ -116,6 +116,11 @@ pipeline {
                         docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
                         echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
                         docker push ${ghcrOntapMcpImage}:nightly
+                         # Add a dummy user/email for mike deploy to work
+                        git config user.name ontap-mcp
+                        git config user.email ontap-mcp
+                        git fetch origin gh-pages:gh-pages
+                        mike deploy -r https://$GIT_TOKEN@github.com/NetApp/ontap-mcp.git --push --update-aliases nightly
                         '''
                     }
                 }
