@@ -14,7 +14,7 @@ var (
 
 // String returns the full version string
 func String() string {
-	return fmt.Sprintf("harvest-mcp version %s-%s (commit %s) (build date %s) %s/%s\n",
+	return fmt.Sprintf("ontap-mcp version %s-%s (commit %s) (build date %s) %s/%s\n",
 		VERSION,
 		Release,
 		Commit,

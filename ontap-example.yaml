@@ -1,0 +1,14 @@
+# See https://netapp.github.io/ontap-mcp/nightly/
+Pollers:
+  u2:
+    addr: 10.193.48.11
+    username: admin
+    use_insecure_tls: true
+    credentials_script:
+      path: /path/to/credentials_script
+      schedule: always
+  aff-2510:
+    addr: 10.195.15.41
+    username: admin
+    use_insecure_tls: true
+    password: password

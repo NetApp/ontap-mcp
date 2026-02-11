@@ -26,6 +26,9 @@ lint:
 test:
     @go test ./...
 
+docs:
+    mkdocs serve
+
 ci: license-check lint test
 
 build: lint ## Build the ONTAP MCP server binary with development checks

@@ -1,0 +1,1 @@
+[ONTAP MCP's License](https://github.com/NetApp/ontap-mcp/blob/main/LICENSE)
