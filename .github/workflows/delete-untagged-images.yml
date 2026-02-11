@@ -1,0 +1,23 @@
+name: Prune untagged images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 6' # every Saturday at midnight
+
+jobs:
+  purge-image:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Prune untagged images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all containers from repository without tags
+        uses: Chizkiyahu/delete-untagged-ghcr-action@cbb5ffeb3e19c91ca5b98afd5a7818daeb3cd689
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          package_name: 'ontap-mcp'
+          untagged_only: true
+          owner_type: user
+
