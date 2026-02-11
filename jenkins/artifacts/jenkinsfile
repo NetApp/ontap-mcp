@@ -1,0 +1,328 @@
+pipeline {
+    agent {label 'buildserver'}
+
+    parameters {
+        string(name: 'VERSION', defaultValue: '', description: '[Optional] Version. If not filled default is YY.mm.ddHH.')
+        string(name: 'RELEASE', defaultValue: 'nightly', description: '[Optional] Example: nightly (default)')
+        string(name: 'BRANCH', defaultValue: 'main', description: '[Optional] Branch name to clone. Default (main) ')
+    }
+
+    environment {
+        GIT_ONTAP_MCP_TOKEN = credentials('GIT_ONTAP_MCP_TOKEN')
+        VERSION = sh (returnStdout: true, script: """
+        [ -n \"${params.VERSION}\" ] && echo \"${params.VERSION}\" || date +%Y.%m.%d | cut -c 3-
+        """).trim()
+        RELEASE = sh (returnStdout: true, script: """
+        echo \"${params.RELEASE}\"
+        """).trim()
+        BRANCH = getBranchName(env.CHANGE_BRANCH, params.BRANCH)
+        targetParentLocation = "/opt/home/nightly/"
+        ontapMcpPath = "ontap-mcp"
+        ghcrOntapMcpImage = "ghcr.io/netapp/ontap-mcp"
+        USERNAME = "hardikl"
+        COMMIT_ID = sh(returnStdout: true, script: 'git rev-parse HEAD')
+    }
+
+    stages {
+        stage("Initialization") {
+            steps {
+                buildName "${BUILD_NUMBER}_$BRANCH"
+                script {
+                    currentStage = 'Initialization'
+                }
+            }
+        }
+
+        stage('Download Prerequisites') {
+            steps {
+                sh '''
+               apt install -y git-all
+               apt-get install -y build-essential
+                '''
+                script {
+                    currentStage = 'Download Prerequisites'
+                }
+            }
+        }
+
+        stage('Git Clone ONTAP MCP') {
+            steps {
+               cleanWs()
+               sh '''
+                git clone --branch $BRANCH https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git .
+                '''
+
+                script {
+                    def file = readFile('.go.env')
+                    currentStage = 'Git Clone ONTAP MCP'
+                    file.split('\n').each { envLine ->
+                        def (key, value) = envLine.tokenize('=')
+                        env."${key}" = "${value}"
+                    }
+                }
+            }
+        }
+
+        stage('Setup GO') {
+            steps {
+                sh '''
+                wget -q -O go.tar.gz "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+                rm -rf /usr/local/go && tar -C /usr/local -xzf go.tar.gz
+                '''
+                script {
+                    currentStage = 'Setup GO'
+                }
+            }
+        }
+
+        stage('Build ONTAP MCP Docker Image') {
+            steps {
+                withCredentials([string(credentialsId: 'GIT_ONTAP_MCP_TOKEN', variable: 'GIT_ONTAP_MCP_TOKEN')]) {
+                    script {
+                        def gitTokenFile = "${env.WORKSPACE}/git_ontap_mcp_token"
+                        currentStage = 'Build ONTAP MCP Docker Image'
+                        writeFile file: gitTokenFile, text: env.GIT_ONTAP_MCP_TOKEN
+
+                        sh '''
+                        targetLocation=$targetParentLocation$VERSION-$RELEASE-$BRANCH
+                        mkdir -p $targetLocation
+                        docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} --build-arg VERSION=$VERSION --build-arg RELEASE=$RELEASE -t ${ghcrOntapMcpImage}:latest -t ${ghcrOntapMcpImage}:$VERSION-$RELEASE . --no-cache
+                        docker save -o ${targetLocation}/docker_ontap_mcp.tar ${ghcrOntapMcpImage}:latest
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Publish Nightly to GitHub') {
+            when {
+                expression {
+                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
+                }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'GIT_ONTAP_MCP_TOKEN', variable: 'GIT_ONTAP_MCP_TOKEN')]) {
+                    script {
+                        // Write the GIT_ONTAP_MCP_TOKEN to a temporary file
+                        def gitTokenFile = "${env.WORKSPACE}/git_ontap_mcp_token"
+                        currentStage = 'Publish ONTAP MCP Docker Nightly Image to GitHub'
+                        writeFile file: gitTokenFile, text: env.GIT_ONTAP_MCP_TOKEN
+
+                        sh '''
+                        if [ $(git tag -l nightly) ]; then
+                            git push https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git --delete nightly
+                        fi
+                        # Reuse already built ONTAP MCP Docker image and tag them with 'nightly'
+                        docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
+                        echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+                        docker push ${ghcrOntapMcpImage}:nightly
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            sendNotification("FAILED")
+        }
+        success {
+            sendNotification("SUCCESS")
+        }
+        aborted {
+             sendNotification("Aborted")
+        }
+    }
+}
+
+def getBranchName(gitBranchName, paramBranchName) {
+    if (gitBranchName != null) {
+        gitBranchName = gitBranchName.replace('origin/', '')
+        if (gitBranchName?.trim() && gitBranchName != "main") {
+            return gitBranchName
+        }
+    }
+    return paramBranchName
+}
+
+def void sendNotification(def status) {
+    def ontapMCPProjectName = 'ONTAP MCP'
+    def msWorkflowUrl = "${ONTAP_MCP_TEAM_HOOK}"
+    def prName = env.CHANGE_TITLE ?: "N/A"
+    def prNo = env.CHANGE_ID ?: "N/A"
+    def buildState = status
+    def PrCommitter = env.CHANGE_AUTHOR_DISPLAY_NAME ?: env.CHANGE_AUTHOR ?: "N/A"
+    def startTime = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd HH:mm:ss")
+    def jenkinsImageUrl = "https://www.jenkins.io/images/logos/jenkins/jenkins.png"
+    def statusMessage = "Jenkins Build SUCCESS"
+    def statusColor = "Good"
+    def stage = "All Stages Passed"
+
+    if (buildState == 'FAILED') {
+        jenkinsImageUrl = "https://www.jenkins.io/images/logos/fire/fire.png"
+        statusMessage = "Jenkins Build FAIL"
+        statusColor = "warning"
+        stage = "${currentStage}"
+    }
+
+    if (buildState == 'Aborted') {
+        jenkinsImageUrl = "https://www.jenkins.io/images/logos/fire/fire.png"
+        statusMessage = "Jenkins Build Aborted"
+        statusColor = "warning"
+        stage = "${currentStage}"
+    }
+
+    def payloadData = """
+    {
+        "type": "message",
+        "attachments": [
+            {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [
+                        {
+                            "type": "TextBlock",
+                            "size": "Medium",
+                            "weight": "Bolder",
+                            "text": "Build Notification"
+                        },
+                        {
+                            "type": "ColumnSet",
+                            "columns": [
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "type": "Image",
+                                            "style": "Person",
+                                            "url": "${jenkinsImageUrl}",
+                                            "altText": "Jenkins Logo",
+                                            "size": "Medium",
+                                            "height": "50px",
+                                            "width": "48px"
+                                        }
+                                    ],
+                                    "width": "auto"
+                                },
+                                {
+                                    "type": "Column",
+                                    "items": [
+                                        {
+                                            "type": "TextBlock",
+                                            "weight": "Bolder",
+                                            "text": "${statusMessage}",
+                                            "color": "${statusColor}",
+                                            "wrap": true,
+                                            "size": "ExtraLarge",
+                                            "isSubtle": true
+                                        },
+                                        {
+                                            "type": "TextBlock",
+                                            "spacing": "None",
+                                            "text": "Build time: ${startTime}",
+                                            "wrap": true,
+                                            "isSubtle": true
+                                        }
+                                    ],
+                                    "width": "stretch"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "FactSet",
+                            "facts": [
+                                {
+                                    "title": "Application Name:",
+                                    "value": "${ontapMCPProjectName}"
+                                },
+                                {
+                                    "title": "Stage:",
+                                    "value": "${stage}"
+                                },
+                                {
+                                    "title": "Job Name:",
+                                    "value": "${env.JOB_BASE_NAME}"
+                                },
+                                {
+                                    "title": "Build Number:",
+                                    "value": "${env.BUILD_NUMBER}"
+                                },
+                                {
+                                    "title": "PR Number:",
+                                    "value": "${prNo}"
+                                },
+                                {
+                                    "title": "Commit Author:",
+                                    "value": "${PrCommitter}"
+                                }
+                            ],
+                            "spacing": "Medium",
+                            "separator": true
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": "${prName}",
+                            "wrap": true,
+                            "spacing": "Medium",
+                            "separator": true,
+                            "maxLines": 2,
+                            "size": "Small",
+                            "fontType": "Monospace",
+                            "weight": "Bolder",
+                            "color": "Accent"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "Action.OpenUrl",
+                            "title": "View ${ontapMCPProjectName} Build",
+                            "url": "${env.BUILD_URL}",
+                            "iconUrl": "https://i.ibb.co/Ks2JKfG/cloudbees-logo-icon-168396.png"
+                        }
+                    ],
+                    "rtl": false
+                }
+            }
+        ]
+    }
+    """
+
+    // This POST call would trigger notification to MS Teams channel
+    httpRequest(
+        httpMode: 'POST',
+        acceptType: 'APPLICATION_JSON',
+        contentType: 'APPLICATION_JSON',
+        url: msWorkflowUrl,
+        requestBody: payloadData
+    )
+}
+
+def void updateStatus(def commitId, def statusMsg, def buildUrl, def description, def gitToken,
+        def jobName) {
+    println("Job Name --> ${jobName}")
+    if(jobName.trim().startsWith("ontap-mcp/PR-")) {
+        println("Ignore GitHub check status update")
+        return
+    }
+    def encodedCommitId = java.net.URLEncoder.encode(commitId.toString(), "UTF-8")
+    def post = (HttpURLConnection) new URL("https://api.github.com/repos/NetApp/ontap-mcp/statuses/${encodedCommitId}").openConnection();
+    def message = '{ "state" :  "'+statusMsg+'", "target_url": "'+buildUrl+'", "description": "'+description+'", "context" : "Integration test result"  }'
+    post.requestMethod = 'POST'
+    post.setDoInput(true);
+    post.setDoOutput(true);
+    post.setRequestProperty("Accept", "application/vnd.github.v3+json")
+    post.setRequestProperty("Authorization", "token ${gitToken}")
+    post.getOutputStream().write(message.getBytes("UTF-8"));
+    println(new String(post.getOutputStream().toByteArray(), "UTF-8"));
+    def postRC = post.getResponseCode();
+    println(postRC);
+    if(postRC.equals(201)) {
+        println(post.getInputStream().getText());
+    }else {
+        throw new RuntimeException("Failed to update GitHub Check "+post.getInputStream().getText())
+    }
+}
