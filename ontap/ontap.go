@@ -67,6 +67,14 @@ type NAS struct {
 	ExportPolicy NASExportPolicy `json:"export_policy"`
 }
 
+type Autosize struct {
+	Max             string `json:"maximum"`
+	Min             string `json:"minimum"`
+	Mode            string `json:"mode"` // enum: grow, grow_shrink, off
+	GrowThreshold   string `json:"grow_threshold"`
+	ShrinkThreshold string `json:"shrink_threshold"`
+}
+
 type Volume struct {
 	SVM        NameAndUUID   `json:"svm,omitzero"`
 	Name       string        `json:"name,omitzero"`
@@ -75,6 +83,7 @@ type Volume struct {
 	Style      string        `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
 	Size       int64         `json:"size,omitempty"`
 	Nas        NAS           `json:"nas,omitzero"`
+	Autosize   Autosize      `json:"autosize,omitzero"`
 }
 
 type NameAndUUID struct {

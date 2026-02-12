@@ -401,6 +401,29 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Nas.ExportPolicy.Name = in.ExportPolicy
 	}
 
+	if in.Max != "" || in.Mode != "" || in.Min != "" || in.GrowThreshold != "" || in.ShrinkThreshold != "" {
+		if in.Max == "" {
+			return out, errors.New("volume max autogrow size is required")
+		}
+		if in.Mode == "" {
+			return out, errors.New("volume autosize mode is required")
+		}
+		if in.Min == "" {
+			return out, errors.New("volume min autogrow size is required")
+		}
+		if in.GrowThreshold == "" {
+			return out, errors.New("volume autogrow threshold is required")
+		}
+		if in.ShrinkThreshold == "" {
+			return out, errors.New("volume autoshrink threshold is required")
+		}
+		out.Autosize.Max = in.Max
+		out.Autosize.Mode = in.Mode
+		out.Autosize.Min = in.Min
+		out.Autosize.GrowThreshold = in.GrowThreshold
+		out.Autosize.ShrinkThreshold = in.ShrinkThreshold
+	}
+
 	return out, nil
 }
 
