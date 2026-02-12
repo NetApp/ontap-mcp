@@ -28,10 +28,6 @@ Expected Response: Volume "docs" has been successfully resized to 25MB on the ma
 
 Expected Response: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.
 
-**Enable Autogrowth on a Volume**
-
-- On the umeng-aff300-05-06 cluster, enable autogrowth on the docs volume
-
 ---
 
 ### Manage QoS Policies
