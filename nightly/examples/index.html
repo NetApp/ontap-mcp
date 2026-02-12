@@ -649,41 +649,39 @@
 
 
 <h1 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h1>
-<p>This section provides example queries you can ask your MCP client (GitHub Copilot, Claude Desktop, etc.) when using the ONTAP MCP Server. For more examples and community discussions about MCP usage, see: <a href="https://github.com/NetApp/ontap-mcp/discussions/12">ONTAP MCP examples discussion</a> </p>
-<p>Higher-capability language models provide better analysis and insights. When possible use the latest model versions with large context windows. You will get better results when using flagship models like GPT-5.X, Sonnet 4.X, Gemini 3, etc. </p>
-<p>The following examples were run with Claude Sonnet 4.5 large language model. </p>
+<p>This section provides example queries you can ask your MCP client (GitHub Copilot, Claude Desktop, etc.) when using the ONTAP MCP Server. For more examples and community discussions about MCP usage, see: <a href="https://github.com/NetApp/ontap-mcp/discussions/12">ONTAP MCP examples discussion</a></p>
+<p>Higher-capability language models provide better analysis and insights. When possible use the latest model versions with large context windows. You will get better results when using flagship models like GPT-5.X, Sonnet 4.X, Gemini 3, etc.</p>
+<p>The following examples were run with Claude Sonnet 4.5 large language model.</p>
 <h2 id="reference-questions">Reference Questions<a class="headerlink" href="#reference-questions" title="Permanent link">&para;</a></h2>
 <p>Below are example questions that work well with the ONTAP MCP Server:</p>
 <h3 id="volume-provisioning">Volume Provisioning<a class="headerlink" href="#volume-provisioning" title="Permanent link">&para;</a></h3>
 <p><strong>Create a Volume</strong></p>
 <ul>
-<li>On the sar cluster, create a 100MB volume named docs on the marketing svm and the umeng_aff300_aggr2 aggregate with thin provisioning enabled.</li>
+<li>On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate</li>
 </ul>
+<p>Expected Response: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.</p>
 <p><strong>Resize a Volume</strong></p>
 <ul>
-<li>On the sar cluster, resize the docs volume on the marketing svm to 500MB.</li>
-<li>On the sar cluster, increase the size of the docs volume on the marketing svm by 200MB.</li>
+<li>On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.</li>
 </ul>
-<p><strong>Enable Autogrowth on a Volume</strong></p>
+<p>Expected Response: Volume "docs" has been successfully resized to 25MB on the marketing SVM.</p>
 <ul>
-<li>On the sar cluster, enable autogrowth on the docs volume</li>
+<li>On the umeng-aff300-05-06 cluster, increase the size of the docs volume on the marketing svm by 5MB.</li>
 </ul>
+<p>Expected Response: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.</p>
 <hr />
 <h3 id="manage-qos-policies">Manage QoS Policies<a class="headerlink" href="#manage-qos-policies" title="Permanent link">&para;</a></h3>
 <p><strong>Create a QoS Policy</strong></p>
 <ul>
-<li>
-<p>On the sar cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.</p>
-</li>
-<li>
-<p>On the sar cluster, set the qos policy of the docs volume on the marketing svm to 'gold'</p>
-</li>
+<li>On the umeng-aff300-05-06 cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.</li>
 </ul>
+<p>Expected Response: The fixed QoS policy "gold" has been successfully created on the marketing SVM with a maximum throughput of 5000 IOPS on the umeng-aff300-05-06 cluster.</p>
 <hr />
 <h3 id="manage-snapshot-policies">Manage Snapshot Policies<a class="headerlink" href="#manage-snapshot-policies" title="Permanent link">&para;</a></h3>
 <ul>
-<li>On the sar cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keep the last 5 snapshots.</li>
+<li>On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.</li>
 </ul>
+<p>Expected Response: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.</p>
 <hr />
 <h2 id="mcp-clients">MCP Clients<a class="headerlink" href="#mcp-clients" title="Permanent link">&para;</a></h2>
 <p>Common MCP clients that work with ONTAP MCP Server:</p>
