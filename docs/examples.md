@@ -44,6 +44,8 @@ Expected Response: The fixed QoS policy "gold" has been successfully created on 
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.
 
+Expected Response: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
+
 ---
 
 ## MCP Clients
