@@ -1,10 +1,10 @@
 # Usage Examples
 
-This section provides example queries you can ask your MCP client (GitHub Copilot, Claude Desktop, etc.) when using the ONTAP MCP Server. For more examples and community discussions about MCP usage, see: [ONTAP MCP examples discussion](https://github.com/NetApp/ontap-mcp/discussions/12) 
+This section provides example queries you can ask your MCP client (GitHub Copilot, Claude Desktop, etc.) when using the ONTAP MCP Server. For more examples and community discussions about MCP usage, see: [ONTAP MCP examples discussion](https://github.com/NetApp/ontap-mcp/discussions/12)
 
-Higher-capability language models provide better analysis and insights. When possible use the latest model versions with large context windows. You will get better results when using flagship models like GPT-5.X, Sonnet 4.X, Gemini 3, etc. 
+Higher-capability language models provide better analysis and insights. When possible use the latest model versions with large context windows. You will get better results when using flagship models like GPT-5.X, Sonnet 4.X, Gemini 3, etc.
 
-The following examples were run with Claude Sonnet 4.5 large language model. 
+The following examples were run with Claude Sonnet 4.5 large language model.
 
 ## Reference Questions
 
@@ -14,16 +14,19 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 **Create a Volume**
 
-- On the sar cluster, create a 100MB volume named docs on the marketing svm and the umeng_aff300_aggr2 aggregate with thin provisioning enabled.
+- On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate
+
+Expected Response: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
 
 **Resize a Volume**
 
-- On the sar cluster, resize the docs volume on the marketing svm to 500MB.
-- On the sar cluster, increase the size of the docs volume on the marketing svm by 200MB.
+- On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.
 
-**Enable Autogrowth on a Volume**
+Expected Response: Volume "docs" has been successfully resized to 25MB on the marketing SVM.
 
-- On the sar cluster, enable autogrowth on the docs volume
+- On the umeng-aff300-05-06 cluster, increase the size of the docs volume on the marketing svm by 5MB.
+
+Expected Response: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.
 
 ---
 
@@ -31,15 +34,17 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 **Create a QoS Policy**
 
-- On the sar cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.
- 
-- On the sar cluster, set the qos policy of the docs volume on the marketing svm to 'gold'
+- On the umeng-aff300-05-06 cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.
+
+Expected Response: The fixed QoS policy "gold" has been successfully created on the marketing SVM with a maximum throughput of 5000 IOPS on the umeng-aff300-05-06 cluster.
 
 ---
 
 ### Manage Snapshot Policies
 
-- On the sar cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keep the last 5 snapshots.
+- On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.
+
+Expected Response: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
 
 ---
 

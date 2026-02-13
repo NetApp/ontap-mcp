@@ -453,6 +453,15 @@ func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
 	return lrw.ResponseWriter.Write(b)
 }
 
+// parseSizeEmptyAllowed is similar to parseSize but allows empty string as valid input, which will be interpreted as 0 bytes.
+func parseSizeEmptyAllowed(size string) (int64, error) {
+	trimmed := strings.TrimSpace(size)
+	if trimmed == "" {
+		return 0, nil
+	}
+	return parseSize(trimmed)
+}
+
 // parseSize parses size strings in multiple formats
 // - Raw bytes: "104857600" → 104857600
 // - With units: "100MB", "2GB", "1TB"
