@@ -2,8 +2,8 @@ package tool
 
 type Volume struct {
 	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM          string `json:"svm_name,omitzero" jsonschema:"SVM name"`
-	Volume       string `json:"volume_name,omitzero" jsonschema:"volume name"`
+	SVM          string `json:"svm_name" jsonschema:"SVM name"`
+	Volume       string `json:"volume_name" jsonschema:"volume name"`
 	Aggregate    string `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
 	NewVolume    string `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
 	Size         string `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
@@ -30,6 +30,7 @@ type QoSPolicy struct {
 	ExpectedIOPS    string `json:"expected_iops,omitzero" jsonschema:"expected iops of adaptive qos policy"`
 	PeakIOPS        string `json:"peak_iops,omitzero" jsonschema:"peak iops of adaptive qos policy"`
 	AbsoluteMinIOPS string `json:"absolute_min_iops,omitzero" jsonschema:"absolute min iops of adaptive qos policy"`
+	CapacityShared  bool   `json:"capacity_shared,omitzero" jsonschema:"whether the capacities are shared across all objects that use this QoS policy-group. Default is false."`
 }
 
 type NFSExportPolicy struct {

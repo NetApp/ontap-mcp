@@ -128,24 +128,20 @@ func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.Name
 	if in.MaxThIOPS != "" || in.MinThIOPS != "" {
-		if in.MaxThIOPS == "" {
-			return out, errors.New("max throughput iops is required")
-		}
-		if in.MinThIOPS == "" {
-			return out, errors.New("min throughput iops is required")
-		}
+		// Only one of these need to be provided to create a fixed qos policy
 
-		maxiops, err := parseSize(in.MaxThIOPS)
+		maxiops, err := parseSizeEmptyAllowed(in.MaxThIOPS)
 		if err != nil {
 			return out, err
 		}
-		miniops, err := parseSize(in.MinThIOPS)
+		miniops, err := parseSizeEmptyAllowed(in.MinThIOPS)
 		if err != nil {
 			return out, err
 		}
 		out.Fixed = ontap.QoSFixed{
-			MaxThIOPS: maxiops,
-			MinThIOPS: miniops,
+			MaxThIOPS:      maxiops,
+			MinThIOPS:      miniops,
+			CapacityShared: in.CapacityShared,
 		}
 	} else {
 		if in.ExpectedIOPS == "" {
@@ -158,15 +154,15 @@ func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 			return out, errors.New("absolute min iops is required")
 		}
 
-		expectediops, err := parseSize(in.ExpectedIOPS)
+		expectediops, err := parseSizeEmptyAllowed(in.ExpectedIOPS)
 		if err != nil {
 			return out, err
 		}
-		peakiops, err := parseSize(in.PeakIOPS)
+		peakiops, err := parseSizeEmptyAllowed(in.PeakIOPS)
 		if err != nil {
 			return out, err
 		}
-		absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
+		absoluteMiniops, err := parseSizeEmptyAllowed(in.AbsoluteMinIOPS)
 		if err != nil {
 			return out, err
 		}
