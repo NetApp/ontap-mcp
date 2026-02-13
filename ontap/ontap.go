@@ -103,7 +103,17 @@ type Copy struct {
 }
 
 type Schedule struct {
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	Interval string `json:"interval,omitzero"`
+	Cron     Cron   `json:"cron,omitzero"`
+}
+
+type Cron struct {
+	Days     []string `json:"days,omitzero"`
+	Hours    []string `json:"hours,omitzero"`
+	Minutes  []string `json:"minutes"`
+	Months   []string `json:"months,omitzero"`
+	Weekdays []string `json:"weekdays,omitzero"`
 }
 
 type QoSPolicy struct {
