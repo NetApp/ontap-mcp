@@ -15,18 +15,27 @@ Below are example questions that work well with the ONTAP MCP Server:
 **Create a Volume**
 
 - On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate
-
-Expected Response: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
+- <span class="key">Expected Response</span>: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
 
 **Resize a Volume**
 
 - On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.
 
-Expected Response: Volume "docs" has been successfully resized to 25MB on the marketing SVM.
+- <span class="key">Expected Response</span>: Volume "docs" has been successfully resized to 25MB on the marketing SVM.
 
 - On the umeng-aff300-05-06 cluster, increase the size of the docs volume on the marketing svm by 5MB.
 
-Expected Response: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.
+- <span class="key">Expected Response</span>: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.
+
+**Volume Autogrowth**
+
+- On the umeng-aff300-05-06 cluster, enable autogrowth on the docs volume in the marketing svm
+
+- <span class="key">Expected Response</span>: Autogrowth has been enabled on the "docs" volume in the marketing SVM on the umeng-aff300-05-06 cluster.
+
+- Increase the docs volume autogrow percent to 62
+
+- <span class="key">Expected Response</span>: The autogrow threshold for the docs volume has been successfully increased to 62%. The volume will now automatically grow when it reaches 62% capacity.
 
 ---
 
@@ -36,7 +45,7 @@ Expected Response: Volume "docs" has been successfully increased by 5MB to 30MB 
 
 - On the umeng-aff300-05-06 cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.
 
-Expected Response: The fixed QoS policy "gold" has been successfully created on the marketing SVM with a maximum throughput of 5000 IOPS on the umeng-aff300-05-06 cluster.
+- <span class="key">Expected Response</span>: The fixed QoS policy "gold" has been successfully created on the marketing SVM with a maximum throughput of 5000 IOPS on the umeng-aff300-05-06 cluster.
 
 ---
 
@@ -44,7 +53,7 @@ Expected Response: The fixed QoS policy "gold" has been successfully created on 
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.
 
-Expected Response: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
+- <span class="key">Expected Response</span>: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
 
 ---
 
