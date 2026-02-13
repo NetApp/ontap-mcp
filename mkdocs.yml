@@ -8,7 +8,6 @@ nav:
   - Overview: 'index.md'
   - Installation: 'install.md'
   - Prepare ONTAP: 'prepare-ontap.md'
-  - MCP Tools: 'tools.md'
   - Examples: 'examples.md'
   - About:
       - 'License': 'license.md'
