@@ -68,11 +68,11 @@ type NAS struct {
 }
 
 type Autosize struct {
-	Max             string `json:"maximum"`
-	Min             string `json:"minimum"`
+	MaxSize         string `json:"maximum,omitzero"`
+	MinSize         string `json:"minimum,omitzero"`
 	Mode            string `json:"mode"` // enum: grow, grow_shrink, off
-	GrowThreshold   string `json:"grow_threshold"`
-	ShrinkThreshold string `json:"shrink_threshold"`
+	GrowThreshold   string `json:"grow_threshold,omitzero"`
+	ShrinkThreshold string `json:"shrink_threshold,omitzero"`
 }
 
 type Volume struct {

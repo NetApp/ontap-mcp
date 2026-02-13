@@ -401,27 +401,20 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Nas.ExportPolicy.Name = in.ExportPolicy
 	}
 
-	if in.Max != "" || in.Mode != "" || in.Min != "" || in.GrowThreshold != "" || in.ShrinkThreshold != "" {
-		if in.Max == "" {
-			return out, errors.New("volume max autogrow size is required")
-		}
-		if in.Mode == "" {
-			return out, errors.New("volume autosize mode is required")
-		}
-		if in.Min == "" {
-			return out, errors.New("volume min autogrow size is required")
-		}
-		if in.GrowThreshold == "" {
-			return out, errors.New("volume autogrow threshold is required")
-		}
-		if in.ShrinkThreshold == "" {
-			return out, errors.New("volume autoshrink threshold is required")
-		}
-		out.Autosize.Max = in.Max
-		out.Autosize.Mode = in.Mode
-		out.Autosize.Min = in.Min
-		out.Autosize.GrowThreshold = in.GrowThreshold
-		out.Autosize.ShrinkThreshold = in.ShrinkThreshold
+	if in.Autosize.Mode != "" {
+		out.Autosize.Mode = in.Autosize.Mode
+	}
+	if in.Autosize.MaxSize != "" {
+		out.Autosize.MaxSize = in.Autosize.MaxSize
+	}
+	if in.Autosize.MinSize != "" {
+		out.Autosize.MinSize = in.Autosize.MinSize
+	}
+	if in.Autosize.GrowThreshold != "" {
+		out.Autosize.GrowThreshold = in.Autosize.GrowThreshold
+	}
+	if in.Autosize.ShrinkThreshold != "" {
+		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
 	}
 
 	return out, nil
