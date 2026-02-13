@@ -17,6 +17,9 @@ theme:
   logo: assets/ontap-mcp.svg
   favicon: assets/ontap-mcp.svg
   name: material
+  custom_dir: docs/overrides
+  features:
+    - announce.dismiss
   palette:
     # Palette toggle for automatic mode
     - media: "(prefers-color-scheme)"
