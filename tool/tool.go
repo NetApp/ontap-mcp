@@ -14,9 +14,9 @@ type Volume struct {
 }
 
 type Autosize struct {
-	MaxSize         string `json:"maximum,omitzero" jsonschema:"Maximum size a volume grows"`
-	MinSize         string `json:"minimum,omitzero" jsonschema:"Minimum size a volume shrinks"`
-	Mode            string `json:"mode,omitzero" jsonschema:"Autosize mode (e.g., 'grow', 'grow_shrink', 'off')"`
+	MaxSize         string `json:"maximum,omitzero" jsonschema:"maximum size a volume grows"`
+	MinSize         string `json:"minimum,omitzero" jsonschema:"minimum size a volume shrinks"`
+	Mode            string `json:"mode,omitzero" jsonschema:"autosize mode (e.g., 'grow', 'grow_shrink', 'off')"`
 	GrowThreshold   string `json:"grow_threshold,omitzero" jsonschema:"percentage of auto growth"`
 	ShrinkThreshold string `json:"shrink_threshold,omitzero" jsonschema:"percentage of auto shrinkage"`
 }
