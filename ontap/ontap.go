@@ -124,8 +124,9 @@ type QoSPolicy struct {
 }
 
 type QoSFixed struct {
-	MaxThIOPS int64 `json:"max_throughput_iops"`
-	MinThIOPS int64 `json:"min_throughput_iops"`
+	MaxThIOPS      int64 `json:"max_throughput_iops"`
+	MinThIOPS      int64 `json:"min_throughput_iops"`
+	CapacityShared bool  `json:"capacity_shared"`
 }
 
 type QoSAdaptive struct {
