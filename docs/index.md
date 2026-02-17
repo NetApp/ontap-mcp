@@ -25,29 +25,7 @@ The ONTAP MCP server allows you to ask natural language questions about your ONT
 - configure NFS and CIFS export policies
 - manage snapshot policies and data protection
 - configure QoS policies
-- and much more! 
-
-**Create a Volume**
-
-- "On the sar cluster, create a 100MB volume named docs on the marketing svm and the umeng_aff300_aggr2 aggregate with thin provisioning enabled."
-
-**Resize a Volume**
-
-- "On the sar cluster, resize the docs volume on the marketing svm to 500MB."
-- "On the sar cluster, increase the size of the docs volume on the marketing svm by 200MB."
-
-**Enable Autogrowth on a Volume**
-
-- "On the sar cluster, enable autogrowth on the docs volume"
-
-**Manage QoS Policies**
-
-- "On the sar cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops/s"
-- "On the sar cluster, set the qos policy of the docs volume on the marketing svm to 'gold'"
-
-**Manage Snapshot Policies**
-
-- "On the sar cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keep the last 5 snapshots."
+- and much more! See more [examples](examples.md)
 
 ## Architecture
 

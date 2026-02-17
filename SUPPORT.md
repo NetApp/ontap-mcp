@@ -29,7 +29,7 @@ The fastest way to ask a question or discuss ONTAP-MCP related topics is via Net
 
 1. [Join and review the community guidelines](https://discord.gg/NetApp)
 2. After you've joined the server, ask your question in the 
-   [#ontap-mcp](https://discord.com/channels/855068651522490400/1062050414146625536) channel.
+   [#ontap-mcp](https://discord.com/channels/855068651522490400/1471250020010430557) channel.
 
 ## Documentation
 
