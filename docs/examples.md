@@ -94,6 +94,14 @@ Expected Response: CIFS share updated successfully.
 
 Expected Response: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
 
+- On the umeng-aff300-05-06 cluster, create a snapshot policy named every12hours30minson2dayweek on the vs_test SVM. The schedule would be 2 weekday 12 hour 30 minutes and keeps the last 3 snapshots.
+
+Expected Response: The snapshot policy has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create a snapshot policy named every5days on the vs_test SVM. The schedule is P5D and keeps the last 2 snapshots.
+
+Expected Response: The snapshot policy has been successfully created.
+
 ---
 
 ## MCP Clients
