@@ -42,15 +42,15 @@ Expected Response: The fixed QoS policy "gold" has been successfully created on 
 
 ### NFS Export Policy Provisioning
 
-**Create a NFS Export policy**
+**Create an NFS Export policy**
 
-- On the umeng-aff300-05-06 cluster, create NFS export policy as nfsEngPolicy on the marketing svm
+- On the umeng-aff300-05-06 cluster, create an NFS export policy name nfsEngPolicy on the marketing svm
 
 Expected Response: NFS Export Policy created successfully.
 
-**Update a NFS Export policy**
+**Update an NFS Export policy**
 
-- On the umeng-aff300-05-06 cluster, update NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm and client match to 1.1.1.1/32, ro rule to any, rw rule to any.
+- On the umeng-aff300-05-06 cluster, update the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
 
 Expected Response: NFS Export Policy updated successfully.
 
@@ -60,13 +60,13 @@ Expected Response: NFS Export Policy updated successfully.
 
 **Create a NFS Export policy rule**
 
-- On the umeng-aff300-05-06 cluster, create NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
+- On the umeng-aff300-05-06 cluster, create an NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
 
 Expected Response: NFS Export Policy Rule created successfully.
 
 **Update a NFS Export policy rule**
 
-- On the umeng-aff300-05-06 cluster, update NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
+- On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
 
 Expected Response: NFS Export Policy Rules updated successfully.
 
@@ -76,13 +76,13 @@ Expected Response: NFS Export Policy Rules updated successfully.
 
 **Create a CIFS share**
 
-- On the umeng-aff300-05-06 cluster, create CIFS share named cifsFin with path as / on the marketing svm
+- On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm
 
 Expected Response: CIFS share created successfully.
 
 **Update a CIFS share**
 
-- On the umeng-aff300-05-06 cluster, update CIFS share cifsFin path to /cifsFin on the marketing svm
+- On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change it's path to /cifsFin on the marketing svm
 
 Expected Response: CIFS share updated successfully.
 
