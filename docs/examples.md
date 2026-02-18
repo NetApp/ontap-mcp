@@ -58,13 +58,13 @@ Expected Response: NFS Export Policy updated successfully.
 
 ### NFS Export Policy Rules Provisioning
 
-**Create a NFS Export policy rule**
+**Create an NFS Export policy rule**
 
 - On the umeng-aff300-05-06 cluster, create an NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
 
 Expected Response: NFS Export Policy Rule created successfully.
 
-**Update a NFS Export policy rule**
+**Update an NFS Export policy rule**
 
 - On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
 
