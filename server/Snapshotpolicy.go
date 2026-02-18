@@ -135,3 +135,69 @@ func newCreateSnapshotPolicy(in tool.SnapshotPolicy) (ontap.SnapshotPolicy, erro
 
 	return out, nil
 }
+
+func (a *App) CreateSchedule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Schedule) (*mcp.CallToolResult, any, error) {
+	scheduleCreate, err := newCreateSchedule(parameters)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+	err = client.CreateSchedule(ctx, scheduleCreate)
+
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	responseText := "Schedule created successfully"
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: responseText},
+		},
+	}, nil, nil
+}
+
+// newCreateSchedule validates the customer provided arguments and converts them into
+// the corresponding ONTAP object ready to use via the REST API
+func newCreateSchedule(in tool.Schedule) (ontap.Schedule, error) {
+	out := ontap.Schedule{}
+	if in.Name == "" {
+		return out, errors.New("schedule name is required")
+	}
+	if in.Type == "" {
+		return out, errors.New("schedule type is required")
+	}
+
+	out.Name = in.Name
+	switch strings.ToLower(in.Type) {
+	case "interval":
+		if in.Interval == "" {
+			return out, errors.New("interval value is required")
+		}
+		out.Interval = in.Interval
+	case "cron":
+		if in.Cron.Days != "" {
+			out.Cron.Days = []string{in.Cron.Days}
+		}
+		if in.Cron.Hours != "" {
+			out.Cron.Hours = []string{in.Cron.Hours}
+		}
+		if in.Cron.Minutes != "" {
+			out.Cron.Minutes = []string{in.Cron.Minutes}
+		}
+		if in.Cron.Months != "" {
+			out.Cron.Months = []string{in.Cron.Months}
+		}
+		if in.Cron.Weekdays != "" {
+			out.Cron.Weekdays = []string{in.Cron.Weekdays}
+		}
+	default:
+		return out, errors.New("schedule type is invalid")
+	}
+
+	return out, nil
+}

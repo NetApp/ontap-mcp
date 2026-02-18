@@ -77,6 +77,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	if !a.options.ReadOnly {
 		addTool(server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, a.CreateSnapshotPolicy)
 		addTool(server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, a.DeleteSnapshotPolicy)
+		addTool(server, "create_schedule", descriptions.CreateSchedule, a.CreateSchedule)
 	}
 
 	// operation on QoS Policy object
