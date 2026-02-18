@@ -1,15 +1,24 @@
 package tool
 
 type Volume struct {
-	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM          string `json:"svm_name" jsonschema:"SVM name"`
-	Volume       string `json:"volume_name" jsonschema:"volume name"`
-	Aggregate    string `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
-	NewVolume    string `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
-	Size         string `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	NewSize      string `json:"new_size,omitzero" jsonschema:"new size of the volume (e.g., '100GB', '1TB')"`
-	NewState     string `json:"new_state,omitzero" jsonschema:"new state of the volume (e.g., 'online', 'offline')"`
-	ExportPolicy string `json:"export_policy,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	Cluster      string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM          string   `json:"svm_name" jsonschema:"SVM name"`
+	Volume       string   `json:"volume_name" jsonschema:"volume name"`
+	Aggregate    string   `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
+	NewVolume    string   `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
+	Size         string   `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	NewSize      string   `json:"new_size,omitzero" jsonschema:"new size of the volume (e.g., '100GB', '1TB')"`
+	NewState     string   `json:"new_state,omitzero" jsonschema:"new state of the volume (e.g., 'online', 'offline')"`
+	ExportPolicy string   `json:"export_policy,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	Autosize     Autosize `json:"autosize,omitzero" jsonschema:"autosize"`
+}
+
+type Autosize struct {
+	MaxSize         string `json:"maximum,omitzero" jsonschema:"maximum size a volume grows"`
+	MinSize         string `json:"minimum,omitzero" jsonschema:"minimum size a volume shrinks"`
+	Mode            string `json:"mode,omitzero" jsonschema:"autosize mode (e.g., 'grow', 'grow_shrink', 'off')"`
+	GrowThreshold   string `json:"grow_threshold,omitzero" jsonschema:"percentage of auto growth"`
+	ShrinkThreshold string `json:"shrink_threshold,omitzero" jsonschema:"percentage of auto shrinkage"`
 }
 
 type SnapshotPolicy struct {

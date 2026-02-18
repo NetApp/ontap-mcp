@@ -401,6 +401,22 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Nas.ExportPolicy.Name = in.ExportPolicy
 	}
 
+	if in.Autosize.Mode != "" {
+		out.Autosize.Mode = in.Autosize.Mode
+	}
+	if in.Autosize.MaxSize != "" {
+		out.Autosize.MaxSize = in.Autosize.MaxSize
+	}
+	if in.Autosize.MinSize != "" {
+		out.Autosize.MinSize = in.Autosize.MinSize
+	}
+	if in.Autosize.GrowThreshold != "" {
+		out.Autosize.GrowThreshold = in.Autosize.GrowThreshold
+	}
+	if in.Autosize.ShrinkThreshold != "" {
+		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
+	}
+
 	return out, nil
 }
 
