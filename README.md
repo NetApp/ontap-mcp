@@ -5,7 +5,7 @@
  
 > ONTAP-MCP is NetApp's ONTAP model context protocol server 
 
-The ONTAP Model Context Protocol (MCP) server provides MCP clients like GitHub Copilot, Claude Desktop, and other large language models (LLMs) access to your NetApp ONTAP storage systems: create automation tools enabling self-service provisioning and lifecycle management.
+The ONTAP Model Context Protocol (MCP) server provides MCP clients like GitHub Copilot, Claude Desktop, and other large language models (LLMs) access to your NetApp ONTAP storage systems. Create automation tools enabling self-service provisioning and lifecycle management.
 
 Supports multi-cluster management, volume lifecycle operations, data protection policies, and NFS/CIFS access control.
 
