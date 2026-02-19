@@ -111,27 +111,6 @@ docker run -d \
   start --port 8083 --host 0.0.0.0
 ```
 
-To place the file at a custom path, use `--config` or the `ONTAP_MCP_CONFIG` environment variable:
-
-```bash
-# Using --config flag
-docker run -d \
-  --name ontap-mcp-server \
-  -p 8083:8083 \
-  -v /path/to/your/ontap.yaml:/config/ontap.yaml \
-  ghcr.io/netapp/ontap-mcp:latest \
-  start --port 8083 --host 0.0.0.0 --config /config/ontap.yaml
-
-# Using environment variable
-docker run -d \
-  --name ontap-mcp-server \
-  -p 8083:8083 \
-  -e ONTAP_MCP_CONFIG=/config/ontap.yaml \
-  -v /path/to/your/ontap.yaml:/config/ontap.yaml \
-  ghcr.io/netapp/ontap-mcp:latest \
-  start --port 8083 --host 0.0.0.0
-```
-
 ## Logs
 
 To view the MCP server logs:
