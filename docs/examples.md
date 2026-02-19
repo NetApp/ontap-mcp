@@ -113,6 +113,18 @@ Expected Response: The snapshot policy has been successfully created.
 
 ---
 
+### Manage Schedule
+
+- On the umeng-aff300-05-06 cluster, create schedule with 5 * * * * named as 5minutes
+
+Expected Response: The schedule has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create schedule with * * 11 1-2 * named as 11dayjantofeb
+
+Expected Response: The schedule has been successfully created.
+
+---
+
 ## MCP Clients
 
 Common MCP clients that work with ONTAP MCP Server:
