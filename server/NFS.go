@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
@@ -10,6 +11,9 @@ import (
 )
 
 func (a *App) ListNFSExportPolicies(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
+	a.locks.RLock(parameters.Cluster)
+	defer a.locks.RUnlock(parameters.Cluster)
+
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
@@ -28,6 +32,11 @@ func (a *App) ListNFSExportPolicies(ctx context.Context, _ *mcp.CallToolRequest,
 }
 
 func (a *App) CreateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	nfsExportPolicyCreate, err := newCreateNFSExportPolicy(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -53,6 +62,11 @@ func (a *App) CreateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 }
 
 func (a *App) UpdateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	nfsExportPolicyUpdate, err := newUpdateNFSExportPolicy(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -113,6 +127,11 @@ func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 }
 
 func (a *App) DeleteNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	nfsExportPolicyDelete, err := newDeleteNFSExportPolicy(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -185,6 +204,11 @@ func newCreateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 }
 
 func (a *App) CreateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyRules) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	nfsExportPolicyRulesCreate, err := newCreateNFSExportPolicyRules(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -235,6 +259,11 @@ func newCreateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, er
 }
 
 func (a *App) UpdateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyRules) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	nfsExportPolicyRulesUpdate, err := newUpdateNFSExportPolicyRules(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -285,6 +314,11 @@ func newUpdateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, er
 }
 
 func (a *App) DeleteNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyRules) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	nfsExportPolicyRulesDelete, err := newDeleteNFSExportPolicyRules(parameters)
 	if err != nil {
 		return nil, nil, err
