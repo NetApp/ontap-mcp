@@ -11,6 +11,9 @@ import (
 )
 
 func (a *App) ListSnapshotPolicies(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
+	a.locks.RLock(parameters.Cluster)
+	defer a.locks.RUnlock(parameters.Cluster)
+
 	snapshotPolicyGet := newGetSnapshotPolicy(parameters)
 
 	client, err := a.getClient(parameters.Cluster)
@@ -31,6 +34,11 @@ func (a *App) ListSnapshotPolicies(ctx context.Context, _ *mcp.CallToolRequest, 
 }
 
 func (a *App) DeleteSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	snapshotPolicyDelete, err := newDeleteSnapshotPolicy(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -56,6 +64,11 @@ func (a *App) DeleteSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, 
 }
 
 func (a *App) CreateSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	snapshotPolicyCreate, err := newCreateSnapshotPolicy(parameters)
 	if err != nil {
 		return nil, nil, err

@@ -29,7 +29,7 @@ The ONTAP MCP server allows you to ask natural language questions about your ONT
 
 ## Architecture
 
-The ONTAP MCP server uses a multi-cluster architecture with centralized credential management and unified tool interfaces. All tools operate through registered cluster configurations rather than requiring credentials for each API call, providing enhanced security and simplified multi-cluster workflows.
+The ONTAP MCP server supports streamable HTTP that can handle multiple client connections. The MCP server can talk with multi-clusters with centralized credential management and unified tool interfaces. All tools operate through registered cluster configurations rather than requiring credentials for each API call, providing enhanced security and simplified multi-cluster workflows. 
 
 ```mermaid
 graph LR

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
@@ -10,6 +11,9 @@ import (
 )
 
 func (a *App) ListCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.CIFSShare) (*mcp.CallToolResult, any, error) {
+	a.locks.RLock(parameters.Cluster)
+	defer a.locks.RUnlock(parameters.Cluster)
+
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
@@ -28,6 +32,11 @@ func (a *App) ListCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, paramet
 }
 
 func (a *App) CreateCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.CIFSShare) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	cifsShareCreate, err := newCreateCIFSShare(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -53,6 +62,11 @@ func (a *App) CreateCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, param
 }
 
 func (a *App) UpdateCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.CIFSShare) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	cifsShareUpdate, err := newUpdateCIFSShare(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -78,6 +92,11 @@ func (a *App) UpdateCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, param
 }
 
 func (a *App) DeleteCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.CIFSShare) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	cifsShareDelete, err := newDeleteCIFSShare(parameters)
 	if err != nil {
 		return nil, nil, err

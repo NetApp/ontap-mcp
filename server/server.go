@@ -10,6 +10,7 @@ import (
 	"github.com/netapp/ontap-mcp/descriptions"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/rest"
+	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
 	"github.com/netapp/ontap-mcp/version"
 	"io"
@@ -36,6 +37,7 @@ type App struct {
 	logger  *slog.Logger
 	cfg     *config.ONTAP
 	options Options
+	locks   *lock.Map
 }
 
 func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
@@ -43,6 +45,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
 		cfg:     cfg,
 		logger:  logger,
 		options: o,
+		locks:   lock.New(),
 	}
 }
 
@@ -192,6 +195,9 @@ func (a *App) ListClusters(_ context.Context, _ *mcp.CallToolRequest, _ ListClus
 }
 
 func (a *App) ListVolumes(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
+	a.locks.RLock(parameters.Cluster)
+	defer a.locks.RUnlock(parameters.Cluster)
+
 	volumeGet := newGetVolume(parameters)
 
 	client, err := a.getClient(parameters.Cluster)
@@ -212,6 +218,11 @@ func (a *App) ListVolumes(ctx context.Context, _ *mcp.CallToolRequest, parameter
 }
 
 func (a *App) DeleteVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	volumeDelete, err := newDeleteVolume(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -237,6 +248,11 @@ func (a *App) DeleteVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 }
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	volumeCreate, err := newCreateVolume(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -262,6 +278,11 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 }
 
 func (a *App) UpdateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	volumeUpdate, err := newUpdateVolume(parameters)
 	if err != nil {
 		return nil, nil, err

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
@@ -10,6 +11,9 @@ import (
 )
 
 func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
+	a.locks.RLock(parameters.Cluster)
+	defer a.locks.RUnlock(parameters.Cluster)
+
 	qosPolicyGet := newGetQoSPolicy(parameters)
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
@@ -29,6 +33,11 @@ func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, param
 }
 
 func (a *App) CreateQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	qosPolicyCreate, err := newCreateQoSPolicy(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -54,6 +63,11 @@ func (a *App) CreateQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, param
 }
 
 func (a *App) UpdateQosPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	qosPolicyUpdate, err := newUpdateQoSPolicy(parameters)
 	if err != nil {
 		return nil, nil, err
@@ -79,6 +93,11 @@ func (a *App) UpdateQosPolicy(ctx context.Context, _ *mcp.CallToolRequest, param
 }
 
 func (a *App) DeleteQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	qosPolicyDelete, err := newDeleteQoSPolicy(parameters)
 	if err != nil {
 		return nil, nil, err

@@ -20,12 +20,15 @@ Start the ONTAP MCP server:
 ```bash
 docker run -d \
   --name ontap-mcp-server \
-  -p 8082:8082 \
+  -p 8083:8083 \
+  -v /path/to/your/ontap.yaml:/opt/mcp/ontap.yaml \
   ghcr.io/netapp/ontap-mcp:latest \
-  start --http --port 8082 --host 0.0.0.0
+  start --port 8083 --host 0.0.0.0
 ```
 
 If you only want to bind to localhost, omit the `--host` option.
+
+See [Configuration File](#configuration-file) below for details on preparing `ontap.yaml`.
 
 Then configure your mcp.json:
 
@@ -34,7 +37,7 @@ Then configure your mcp.json:
   "servers": {
     "ontap-mcp": {
       "type": "http",
-      "url": "http://your-server-ip:8082"
+      "url": "http://your-server-ip:8083"
     }
   }
 }
@@ -80,6 +83,33 @@ docker build -f Dockerfile -t ontap-mcp:local .
 ### Running the Built Docker Image
 
 After building, use your local image in your MCP client configuration. See [MCP Client Integration](#mcp-client-integration) above for configuration examples - just replace `ghcr.io/netapp/ontap-mcp:latest` with your local image tag (e.g., `ontap-mcp:local`).
+
+## Configuration File
+
+The server requires a YAML config file that defines which ONTAP clusters to connect to.
+By default, it looks for `ontap.yaml` in its working directory (`/opt/mcp` inside the container).
+
+Create your config file based on the [ontap-example.yaml](https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml) template:
+
+```yaml
+Pollers:
+  cluster1:
+    addr: 10.0.0.1
+    username: admin
+    password: password
+    use_insecure_tls: true
+```
+
+Mount it into the container using `-v`:
+
+```bash
+docker run -d \
+  --name ontap-mcp-server \
+  -p 8083:8083 \
+  -v /path/to/your/ontap.yaml:/opt/mcp/ontap.yaml \
+  ghcr.io/netapp/ontap-mcp:latest \
+  start --port 8083 --host 0.0.0.0
+```
 
 ## Logs
 
