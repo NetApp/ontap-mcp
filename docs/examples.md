@@ -103,7 +103,7 @@ Expected Response: CIFS share updated successfully.
 
 - <span class="key">Expected Response</span>: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
 
-- On the umeng-aff300-05-06 cluster, create a snapshot policy named every12hours30minson2dayweek on the vs_test SVM. The schedule would be 2 weekday 12 hour 30 minutes and keeps the last 3 snapshots.
+- On the umeng-aff300-05-06 cluster, create a snapshot policy named biweekly on the vs_test SVM. The schedule would be 2 weekday 12 hour 30 minutes and keeps the last 3 snapshots.
 
 Expected Response: The snapshot policy has been successfully created.
 
@@ -115,11 +115,11 @@ Expected Response: The snapshot policy has been successfully created.
 
 ### Manage Schedule
 
-- On the umeng-aff300-05-06 cluster, create schedule with 5 * * * * named as 5minutes
+- On the umeng-aff300-05-06 cluster, create a cron schedule with 5 * * * * named as 5minutes
 
 Expected Response: The schedule has been successfully created.
 
-- On the umeng-aff300-05-06 cluster, create schedule with * * 11 1-2 * named as 11dayjantofeb
+- On the umeng-aff300-05-06 cluster, create a cron schedule with * * 11 1-2 * named as 11dayjantofeb
 
 Expected Response: The schedule has been successfully created.
 
