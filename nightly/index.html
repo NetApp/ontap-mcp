@@ -636,7 +636,7 @@ The ONTAP MCP server provides APIs for large language models (LLMs) to query and
 <li>and much more! See more <a href="examples/">examples</a></li>
 </ul>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<p>The ONTAP MCP server uses a multi-cluster architecture with centralized credential management and unified tool interfaces. All tools operate through registered cluster configurations rather than requiring credentials for each API call, providing enhanced security and simplified multi-cluster workflows.</p>
+<p>The ONTAP MCP server supports streamable HTTP that can handle multiple client connections. The MCP server can talk with multi-clusters with centralized credential management and unified tool interfaces. All tools operate through registered cluster configurations rather than requiring credentials for each API call, providing enhanced security and simplified multi-cluster workflows. </p>
 <pre class="mermaid"><code>graph LR
     A[MCP Client&lt;br/&gt;GitHub Copilot&lt;br/&gt;Claude Desktop] --&gt; B[ONTAP MCP Server]
     B --&gt; C[ONTAP Cluster 1]
