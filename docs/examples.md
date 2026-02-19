@@ -50,7 +50,7 @@ Expected Response: NFS Export Policy created successfully.
 
 **Update an NFS Export policy**
 
-- On the umeng-aff300-05-06 cluster, update the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
+- On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
 
 Expected Response: NFS Export Policy updated successfully.
 
