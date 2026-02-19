@@ -30,11 +30,9 @@ type SnapshotPolicy struct {
 }
 
 type Schedule struct {
-	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
-	Name     string `json:"name"`
-	Type     string `json:"type" jsonschema:"type (e.g., 'interval', 'cron')"`
-	Interval string `json:"interval,omitzero"`
-	Cron     Cron   `json:"cron,omitzero"`
+	Cluster        string `json:"cluster_name" jsonschema:"cluster name"`
+	Name           string `json:"name"`
+	CronExpression string `json:"cron_expression" jsonschema:"cron_expression"`
 }
 
 type Cron struct {

@@ -112,17 +112,16 @@ type Copy struct {
 }
 
 type Schedule struct {
-	Name     string `json:"name"`
-	Interval string `json:"interval,omitzero"`
-	Cron     Cron   `json:"cron,omitzero"`
+	Name string `json:"name"`
+	Cron Cron   `json:"cron,omitzero"`
 }
 
 type Cron struct {
-	Days     []string `json:"days,omitzero"`
-	Hours    []string `json:"hours,omitzero"`
-	Minutes  []string `json:"minutes"`
-	Months   []string `json:"months,omitzero"`
-	Weekdays []string `json:"weekdays,omitzero"`
+	Days     []int `json:"days,omitzero"`
+	Hours    []int `json:"hours,omitzero"`
+	Minutes  []int `json:"minutes"`
+	Months   []int `json:"months,omitzero"`
+	Weekdays []int `json:"weekdays,omitzero"`
 }
 
 type QoSPolicy struct {

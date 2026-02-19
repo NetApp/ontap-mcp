@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
@@ -164,40 +165,87 @@ func (a *App) CreateSchedule(ctx context.Context, _ *mcp.CallToolRequest, parame
 // newCreateSchedule validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
 func newCreateSchedule(in tool.Schedule) (ontap.Schedule, error) {
-	out := ontap.Schedule{}
+	out := ontap.Schedule{
+		Cron: ontap.Cron{
+			Minutes:  make([]int, 0),
+			Hours:    make([]int, 0),
+			Days:     make([]int, 0),
+			Months:   make([]int, 0),
+			Weekdays: make([]int, 0),
+		},
+	}
+
 	if in.Name == "" {
 		return out, errors.New("schedule name is required")
 	}
-	if in.Type == "" {
-		return out, errors.New("schedule type is required")
+	if in.CronExpression == "" {
+		return out, errors.New("schedule cron expression is required")
 	}
 
 	out.Name = in.Name
-	switch strings.ToLower(in.Type) {
-	case "interval":
-		if in.Interval == "" {
-			return out, errors.New("interval value is required")
-		}
-		out.Interval = in.Interval
-	case "cron":
-		if in.Cron.Days != "" {
-			out.Cron.Days = []string{in.Cron.Days}
-		}
-		if in.Cron.Hours != "" {
-			out.Cron.Hours = []string{in.Cron.Hours}
-		}
-		if in.Cron.Minutes != "" {
-			out.Cron.Minutes = []string{in.Cron.Minutes}
-		}
-		if in.Cron.Months != "" {
-			out.Cron.Months = []string{in.Cron.Months}
-		}
-		if in.Cron.Weekdays != "" {
-			out.Cron.Weekdays = []string{in.Cron.Weekdays}
-		}
-	default:
-		return out, errors.New("schedule type is invalid")
+
+	if err := convertCron(in.CronExpression, &out); err != nil {
+		return out, err
 	}
 
 	return out, nil
+}
+func readRanges(minRange int, maxRange int, r string, out *[]int) {
+	if r != "*" {
+		for rng := range strings.SplitSeq(r, ",") {
+			from, to := 0, 0
+			n, _ := fmt.Sscanf(rng, "%d-%d", &from, &to)
+			switch n {
+			case 1: // single value
+				if from >= minRange && from <= maxRange {
+					*out = append(*out, from)
+				}
+			case 2: // range
+				if from < minRange {
+					from = minRange
+				}
+				if to > maxRange {
+					to = maxRange
+				}
+				for i := from; i <= to; i++ {
+					*out = append(*out, i)
+				}
+			default:
+				continue
+			}
+		}
+	}
+}
+
+func convertCron(cronStr string, out *ontap.Schedule) error {
+	fields := strings.Fields(cronStr)
+	for i := range 5 {
+		var field string
+		if i < len(fields) {
+			field = fields[i]
+			if strings.Contains(field, "/") {
+				return fmt.Errorf("wrong cron format %s detected", field)
+			}
+		} else {
+			// Cron misses a field, using '*'
+			field = "*"
+		}
+		switch i {
+		case 0:
+			readRanges(0, 59, field, &out.Cron.Minutes)
+		case 1:
+			readRanges(0, 23, field, &out.Cron.Hours)
+		case 2:
+			readRanges(1, 31, field, &out.Cron.Days)
+		case 3:
+			readRanges(1, 12, field, &out.Cron.Months)
+		case 4:
+			readRanges(0, 6, field, &out.Cron.Weekdays)
+		default:
+		}
+	}
+	if len(fields) > 5 {
+		fmt.Println("Ignoring extra fields in cron")
+	}
+	return nil
 }
