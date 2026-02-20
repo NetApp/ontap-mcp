@@ -1,7 +1,7 @@
 # What is NetApp ONTAP-MCP?
 
 > [!NOTE]  
-> NetApp ONTAP-MCP is currently in early access. Please give it a try, and [let use know](SUPPORT.md) how it works for you!
+> NetApp ONTAP-MCP is currently in early access. Please give it a try, and [let us know](SUPPORT.md) how it works for you!
  
 > ONTAP-MCP is NetApp's ONTAP model context protocol server 
 
