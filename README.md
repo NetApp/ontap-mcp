@@ -29,7 +29,7 @@ and GitHub [discussions](https://github.com/NetApp/ontap-mcp/discussions). Come 
 
 # Documentation
 
-:closed_book: https://netapp.github.io/ontap-mcp/nightly/
+:closed_book: https://netapp.github.io/ontap-mcp/latest/
 
 ---
 
