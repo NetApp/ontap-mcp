@@ -419,6 +419,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#logs" class="md-nav__link">
     <span class="md-ellipsis">
       Logs
@@ -675,6 +684,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#logs" class="md-nav__link">
     <span class="md-ellipsis">
       Logs
@@ -743,17 +761,19 @@
 <p>Start the ONTAP MCP server:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>ontap-mcp-server<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-p<span class="w"> </span><span class="m">8082</span>:8082<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">8083</span>:8083<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/your/ontap.yaml:/opt/mcp/ontap.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>ghcr.io/netapp/ontap-mcp:latest<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>start<span class="w"> </span>--http<span class="w"> </span>--port<span class="w"> </span><span class="m">8082</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0
+<span class="w">  </span>start<span class="w"> </span>--port<span class="w"> </span><span class="m">8083</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0
 </code></pre></div>
 <p>If you only want to bind to localhost, omit the <code>--host</code> option.</p>
+<p>See <a href="#configuration-file">Configuration File</a> below for details on preparing <code>ontap.yaml</code>.</p>
 <p>Then configure your mcp.json:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;ontap-mcp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://your-server-ip:8082&quot;</span>
+<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://your-server-ip:8083&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
@@ -785,6 +805,25 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
 </code></pre></div>
 <h3 id="running-the-built-docker-image">Running the Built Docker Image<a class="headerlink" href="#running-the-built-docker-image" title="Permanent link">&para;</a></h3>
 <p>After building, use your local image in your MCP client configuration. See <a href="#mcp-client-integration">MCP Client Integration</a> above for configuration examples - just replace <code>ghcr.io/netapp/ontap-mcp:latest</code> with your local image tag (e.g., <code>ontap-mcp:local</code>).</p>
+<h2 id="configuration-file">Configuration File<a class="headerlink" href="#configuration-file" title="Permanent link">&para;</a></h2>
+<p>The server requires a YAML config file that defines which ONTAP clusters to connect to.
+By default, it looks for <code>ontap.yaml</code> in its working directory (<code>/opt/mcp</code> inside the container).</p>
+<p>Create your config file based on the <a href="https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml">ontap-example.yaml</a> template:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Pollers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cluster1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.0.1</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password</span>
+<span class="w">    </span><span class="nt">use_insecure_tls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Mount it into the container using <code>-v</code>:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>ontap-mcp-server<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">8083</span>:8083<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/your/ontap.yaml:/opt/mcp/ontap.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/netapp/ontap-mcp:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>start<span class="w"> </span>--port<span class="w"> </span><span class="m">8083</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0
+</code></pre></div>
 <h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
 <p>To view the MCP server logs:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>&lt;container-id&gt;
