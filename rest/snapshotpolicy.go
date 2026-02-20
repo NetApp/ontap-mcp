@@ -119,9 +119,9 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 	}
 
 	if oc.NumRecords == 0 {
-		return fmt.Errorf("no snapshotPolicy %s found", scheduleName)
+		return fmt.Errorf("no schedule %s found", scheduleName)
 	} else if oc.NumRecords != 1 {
-		return fmt.Errorf("failed to create snapshotPolicy=%s on svm=%s with given schedule name=%s because there are %d matching export policies",
+		return fmt.Errorf("failed to create snapshotPolicy=%s on svm=%s with given schedule name=%s because there are %d matching schedules",
 			snapshotPolicy.Name, snapshotPolicy.SVM.Name, scheduleName, oc.NumRecords)
 	}
 
@@ -136,4 +136,22 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 	}
 
 	return err
+}
+
+func (c *Client) CreateSchedule(ctx context.Context, schedule ontap.Schedule) error {
+	var statusCode int
+
+	builder := c.baseRequestBuilder(`/api/cluster/schedules`, &statusCode, nil).
+		BodyJSON(schedule)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+	if err != nil {
+		return err
+	}
+
+	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
+		return fmt.Errorf(`failed to create schedule %s: unexpected status code: %d`, schedule.Name, statusCode)
+	}
+
+	return nil
 }

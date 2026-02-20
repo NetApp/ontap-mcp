@@ -113,6 +113,15 @@ type Copy struct {
 
 type Schedule struct {
 	Name string `json:"name"`
+	Cron Cron   `json:"cron,omitzero"`
+}
+
+type Cron struct {
+	Days     []int `json:"days,omitzero"`
+	Hours    []int `json:"hours,omitzero"`
+	Minutes  []int `json:"minutes"`
+	Months   []int `json:"months,omitzero"`
+	Weekdays []int `json:"weekdays,omitzero"`
 }
 
 type QoSPolicy struct {

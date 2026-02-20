@@ -29,6 +29,20 @@ type SnapshotPolicy struct {
 	Count    int    `json:"count,omitzero" jsonschema:"number of snapshots"`
 }
 
+type Schedule struct {
+	Cluster        string `json:"cluster_name" jsonschema:"cluster name"`
+	Name           string `json:"name"`
+	CronExpression string `json:"cron_expression" jsonschema:"cron_expression"`
+}
+
+type Cron struct {
+	Days     string `json:"days,omitzero"`
+	Hours    string `json:"hours,omitzero"`
+	Minutes  string `json:"minutes,omitzero"`
+	Months   string `json:"months,omitzero"`
+	Weekdays string `json:"weekdays,omitzero"`
+}
+
 type QoSPolicy struct {
 	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM             string `json:"svm_name,omitzero" jsonschema:"SVM name"`
