@@ -451,7 +451,7 @@ var (
 )
 
 func addTool[In, Out any](a *App, server *mcp.Server, name string, description string, annotations mcp.ToolAnnotations, handler mcp.ToolHandlerFor[In, Out]) {
-	if a.options.ReadOnly && annotations != readOnlyAnnotation {
+	if a.options.ReadOnly && !annotations.ReadOnlyHint {
 		a.logger.Warn("skipping registration of destructive tool in read-only mode", slog.String("tool", name))
 		return
 	}
