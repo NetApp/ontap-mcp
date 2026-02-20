@@ -11,6 +11,7 @@ const UpdateVolume = `Update volume name, size, state, nfs export policy of volu
 const ListSnapshotPolicy = `List snapshot policies on a cluster by cluster name.`
 const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster name.`
 const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster name.`
+const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
 const ListQoSPolicy = `List QoS policies on a cluster by cluster name.`
 const CreateQoSPolicy = `Create a QoS policy on a cluster by cluster name.`
