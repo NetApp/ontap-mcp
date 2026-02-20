@@ -48,7 +48,7 @@ Expected Response: The fixed QoS policy "gold" has been successfully created on 
 
 Expected Response: NFS Export Policy created successfully.
 
-**Update an NFS Export policy**
+**Rename an NFS Export policy**
 
 - On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
 
