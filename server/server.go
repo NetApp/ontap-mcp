@@ -80,6 +80,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	if !a.options.ReadOnly {
 		addTool(server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
 		addTool(server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
+		addTool(server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
 	}
 
 	// operation on QoS Policy object
@@ -444,21 +445,19 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 type ListClusterParams struct{}
 type ListVolumeParams struct{}
 
-func boolPtr(b bool) *bool { return &b }
-
 var (
 	readOnlyAnnotation = &mcp.ToolAnnotations{
 		ReadOnlyHint: true,
 	}
 	createAnnotation = &mcp.ToolAnnotations{
-		DestructiveHint: boolPtr(false),
+		DestructiveHint: new(false),
 	}
 	updateAnnotation = &mcp.ToolAnnotations{
-		DestructiveHint: boolPtr(true),
+		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}
 	deleteAnnotation = &mcp.ToolAnnotations{
-		DestructiveHint: boolPtr(true),
+		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}
 )
