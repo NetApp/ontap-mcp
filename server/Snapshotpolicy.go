@@ -151,6 +151,11 @@ func newCreateSnapshotPolicy(in tool.SnapshotPolicy) (ontap.SnapshotPolicy, erro
 }
 
 func (a *App) CreateSchedule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Schedule) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
 	scheduleCreate, err := newCreateSchedule(parameters)
 	if err != nil {
 		return nil, nil, err
