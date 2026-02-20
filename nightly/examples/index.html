@@ -445,9 +445,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nfs-export-policy-provisioning_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      NFS Export Policy Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfs-export-policy-rules-provisioning_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      NFS Export Policy Rules Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cifs-share-provisioning_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      CIFS share Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#manage-snapshot-policies" class="md-nav__link">
     <span class="md-ellipsis">
       Manage Snapshot Policies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage Schedule
     </span>
   </a>
   
@@ -643,9 +679,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nfs-export-policy-provisioning_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      NFS Export Policy Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfs-export-policy-rules-provisioning_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      NFS Export Policy Rules Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cifs-share-provisioning_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      CIFS share Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#manage-snapshot-policies" class="md-nav__link">
     <span class="md-ellipsis">
       Manage Snapshot Policies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage Schedule
     </span>
   </a>
   
@@ -770,6 +842,42 @@
 </ul>
 <p>Expected Response: CIFS share updated successfully.</p>
 <hr />
+<h3 id="nfs-export-policy-provisioning_1">NFS Export Policy Provisioning<a class="headerlink" href="#nfs-export-policy-provisioning_1" title="Permanent link">&para;</a></h3>
+<p><strong>Create an NFS Export policy</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create an NFS export policy name nfsEngPolicy on the marketing svm</li>
+</ul>
+<p>Expected Response: NFS Export Policy created successfully.</p>
+<p><strong>Rename an NFS Export policy</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.</li>
+</ul>
+<p>Expected Response: NFS Export Policy updated successfully.</p>
+<hr />
+<h3 id="nfs-export-policy-rules-provisioning_1">NFS Export Policy Rules Provisioning<a class="headerlink" href="#nfs-export-policy-rules-provisioning_1" title="Permanent link">&para;</a></h3>
+<p><strong>Create an NFS Export policy rule</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create an NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm</li>
+</ul>
+<p>Expected Response: NFS Export Policy Rule created successfully.</p>
+<p><strong>Update an NFS Export policy rule</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.</li>
+</ul>
+<p>Expected Response: NFS Export Policy Rules updated successfully.</p>
+<hr />
+<h3 id="cifs-share-provisioning_1">CIFS share Provisioning<a class="headerlink" href="#cifs-share-provisioning_1" title="Permanent link">&para;</a></h3>
+<p><strong>Create a CIFS share</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm</li>
+</ul>
+<p>Expected Response: CIFS share created successfully.</p>
+<p><strong>Update a CIFS share</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change it's path to /cifsFin on the marketing svm</li>
+</ul>
+<p>Expected Response: CIFS share updated successfully.</p>
+<hr />
 <h3 id="manage-snapshot-policies">Manage Snapshot Policies<a class="headerlink" href="#manage-snapshot-policies" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
@@ -778,7 +886,26 @@
 <li>
 <p><span class="key">Expected Response</span>: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.</p>
 </li>
+<li>
+<p>On the umeng-aff300-05-06 cluster, create a snapshot policy named biweekly on the vs_test SVM. The schedule would be 2weekday12_30min and keeps the last 3 snapshots.</p>
+</li>
 </ul>
+<p>Expected Response if schedule exist: The snapshot policy has been successfully created.
+Expected Response if schedule not exist: no schedule 2weekday12_30min found</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create a snapshot policy named every5min on the vs_test SVM. The schedule is 5 min and keeps the last 2 snapshots.</li>
+</ul>
+<p>Expected Response: The snapshot policy has been successfully created.</p>
+<hr />
+<h3 id="manage-schedule">Manage Schedule<a class="headerlink" href="#manage-schedule" title="Permanent link">&para;</a></h3>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create a cron schedule with 5 * * * * named as 5minutes</li>
+</ul>
+<p>Expected Response: The schedule has been successfully created.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create a cron schedule with * * 11 1-2 * named as 11dayjantofeb</li>
+</ul>
+<p>Expected Response: The schedule has been successfully created.</p>
 <hr />
 <h2 id="mcp-clients">MCP Clients<a class="headerlink" href="#mcp-clients" title="Permanent link">&para;</a></h2>
 <p>Common MCP clients that work with ONTAP MCP Server:</p>
