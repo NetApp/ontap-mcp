@@ -97,6 +97,54 @@ Expected Response: CIFS share updated successfully.
 
 ---
 
+### NFS Export Policy Provisioning
+
+**Create an NFS Export policy**
+
+- On the umeng-aff300-05-06 cluster, create an NFS export policy name nfsEngPolicy on the marketing svm
+
+Expected Response: NFS Export Policy created successfully.
+
+**Rename an NFS Export policy**
+
+- On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
+
+Expected Response: NFS Export Policy updated successfully.
+
+---
+
+### NFS Export Policy Rules Provisioning
+
+**Create an NFS Export policy rule**
+
+- On the umeng-aff300-05-06 cluster, create an NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
+
+Expected Response: NFS Export Policy Rule created successfully.
+
+**Update an NFS Export policy rule**
+
+- On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
+
+Expected Response: NFS Export Policy Rules updated successfully.
+
+---
+
+### CIFS share Provisioning
+
+**Create a CIFS share**
+
+- On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm
+
+Expected Response: CIFS share created successfully.
+
+**Update a CIFS share**
+
+- On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change it's path to /cifsFin on the marketing svm
+
+Expected Response: CIFS share updated successfully.
+
+---
+
 ### Manage Snapshot Policies
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.
