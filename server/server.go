@@ -65,54 +65,42 @@ func (a *App) createMCPServer() *mcp.Server {
 		Logger:       a.logger,
 	})
 
-	addTool(server, "list_registered_clusters", descriptions.ListClusters, readOnlyAnnotation, a.ListClusters)
+	addTool(a, server, "list_registered_clusters", descriptions.ListClusters, readOnlyAnnotation, a.ListClusters)
 
 	// operation on Volume object
-	addTool(server, "list_volumes", descriptions.ListVolumes, readOnlyAnnotation, a.ListVolumes)
-	if !a.options.ReadOnly {
-		addTool(server, "create_volume", descriptions.CreateVolume, createAnnotation, a.CreateVolume)
-		addTool(server, "update_volume", descriptions.UpdateVolume, updateAnnotation, a.UpdateVolume)
-		addTool(server, "delete_volume", descriptions.DeleteVolume, deleteAnnotation, a.DeleteVolume)
-	}
+	addTool(a, server, "list_volumes", descriptions.ListVolumes, readOnlyAnnotation, a.ListVolumes)
+	addTool(a, server, "create_volume", descriptions.CreateVolume, createAnnotation, a.CreateVolume)
+	addTool(a, server, "update_volume", descriptions.UpdateVolume, updateAnnotation, a.UpdateVolume)
+	addTool(a, server, "delete_volume", descriptions.DeleteVolume, deleteAnnotation, a.DeleteVolume)
 
 	// operation on Snapshot Policy object
-	addTool(server, "list_snapshot_policies", descriptions.ListSnapshotPolicy, readOnlyAnnotation, a.ListSnapshotPolicies)
-	if !a.options.ReadOnly {
-		addTool(server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
-		addTool(server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
-		addTool(server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
-	}
+	addTool(a, server, "list_snapshot_policies", descriptions.ListSnapshotPolicy, readOnlyAnnotation, a.ListSnapshotPolicies)
+	addTool(a, server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
+	addTool(a, server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
+	addTool(a, server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
 
 	// operation on QoS Policy object
-	addTool(server, "list_qos_policies", descriptions.ListQoSPolicy, readOnlyAnnotation, a.ListQoSPolicies)
-	if !a.options.ReadOnly {
-		addTool(server, "create_qos_policy", descriptions.CreateQoSPolicy, createAnnotation, a.CreateQoSPolicy)
-		addTool(server, "update_qos_policy", descriptions.UpdateQoSPolicy, updateAnnotation, a.UpdateQosPolicy)
-		addTool(server, "delete_qos_policy", descriptions.DeleteQoSPolicy, deleteAnnotation, a.DeleteQoSPolicy)
-	}
+	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicy, readOnlyAnnotation, a.ListQoSPolicies)
+	addTool(a, server, "create_qos_policy", descriptions.CreateQoSPolicy, createAnnotation, a.CreateQoSPolicy)
+	addTool(a, server, "update_qos_policy", descriptions.UpdateQoSPolicy, updateAnnotation, a.UpdateQosPolicy)
+	addTool(a, server, "delete_qos_policy", descriptions.DeleteQoSPolicy, deleteAnnotation, a.DeleteQoSPolicy)
 
-	// NFS (lint:gocritic)
 	// operation on NFS Export Policy object
-	addTool(server, "list_nfs_export_policies", descriptions.ListNFSExportPolicy, readOnlyAnnotation, a.ListNFSExportPolicies)
-	if !a.options.ReadOnly {
-		addTool(server, "create_nfs_export_policies", descriptions.CreateNFSExportPolicy, createAnnotation, a.CreateNFSExportPolicy)
-		addTool(server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, updateAnnotation, a.UpdateNFSExportPolicy)
-		addTool(server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, deleteAnnotation, a.DeleteNFSExportPolicy)
-	}
+	addTool(a, server, "list_nfs_export_policies", descriptions.ListNFSExportPolicy, readOnlyAnnotation, a.ListNFSExportPolicies)
+	addTool(a, server, "create_nfs_export_policies", descriptions.CreateNFSExportPolicy, createAnnotation, a.CreateNFSExportPolicy)
+	addTool(a, server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, updateAnnotation, a.UpdateNFSExportPolicy)
+	addTool(a, server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, deleteAnnotation, a.DeleteNFSExportPolicy)
+
 	// operation on NFS Export Policy rules object
-	if !a.options.ReadOnly {
-		addTool(server, "create_nfs_export_policies_rules", descriptions.CreateNFSExportPolicyRules, createAnnotation, a.CreateNFSExportPoliciesRule)
-		addTool(server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, updateAnnotation, a.UpdateNFSExportPoliciesRule)
-		addTool(server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
-	}
+	addTool(a, server, "create_nfs_export_policies_rules", descriptions.CreateNFSExportPolicyRules, createAnnotation, a.CreateNFSExportPoliciesRule)
+	addTool(a, server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, updateAnnotation, a.UpdateNFSExportPoliciesRule)
+	addTool(a, server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
 
 	// operation on CIFS share object
-	addTool(server, "list_cifs_share", descriptions.ListCIFSShare, readOnlyAnnotation, a.ListCIFSShare)
-	if !a.options.ReadOnly {
-		addTool(server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
-		addTool(server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
-		addTool(server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
-	}
+	addTool(a, server, "list_cifs_share", descriptions.ListCIFSShare, readOnlyAnnotation, a.ListCIFSShare)
+	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
+	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
+	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
 
 	return server
 }
@@ -446,27 +434,31 @@ type ListClusterParams struct{}
 type ListVolumeParams struct{}
 
 var (
-	readOnlyAnnotation = &mcp.ToolAnnotations{
+	readOnlyAnnotation = mcp.ToolAnnotations{
 		ReadOnlyHint: true,
 	}
-	createAnnotation = &mcp.ToolAnnotations{
+	createAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(false),
 	}
-	updateAnnotation = &mcp.ToolAnnotations{
+	updateAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}
-	deleteAnnotation = &mcp.ToolAnnotations{
+	deleteAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}
 )
 
-func addTool[In, Out any](server *mcp.Server, name string, description string, annotations *mcp.ToolAnnotations, handler mcp.ToolHandlerFor[In, Out]) {
+func addTool[In, Out any](a *App, server *mcp.Server, name string, description string, annotations mcp.ToolAnnotations, handler mcp.ToolHandlerFor[In, Out]) {
+	if a.options.ReadOnly && annotations != readOnlyAnnotation {
+		a.logger.Warn("skipping registration of destructive tool in read-only mode", slog.String("tool", name))
+		return
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        name,
 		Description: description,
-		Annotations: annotations,
+		Annotations: &annotations,
 	}, handler)
 }
 
