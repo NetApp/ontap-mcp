@@ -7,6 +7,8 @@ SHELL ["/bin/bash", "-c"]
 ARG INSTALL_DIR=/opt/mcp
 ARG BUILD_DIR=/opt/home
 ARG VERSION=1.0.0
+ARG JUST_VERSION=1.42.4
+ARG JUST_URL=${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz
 
 WORKDIR $BUILD_DIR
 
@@ -14,7 +16,11 @@ RUN mkdir -p $INSTALL_DIR
 
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 VERSION=$VERSION CGO_ENABLED=0 go build .
+# Install just, a command runner used in the build process. We use the musl version to ensure it runs in the distroless image.
+RUN wget -O - "https://github.com/casey/just/releases/download/${JUST_URL}" \
+  | tar -xz -C /usr/local/bin just
+
+RUN VERSION=$VERSION just build
 
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
 
