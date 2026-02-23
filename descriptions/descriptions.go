@@ -1,7 +1,13 @@
 package descriptions
 
-const ListClusters = `List registered clusters`
-const Instructions = `You are a NetApp storage infrastructure expert specializing in ONTAP.`
+const Instructions = `You are a NetApp storage infrastructure expert specializing in ONTAP storage management.
+WORKFLOW — ALWAYS START HERE:
+1. Call list_registered_clusters to get valid cluster names
+2. Use the cluster_name in all subsequent tool calls
+`
+
+const ListClusters = `List all ONTAP clusters registered in the server configuration.
+USE THIS FIRST: Always call this before any other tool to discover valid cluster names.`
 
 const ListVolumes = `List volumes on a cluster by cluster name.`
 const CreateVolume = `Create a volume on a cluster by cluster name.`
