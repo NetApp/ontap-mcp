@@ -395,8 +395,8 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Name = in.NewVolume
 	}
 
-	if in.NewSize != "" {
-		size, err := parseSize(in.NewSize)
+	if in.Size != "" {
+		size, err := parseSize(in.Size)
 		if err != nil {
 			return ontap.Volume{}, err
 		}
