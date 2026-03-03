@@ -1,10 +1,15 @@
 package tool
 
+type ListVolume struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+}
+
 type Volume struct {
 	Cluster      string   `json:"cluster_name" jsonschema:"cluster name"`
-	SVM          string   `json:"svm_name,omitzero" jsonschema:"SVM name. Required for create/update/delete. Optional filter for list."`
-	Volume       string   `json:"volume_name,omitzero" jsonschema:"volume name. Required for create/update/delete. Optional filter for list."`
-	Aggregate    string   `json:"aggregate_name,omitzero" jsonschema:"aggregate name. Required for create."`
+	SVM          string   `json:"svm_name" jsonschema:"SVM name"`
+	Volume       string   `json:"volume_name" jsonschema:"volume name"`
+	Aggregate    string   `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
 	NewVolume    string   `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
 	Size         string   `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
 	NewState     string   `json:"new_state,omitzero" jsonschema:"new state of the volume (e.g., 'online', 'offline')"`
