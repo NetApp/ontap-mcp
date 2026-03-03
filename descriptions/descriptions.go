@@ -9,10 +9,10 @@ WORKFLOW — ALWAYS START HERE:
 const ListClusters = `List all ONTAP clusters registered in the server configuration.
 USE THIS FIRST: Always call this before any other tool to discover valid cluster names.`
 
-const ListVolumes = `List volumes on a cluster by cluster name.`
-const CreateVolume = `Create a volume on a cluster by cluster name.`
-const DeleteVolume = `Delete a volume on a cluster by cluster name.`
-const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
+const ListVolumes = `List volumes on a cluster. Required: cluster_name.`
+const CreateVolume = `Create a volume on a cluster. Required: cluster_name, svm_name, volume_name, aggregate_name.`
+const DeleteVolume = `Delete a volume on a cluster. Required: cluster_name, svm_name, volume_name.`
+const UpdateVolume = `Update volume properties (name, size, state, export policy, autosize). Required: cluster_name, svm_name, volume_name.`
 
 const ListSnapshotPolicy = `List snapshot policies on a cluster by cluster name.`
 const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster name.`
