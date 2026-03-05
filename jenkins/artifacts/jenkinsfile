@@ -53,7 +53,7 @@ pipeline {
                 '''
 
                 script {
-                    def file = readFile('.go.env')
+                    def file = readFile('.ontap-mcp.env')
                     currentStage = 'Git Clone ONTAP MCP'
                     file.split('\n').each { envLine ->
                         def (key, value) = envLine.tokenize('=')
