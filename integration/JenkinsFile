@@ -29,7 +29,7 @@ pipeline {
                 '''
 
                 script {
-                    def file = readFile('.ontap-mcp.env')
+                    def file = readFile('.go.env')
                     file.split('\n').each { envLine ->
                         def (key, value) = envLine.tokenize('=')
                         env."${key}" = "${value}"
