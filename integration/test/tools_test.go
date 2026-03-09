@@ -321,12 +321,12 @@ func validateTools(t *testing.T) {
 
 	userName := os.Getenv("LLM_USER")
 	if userName == "" {
-		slog.Error("USER environment variable is required. Set it in .ontap-mcp.env file or export it.")
+		slog.Error("LLM_USER environment variable is required. Set it in .ontap-mcp.env file or export it.")
 	}
 
 	token := os.Getenv("LLM_TOKEN")
 	if token == "" {
-		slog.Error("TOKEN environment variable is required. Get it from https://llm-proxy-api.ai.openeng.netapp.com/ui/")
+		slog.Error("LLM_TOKEN environment variable is required. Get it from https://llm-proxy-api.ai.openeng.netapp.com/ui/")
 	}
 
 	agent, err := NewAgent(userName, token)

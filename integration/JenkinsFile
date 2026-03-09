@@ -109,6 +109,7 @@ def void setupWorkspace() {
     rm -rf /usr/local/go && tar -C /usr/local -xzf ./go.tar.gz
     git clone --branch $BRANCH https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git
     cp /home/ontapmcpfiles/ontap.yaml $WORKSPACE/ontap-mcp/integration/test/
+    cp /home/ontapmcpfiles/.ontap-mcp.env $WORKSPACE/ontap-mcp/integration/test/
     ls -ltr $WORKSPACE/ontap-mcp/integration/test/
 '''
 }
