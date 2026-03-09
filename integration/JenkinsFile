@@ -56,12 +56,13 @@ pipeline {
                             steps {
                                 sh '''
                                 echo "Installing Docker"
+                                curl -O $DOCKER && docker load -i docker_ontap_mcp.tar
                                 cp -rf $WORKSPACE/ontap-mcp/integration/test/ontap.yaml .
                                 docker run -d \
                                   --name ontap-mcp-server \
                                   -p 8083:8083 \
                                   -v "$(pwd)/ontap.yaml:/opt/mcp/ontap.yaml" \
-                                  ghcr.io/netapp/ontap-mcp:nightly \
+                                  ghcr.io/netapp/ontap-mcp:latest \
                                   start --port 8083 --host 0.0.0.0
                                 sleep 1m
                                 '''
