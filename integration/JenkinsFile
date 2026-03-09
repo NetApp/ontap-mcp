@@ -71,7 +71,7 @@ pipeline {
                             steps {
                                 sh """
                                 export VERSION=$VERSION
-                                CHECK_TOOLS=1 bash $WORKSPACE/integration/test/test.sh
+                                CHECK_TOOLS=1 bash $WORKSPACE/ontap-mcp/integration/test/test.sh
                                 """
 
                             }
