@@ -57,7 +57,7 @@ func loadInput() {
 	deleteObjMap.Set("Delete gold QoS policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
 	deleteObjMap.Set("Delete silver QoS policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
 	deleteObjMap.Set("Delete payroll QoS policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete NFS export policy rule where current ro rule is any in nfsMgrPolicy NFS export policy in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
+	//deleteObjMap.Set("Delete NFS export policy rule where current ro rule is any in nfsMgrPolicy NFS export policy in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
 	deleteObjMap.Set("Delete cifsFin CIFS share in vs_test4 svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
 	deleteObjMap.Set("Delete every4hours snapshot policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
 	deleteObjMap.Set("Delete biweekly snapshot policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})

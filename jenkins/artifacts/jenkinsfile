@@ -95,6 +95,18 @@ pipeline {
             }
         }
 
+        stage('Publish builds locally'){
+            steps {
+                script {
+                    currentStage = 'Publish builds locally'
+                }
+                dir("$targetParentLocation$VERSION-$RELEASE-$BRANCH") {
+                    archiveArtifacts artifacts: '**', fingerprint: true
+                }
+            }
+        }
+
+
         stage('Run Tests') {
             when {
                 expression {
