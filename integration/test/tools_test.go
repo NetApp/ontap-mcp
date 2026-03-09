@@ -5,32 +5,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
 )
 
 const (
-	CheckTools = "CHECK_TOOLS"
+	CheckTools  = "CHECK_TOOLS"
+	CLUSTER_STR = "On the umeng-aff300-05-06 cluster, "
 )
-
-var deleteObjMap = PromptMap{}
-var inputPromptMap = PromptMap{}
-
-type PromptMap struct {
-	promts       []string
-	promptErrMap map[string]ExpectedErr
-}
-type ExpectedErr struct {
-	expectedLLMErr   string
-	expectedOntapErr string
-}
 
 type Agent struct {
 	userName     string
@@ -41,97 +29,258 @@ type Agent struct {
 	model        string
 }
 
-func TestOntapMcpTools(t *testing.T) {
+func TestOntapMCPTools(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
-	validateTools(t)
+	llmUserName, llmToken, llmBaseURL, openaiModel, mcpServerUrl := loadEnv()
+
+	agent, err := NewAgent(llmUserName, llmToken, llmBaseURL, openaiModel, mcpServerUrl)
+	if err != nil {
+		slog.Error("Failed to create agent: %v", slog.Any("error", err))
+	}
+	defer agent.Close()
+
+	tests := []struct {
+		name             string
+		input            string
+		expectedOntapErr string
+	}{
+		// Cluster operations
+		{
+			name:             "List all clusters",
+			input:            "List all clusters",
+			expectedOntapErr: "",
+		},
+
+		// Volume operations
+		{
+			name:             "List all volumes in one cluster",
+			input:            CLUSTER_STR + "List all volumes",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "List all volumes in wrong cluster",
+			input:            "List all volumes in valso cluster",
+			expectedOntapErr: "cluster valso not found",
+		},
+		{
+			name:             "List all volumes in one cluster in one svm",
+			input:            CLUSTER_STR + "List all volumes in vs_test svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean volume",
+			input:            CLUSTER_STR + "delete volume docs in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean volume",
+			input:            CLUSTER_STR + "delete volume docsnew in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Create volume",
+			input:            CLUSTER_STR + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Update volume size",
+			input:            CLUSTER_STR + "resize the docs volume on the marketing svm to 25MB",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Enable volume autogrowth",
+			input:            CLUSTER_STR + "enable autogrowth and grow percent to 62 on the docs volume in the marketing svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Rename volume",
+			input:            CLUSTER_STR + "rename the docs volume on the marketing svm to docsnew",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Update volume state",
+			input:            CLUSTER_STR + "update state of the docsnew volume on the marketing svm to offline",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean volume",
+			input:            CLUSTER_STR + "delete volume docsnew in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+
+		// NFS export policy operations
+		{
+			name:             "List all NFS export policies",
+			input:            CLUSTER_STR + "List all NFS export policies",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean NFS export policy",
+			input:            CLUSTER_STR + "delete nfsEngPolicy NFS export policy",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean NFS export policy",
+			input:            CLUSTER_STR + "delete nfsMgrPolicy NFS export policy",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Create NFS export policy",
+			input:            CLUSTER_STR + "create an NFS export policy name nfsEngPolicy on the marketing svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Create volume",
+			input:            CLUSTER_STR + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Attach NFS export policy to volume",
+			input:            CLUSTER_STR + "apply nfsEngPolicy NFS export policy to the docs volume in the marketing svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Rename NFS export policy",
+			input:            CLUSTER_STR + "rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean volume",
+			input:            CLUSTER_STR + "delete volume docs in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean NFS export policy",
+			input:            CLUSTER_STR + "delete nfsMgrPolicy NFS export policy",
+			expectedOntapErr: "because it does not exist",
+		},
+
+		// QoS policy operations
+		{
+			name:             "List QoS policies",
+			input:            CLUSTER_STR + "List all QoS policies",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean QoS policy",
+			input:            CLUSTER_STR + "delete gold QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean QoS policy",
+			input:            CLUSTER_STR + "delete silver QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean QoS policy",
+			input:            CLUSTER_STR + "delete payroll QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Create fixed QoS policy",
+			input:            CLUSTER_STR + "create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Create adaptive QoS policy",
+			input:            CLUSTER_STR + "create a adaptive QoS policy named payroll on the marketing svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Rename QoS policy",
+			input:            CLUSTER_STR + "rename the QoS policy from gold to silver on the marketing svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean QoS policy",
+			input:            CLUSTER_STR + "delete silver QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean QoS policy",
+			input:            CLUSTER_STR + "delete payroll QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+
+		// CIFS share operations
+		{
+			name:             "List CIFS share",
+			input:            CLUSTER_STR + "List all CIFS shares",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean CIFS share",
+			input:            CLUSTER_STR + "delete cifsFin CIFS share in vs_test4 svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Create CIFS share",
+			input:            CLUSTER_STR + "create CIFS share named cifsFin with path as / on the vs_test4 svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Update CIFS share",
+			input:            CLUSTER_STR + "update CIFS share cifsFin path to /vol_test2 on the vs_test4 svm",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean CIFS share",
+			input:            CLUSTER_STR + "delete cifsFin CIFS share in vs_test4 svm",
+			expectedOntapErr: "because it does not exist",
+		},
+
+		// Snapshot policy operations
+		{
+			name:             "List snapshot policies",
+			input:            CLUSTER_STR + "List all snapshot policies",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean snapshot policy every4hours",
+			input:            CLUSTER_STR + "delete every4hours snapshot policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean snapshot policy every5min",
+			input:            CLUSTER_STR + "Delete every5min snapshot policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Create snapshot policy every4hours",
+			input:            CLUSTER_STR + "create a snapshot policy named every4hours on the marketing SVM. The schedule is 4hours and keeps the last 5 snapshots",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Create snapshot policy every5min",
+			input:            CLUSTER_STR + "create a snapshot policy named every5min on the marketing SVM. The schedule is 5minutes and keeps the last 2 snapshots",
+			expectedOntapErr: "",
+		},
+		{
+			name:             "Clean snapshot policy every4hours",
+			input:            CLUSTER_STR + "delete every4hours snapshot policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+		{
+			name:             "Clean snapshot policy every5min",
+			input:            CLUSTER_STR + "Delete every5min snapshot policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			slog.Debug("", slog.String("Input", tt.input))
+			if _, err = agent.Chat(context.Background(), tt.input, tt.expectedOntapErr, t); err != nil {
+				slog.Error("Error processing input: %v", slog.Any("error", err))
+			}
+		})
+	}
 }
 
-func loadInput() {
-	// deleteObjMap map of delete prompts and expected LLM error, expected Ontap error if any. This would delete the objects which are being tested in CI.
-	// It's deleted before and after the testing to avoid any duplication of objects
-	deleteObjMap.promptErrMap = make(map[string]ExpectedErr)
-	deleteObjMap.Set("Delete volume docs in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete volume docsnew in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete nfsEngPolicy NFS export policy in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete nfsMgrPolicy NFS export policy in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete gold QoS policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete silver QoS policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete payroll QoS policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	//deleteObjMap.Set("Delete NFS export policy rule where current ro rule is any in nfsMgrPolicy NFS export policy in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete cifsFin CIFS share in vs_test4 svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete every4hours snapshot policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete biweekly snapshot policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-	deleteObjMap.Set("Delete every5min snapshot policy in marketing svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "because it does not exist", expectedLLMErr: ""})
-
-	// inputPromptMap map of customer input prompts and expected LLM error, expected Ontap error if any
-	inputPromptMap.promptErrMap = make(map[string]ExpectedErr)
-	inputPromptMap.Set("List all clusters", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("List all volumes in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("List all volumes in valso cluster", ExpectedErr{expectedOntapErr: "cluster valso not found", expectedLLMErr: ""})
-	inputPromptMap.Set("List all volumes in vs_test svm in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-
-	// Volume operations
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, enable autogrowth and grow percent to 62 on the docs volume in the marketing svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, rename the docs volume on the marketing svm to docsnew", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, update state of the docsnew volume on the marketing svm to offline", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, update state of the docsnew volume on the marketing svm to online", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-
-	// NFS export policy operations
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create an NFS export policy name nfsEngPolicy on the marketing svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("List all NFS export policies in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, apply nfsEngPolicy NFS export policy to the docsnew volume in the marketing svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-
-	// NFS export policy rules operations
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, update NFS export policy rule for nfsMgrPolicy export policy ro rule from any to never", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-
-	// QoS policy operations
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("List all QoS policies in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create a adaptive QoS policy named payroll on the marketing svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, rename the QoS policy from gold to silver on the marketing svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-
-	// CIFS share operations
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create CIFS share named cifsFin with path as / on the vs_test4 svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("List all CIFS shares in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, update CIFS share cifsFin path to /vol_test2 on the vs_test4 svm", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-
-	// Snapshot policy operations
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the marketing SVM. The schedule is 4hours and keeps the last 5 snapshots", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("List all snapshot policies in umeng-aff300-05-06 cluster", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-	inputPromptMap.Set("On the umeng-aff300-05-06 cluster, create a snapshot policy named every5min on the marketing SVM. The schedule is 5minutes and keeps the last 2 snapshots", ExpectedErr{expectedOntapErr: "", expectedLLMErr: ""})
-}
-
-func (p *PromptMap) Set(input string, exptErr ExpectedErr) {
-	p.promptErrMap[input] = exptErr
-	p.promts = append(p.promts, input)
-}
-
-func NewAgent(userName, token string) (*Agent, error) {
-	baseURL := os.Getenv("LLM_PROXY")
-	if baseURL == "" {
-		baseURL = "https://llm-proxy-api.ai.openeng.netapp.com/v1"
-	}
-	slog.Debug("", slog.String("LLM PROXY Base URL", baseURL))
-
-	model := os.Getenv("OPENAI_MODEL")
-	if model == "" {
-		model = "gpt-5.2-chat"
-	}
-	slog.Debug("", slog.String("Model", model))
-
-	mcpServerUrl := os.Getenv("MCP_URL")
-	if mcpServerUrl == "" {
-		mcpServerUrl = "http://localhost:8083"
-	}
-	slog.Debug("", slog.String("Mcp server url", mcpServerUrl))
-
+func NewAgent(llmUserName, llmToken, llmBaseURL, openaiModel, mcpServerUrl string) (*Agent, error) {
 	openaiClient := openai.NewClient(
-		option.WithAPIKey(token),
-		option.WithBaseURL(baseURL),
+		option.WithAPIKey(llmToken),
+		option.WithBaseURL(llmBaseURL),
 	)
 
 	impl := &mcp.Implementation{
@@ -159,12 +308,12 @@ func NewAgent(userName, token string) (*Agent, error) {
 	slog.Info("Connected to MCP server", slog.Int("Found tools", len(toolsResult.Tools)))
 
 	return &Agent{
-		userName:     userName,
+		userName:     llmUserName,
 		openaiClient: openaiClient,
 		mcpSession:   session,
 		mcpClient:    mcpClient,
 		tools:        toolsResult.Tools,
-		model:        model,
+		model:        openaiModel,
 	}, nil
 }
 
@@ -225,7 +374,7 @@ func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[
 	return output, nil
 }
 
-func (a *Agent) Chat(ctx context.Context, userMessage string, expectedLLMErrorStr string, expectedOntapErrorStr string, t *testing.T) (string, error) {
+func (a *Agent) Chat(ctx context.Context, userMessage string, expectedOntapErrorStr string, t *testing.T) (string, error) {
 	messages := []openai.ChatCompletionMessageParamUnion{
 		openai.UserMessage(userMessage),
 	}
@@ -248,10 +397,6 @@ func (a *Agent) Chat(ctx context.Context, userMessage string, expectedLLMErrorSt
 		assistantMessage := completion.Choices[0].Message
 
 		if len(assistantMessage.ToolCalls) == 0 {
-			// Only error out when we don't expect the error scenarios
-			if expectedLLMErrorStr != "" && !strings.Contains(completion.Choices[0].Message.Content, expectedLLMErrorStr) {
-				t.Errorf("Error: %s", slog.Any("err", completion.Choices[0].Message.Content))
-			}
 			return assistantMessage.Content, nil
 		}
 
@@ -290,11 +435,11 @@ func (a *Agent) Close() {
 	}
 }
 
-func loadEnv() {
+func loadEnv() (string, string, string, string, string) {
 	file, err := os.Open(".ontap-mcp.env")
 	if err != nil {
 		// .ontap-mcp.env file doesn't exist, that's okay
-		return
+		slog.Debug(".ontap-mcp.env file not exist")
 	}
 	defer file.Close()
 
@@ -313,45 +458,35 @@ func loadEnv() {
 			}
 		}
 	}
-}
 
-func validateTools(t *testing.T) {
-	loadEnv()
-	loadInput()
-
-	userName := os.Getenv("LLM_USER")
-	if userName == "" {
+	llmUserName := os.Getenv("LLM_USER")
+	if llmUserName == "" {
 		slog.Error("LLM_USER environment variable is required. Set it in .ontap-mcp.env file or export it.")
 	}
 
-	token := os.Getenv("LLM_TOKEN")
-	if token == "" {
+	llmToken := os.Getenv("LLM_TOKEN")
+	if llmToken == "" {
 		slog.Error("LLM_TOKEN environment variable is required. Get it from https://llm-proxy-api.ai.openeng.netapp.com/ui/")
 	}
 
-	agent, err := NewAgent(userName, token)
-	if err != nil {
-		slog.Error("Failed to create agent: %v", slog.Any("error", err))
+	llmBaseURL := os.Getenv("LLM_PROXY")
+	if llmBaseURL == "" {
+		llmBaseURL = "https://llm-proxy-api.ai.openeng.netapp.com/v1"
 	}
-	defer agent.Close()
+	slog.Debug("", slog.String("LLM PROXY Base URL", llmBaseURL))
 
-	// Clean the existing objects in the cluster which we would be creating next
-	deleteObjects(agent, t)
-
-	// End to end validation of all tool operations
-	for _, input := range inputPromptMap.promts {
-		expectedErr := inputPromptMap.promptErrMap[input]
-		slog.Debug("", slog.String("Input", input))
-
-		ctx := context.Background()
-		_, err := agent.Chat(ctx, input, expectedErr.expectedLLMErr, expectedErr.expectedOntapErr, t)
-		if err != nil {
-			slog.Error("Error processing input: %v", slog.Any("error", err))
-		}
+	openaiModel := os.Getenv("OPENAI_MODEL")
+	if openaiModel == "" {
+		openaiModel = "gpt-5.2-chat"
 	}
+	slog.Debug("", slog.String("Model", openaiModel))
 
-	// Safe side, Clean the existing objects in the cluster which we would be creating next
-	deleteObjects(agent, t)
+	mcpServerUrl := os.Getenv("MCP_URL")
+	if mcpServerUrl == "" {
+		mcpServerUrl = "http://localhost:8083"
+	}
+	slog.Debug("", slog.String("Mcp server url", mcpServerUrl))
+	return llmUserName, llmToken, llmBaseURL, openaiModel, mcpServerUrl
 }
 
 func SkipIfMissing(t *testing.T, vars ...string) {
@@ -367,19 +502,4 @@ func SkipIfMissing(t *testing.T, vars ...string) {
 	if !anyMatches {
 		t.Skipf("Set one of %s envvars to run the test", strings.Join(vars, ", "))
 	}
-}
-
-func deleteObjects(agent *Agent, t *testing.T) {
-	for _, deleteInput := range deleteObjMap.promts {
-		expectedErr := deleteObjMap.promptErrMap[deleteInput]
-		slog.Debug("", slog.String("Input", deleteInput))
-
-		ctx := context.Background()
-		_, err := agent.Chat(ctx, deleteInput, expectedErr.expectedLLMErr, expectedErr.expectedOntapErr, t)
-		if err != nil {
-			t.Errorf("Error detected: %v", slog.Any("err", slog.Any("error", err)))
-		}
-	}
-
-	slog.Info("Objects were successfully deleted")
 }

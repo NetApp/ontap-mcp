@@ -81,7 +81,6 @@ pipeline {
                                     sh """
                                         docker ps -q | xargs docker stop | xargs docker rm --force
                                     """
-                                    archiveArtifacts artifacts: "docker_logs.zip", fingerprint: true
                                 }
                             }
                         }
@@ -111,7 +110,7 @@ def void setupWorkspace() {
     git clone --branch $BRANCH https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git
     cp /home/ontapmcpfiles/ontap.yaml $WORKSPACE/ontap-mcp/integration/test/
     cp /home/ontapmcpfiles/.ontap-mcp.env $WORKSPACE/ontap-mcp/integration/test/
-    ls -ltr $WORKSPACE/ontap-mcp/integration/test/
+    ls -ltra $WORKSPACE/ontap-mcp/integration/test/
 '''
 }
 
