@@ -182,7 +182,7 @@ func (a *App) ListClusters(_ context.Context, _ *mcp.CallToolRequest, _ ListClus
 	}, nil, nil
 }
 
-func (a *App) ListVolumes(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
+func (a *App) ListVolumes(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.ListVolume) (*mcp.CallToolResult, any, error) {
 	a.locks.RLock(parameters.Cluster)
 	defer a.locks.RUnlock(parameters.Cluster)
 
@@ -333,7 +333,7 @@ func newDeleteVolume(in tool.Volume) (ontap.Volume, error) {
 
 // newGetVolume validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newGetVolume(in tool.Volume) ontap.Volume {
+func newGetVolume(in tool.ListVolume) ontap.Volume {
 	out := ontap.Volume{}
 	if in.SVM != "" {
 		out.SVM = ontap.NameAndUUID{Name: in.SVM}
@@ -395,8 +395,8 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Name = in.NewVolume
 	}
 
-	if in.NewSize != "" {
-		size, err := parseSize(in.NewSize)
+	if in.Size != "" {
+		size, err := parseSize(in.Size)
 		if err != nil {
 			return ontap.Volume{}, err
 		}

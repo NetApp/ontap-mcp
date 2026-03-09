@@ -1,5 +1,10 @@
 package tool
 
+type ListVolume struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+}
+
 type Volume struct {
 	Cluster      string   `json:"cluster_name" jsonschema:"cluster name"`
 	SVM          string   `json:"svm_name" jsonschema:"SVM name"`
@@ -7,7 +12,6 @@ type Volume struct {
 	Aggregate    string   `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
 	NewVolume    string   `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
 	Size         string   `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	NewSize      string   `json:"new_size,omitzero" jsonschema:"new size of the volume (e.g., '100GB', '1TB')"`
 	NewState     string   `json:"new_state,omitzero" jsonschema:"new state of the volume (e.g., 'online', 'offline')"`
 	ExportPolicy string   `json:"export_policy,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
 	Autosize     Autosize `json:"autosize,omitzero" jsonschema:"autosize"`
