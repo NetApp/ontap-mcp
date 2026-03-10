@@ -174,6 +174,22 @@ Expected Response: The schedule has been successfully created.
 
 ---
 
+### Querying Specific Fields
+
+**Get volume space and protection details**
+
+- On the umeng-aff300-05-06 cluster, for every volume on the marketing svm, show me the name, junction path, used size, available size, and snapshot policy.
+
+Expected Response: A table of volumes with their junction paths, used/available space, and assigned snapshot policies on the marketing SVM.
+
+**Check whether it is safe to extend a volume**
+
+- On the umeng-aff300-05-06 cluster, can I safely grow the docs volume on the marketing svm by 10GB? Check the aggregate's available space first.
+
+Expected Response: A summary of aggregate free space, followed by a recommendation on whether it is safe to proceed with the resize.
+
+---
+
 ## MCP Clients
 
 Common MCP clients that work with ONTAP MCP Server:
