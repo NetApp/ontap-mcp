@@ -489,6 +489,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#querying-specific-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Querying Specific Fields
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -723,6 +732,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#querying-specific-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Querying Specific Fields
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -906,6 +924,18 @@ Expected Response if schedule not exist: no schedule 2weekday12_30min found</p>
 <li>On the umeng-aff300-05-06 cluster, create a cron schedule with * * 11 1-2 * named as 11dayjantofeb</li>
 </ul>
 <p>Expected Response: The schedule has been successfully created.</p>
+<hr />
+<h3 id="querying-specific-fields">Querying Specific Fields<a class="headerlink" href="#querying-specific-fields" title="Permanent link">&para;</a></h3>
+<p><strong>Get volume space and protection details</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, for every volume on the marketing svm, show me the name, junction path, used size, available size, and snapshot policy.</li>
+</ul>
+<p>Expected Response: A table of volumes with their junction paths, used/available space, and assigned snapshot policies on the marketing SVM.</p>
+<p><strong>Check whether it is safe to extend a volume</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, can I safely grow the docs volume on the marketing svm by 10GB? Check the aggregate's available space first.</li>
+</ul>
+<p>Expected Response: A summary of aggregate free space, followed by a recommendation on whether it is safe to proceed with the resize.</p>
 <hr />
 <h2 id="mcp-clients">MCP Clients<a class="headerlink" href="#mcp-clients" title="Permanent link">&para;</a></h2>
 <p>Common MCP clients that work with ONTAP MCP Server:</p>
