@@ -3,9 +3,24 @@ package server
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"log/slog"
+	"net/http"
+	"net/url"
+	"os"
+	"slices"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/descriptions"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -13,15 +28,6 @@ import (
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
 	"github.com/netapp/ontap-mcp/version"
-	"io"
-	"log"
-	"log/slog"
-	"net/http"
-	"os"
-	"slices"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Options struct {
@@ -34,19 +40,38 @@ type Options struct {
 }
 
 type App struct {
-	logger  *slog.Logger
-	cfg     *config.ONTAP
-	options Options
-	locks   *lock.Map
+	logger       *slog.Logger
+	cfg          *config.ONTAP
+	options      Options
+	locks        *lock.Map
+	catalog      catalog.APICatalog
+	versionCache sync.Map
 }
 
+type cachedVersion struct {
+	version string
+	fetched time.Time
+}
+
+const versionCacheTTL = 24 * time.Hour
+
 func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
-	return &App{
+	app := &App{
 		cfg:     cfg,
 		logger:  logger,
 		options: o,
 		locks:   lock.New(),
 	}
+
+	const catalogPath = "conf/ontap_api_catalog.json"
+	if cat, err := catalog.Load(catalogPath); err == nil {
+		app.catalog = cat
+		logger.Info("loaded API catalog", slog.Int("endpoints", len(cat)), slog.String("path", catalogPath))
+	} else {
+		logger.Warn("API catalog not found — catalog tools disabled", slog.String("path", catalogPath))
+	}
+
+	return app
 }
 
 func (a *App) StartServer() {
@@ -101,6 +126,13 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
+
+	if a.catalog != nil {
+		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
+		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)
+		addTool(a, server, "describe_ontap_endpoint", descriptions.DescribeOntapEndpoint, readOnlyAnnotation, a.DescribeOntapEndpoint)
+	}
+	addTool(a, server, "ontap_get", descriptions.OntapGet, readOnlyAnnotation, a.OntapGet)
 
 	return server
 }
@@ -169,16 +201,210 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	a.logger.Info("mcp server shutdown gracefully")
 }
 
-func (a *App) ListClusters(_ context.Context, _ *mcp.CallToolRequest, _ ListClusterParams) (*mcp.CallToolResult, any, error) {
-	// Validate params
+type clusterInfo struct {
+	Name         string `json:"name"`
+	ONTAPVersion string `json:"ontap_version"`
+}
 
+func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, error) {
+	if cached, ok := a.versionCache.Load(cluster); ok {
+		cv := cached.(cachedVersion)
+		if time.Since(cv.fetched) < versionCacheTTL {
+			return cv.version, nil
+		}
+	}
+
+	client, err := a.getClient(cluster)
+	if err != nil {
+		return "", err
+	}
+	remote, err := client.GetClusterInfo(ctx)
+	if err != nil {
+		return "", err
+	}
+	ver := fmt.Sprintf("%d.%d", remote.Version.Generation, remote.Version.Major)
+	a.versionCache.Store(cluster, cachedVersion{version: ver, fetched: time.Now()})
+	return ver, nil
+}
+
+func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ ListClusterParams) (*mcp.CallToolResult, any, error) {
 	clusters := slices.Clone(a.cfg.PollersOrdered)
 	slices.Sort(clusters)
 
+	infos := make([]clusterInfo, 0, len(clusters))
+	for _, name := range clusters {
+		ver, err := a.getClusterVersion(ctx, name)
+		if err != nil {
+			a.logger.Warn("failed to fetch cluster info", slog.String("cluster", name), slog.String("error", err.Error()))
+			infos = append(infos, clusterInfo{Name: name})
+			continue
+		}
+		infos = append(infos, clusterInfo{Name: name, ONTAPVersion: ver})
+	}
+
+	data, err := json.MarshalIndent(infos, "", "  ")
+	if err != nil {
+		return errorResult(err), nil, err
+	}
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			&mcp.TextContent{Text: strings.Join(clusters, ",")},
+			&mcp.TextContent{Text: string(data)},
 		},
+	}, nil, nil
+}
+
+func (a *App) ListOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p tool.ListEndpointsParams) (*mcp.CallToolResult, any, error) {
+	var results []catalog.SearchResult
+	if p.Match != "" {
+		results = a.catalog.Search(p.Match)
+	} else {
+		results = a.catalog.ListAll()
+	}
+	if len(results) == 0 {
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "No endpoints found"}}}, nil, nil
+	}
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "Found %d endpoints:\n", len(results))
+	for _, r := range results {
+		fmt.Fprintf(&sb, "%s — %s\n", r.Path, r.Endpoint.Summary)
+	}
+	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: sb.String()}}}, nil, nil
+}
+
+func (a *App) SearchOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p tool.SearchEndpointsParams) (*mcp.CallToolResult, any, error) {
+	if p.Query == "" {
+		return errorResult(errors.New("query parameter is required")), nil, nil
+	}
+	results := a.catalog.Search(p.Query)
+	if len(results) == 0 {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: "No endpoints found matching: " + p.Query}},
+		}, nil, nil
+	}
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "Found %d endpoints matching %q:\n", len(results), p.Query)
+	for _, r := range results {
+		fmt.Fprintf(&sb, "%s — %s\n", r.Path, r.Endpoint.Summary)
+	}
+	sb.WriteString("\nCall describe_ontap_endpoint for filters and fields before calling ontap_get.")
+	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: sb.String()}}}, nil, nil
+}
+
+func (a *App) DescribeOntapEndpoint(ctx context.Context, _ *mcp.CallToolRequest, p tool.DescribeEndpointParams) (*mcp.CallToolResult, any, error) {
+	if p.Path == "" {
+		return errorResult(errors.New("path parameter is required")), nil, nil
+	}
+	ep, ok := a.catalog[p.Path]
+	if !ok {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: "Endpoint not found: " + p.Path + ". Use list_ontap_endpoints or search_ontap_endpoints to discover valid paths."}},
+		}, nil, nil
+	}
+
+	var versionNote string
+	if p.Cluster != "" {
+		if ontapVer, err := a.getClusterVersion(ctx, p.Cluster); err == nil {
+			ep = ep.FilterByVersion(ontapVer)
+			versionNote = ", filtered for ONTAP " + ontapVer
+		}
+	}
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "%s (since %s%s)\n", p.Path, ep.Introduced, versionNote)
+
+	if len(ep.Filters) > 0 {
+		names := make([]string, 0, len(ep.Filters))
+		for k := range ep.Filters {
+			names = append(names, k)
+		}
+		sort.Strings(names)
+		sb.WriteString("Filters:\n")
+		for _, name := range names {
+			f := ep.Filters[name]
+			typ := f.Type
+			if typ == "" {
+				typ = "string"
+			}
+			var ann string
+			switch {
+			case typ != "string" && f.Since != "":
+				ann = "(" + typ + "," + f.Since + ")"
+			case typ != "string":
+				ann = "(" + typ + ")"
+			case f.Since != "":
+				ann = "(" + f.Since + ")"
+			}
+			if f.Desc != "" {
+				fmt.Fprintf(&sb, "  %s%s — %s\n", name, ann, f.Desc)
+			} else {
+				fmt.Fprintf(&sb, "  %s%s\n", name, ann)
+			}
+		}
+	}
+
+	if len(ep.Fields) > 0 {
+		names := make([]string, 0, len(ep.Fields))
+		for k := range ep.Fields {
+			names = append(names, k)
+		}
+		sort.Strings(names)
+		sb.WriteString("Fields:\n")
+		for _, name := range names {
+			f := ep.Fields[name]
+			if f.Since != "" {
+				fmt.Fprintf(&sb, "  %s(%s) — %s\n", name, f.Since, f.Desc)
+			} else {
+				fmt.Fprintf(&sb, "  %s — %s\n", name, f.Desc)
+			}
+		}
+	}
+
+	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: sb.String()}}}, nil, nil
+}
+
+func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.OntapGetParams) (*mcp.CallToolResult, any, error) {
+	if p.Cluster == "" {
+		return errorResult(errors.New("cluster_name is required")), nil, nil
+	}
+	if p.Path == "" {
+		return errorResult(errors.New("path is required")), nil, nil
+	}
+	if !strings.HasPrefix(p.Path, "/") {
+		return errorResult(fmt.Errorf("path must start with /, got %q", p.Path)), nil, nil
+	}
+
+	a.locks.RLock(p.Cluster)
+	defer a.locks.RUnlock(p.Cluster)
+
+	client, err := a.getClient(p.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	params := url.Values{}
+	for k, v := range p.Filters {
+		params.Set(k, v)
+	}
+	if len(p.Fields) > 0 {
+		params.Set("fields", strings.Join(p.Fields, ","))
+	}
+	if p.MaxRecords > 0 {
+		params.Set("max_records", strconv.Itoa(p.MaxRecords))
+	}
+	// ignore_unknown_fields was introduced in ONTAP 9.11. skip for older clusters.
+	if ver, err := a.getClusterVersion(ctx, p.Cluster); err != nil || catalog.CompareVersions(ver, "9.11") >= 0 {
+		params.Set("ignore_unknown_fields", "true")
+	}
+
+	raw, err := client.GenericGet(ctx, p.Path, params, p.MaxRecords)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{Text: string(stripLinks(raw))}},
 	}, nil, nil
 }
 
@@ -301,6 +527,41 @@ func errorResult(err error) *mcp.CallToolResult {
 			&mcp.TextContent{Text: err.Error()},
 		},
 		IsError: true,
+	}
+}
+
+func stripLinks(raw json.RawMessage) json.RawMessage {
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return raw
+	}
+	stripped := stripLinksValue(v)
+	out, err := json.Marshal(stripped)
+	if err != nil {
+		return raw
+	}
+	return out
+}
+
+func stripLinksValue(v any) any {
+	switch val := v.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(val))
+		for k, child := range val {
+			if k == "_links" {
+				continue
+			}
+			out[k] = stripLinksValue(child)
+		}
+		return out
+	case []any:
+		out := make([]any, len(val))
+		for i, item := range val {
+			out[i] = stripLinksValue(item)
+		}
+		return out
+	default:
+		return v
 	}
 }
 

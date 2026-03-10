@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -361,7 +362,7 @@ func (c *Client) getHTTPClient() *http.Client {
 
 	// If we just initialized the client, fetch cluster info and send MCP version
 	if wasInitialized {
-		remote, err := c.GetClusterInfo()
+		remote, err := c.GetClusterInfo(context.Background())
 		if err == nil {
 			c.remote = remote
 			err = c.sendMcpVersion()
@@ -374,13 +375,12 @@ func (c *Client) getHTTPClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *Client) GetClusterInfo() (ontap.Remote, error) {
+func (c *Client) GetClusterInfo(ctx context.Context) (ontap.Remote, error) {
 	var cluster ontap.Cluster
 
 	builder := c.baseRequestBuilder("/api/cluster?fields=*", nil, nil).
 		ToJSON(&cluster)
 
-	ctx := context.Background()
 	err := c.buildAndExecuteRequest(ctx, builder)
 	if err != nil {
 		return ontap.Remote{}, err
@@ -580,4 +580,92 @@ func sha1Sum(s string) string {
 	hash := sha1.New() //nolint:gosec // using sha1 for a hash, not a security risk
 	hash.Write([]byte(s))
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+type paginatedResponse struct {
+	Records    []json.RawMessage `json:"records"`
+	NumRecords int               `json:"num_records"`
+	Links      *struct {
+		Next *struct {
+			Href string `json:"href"`
+		} `json:"next"`
+	} `json:"_links"`
+}
+
+const defaultPageSize = 500
+
+func (c *Client) GenericGet(ctx context.Context, path string, params url.Values, maxRecords int) (json.RawMessage, error) {
+	pageSize := defaultPageSize
+	if maxRecords > 0 && maxRecords < pageSize {
+		pageSize = maxRecords
+	}
+
+	if params == nil {
+		params = url.Values{}
+	}
+	if params.Get("max_records") == "" {
+		params.Set("max_records", strconv.Itoa(pageSize))
+	}
+
+	nextURL := "/api" + path
+	if len(params) > 0 {
+		nextURL += "?" + params.Encode()
+	}
+
+	var allRecords []json.RawMessage
+	prevURL := ""
+
+	for {
+		var buf bytes.Buffer
+		builder := c.baseRequestBuilder(nextURL, nil, nil).
+			ToBytesBuffer(&buf)
+		if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+			return nil, err
+		}
+
+		var page paginatedResponse
+		_ = json.Unmarshal(buf.Bytes(), &page)
+		if page.Records == nil {
+			return buf.Bytes(), nil
+		}
+
+		allRecords = append(allRecords, page.Records...)
+
+		if maxRecords > 0 && len(allRecords) >= maxRecords {
+			allRecords = allRecords[:maxRecords]
+			break
+		}
+
+		if page.Links == nil || page.Links.Next == nil || page.Links.Next.Href == "" {
+			break
+		}
+
+		nextURL = page.Links.Next.Href
+		if !strings.HasPrefix(nextURL, "/api") {
+			nextURL = "/api" + nextURL
+		}
+		if nextURL == prevURL {
+			break
+		}
+		prevURL = nextURL
+	}
+
+	result := struct {
+		Records    []json.RawMessage `json:"records"`
+		NumRecords int               `json:"num_records"`
+	}{
+		Records:    allRecords,
+		NumRecords: len(allRecords),
+	}
+	return json.Marshal(result)
+}
+
+func (c *Client) FetchSwagger() ([]byte, error) {
+	var buf bytes.Buffer
+	builder := c.baseRequestBuilder("/docs/api/swagger.yaml", nil, nil).
+		ToBytesBuffer(&buf)
+	if err := c.buildAndExecuteRequest(context.Background(), builder); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
