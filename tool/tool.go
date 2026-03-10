@@ -87,3 +87,24 @@ type CIFSShare struct {
 	Name    string `json:"name,omitzero" jsonschema:"cifs share name"`
 	Path    string `json:"path,omitzero" jsonschema:"cifs share path"`
 }
+
+type OntapGetParams struct {
+	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
+	Path       string            `json:"path" jsonschema:"ONTAP REST API collection path without /api prefix, e.g. /storage/volumes"`
+	Fields     []string          `json:"fields,omitzero" jsonschema:"dot-notation fields to return as array of strings, e.g. [\"name\",\"svm.name\",\"space.size\"] — use space.* to expand all space sub-fields"`
+	Filters    map[string]string `json:"filters,omitzero" jsonschema:"filter key-value pairs using ONTAP query syntax as JSON object, e.g. {\"svm.name\":\"vs1\",\"state\":\"online\"}"`
+	MaxRecords int               `json:"max_records,omitzero" jsonschema:"limit results. omit to return all records"`
+}
+
+type ListEndpointsParams struct {
+	Match string `json:"match,omitzero" jsonschema:"optional substring or regex to filter endpoint paths and summaries; omit to return all"`
+}
+
+type SearchEndpointsParams struct {
+	Query string `json:"query" jsonschema:"keyword to search across endpoint paths, summaries and tags"`
+}
+
+type DescribeEndpointParams struct {
+	Path    string `json:"path" jsonschema:"ONTAP REST API path, e.g. /storage/volumes"`
+	Cluster string `json:"cluster_name,omitzero" jsonschema:"cluster name — if provided, filters out fields and filters not available in that cluster's ONTAP version"`
+}

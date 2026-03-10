@@ -10,29 +10,6 @@ import (
 	"strings"
 )
 
-func (a *App) ListSnapshotPolicies(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
-	a.locks.RLock(parameters.Cluster)
-	defer a.locks.RUnlock(parameters.Cluster)
-
-	snapshotPolicyGet := newGetSnapshotPolicy(parameters)
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	snapshotPolicies, err := client.GetSnapshotPolicy(ctx, snapshotPolicyGet)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: strings.Join(snapshotPolicies, ",")},
-		},
-	}, nil, nil
-}
-
 func (a *App) DeleteSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
@@ -108,17 +85,6 @@ func newDeleteSnapshotPolicy(in tool.SnapshotPolicy) (ontap.SnapshotPolicy, erro
 	out.Name = in.Name
 
 	return out, nil
-}
-
-// newGetSnapshotPolicy validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
-func newGetSnapshotPolicy(in tool.SnapshotPolicy) ontap.SnapshotPolicy {
-	out := ontap.SnapshotPolicy{}
-	if in.SVM != "" {
-		out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	}
-
-	return out
 }
 
 // newCreateSnapshotPolicy validates the customer provided arguments and converts them into

@@ -10,27 +10,6 @@ import (
 	"strings"
 )
 
-func (a *App) ListNFSExportPolicies(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
-	a.locks.RLock(parameters.Cluster)
-	defer a.locks.RUnlock(parameters.Cluster)
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	nfsExportPolicies, err := client.GetNFSExportPolicy(ctx)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: strings.Join(nfsExportPolicies, ",")},
-		},
-	}, nil, nil
-}
-
 func (a *App) CreateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil

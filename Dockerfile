@@ -23,6 +23,7 @@ RUN wget -O - "https://github.com/casey/just/releases/download/${JUST_URL}" \
 RUN VERSION=$VERSION just build
 
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
+RUN cp -a $BUILD_DIR/conf $INSTALL_DIR/
 
 FROM gcr.io/distroless/static-debian12:debug
 
