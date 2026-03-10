@@ -7,29 +7,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
-	"strings"
 )
-
-func (a *App) ListCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.CIFSShare) (*mcp.CallToolResult, any, error) {
-	a.locks.RLock(parameters.Cluster)
-	defer a.locks.RUnlock(parameters.Cluster)
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	cifsShares, err := client.GetCIFSShare(ctx)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: strings.Join(cifsShares, ",")},
-		},
-	}, nil, nil
-}
 
 func (a *App) CreateCIFSShare(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.CIFSShare) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {

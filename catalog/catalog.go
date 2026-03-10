@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	goversion "github.com/hashicorp/go-version"
+	goversion "github.com/netapp/ontap-mcp/third_party/go-version"
 )
 
 type FilterInfo struct {

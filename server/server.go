@@ -93,25 +93,21 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "list_registered_clusters", descriptions.ListClusters, readOnlyAnnotation, a.ListClusters)
 
 	// operation on Volume object
-	addTool(a, server, "list_volumes", descriptions.ListVolumes, readOnlyAnnotation, a.ListVolumes)
 	addTool(a, server, "create_volume", descriptions.CreateVolume, createAnnotation, a.CreateVolume)
 	addTool(a, server, "update_volume", descriptions.UpdateVolume, updateAnnotation, a.UpdateVolume)
 	addTool(a, server, "delete_volume", descriptions.DeleteVolume, deleteAnnotation, a.DeleteVolume)
 
 	// operation on Snapshot Policy object
-	addTool(a, server, "list_snapshot_policies", descriptions.ListSnapshotPolicy, readOnlyAnnotation, a.ListSnapshotPolicies)
 	addTool(a, server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
 	addTool(a, server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
 	addTool(a, server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
 
 	// operation on QoS Policy object
-	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicy, readOnlyAnnotation, a.ListQoSPolicies)
 	addTool(a, server, "create_qos_policy", descriptions.CreateQoSPolicy, createAnnotation, a.CreateQoSPolicy)
 	addTool(a, server, "update_qos_policy", descriptions.UpdateQoSPolicy, updateAnnotation, a.UpdateQosPolicy)
 	addTool(a, server, "delete_qos_policy", descriptions.DeleteQoSPolicy, deleteAnnotation, a.DeleteQoSPolicy)
 
 	// operation on NFS Export Policy object
-	addTool(a, server, "list_nfs_export_policies", descriptions.ListNFSExportPolicy, readOnlyAnnotation, a.ListNFSExportPolicies)
 	addTool(a, server, "create_nfs_export_policies", descriptions.CreateNFSExportPolicy, createAnnotation, a.CreateNFSExportPolicy)
 	addTool(a, server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, updateAnnotation, a.UpdateNFSExportPolicy)
 	addTool(a, server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, deleteAnnotation, a.DeleteNFSExportPolicy)
@@ -122,7 +118,6 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
 
 	// operation on CIFS share object
-	addTool(a, server, "list_cifs_share", descriptions.ListCIFSShare, readOnlyAnnotation, a.ListCIFSShare)
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
@@ -242,7 +237,7 @@ func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ ListCl
 		infos = append(infos, clusterInfo{Name: name, ONTAPVersion: ver})
 	}
 
-	data, err := json.MarshalIndent(infos, "", "  ")
+	data, err := json.Marshal(infos)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
@@ -408,29 +403,6 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	}, nil, nil
 }
 
-func (a *App) ListVolumes(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.ListVolume) (*mcp.CallToolResult, any, error) {
-	a.locks.RLock(parameters.Cluster)
-	defer a.locks.RUnlock(parameters.Cluster)
-
-	volumeGet := newGetVolume(parameters)
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	volumes, err := client.GetVolume(ctx, volumeGet)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: strings.Join(volumes, ",")},
-		},
-	}, nil, nil
-}
-
 func (a *App) DeleteVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
@@ -590,17 +562,6 @@ func newDeleteVolume(in tool.Volume) (ontap.Volume, error) {
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.Volume
 	return out, nil
-}
-
-// newGetVolume validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
-func newGetVolume(in tool.ListVolume) ontap.Volume {
-	out := ontap.Volume{}
-	if in.SVM != "" {
-		out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	}
-
-	return out
 }
 
 // newCreateVolume validates the customer provided arguments and converts them into

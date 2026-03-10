@@ -7,30 +7,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
-	"strings"
 )
-
-func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
-	a.locks.RLock(parameters.Cluster)
-	defer a.locks.RUnlock(parameters.Cluster)
-
-	qosPolicyGet := newGetQoSPolicy(parameters)
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	qosPolicies, err := client.GetQoSPolicy(ctx, qosPolicyGet)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: strings.Join(qosPolicies, ",")},
-		},
-	}, nil, nil
-}
 
 func (a *App) CreateQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
@@ -120,17 +97,6 @@ func (a *App) DeleteQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, param
 			&mcp.TextContent{Text: responseText},
 		},
 	}, nil, nil
-}
-
-// newGetQoSPolicy validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
-func newGetQoSPolicy(in tool.QoSPolicy) ontap.QoSPolicy {
-	out := ontap.QoSPolicy{}
-	if in.SVM != "" {
-		out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	}
-
-	return out
 }
 
 // newCreateQoSPolicy validates the customer provided arguments and converts them into

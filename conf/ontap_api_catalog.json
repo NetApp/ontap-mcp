@@ -1,6 +1,6 @@
 {
   "ontap_version": "9.16",
-  "generated_at": "2026-03-10T10:25:17Z",
+  "generated_at": "2026-03-10T14:56:15Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
