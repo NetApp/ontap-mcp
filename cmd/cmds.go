@@ -20,7 +20,8 @@ type Globals struct {
 
 type CLI struct {
 	Globals
-	Start StartCmd `cmd:"" help:"Start ONTAP MCP server"`
+	Start    StartCmd    `cmd:"" help:"Start ONTAP MCP server"`
+	Generate GenerateCmd `cmd:"" help:"Generate ONTAP MCP artifacts"`
 }
 
 type StartCmd struct {
