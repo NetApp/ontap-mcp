@@ -3,21 +3,28 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
 	CheckTools  = "CHECK_TOOLS"
-	CLUSTER_STR = "On the umeng-aff300-05-06 cluster, "
+	CONFIG_FILE = "ontap.yaml"
+	CLUSTER     = "umeng-aff300-05-06"
+	CLUSTER_STR = "On the " + CLUSTER + " cluster, "
 )
 
 type Agent struct {
@@ -43,6 +50,8 @@ func TestOntapMCPTools(t *testing.T) {
 		name             string
 		input            string
 		expectedOntapErr string
+		api              string
+		functionName     func(api string, poller *config.Poller, client *http.Client, t *testing.T) bool
 	}{
 		// Cluster operations
 		{
@@ -53,34 +62,32 @@ func TestOntapMCPTools(t *testing.T) {
 
 		// Volume operations
 		{
-			name:             "List all volumes in one cluster",
-			input:            CLUSTER_STR + "List all volumes",
+			name:             "List all volumes in one cluster in one svm with given fields",
+			input:            CLUSTER_STR + "for every volume on the marketing svm, show me the name, used size, available size, and snapshot policy",
 			expectedOntapErr: "",
-		},
-		{
-			name:             "List all volumes in wrong cluster",
-			input:            "List all volumes in valso cluster",
-			expectedOntapErr: "cluster valso not found",
-		},
-		{
-			name:             "List all volumes in one cluster in one svm",
-			input:            CLUSTER_STR + "List all volumes in vs_test svm",
-			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/volumes?svm=marketing",
+			functionName:     listObject,
 		},
 		{
 			name:             "Clean volume",
 			input:            CLUSTER_STR + "delete volume docs in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/volumes?name=docs&svm=marketing",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean volume",
 			input:            CLUSTER_STR + "delete volume docsnew in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/volumes?name=docsnew&svm=marketing",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Create volume",
 			input:            CLUSTER_STR + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
 			expectedOntapErr: "",
+			api:              "api/storage/volumes?name=docs&svm=marketing",
+			functionName:     createObject,
 		},
 		{
 			name:             "Update volume size",
@@ -96,6 +103,8 @@ func TestOntapMCPTools(t *testing.T) {
 			name:             "Rename volume",
 			input:            CLUSTER_STR + "rename the docs volume on the marketing svm to docsnew",
 			expectedOntapErr: "",
+			api:              "api/storage/volumes?name=docsnew&svm=marketing",
+			functionName:     createObject,
 		},
 		{
 			name:             "Update volume state",
@@ -104,35 +113,47 @@ func TestOntapMCPTools(t *testing.T) {
 		},
 		{
 			name:             "Clean volume",
+			input:            CLUSTER_STR + "delete volume docs in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/volumes?name=docs&svm=marketing",
+			functionName:     deleteObject,
+		},
+		{
+			name:             "Clean volume",
 			input:            CLUSTER_STR + "delete volume docsnew in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/volumes?name=docsnew&svm=marketing",
+			functionName:     deleteObject,
 		},
 
 		// NFS export policy operations
 		{
-			name:             "List all NFS export policies",
-			input:            CLUSTER_STR + "List all NFS export policies",
-			expectedOntapErr: "",
-		},
-		{
 			name:             "Clean NFS export policy",
 			input:            CLUSTER_STR + "delete nfsEngPolicy NFS export policy",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/protocols/nfs/export-policies?name=nfsEngPolicy",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean NFS export policy",
 			input:            CLUSTER_STR + "delete nfsMgrPolicy NFS export policy",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/protocols/nfs/export-policies?name=nfsMgrPolicy",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Create NFS export policy",
 			input:            CLUSTER_STR + "create an NFS export policy name nfsEngPolicy on the marketing svm",
 			expectedOntapErr: "",
+			api:              "api/protocols/nfs/export-policies?name=nfsEngPolicy",
+			functionName:     createObject,
 		},
 		{
 			name:             "Create volume",
 			input:            CLUSTER_STR + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
 			expectedOntapErr: "",
+			api:              "api/storage/volumes?name=docs&svm=marketing",
+			functionName:     createObject,
 		},
 		{
 			name:             "Attach NFS export policy to volume",
@@ -143,80 +164,96 @@ func TestOntapMCPTools(t *testing.T) {
 			name:             "Rename NFS export policy",
 			input:            CLUSTER_STR + "rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm",
 			expectedOntapErr: "",
+			api:              "api/protocols/nfs/export-policies?name=nfsMgrPolicy",
+			functionName:     createObject,
 		},
 		{
 			name:             "Clean volume",
 			input:            CLUSTER_STR + "delete volume docs in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/volumes?name=docs&svm=marketing",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean NFS export policy",
 			input:            CLUSTER_STR + "delete nfsMgrPolicy NFS export policy",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/protocols/nfs/export-policies?name=nfsMgrPolicy",
+			functionName:     deleteObject,
 		},
 
 		// QoS policy operations
 		{
-			name:             "List QoS policies",
-			input:            CLUSTER_STR + "List all QoS policies",
-			expectedOntapErr: "",
-		},
-		{
 			name:             "Clean QoS policy",
 			input:            CLUSTER_STR + "delete gold QoS policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/qos/policies?name=gold",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean QoS policy",
 			input:            CLUSTER_STR + "delete silver QoS policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/qos/policies?name=silver",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean QoS policy",
 			input:            CLUSTER_STR + "delete payroll QoS policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/qos/policies?name=payroll",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Create fixed QoS policy",
 			input:            CLUSTER_STR + "create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops",
 			expectedOntapErr: "",
+			api:              "api/storage/qos/policies?name=gold",
+			functionName:     createObject,
 		},
 		{
 			name:             "Create adaptive QoS policy",
 			input:            CLUSTER_STR + "create a adaptive QoS policy named payroll on the marketing svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10",
 			expectedOntapErr: "",
+			api:              "api/storage/qos/policies?name=payroll",
+			functionName:     createObject,
 		},
 		{
 			name:             "Rename QoS policy",
 			input:            CLUSTER_STR + "rename the QoS policy from gold to silver on the marketing svm",
 			expectedOntapErr: "",
+			api:              "api/storage/qos/policies?name=silver",
+			functionName:     createObject,
 		},
 		{
 			name:             "Clean QoS policy",
 			input:            CLUSTER_STR + "delete silver QoS policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/qos/policies?name=silver",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean QoS policy",
 			input:            CLUSTER_STR + "delete payroll QoS policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/qos/policies?name=payroll",
+			functionName:     deleteObject,
 		},
 
 		// CIFS share operations
 		{
-			name:             "List CIFS share",
-			input:            CLUSTER_STR + "List all CIFS shares",
-			expectedOntapErr: "",
-		},
-		{
 			name:             "Clean CIFS share",
 			input:            CLUSTER_STR + "delete cifsFin CIFS share in vs_test4 svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/protocols/cifs/shares?name=cifsFin",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Create CIFS share",
 			input:            CLUSTER_STR + "create CIFS share named cifsFin with path as / on the vs_test4 svm",
 			expectedOntapErr: "",
+			api:              "api/protocols/cifs/shares?name=cifsFin",
+			functionName:     createObject,
 		},
 		{
 			name:             "Update CIFS share",
@@ -227,51 +264,77 @@ func TestOntapMCPTools(t *testing.T) {
 			name:             "Clean CIFS share",
 			input:            CLUSTER_STR + "delete cifsFin CIFS share in vs_test4 svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/protocols/cifs/shares?name=cifsFin",
+			functionName:     deleteObject,
 		},
 
 		// Snapshot policy operations
 		{
-			name:             "List snapshot policies",
-			input:            CLUSTER_STR + "List all snapshot policies",
-			expectedOntapErr: "",
-		},
-		{
 			name:             "Clean snapshot policy every4hours",
 			input:            CLUSTER_STR + "delete every4hours snapshot policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/snapshot-policies?name=every4hours",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean snapshot policy every5min",
 			input:            CLUSTER_STR + "Delete every5min snapshot policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/snapshot-policies?name=every5min",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Create snapshot policy every4hours",
 			input:            CLUSTER_STR + "create a snapshot policy named every4hours on the marketing SVM. The schedule is 4hours and keeps the last 5 snapshots",
 			expectedOntapErr: "",
+			api:              "api/storage/snapshot-policies?name=every4hours",
+			functionName:     createObject,
 		},
 		{
 			name:             "Create snapshot policy every5min",
 			input:            CLUSTER_STR + "create a snapshot policy named every5min on the marketing SVM. The schedule is 5minutes and keeps the last 2 snapshots",
 			expectedOntapErr: "",
+			api:              "api/storage/snapshot-policies?name=every5min",
+			functionName:     createObject,
 		},
 		{
 			name:             "Clean snapshot policy every4hours",
 			input:            CLUSTER_STR + "delete every4hours snapshot policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/snapshot-policies?name=every4hours",
+			functionName:     deleteObject,
 		},
 		{
 			name:             "Clean snapshot policy every5min",
 			input:            CLUSTER_STR + "Delete every5min snapshot policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
+			api:              "api/storage/snapshot-policies?name=every5min",
+			functionName:     deleteObject,
 		},
 	}
+
+	cfg, err := config.ReadConfig(CONFIG_FILE)
+	if err != nil {
+		t.Errorf("Error parsing the config: %v\n", err)
+		return
+	}
+
+	poller := cfg.Pollers[CLUSTER]
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: poller.UseInsecureTLS,
+		},
+	}
+	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			slog.Debug("", slog.String("Input", tt.input))
 			if _, err = agent.Chat(context.Background(), tt.input, tt.expectedOntapErr, t); err != nil {
 				slog.Error("Error processing input: %v", slog.Any("error", err))
+			}
+			if tt.api != "" && !tt.functionName(tt.api, poller, client, t) {
+				t.Errorf("Error while accessing the object via prompt %s", slog.Any("input", tt.input))
 			}
 		})
 	}
@@ -502,4 +565,102 @@ func SkipIfMissing(t *testing.T, vars ...string) {
 	if !anyMatches {
 		t.Skipf("Set one of %s envvars to run the test", strings.Join(vars, ", "))
 	}
+}
+
+func createObject(api string, poller *config.Poller, client *http.Client, t *testing.T) bool {
+	url := fmt.Sprintf("https://%s/%s", poller.Addr, api)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+
+	req.SetBasicAuth(poller.Username, poller.Password)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Errorf("Error sending request: %v\n", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	var data ontap.GetData
+	if err := json.Unmarshal(bodyBytes, &data); err != nil {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+
+	if data.NumRecords != 1 {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+	return true
+}
+
+func deleteObject(api string, poller *config.Poller, client *http.Client, t *testing.T) bool {
+	url := fmt.Sprintf("https://%s/%s", poller.Addr, api)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+
+	req.SetBasicAuth(poller.Username, poller.Password)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Errorf("Error sending request: %v\n", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	var data ontap.GetData
+	if err := json.Unmarshal(bodyBytes, &data); err != nil {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+
+	if data.NumRecords != 0 {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+	return true
+}
+
+func listObject(api string, poller *config.Poller, client *http.Client, t *testing.T) bool {
+	url := fmt.Sprintf("https://%s/%s", poller.Addr, api)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+
+	req.SetBasicAuth(poller.Username, poller.Password)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Errorf("Error sending request: %v\n", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Error creating request: %v\n", err)
+		return false
+	}
+
+	return true
 }

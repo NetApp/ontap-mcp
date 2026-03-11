@@ -64,7 +64,11 @@ pipeline {
                                   -v "$(pwd)/ontap.yaml:/opt/mcp/ontap.yaml" \
                                   ghcr.io/netapp/ontap-mcp:latest \
                                   start --port 8083 --host 0.0.0.0
-                                sleep 1m
+                                # Use an until loop to keep running the command until the condition is met
+                                until [ "$(curl -s -f http://localhost:8083/health)" != "OK" ]; do
+                                    sleep 1s
+                                done
+                                echo "MCP server Running"
                                 '''
                             }
                         }
