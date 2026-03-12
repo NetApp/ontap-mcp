@@ -604,11 +604,12 @@ func newCreateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Size = size
 	}
 
-	if in.ExportPolicy != "" {
+	if in.ExportPolicy != "" || in.JunctionPath != "" {
 		out.Nas = ontap.NAS{
 			ExportPolicy: ontap.NASExportPolicy{
 				Name: in.ExportPolicy,
 			},
+			Path: in.JunctionPath,
 		}
 	}
 
@@ -637,8 +638,12 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Size = size
 	}
 
-	if in.NewState != "" {
-		out.State = in.NewState
+	if in.State != "" {
+		out.State = in.State
+	}
+
+	if in.JunctionPath != "" {
+		out.Nas.Path = in.JunctionPath
 	}
 
 	if in.ExportPolicy != "" {

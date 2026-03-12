@@ -111,6 +111,12 @@ func TestOntapMCPTools(t *testing.T) {
 			verifyAPI:        ontapVerifier{},
 		},
 		{
+			name:             "Update volume size",
+			input:            ClusterStr + "update junction path of the docs volume on the marketing svm to empty",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{},
+		},
+		{
 			name:             "Enable volume autogrowth",
 			input:            ClusterStr + "enable autogrowth and grow percent to 62 on the docs volume in the marketing svm",
 			expectedOntapErr: "",
@@ -127,6 +133,24 @@ func TestOntapMCPTools(t *testing.T) {
 			input:            ClusterStr + "update state of the docsnew volume on the marketing svm to offline",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "Update volume state",
+			input:            ClusterStr + "update state of the docsnew volume on the marketing svm to online",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "Update volume junction path",
+			input:            ClusterStr + "update junction path of the docsnew volume on the marketing svm to /docs",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "List one volume in one cluster in one svm with specific field",
+			input:            ClusterStr + "for docsnew volume on the marketing svm, show me the name and junction path",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docsnew&svm=marketing", validationFunc: listObject},
 		},
 		{
 			name:             "Clean volume",
