@@ -18,13 +18,17 @@ set dotenv-path := ".go.env"
 license-check:
     @go run github.com/frapposelli/wwhrd@latest check -q -t
 
-lint:
-	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.9.0 run ./...
-	@go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest $(go list ./... | grep -v /third_party/)
-	@go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+@_lint-impl target:
+    cd {{target}} && go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.9.0 run ./...
+    cd {{target}} && go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest $(go list ./... | grep -v /third_party/)
+    cd {{target}} && go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
-test:
-    @go test ./...
+@lint:
+    just _lint-impl .
+    just _lint-impl integration
+
+@test:
+    go test ./...
 
 docs:
     mkdocs serve
