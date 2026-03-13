@@ -326,20 +326,20 @@ func (a *App) DeleteNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 // the corresponding ONTAP object ready to use via the REST API
 func newDeleteNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, error) {
 	out := ontap.Rule{}
-	if in.ClientMatch == "" && in.ROrule == "" && in.RWrule == "" {
-		return out, errors.New("old client match OR ro rule OR rw rules are required")
+	if in.OldClientMatch == "" && in.OldROrule == "" && in.OldRWrule == "" {
+		return out, errors.New("old client match OR old ro rule OR old rw rules are required")
 	}
 
-	if in.ClientMatch != "" {
-		out.ClientsStr = in.ClientMatch
+	if in.OldClientMatch != "" {
+		out.ClientsStr = in.OldClientMatch
 	}
 
-	if in.ROrule != "" {
-		out.ROruleStr = in.ROrule
+	if in.OldROrule != "" {
+		out.ROruleStr = in.OldROrule
 	}
 
-	if in.RWrule != "" {
-		out.RWruleStr = in.RWrule
+	if in.OldRWrule != "" {
+		out.RWruleStr = in.OldRWrule
 	}
 
 	return out, nil

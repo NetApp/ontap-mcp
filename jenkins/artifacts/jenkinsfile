@@ -5,6 +5,7 @@ pipeline {
         string(name: 'VERSION', defaultValue: '', description: '[Optional] Version. If not filled default is YY.mm.ddHH.')
         string(name: 'RELEASE', defaultValue: 'nightly', description: '[Optional] Example: nightly (default)')
         string(name: 'BRANCH', defaultValue: 'main', description: '[Optional] Branch name to clone. Default (main) ')
+        string(name: 'RUN_TEST', defaultValue: 'true', description: 'false to skip test')
     }
 
     environment {
@@ -90,6 +91,33 @@ pipeline {
                         docker save -o ${targetLocation}/docker_ontap_mcp.tar ${ghcrOntapMcpImage}:latest
                         '''
                     }
+                }
+            }
+        }
+
+        stage('Publish builds locally'){
+            steps {
+                script {
+                    currentStage = 'Publish builds locally'
+                }
+                dir("$targetParentLocation$VERSION-$RELEASE-$BRANCH") {
+                    archiveArtifacts artifacts: '**', fingerprint: true
+                }
+            }
+        }
+
+
+        stage('Run Tests') {
+            when {
+                expression {
+                    return params.RUN_TEST == 'true';
+                }
+            }
+            steps {
+                script {
+                    currentStage = 'Run Tests'
+                    dockerBuild = "${BUILD_URL}/artifact/docker_ontap_mcp.tar"
+                    build job: 'Ontap-MCP/smoke', parameters: [string(name: 'VERSION', value: "${VERSION}"), string(name: 'BRANCH', value: "${BRANCH}"), string(name: 'DOCKER', value: "${dockerBuild}")]
                 }
             }
         }

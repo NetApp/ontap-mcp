@@ -64,7 +64,8 @@ type NASExportPolicy struct {
 }
 
 type NAS struct {
-	ExportPolicy NASExportPolicy `json:"export_policy"`
+	ExportPolicy NASExportPolicy `json:"export_policy,omitzero"`
+	Path         string          `json:"path,omitzero"`
 }
 
 type Autosize struct {

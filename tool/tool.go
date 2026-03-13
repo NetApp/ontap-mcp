@@ -10,10 +10,11 @@ type Volume struct {
 	SVM          string   `json:"svm_name" jsonschema:"SVM name"`
 	Volume       string   `json:"volume_name" jsonschema:"volume name"`
 	Aggregate    string   `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
+	JunctionPath string   `json:"nas.path,omitzero" jsonschema:"junction path"`
 	NewVolume    string   `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
 	Size         string   `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	NewState     string   `json:"new_state,omitzero" jsonschema:"new state of the volume (e.g., 'online', 'offline')"`
-	ExportPolicy string   `json:"export_policy,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	State        string   `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
+	ExportPolicy string   `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
 	Autosize     Autosize `json:"autosize,omitzero" jsonschema:"autosize"`
 }
 
@@ -74,11 +75,11 @@ type NFSExportPolicyRules struct {
 	Cluster        string `json:"cluster_name" jsonschema:"cluster name"`
 	ExportPolicy   string `json:"export_policy" jsonschema:"nfs export policy name"`
 	OldClientMatch string `json:"old_client,omitzero" jsonschema:"old list of clients"`
-	ClientMatch    string `json:"client,omitzero" jsonschema:"new list of clients"`
+	ClientMatch    string `json:"client,omitzero" jsonschema:"list of clients"`
 	OldROrule      string `json:"old_ro_rule,omitzero" jsonschema:"old read only rules"`
-	ROrule         string `json:"ro_rule,omitzero" jsonschema:"new read only rules"`
+	ROrule         string `json:"ro_rule,omitzero" jsonschema:"read only rules"`
 	OldRWrule      string `json:"old_rw_rule,omitzero" jsonschema:"old read write rules"`
-	RWrule         string `json:"rw_rule,omitzero" jsonschema:"new read write rules"`
+	RWrule         string `json:"rw_rule,omitzero" jsonschema:"read write rules"`
 }
 
 type CIFSShare struct {
