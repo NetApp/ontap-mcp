@@ -49,6 +49,22 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 ---
 
+### CIFS share Provisioning
+
+**Create a CIFS share**
+
+- On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm
+
+Expected Response: CIFS share created successfully.
+
+**Update a CIFS share**
+
+- On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change it's path to /cifsFin on the marketing svm
+
+Expected Response: CIFS share updated successfully.
+
+---
+
 ### NFS Export Policy Provisioning
 
 **Create a NFS Export policy**
@@ -81,22 +97,6 @@ Expected Response: NFS Export Policy Rules updated successfully.
 
 ---
 
-### CIFS share Provisioning
-
-**Create a CIFS share**
-
-- On the umeng-aff300-05-06 cluster, create CIFS share named cifsFin with path as / on the marketing svm
-
-Expected Response: CIFS share created successfully.
-
-**Update a CIFS share**
-
-- On the umeng-aff300-05-06 cluster, update CIFS share cifsFin path to /cifsFin on the marketing svm
-
-Expected Response: CIFS share updated successfully.
-
----
-
 ### NFS Export Policy Provisioning
 
 **Create an NFS Export policy**
@@ -126,22 +126,6 @@ Expected Response: NFS Export Policy Rule created successfully.
 - On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
 
 Expected Response: NFS Export Policy Rules updated successfully.
-
----
-
-### CIFS share Provisioning
-
-**Create a CIFS share**
-
-- On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm
-
-Expected Response: CIFS share created successfully.
-
-**Update a CIFS share**
-
-- On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change it's path to /cifsFin on the marketing svm
-
-Expected Response: CIFS share updated successfully.
 
 ---
 
