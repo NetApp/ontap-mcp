@@ -328,6 +328,44 @@ func TestOntapMCPTools(t *testing.T) {
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every5min", validationFunc: deleteObject},
 		},
+
+		// Qtree operations
+		{
+			name:             "Clean qtree staff",
+			input:            ClusterStr + "delete staff qtree in doc volume in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: deleteObject},
+		},
+		{
+			name:             "Create volume",
+			input:            ClusterStr + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: createObject},
+		},
+		{
+			name:             "Create qtree staff",
+			input:            ClusterStr + "create a qtree named staff in docs volume on the marketing SVM",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: createObject},
+		},
+		{
+			name:             "Rename qtree staff",
+			input:            ClusterStr + "rename a qtree named staff to pay in docs volume on the marketing SVM",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: createObject},
+		},
+		{
+			name:             "Clean qtree policy pay",
+			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume",
+			input:            ClusterStr + "delete volume docs in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: deleteObject},
+		},
 	}
 
 	cfg, err := config.ReadConfig(ConfigFile)

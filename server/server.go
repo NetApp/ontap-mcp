@@ -23,7 +23,6 @@ import (
 	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/descriptions"
-	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/rest"
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
@@ -121,6 +120,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
+
+	// operation on Qtree object
+	addTool(a, server, "create_qtree", descriptions.CreateQtree, createAnnotation, a.CreateQtree)
+	addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
+	addTool(a, server, "delete_qtree", descriptions.DeleteQtree, deleteAnnotation, a.DeleteQtree)
 
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
@@ -415,96 +419,6 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	}, nil, nil
 }
 
-func (a *App) DeleteVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
-	if !a.locks.TryLock(parameters.Cluster) {
-		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
-	}
-	defer a.locks.Unlock(parameters.Cluster)
-
-	volumeDelete, err := newDeleteVolume(parameters)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	err = client.DeleteVolume(ctx, volumeDelete)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	responseText := "Volume deleted successfully"
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: responseText},
-		},
-	}, nil, nil
-}
-
-func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
-	if !a.locks.TryLock(parameters.Cluster) {
-		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
-	}
-	defer a.locks.Unlock(parameters.Cluster)
-
-	volumeCreate, err := newCreateVolume(parameters)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	err = client.CreateVolume(ctx, volumeCreate)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	responseText := "Volume created successfully"
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: responseText},
-		},
-	}, nil, nil
-}
-
-func (a *App) UpdateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
-	if !a.locks.TryLock(parameters.Cluster) {
-		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
-	}
-	defer a.locks.Unlock(parameters.Cluster)
-
-	volumeUpdate, err := newUpdateVolume(parameters)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-	err = client.UpdateVolume(ctx, volumeUpdate, parameters.Volume, parameters.SVM)
-
-	if err != nil {
-		return errorResult(err), nil, err
-	}
-
-	responseText := "Volume updated successfully"
-
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{Text: responseText},
-		},
-	}, nil, nil
-}
-
 func errorResult(err error) *mcp.CallToolResult {
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -559,114 +473,6 @@ func (a *App) getClient(cluster string) (*rest.Client, error) {
 		return rest.NewWithClient(poller, a.options.TestHTTPClient), nil
 	}
 	return rest.New(poller), nil
-}
-
-// newDeleteVolume validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
-func newDeleteVolume(in tool.Volume) (ontap.Volume, error) {
-	out := ontap.Volume{}
-	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
-	}
-	if in.Volume == "" {
-		return out, errors.New("volume name is required")
-	}
-	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	out.Name = in.Volume
-	return out, nil
-}
-
-// newCreateVolume validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
-func newCreateVolume(in tool.Volume) (ontap.Volume, error) {
-	out := ontap.Volume{}
-	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
-	}
-	if in.Volume == "" {
-		return out, errors.New("volume name is required")
-	}
-	if in.Aggregate == "" {
-		return out, errors.New("aggregate name is required")
-	}
-
-	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	out.Aggregates = []ontap.NameAndUUID{
-		{Name: in.Aggregate},
-	}
-	out.Name = in.Volume
-
-	if in.Size != "" {
-		size, err := parseSize(in.Size)
-		if err != nil {
-			return ontap.Volume{}, err
-		}
-		out.Size = size
-	}
-
-	if in.ExportPolicy != "" || in.JunctionPath != "" {
-		out.Nas = ontap.NAS{
-			ExportPolicy: ontap.NASExportPolicy{
-				Name: in.ExportPolicy,
-			},
-			Path: in.JunctionPath,
-		}
-	}
-
-	return out, nil
-}
-
-// newUpdateVolume validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
-func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
-	out := ontap.Volume{}
-	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
-	}
-	if in.Volume == "" {
-		return out, errors.New("volume name is required")
-	}
-	if in.NewVolume != "" {
-		out.Name = in.NewVolume
-	}
-
-	if in.Size != "" {
-		size, err := parseSize(in.Size)
-		if err != nil {
-			return ontap.Volume{}, err
-		}
-		out.Size = size
-	}
-
-	if in.State != "" {
-		out.State = in.State
-	}
-
-	if in.JunctionPath != "" {
-		out.Nas.Path = in.JunctionPath
-	}
-
-	if in.ExportPolicy != "" {
-		out.Nas.ExportPolicy.Name = in.ExportPolicy
-	}
-
-	if in.Autosize.Mode != "" {
-		out.Autosize.Mode = in.Autosize.Mode
-	}
-	if in.Autosize.MaxSize != "" {
-		out.Autosize.MaxSize = in.Autosize.MaxSize
-	}
-	if in.Autosize.MinSize != "" {
-		out.Autosize.MinSize = in.Autosize.MinSize
-	}
-	if in.Autosize.GrowThreshold != "" {
-		out.Autosize.GrowThreshold = in.Autosize.GrowThreshold
-	}
-	if in.Autosize.ShrinkThreshold != "" {
-		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
-	}
-
-	return out, nil
 }
 
 type ListClusterParams struct{}
