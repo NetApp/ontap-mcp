@@ -234,7 +234,7 @@ func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, er
 	return ver, nil
 }
 
-func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ ListClusterParams) (*mcp.CallToolResult, any, error) {
+func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.ListClusterParams) (*mcp.CallToolResult, any, error) {
 	clusters := slices.Clone(a.cfg.PollersOrdered)
 	slices.Sort(clusters)
 
@@ -668,9 +668,6 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 
 	return out, nil
 }
-
-type ListClusterParams struct{}
-type ListVolumeParams struct{}
 
 var (
 	readOnlyAnnotation = mcp.ToolAnnotations{

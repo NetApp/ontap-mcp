@@ -400,26 +400,10 @@ func NewAgent(llmUserName, llmToken, llmBaseURL, openaiModel, mcpServerURL strin
 func (a *Agent) convertMCPToolsToOpenAI() []openai.ChatCompletionToolUnionParam {
 	tools := make([]openai.ChatCompletionToolUnionParam, len(a.tools))
 	for i, tool := range a.tools {
-		parameters := openai.FunctionParameters{
-			"type":       "object",
-			"properties": map[string]any{},
-		}
-
-		if tool.InputSchema != nil {
-			if schema, ok := tool.InputSchema.(map[string]any); ok {
-				if schema["type"] == "object" {
-					if _, hasProps := schema["properties"]; !hasProps {
-						schema["properties"] = map[string]any{}
-					}
-				}
-				parameters = schema
-			}
-		}
-
 		tools[i] = openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
 			Name:        tool.Name,
 			Description: openai.String(tool.Description),
-			Parameters:  parameters,
+			Parameters:  tool.InputSchema.(map[string]any),
 		})
 	}
 	return tools
