@@ -11,36 +11,6 @@ import (
 	"strconv"
 )
 
-func (c *Client) GetNFSExportPolicy(ctx context.Context) ([]string, error) {
-	var (
-		nfsExportPolicy ontap.GetData
-	)
-	responseHeaders := http.Header{}
-	nfsExportPolicies := []string{}
-
-	params := url.Values{}
-
-	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&nfsExportPolicy)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	if nfsExportPolicy.NumRecords == 0 {
-		return []string{}, errors.New("no nfs export policies found in the cluster")
-	}
-
-	for _, nfsExportPolicyData := range nfsExportPolicy.Records {
-		nfsExportPolicies = append(nfsExportPolicies, nfsExportPolicyData.Name)
-	}
-
-	return nfsExportPolicies, nil
-}
-
 func (c *Client) CreateNFSExportPolicy(ctx context.Context, exportPolicy ontap.ExportPolicy) error {
 	var (
 		buf        bytes.Buffer

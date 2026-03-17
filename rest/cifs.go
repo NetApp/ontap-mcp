@@ -3,45 +3,11 @@ package rest
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 )
-
-func (c *Client) GetCIFSShare(ctx context.Context) ([]string, error) {
-	var (
-		cifsShare  ontap.GetData
-		buf        bytes.Buffer
-		statusCode int
-		cifsShares []string
-	)
-	responseHeaders := http.Header{}
-
-	params := url.Values{}
-
-	builder := c.baseRequestBuilder(`/api/protocols/cifs/shares`, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
-		ToJSON(&cifsShare).
-		Params(params)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	if cifsShare.NumRecords == 0 {
-		return []string{}, errors.New("no cifs share found in the cluster")
-	}
-
-	for _, cifsShareData := range cifsShare.Records {
-		cifsShares = append(cifsShares, cifsShareData.Name)
-	}
-
-	return cifsShares, nil
-}
 
 func (c *Client) CreateCIFSShare(ctx context.Context, cifsShare ontap.CIFSShare) error {
 	var (

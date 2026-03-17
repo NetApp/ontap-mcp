@@ -3,46 +3,12 @@ package rest
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 	"strconv"
 )
-
-func (c *Client) GetQtree(ctx context.Context) ([]string, error) {
-	var (
-		qtree      ontap.GetData
-		buf        bytes.Buffer
-		statusCode int
-		qtrees     []string
-	)
-	responseHeaders := http.Header{}
-
-	params := url.Values{}
-
-	builder := c.baseRequestBuilder(`/api/storage/qtrees`, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
-		ToJSON(&qtree).
-		Params(params)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	if qtree.NumRecords == 0 {
-		return []string{}, errors.New("no qtree found in the cluster")
-	}
-
-	for _, qtreeData := range qtree.Records {
-		qtrees = append(qtrees, qtreeData.Name)
-	}
-
-	return qtrees, nil
-}
 
 func (c *Client) CreateQtree(ctx context.Context, qtree ontap.Qtree) error {
 	var (
