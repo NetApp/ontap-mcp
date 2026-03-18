@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"slices"
 	"sort"
 	"strconv"
@@ -691,11 +692,21 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 		a.logger.Warn("skipping registration of destructive tool in read-only mode", slog.String("tool", name))
 		return
 	}
-	mcp.AddTool(server, &mcp.Tool{
+
+	tt := &mcp.Tool{
 		Name:        name,
 		Description: description,
 		Annotations: &annotations,
-	}, handler)
+	}
+
+	// Check if the tool handlers in param has any fields. If it doesn't, create a schema with an empty properties
+	// Workaround for https://github.com/modelcontextprotocol/go-sdk/issues/693
+	typeFor := reflect.TypeFor[In]()
+	if typeFor.Kind() == reflect.Struct && typeFor.NumField() == 0 {
+		tt.InputSchema = json.RawMessage(`{"type":"object","properties":{}}`)
+	}
+
+	mcp.AddTool(server, tt, handler)
 }
 
 type loggingResponseWriter struct {
