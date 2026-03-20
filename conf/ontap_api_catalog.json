@@ -1,6 +1,6 @@
 {
   "ontap_version": "9.16",
-  "generated_at": "2026-03-10T14:56:15Z",
+  "generated_at": "2026-03-20T08:36:15Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
@@ -1713,9 +1713,6 @@
         },
         "controller.over_temperature": {},
         "date": {},
-        "disaggregated": {
-          "type": "boolean"
-        },
         "external_cache.is_enabled": {
           "type": "boolean",
           "since": "9.10"
@@ -1819,22 +1816,6 @@
         "hw_assist.status.partner.state": {
           "since": "9.11"
         },
-        "is_all_flash_optimized": {
-          "type": "boolean",
-          "since": "9.11"
-        },
-        "is_all_flash_select_optimized": {
-          "type": "boolean",
-          "since": "9.11"
-        },
-        "is_capacity_optimized": {
-          "type": "boolean",
-          "since": "9.11"
-        },
-        "is_performance_optimized": {
-          "type": "boolean",
-          "since": "9.11"
-        },
         "is_spares_low": {
           "type": "boolean",
           "since": "9.10"
@@ -1865,9 +1846,6 @@
         },
         "owner": {
           "since": "9.9"
-        },
-        "san_optimized": {
-          "type": "boolean"
         },
         "serial_number": {},
         "service_processor.api_service.enabled": {
@@ -2010,29 +1988,8 @@
         "version.minor": {
           "type": "integer"
         },
-        "version.patch": {
-          "since": "9.11"
-        },
-        "vm.account_id": {
-          "since": "9.11"
-        },
-        "vm.deployment_id": {
-          "since": "9.11"
-        },
-        "vm.fault_domain": {
-          "since": "9.11"
-        },
-        "vm.instance_id": {
-          "since": "9.11"
-        },
-        "vm.primary_ip": {
-          "since": "9.11"
-        },
         "vm.provider_type": {
           "since": "9.7"
-        },
-        "vm.update_domain": {
-          "since": "9.11"
         }
       }
     },
@@ -6758,9 +6715,6 @@
         "enabled": {
           "type": "boolean"
         },
-        "enforce_host_authentication": {
-          "type": "boolean"
-        },
         "interface.ip.address": {},
         "interface.name": {},
         "interface.uuid": {},
@@ -6773,9 +6727,6 @@
         },
         "enabled": {
           "desc": "Indicates whether NFS over TLS is enabled."
-        },
-        "enforce_host_authentication": {
-          "desc": "Indicates whether NFS over TLS host authentication is enforced or not."
         },
         "interface": {
           "desc": "Network interface."
@@ -7670,12 +7621,6 @@
         "users.key_time_to_live": {
           "since": "9.14"
         },
-        "users.keys.access_key": {},
-        "users.keys.expiry_time": {},
-        "users.keys.id": {
-          "type": "integer"
-        },
-        "users.keys.time_to_live": {},
         "users.name": {},
         "users.svm.name": {},
         "users.svm.uuid": {}
@@ -7986,11 +7931,6 @@
         "comment": {},
         "name": {},
         "protocol": {},
-        "proximity.local_svm": {
-          "type": "boolean"
-        },
-        "proximity.peer_svms.name": {},
-        "proximity.peer_svms.uuid": {},
         "svm.name": {},
         "svm.uuid": {}
       },
@@ -8005,9 +7945,6 @@
         },
         "protocol": {
           "desc": "The protocol of the initiator."
-        },
-        "proximity": {
-          "desc": "Properties that define to what SVMs the initiator is proximal. This information is used to properly report active optimized and active non-optimized network paths via ALUA. If no configuration has been specified for the initiator, the sub-object will not be present in GET. These properties apply to all instances of the initiator in all initiator groups in the SVM and its peers."
         },
         "svm": {
           "desc": "The SVM for which the initiator properties are configured."
@@ -8477,9 +8414,6 @@
         "applications.second_authentication_method": {
           "since": "9.7"
         },
-        "authentication_methods": {
-          "since": "9.11"
-        },
         "comment": {
           "since": "9.7"
         },
@@ -8499,17 +8433,11 @@
         "password_hash_algorithm": {
           "since": "9.11"
         },
-        "public_key": {
-          "since": "9.11"
-        },
         "role.name": {
           "since": "9.7"
         },
         "scope": {
           "since": "9.7"
-        },
-        "ssl_ca_certificate": {
-          "since": "9.11"
         }
       },
       "fields": {
@@ -8532,14 +8460,8 @@
           "since": "9.11",
           "desc": "Password hash algorithm used to generate a hash of the user's password for password matching.To modify \"password_hash_algorithm\", use REST API \"/api/security/authentication/password\"."
         },
-        "public_key": {
-          "desc": "Public key for SSH."
-        },
         "scope": {
           "desc": "Scope of the entity. Set to \"cluster\" for cluster owned objects and to \"svm\" for SVM owned objects."
-        },
-        "ssl_ca_certificate": {
-          "desc": "SSL certificate for the chain of certificate authorities (CA) that have signed this user's client certificate."
         }
       }
     },
@@ -8659,7 +8581,6 @@
         "state": {},
         "svm.name": {},
         "timestamp": {},
-        "traceid": {},
         "user": {}
       },
       "fields": {
@@ -8698,9 +8619,6 @@
         },
         "timestamp": {
           "desc": "Log entry timestamp. Valid in URL"
-        },
-        "traceid": {
-          "desc": "If present, the traceid that was included in the header of the request."
         },
         "user": {
           "desc": "Username of the remote user."
@@ -10230,9 +10148,6 @@
           "type": "boolean",
           "since": "9.7"
         },
-        "comment": {
-          "since": "9.11"
-        },
         "name": {
           "since": "9.7"
         },
@@ -10258,9 +10173,6 @@
       "fields": {
         "builtin": {
           "desc": "Indicates if this is a built-in (pre-defined) role which cannot be modified or deleted."
-        },
-        "comment": {
-          "desc": "Comment"
         },
         "name": {
           "desc": "Role name"
@@ -10414,14 +10326,6 @@
       ],
       "api_introduced": "9.6",
       "filters": {
-        "archive.after_days": {
-          "type": "integer",
-          "since": "9.11"
-        },
-        "archive.enabled": {
-          "type": "boolean",
-          "since": "9.11"
-        },
         "comment": {},
         "copy_all_source_snapshots": {
           "type": "boolean",
@@ -10463,9 +10367,6 @@
           "since": "9.10"
         },
         "scope": {},
-        "snapshot_lock_mode": {
-          "since": "9.11"
-        },
         "svm.name": {},
         "svm.uuid": {},
         "sync_common_snapshot_schedule.name": {},
@@ -10480,9 +10381,6 @@
         "uuid": {}
       },
       "fields": {
-        "archive": {
-          "desc": "Archive information for the objects in an object store SnapMirror relationship. This property is applicable only for \"async\" policies with \"create_snapshot_on_source\" set to \"false\"."
-        },
         "comment": {
           "desc": "Comment associated with the policy."
         },
@@ -10516,9 +10414,6 @@
         },
         "scope": {
           "desc": "Set to \"svm\" for policies owned by an SVM, otherwise set to \"cluster\"."
-        },
-        "snapshot_lock_mode": {
-          "desc": "Specifies the lock mode of the snapshots stored in the object store. This property is applicable only to policies of type \"async\" with \"create_snapshot_on_source\" set to \"false\". When set to enterprise or compliance, the policy can be associated only with SnapMirror relationships where the source endpoint is a FlexVol volume and the destination endpoint is an object store. When set to compliance, no users can delete a snapshot until the retention period has expired. When set to enterprise, users that have special permissions can delete a snapshot before the retention period has expired."
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -10589,40 +10484,7 @@
         "destination.path": {},
         "destination.svm.name": {},
         "destination.svm.uuid": {},
-        "destination.uuid": {
-          "since": "9.11"
-        },
         "exported_snapshot": {},
-        "fabriclink.destination_bucket": {
-          "since": "9.11"
-        },
-        "fabriclink.destination_role": {
-          "since": "9.11"
-        },
-        "fabriclink.pending_work_task_count": {
-          "type": "integer",
-          "since": "9.11"
-        },
-        "fabriclink.pull_byte_count": {
-          "type": "integer",
-          "since": "9.11"
-        },
-        "fabriclink.push_byte_count": {
-          "type": "integer",
-          "since": "9.11"
-        },
-        "fabriclink.source_bucket": {
-          "since": "9.11"
-        },
-        "fabriclink.source_role": {
-          "since": "9.11"
-        },
-        "fabriclink.status": {
-          "since": "9.11"
-        },
-        "fabriclink.topology_uuid": {
-          "since": "9.11"
-        },
         "group_type": {
           "since": "9.11"
         },
@@ -10650,9 +10512,6 @@
           "since": "9.14"
         },
         "policy.name": {},
-        "policy.transfer_schedule.name": {
-          "since": "9.11"
-        },
         "policy.type": {},
         "policy.uuid": {},
         "preferred_site": {
@@ -10679,9 +10538,6 @@
         "source.path": {},
         "source.svm.name": {},
         "source.svm.uuid": {},
-        "source.uuid": {
-          "since": "9.11"
-        },
         "state": {},
         "svmdr_volumes.name": {
           "since": "9.13"
@@ -10737,9 +10593,6 @@
         },
         "exported_snapshot": {
           "desc": "Snapshot exported to clients on destination."
-        },
-        "fabriclink": {
-          "desc": "SnapMirror FabricLink relationship"
         },
         "group_type": {
           "since": "9.11",
@@ -10963,9 +10816,6 @@
           "type": "boolean",
           "since": "9.14"
         },
-        "cloud_storage.max_cloud_cache_percent": {
-          "type": "integer"
-        },
         "cloud_storage.stores.cloud_store.name": {
           "since": "9.14"
         },
@@ -11107,9 +10957,6 @@
         "space.block_storage.inactive_user_data_percent": {
           "type": "integer",
           "since": "9.10"
-        },
-        "space.block_storage.performance_tier_cache_used": {
-          "type": "integer"
         },
         "space.block_storage.physical_used": {
           "type": "integer",
@@ -13087,9 +12934,6 @@
           "type": "boolean",
           "since": "9.16"
         },
-        "filesystem_path": {
-          "since": "9.10"
-        },
         "group.id": {
           "since": "9.9"
         },
@@ -13144,10 +12988,6 @@
       "fields": {
         "export_policy": {
           "desc": "Export Policy"
-        },
-        "filesystem_path": {
-          "since": "9.10",
-          "desc": "Path of the qtree directory. This path is relative to the volume root directory."
         },
         "group": {
           "since": "9.8",
@@ -15805,47 +15645,22 @@
       ],
       "api_introduced": "9.6",
       "filters": {
-        "actionable": {
-          "type": "boolean"
-        },
-        "creation_time": {
-          "since": "9.11"
-        },
         "filter.name": {
           "since": "9.8",
           "desc": "Filter the collection returned using an event filter"
         },
-        "history.log_message": {},
-        "history.state": {},
-        "history.update_time": {},
         "index": {
           "type": "integer"
-        },
-        "last_update_time": {
-          "since": "9.11"
         },
         "log_message": {},
         "message.name": {},
         "message.severity": {},
         "node.name": {},
         "node.uuid": {},
-        "num_occurrences": {
-          "type": "integer"
-        },
         "parameters.name": {},
         "parameters.value": {},
         "source": {},
-        "state": {
-          "since": "9.11"
-        },
-        "stateful": {
-          "type": "boolean",
-          "since": "9.11"
-        },
-        "time": {},
-        "uuid": {
-          "since": "9.11"
-        }
+        "time": {}
       }
     },
     "/support/ems/filters": {
@@ -15896,11 +15711,7 @@
         },
         "name": {},
         "severity": {},
-        "snmp_trap_type": {},
-        "stateful": {
-          "type": "boolean",
-          "since": "9.11"
-        }
+        "snmp_trap_type": {}
       }
     },
     "/support/ems/role-configs": {
@@ -16292,9 +16103,6 @@
         "qos_policy_group_template.uuid": {
           "since": "9.16"
         },
-        "retention_period": {
-          "type": "integer"
-        },
         "s3.allowed": {
           "type": "boolean",
           "since": "9.12"
@@ -16480,9 +16288,6 @@
         "qos_policy_group_template": {
           "since": "9.16",
           "desc": "This optionally specifies which QoS non-shared policy group to apply to the SVM as a template. This policy group is then assigned to volumes created or rehosted into this SVM. This policy group defines measurable service level objectives (SLOs) and Service Level Agreements (SLAs)."
-        },
-        "retention_period": {
-          "desc": "Volume delete retention period specifies the default duration, in hours that deleted volumes are retained in the recovery queue for possible future recovery."
         },
         "routes": {
           "desc": "Optional array of routes for the SVM"
