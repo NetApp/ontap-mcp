@@ -92,13 +92,11 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 		BodyJSON(snapshotPolicy).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder2)
-
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
 
-	return err
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) CreateSchedule(ctx context.Context, schedule ontap.Schedule) error {
@@ -107,14 +105,9 @@ func (c *Client) CreateSchedule(ctx context.Context, schedule ontap.Schedule) er
 	builder := c.baseRequestBuilder(`/api/cluster/schedules`, &statusCode, nil).
 		BodyJSON(schedule)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
-		return fmt.Errorf(`failed to create schedule %s: unexpected status code: %d`, schedule.Name, statusCode)
-	}
-
-	return nil
+	return c.checkStatus(statusCode)
 }

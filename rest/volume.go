@@ -52,9 +52,7 @@ func (c *Client) CreateVolume(ctx context.Context, volume ontap.Volume) error {
 		BodyJSON(volume).
 		ToBytesBuffer(&buf)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
@@ -99,10 +97,8 @@ func (c *Client) UpdateVolume(ctx context.Context, volume ontap.Volume, oldVolum
 		ToBytesBuffer(&buf).
 		BodyJSON(volume)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return fmt.Errorf("error during update volume request: %w", err)
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
 
 	return c.handleJob(ctx, statusCode, buf)
@@ -145,9 +141,7 @@ func (c *Client) DeleteVolume(ctx context.Context, volume ontap.Volume) error {
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
@@ -164,14 +158,9 @@ func (c *Client) CreateExportPolicy(ctx context.Context, volume ontap.Volume) er
 	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, &statusCode, nil).
 		BodyJSON(newExportPolicy)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
-		return fmt.Errorf(`unexpected status code: %d`, statusCode)
-	}
-
-	return nil
+	return c.checkStatus(statusCode)
 }

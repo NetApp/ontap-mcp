@@ -20,12 +20,11 @@ func (c *Client) CreateCIFSShare(ctx context.Context, cifsShare ontap.CIFSShare)
 		ToBytesBuffer(&buf).
 		BodyJSON(cifsShare)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) UpdateCIFSShare(ctx context.Context, svmName, cifsShareName string, cifsShare ontap.CIFSShare) error {
@@ -54,17 +53,16 @@ func (c *Client) UpdateCIFSShare(ctx context.Context, svmName, cifsShareName str
 		return fmt.Errorf("failed to get detail of cifs share %s because it does not exist", cifsShareName)
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/cifs/shares/`+cShare.Records[0].Svm.UUID+`/`+cifsShareName, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/shares/`+cShare.Records[0].Svm.UUID+`/`+cifsShareName, &statusCode, responseHeaders).
 		BodyJSON(cifsShare).
 		ToJSON(&cShare).
 		Patch()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) DeleteCIFSShare(ctx context.Context, cifsShare ontap.CIFSShare) error {
@@ -93,13 +91,12 @@ func (c *Client) DeleteCIFSShare(ctx context.Context, cifsShare ontap.CIFSShare)
 		return fmt.Errorf("failed to get detail of cifs share %s because it does not exist", cifsShare.Name)
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/cifs/shares/`+cShare.Records[0].Svm.UUID+`/`+cifsShare.Name, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/shares/`+cShare.Records[0].Svm.UUID+`/`+cifsShare.Name, &statusCode, responseHeaders).
 		Delete()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }

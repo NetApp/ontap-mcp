@@ -121,6 +121,14 @@ func (c *Client) waitForJob(ctx context.Context, jobLocation string, duration ti
 	}
 }
 
+func (c *Client) checkStatus(statusCode int) error {
+	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
+		return fmt.Errorf("failed to finish the job, unexpected status code: %d", statusCode)
+	}
+
+	return nil
+}
+
 func ontapValidator(response *http.Response) error {
 	if response.StatusCode >= http.StatusBadRequest {
 		var ontapErr ontap.ClusterError

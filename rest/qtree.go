@@ -21,16 +21,16 @@ func (c *Client) CreateQtree(ctx context.Context, qtree ontap.Qtree) error {
 		ToBytesBuffer(&buf).
 		BodyJSON(qtree)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.handleJob(ctx, statusCode, buf)
 }
 
 func (c *Client) UpdateQtree(ctx context.Context, svmName, volumeName, qtreeName string, qtree ontap.Qtree) error {
 	var (
+		buf         bytes.Buffer
 		statusCode  int
 		qtreeRecord ontap.GetData
 	)
@@ -56,21 +56,21 @@ func (c *Client) UpdateQtree(ctx context.Context, svmName, volumeName, qtreeName
 		return fmt.Errorf("failed to get detail of qtree %s because it does not exist", qtreeName)
 	}
 
-	builder = c.baseRequestBuilder(`/api/storage/qtrees/`+qtreeRecord.Records[0].Volume.UUID+`/`+strconv.Itoa(qtreeRecord.Records[0].ID), &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/storage/qtrees/`+qtreeRecord.Records[0].Volume.UUID+`/`+strconv.Itoa(qtreeRecord.Records[0].ID), &statusCode, responseHeaders).
 		BodyJSON(qtree).
 		ToJSON(&qtreeRecord).
 		Patch()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.handleJob(ctx, statusCode, buf)
 }
 
 func (c *Client) DeleteQtree(ctx context.Context, qtree ontap.Qtree) error {
 	var (
+		buf         bytes.Buffer
 		statusCode  int
 		qtreeRecord ontap.GetData
 	)
@@ -96,13 +96,12 @@ func (c *Client) DeleteQtree(ctx context.Context, qtree ontap.Qtree) error {
 		return fmt.Errorf("failed to get detail of qtree %s because it does not exist", qtree.Name)
 	}
 
-	builder = c.baseRequestBuilder(`/api/storage/qtrees/`+qtreeRecord.Records[0].Volume.UUID+`/`+strconv.Itoa(qtreeRecord.Records[0].ID), &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/storage/qtrees/`+qtreeRecord.Records[0].Volume.UUID+`/`+strconv.Itoa(qtreeRecord.Records[0].ID), &statusCode, responseHeaders).
 		Delete()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.handleJob(ctx, statusCode, buf)
 }

@@ -22,12 +22,11 @@ func (c *Client) CreateNFSExportPolicy(ctx context.Context, exportPolicy ontap.E
 		BodyJSON(exportPolicy).
 		ToBytesBuffer(&buf)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) CreateNFSExportPolicyRules(ctx context.Context, exportPolicyName string, rule ontap.Rule) error {
@@ -60,12 +59,11 @@ func (c *Client) CreateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		BodyJSON(rule).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder2)
-
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) UpdateNFSExportPolicyRules(ctx context.Context, exportPolicyName string, oldClientMatch string, oldRoRule string, oldRwRule string, rule ontap.Rule) error {
@@ -126,12 +124,11 @@ func (c *Client) UpdateNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		BodyJSON(rule).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder3)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder3); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) DeleteNFSExportPolicyRules(ctx context.Context, exportPolicyName string, rule ontap.Rule) error {
@@ -191,12 +188,11 @@ func (c *Client) DeleteNFSExportPolicyRules(ctx context.Context, exportPolicyNam
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder3)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder3); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) UpdateNFSExportPolicy(ctx context.Context, oldExportPolicyName string, exportPolicy ontap.ExportPolicy) error {
@@ -230,12 +226,11 @@ func (c *Client) UpdateNFSExportPolicy(ctx context.Context, oldExportPolicyName 
 		BodyJSON(exportPolicy).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder2)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) DeleteNFSExportPolicy(ctx context.Context, exportPolicy ontap.ExportPolicy) error {
@@ -268,10 +263,9 @@ func (c *Client) DeleteNFSExportPolicy(ctx context.Context, exportPolicy ontap.E
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder2)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
