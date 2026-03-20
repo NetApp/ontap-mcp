@@ -58,7 +58,7 @@ func (c *Client) UpdateQtree(ctx context.Context, svmName, volumeName, qtreeName
 
 	builder2 := c.baseRequestBuilder(`/api/storage/qtrees/`+qtreeRecord.Records[0].Volume.UUID+`/`+strconv.Itoa(qtreeRecord.Records[0].ID), &statusCode, responseHeaders).
 		BodyJSON(qtree).
-		ToJSON(&qtreeRecord).
+		ToBytesBuffer(&buf).
 		Patch()
 
 	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
@@ -97,7 +97,8 @@ func (c *Client) DeleteQtree(ctx context.Context, qtree ontap.Qtree) error {
 	}
 
 	builder2 := c.baseRequestBuilder(`/api/storage/qtrees/`+qtreeRecord.Records[0].Volume.UUID+`/`+strconv.Itoa(qtreeRecord.Records[0].ID), &statusCode, responseHeaders).
-		Delete()
+		Delete().
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
 		return err
