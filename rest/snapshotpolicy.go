@@ -3,7 +3,6 @@ package rest
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
@@ -52,42 +51,6 @@ func (c *Client) DeleteSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 	return c.handleJob(ctx, statusCode, buf)
 }
 
-func (c *Client) GetSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy) ([]string, error) {
-	var (
-		ssPolicy ontap.GetData
-	)
-	responseHeaders := http.Header{}
-	snapshotPolicies := []string{}
-	params := url.Values{}
-	svmName := snapshotPolicy.SVM.Name
-	if svmName != "" {
-		params.Set("svm", svmName)
-	}
-
-	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&ssPolicy)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	if ssPolicy.NumRecords == 0 {
-		if svmName != "" {
-			return []string{}, fmt.Errorf("no snapshot policies found on svm: %s", svmName)
-		}
-		return []string{}, errors.New("no snapshot policies found in the cluster")
-	}
-
-	for _, ss := range ssPolicy.Records {
-		snapshotPolicies = append(snapshotPolicies, ss.Name)
-	}
-
-	return snapshotPolicies, nil
-}
-
 func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy) error {
 	var (
 		buf        bytes.Buffer
@@ -129,13 +92,11 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 		BodyJSON(snapshotPolicy).
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder2)
-
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
 	}
 
-	return err
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) CreateSchedule(ctx context.Context, schedule ontap.Schedule) error {
@@ -144,14 +105,9 @@ func (c *Client) CreateSchedule(ctx context.Context, schedule ontap.Schedule) er
 	builder := c.baseRequestBuilder(`/api/cluster/schedules`, &statusCode, nil).
 		BodyJSON(schedule)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
-		return fmt.Errorf(`failed to create schedule %s: unexpected status code: %d`, schedule.Name, statusCode)
-	}
-
-	return nil
+	return c.checkStatus(statusCode)
 }

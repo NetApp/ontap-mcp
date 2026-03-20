@@ -23,10 +23,11 @@ import (
 )
 
 const (
-	CheckTools = "CHECK_TOOLS"
-	ConfigFile = "ontap.yaml"
-	Cluster    = "umeng-aff300-05-06"
-	ClusterStr = "On the " + Cluster + " cluster, "
+	CheckTools         = "CHECK_TOOLS"
+	OpenaiModelVersion = "gpt-4.1"
+	ConfigFile         = "ontap.yaml"
+	Cluster            = "umeng-aff300-05-06"
+	ClusterStr         = "On the " + Cluster + " cluster, "
 )
 
 type envConfig struct {
@@ -328,6 +329,50 @@ func TestOntapMCPTools(t *testing.T) {
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every5min", validationFunc: deleteObject},
 		},
+
+		// Qtree operations
+		{
+			name:             "Clean qtree staff",
+			input:            ClusterStr + "delete staff qtree in doc volume in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean qtree pay",
+			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+		},
+		{
+			name:             "Create volume",
+			input:            ClusterStr + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: createObject},
+		},
+		{
+			name:             "Create qtree staff",
+			input:            ClusterStr + "create a qtree named staff in docs volume on the marketing SVM",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: createObject},
+		},
+		{
+			name:             "Rename qtree staff",
+			input:            ClusterStr + "rename a qtree named staff to pay in docs volume on the marketing SVM",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: createObject},
+		},
+		{
+			name:             "Clean qtree policy pay",
+			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume",
+			input:            ClusterStr + "delete volume docs in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: deleteObject},
+		},
 	}
 
 	cfg, err := config.ReadConfig(ConfigFile)
@@ -549,7 +594,7 @@ func loadEnv() (envConfig, error) {
 	llmBaseURL := cmp.Or(os.Getenv("LLM_PROXY"), "https://llm-proxy-api.ai.openeng.netapp.com/v1")
 	slog.Debug("", slog.String("LLM PROXY Base URL", llmBaseURL))
 
-	openaiModel := cmp.Or(os.Getenv("OPENAI_MODEL"), "gpt-5.2-chat")
+	openaiModel := OpenaiModelVersion
 	slog.Debug("", slog.String("Model", openaiModel))
 
 	mcpServerURL := cmp.Or(os.Getenv("MCP_URL"), "http://localhost:8083")
