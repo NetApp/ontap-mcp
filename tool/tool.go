@@ -5,6 +5,10 @@ type ListVolume struct {
 	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`
 }
 
+type ListClusterParams struct {
+	Cluster string `json:"cluster,omitzero" jsonschema:"optional cluster name"`
+}
+
 type Volume struct {
 	Cluster      string   `json:"cluster_name" jsonschema:"cluster name"`
 	SVM          string   `json:"svm_name" jsonschema:"SVM name"`
