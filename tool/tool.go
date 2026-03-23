@@ -8,16 +8,25 @@ type ListVolume struct {
 type ListClusterParams struct{}
 
 type Volume struct {
-	Cluster      string   `json:"cluster_name" jsonschema:"cluster name"`
-	SVM          string   `json:"svm_name" jsonschema:"SVM name"`
-	Volume       string   `json:"volume_name" jsonschema:"volume name"`
-	Aggregate    string   `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
-	JunctionPath string   `json:"nas.path,omitzero" jsonschema:"junction path"`
-	NewVolume    string   `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
-	Size         string   `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	State        string   `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
-	ExportPolicy string   `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
-	Autosize     Autosize `json:"autosize,omitzero" jsonschema:"autosize"`
+	Cluster      string    `json:"cluster_name" jsonschema:"cluster name"`
+	SVM          string    `json:"svm_name" jsonschema:"SVM name"`
+	Volume       string    `json:"volume_name" jsonschema:"volume name"`
+	Aggregate    string    `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
+	JunctionPath string    `json:"nas.path,omitzero" jsonschema:"junction path"`
+	NewVolume    string    `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
+	Size         string    `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	State        string    `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
+	ExportPolicy string    `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	Autosize     Autosize  `json:"autosize,omitzero" jsonschema:"autosize"`
+	QoS          VolumeQoS `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
+}
+
+type VolumeQoS struct {
+	PolicyName string `json:"policy_name,omitzero" jsonschema:"name of an existing QoS policy to assign. Mutually exclusive with inline throughput fields"`
+	MaxIOPS    int    `json:"max_iops,omitzero" jsonschema:"inline: max throughput in IOPS (0 = none). Mutually exclusive with policy_name"`
+	MinIOPS    int    `json:"min_iops,omitzero" jsonschema:"inline: min throughput in IOPS (0 = none, AFF only). Mutually exclusive with policy_name"`
+	MaxMBPS    int    `json:"max_mbps,omitzero" jsonschema:"inline: max throughput in MB/s (0 = none). Mutually exclusive with policy_name"`
+	MinMBPS    int    `json:"min_mbps,omitzero" jsonschema:"inline: min throughput in MB/s (0 = none). Mutually exclusive with policy_name"`
 }
 
 type Autosize struct {

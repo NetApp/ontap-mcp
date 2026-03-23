@@ -76,6 +76,18 @@ type Autosize struct {
 	ShrinkThreshold string `json:"shrink_threshold,omitzero"`
 }
 
+type VolumeQoSPolicy struct {
+	Name           string `json:"name,omitzero"`
+	MaxThroughIOPS int    `json:"max_throughput_iops,omitzero"`
+	MinThroughIOPS int    `json:"min_throughput_iops,omitzero"`
+	MaxThroughMBPS int    `json:"max_throughput_mbps,omitzero"`
+	MinThroughMBPS int    `json:"min_throughput_mbps,omitzero"`
+}
+
+type VolumeQoS struct {
+	Policy VolumeQoSPolicy `json:"policy,omitzero"`
+}
+
 type Volume struct {
 	SVM        NameAndUUID   `json:"svm,omitzero"`
 	Name       string        `json:"name,omitzero"`
@@ -85,6 +97,7 @@ type Volume struct {
 	Size       int64         `json:"size,omitempty"`
 	Nas        NAS           `json:"nas,omitzero"`
 	Autosize   Autosize      `json:"autosize,omitzero"`
+	QoS        VolumeQoS     `json:"qos,omitzero"`
 }
 
 type NameAndUUID struct {
