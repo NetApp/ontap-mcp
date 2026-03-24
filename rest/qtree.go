@@ -41,6 +41,7 @@ func (c *Client) UpdateQtree(ctx context.Context, svmName, volumeName, qtreeName
 	params.Set("name", qtreeName)
 	params.Set("svm", svmName)
 	params.Set("volume", volumeName)
+	params.Set("fields", "id,volume.uuid")
 
 	builder := c.baseRequestBuilder(`/api/storage/qtrees`, &statusCode, responseHeaders).
 		Params(params).

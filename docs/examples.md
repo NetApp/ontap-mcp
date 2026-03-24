@@ -47,6 +47,30 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 - <span class="key">Expected Response</span>: The fixed QoS policy "gold" has been successfully created on the marketing SVM with a maximum throughput of 5000 IOPS on the umeng-aff300-05-06 cluster.
 
+**Apply a Named QoS Policy to a Volume**
+
+- On the umeng-aff300-05-06 cluster, apply the gold QoS policy to the docs volume on the marketing svm
+
+- <span class="key">Expected Response</span>: The QoS policy "gold" has been successfully applied to the "docs" volume on the marketing SVM.
+
+**Create a Volume with a Named QoS Policy**
+
+- On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate with QoS policy gold
+
+- <span class="key">Expected Response</span>: Volume "docs" has been created successfully on the marketing SVM with QoS policy "gold" applied.
+
+**Create a Volume with Inline QoS Limits**
+
+- On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate with an inline QoS limit of max_iops 300
+
+- <span class="key">Expected Response</span>: Volume "docs" has been created successfully with an inline QoS limit of 300 IOPS.
+
+**Update Inline QoS Limits on a Volume**
+
+- On the umeng-aff300-05-06 cluster, update the docs volume on the marketing svm setting an inline QoS limit of max_iops 150
+
+- <span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been updated to a maximum of 150 IOPS.
+
 ---
 
 ### CIFS share Provisioning

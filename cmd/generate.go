@@ -56,11 +56,12 @@ type swaggerPath struct {
 }
 
 type swaggerParameter struct {
-	Name        string `yaml:"name"`
-	In          string `yaml:"in"`
-	Description string `yaml:"description"`
-	Type        string `yaml:"type"`
-	Introduced  string `yaml:"x-ntap-introduced"`
+	Name        string            `yaml:"name"`
+	In          string            `yaml:"in"`
+	Description string            `yaml:"description"`
+	Type        string            `yaml:"type"`
+	Introduced  string            `yaml:"x-ntap-introduced"`
+	Visibility  swaggerVisibility `yaml:"x-ntap-visibility"`
 }
 
 type swaggerOperation struct {
@@ -90,10 +91,11 @@ type swaggerDef struct {
 }
 
 type swaggerProp struct {
-	Description string       `yaml:"description"`
-	Ref         string       `yaml:"$ref"`
-	Items       *swaggerProp `yaml:"items"`
-	Introduced  string       `yaml:"x-ntap-introduced"`
+	Description string            `yaml:"description"`
+	Ref         string            `yaml:"$ref"`
+	Items       *swaggerProp      `yaml:"items"`
+	Introduced  string            `yaml:"x-ntap-introduced"`
+	Visibility  swaggerVisibility `yaml:"x-ntap-visibility"`
 }
 
 // skipParams are query params present on every collection GET.
@@ -190,6 +192,9 @@ func extractFieldDescs(op *swaggerOperation, defs map[string]swaggerDef, apiVers
 		if strings.HasPrefix(name, "_") {
 			continue // skip _links, _tags etc.
 		}
+		if prop.Visibility.Type == "private" {
+			continue
+		}
 		desc := strings.TrimSpace(prop.Description)
 		if desc == "" {
 			continue
@@ -260,6 +265,9 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 				continue
 			}
 			if isSkippedParam(p.Name) {
+				continue
+			}
+			if p.Visibility.Type == "private" {
 				continue
 			}
 			t := p.Type

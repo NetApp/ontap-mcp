@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/carlmjohnson/requests"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -264,6 +264,107 @@ func TestOntapMCPTools(t *testing.T) {
 			input:            ClusterStr + "delete payroll QoS policy in marketing svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=payroll", validationFunc: deleteObject},
+		},
+
+		// QoS policy assign to volume operations
+		{
+			name:             "Clean QoS policy qos_docs_200iops",
+			input:            ClusterStr + "delete qos_docs_200iops QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=qos_docs_200iops", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume docs_qos",
+			input:            ClusterStr + "delete volume docs_qos in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume docs_qos2",
+			input:            ClusterStr + "delete volume docs_qos2 in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos2&svm=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume docs_qos3",
+			input:            ClusterStr + "delete volume docs_qos3 in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Create fixed QoS policy qos_docs_200iops",
+			input:            ClusterStr + "create a fixed QoS policy named qos_docs_200iops on the marketing svm with a max throughput of 200 iops and min throughput of 0 iops",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=qos_docs_200iops", validationFunc: createObject},
+		},
+		{
+			name:             "Create volume docs_qos",
+			input:            ClusterStr + "create a 20MB volume named docs_qos on the marketing svm and the harvest_vc_aggr aggregate",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm=marketing", validationFunc: createObject},
+		},
+		{
+			name:             "Apply named QoS policy to existing volume",
+			input:            ClusterStr + "apply the qos_docs_200iops QoS policy to the docs_qos volume on the marketing svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+		},
+		{
+			name:             "Create volume docs_qos2 with named QoS policy",
+			input:            ClusterStr + "create a 20MB volume named docs_qos2 on the marketing svm and the harvest_vc_aggr aggregate with QoS policy qos_docs_200iops",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos2&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+		},
+		{
+			name:             "Create volume docs_qos3 with inline QoS max 300 iops",
+			input:            ClusterStr + "create a 20MB volume named docs_qos3 on the marketing svm and the harvest_vc_aggr aggregate with an inline QoS limit of max_iops 300",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.max_throughput_iops", validationFunc: verifyQoSMaxIOPS(300)},
+		},
+		{
+			name:             "Update volume docs_qos3 inline QoS to max 150 iops",
+			input:            ClusterStr + "update the docs_qos3 volume on the marketing svm setting an inline QoS limit of max_iops 150",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.max_throughput_iops", validationFunc: verifyQoSMaxIOPS(150)},
+		},
+		// Mode switching: inline → named
+		{
+			name:             "Switch docs_qos3 from inline to named QoS policy",
+			input:            ClusterStr + "apply the qos_docs_200iops QoS policy to the docs_qos3 volume on the marketing svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+		},
+		// Mode switching: named → inline
+		{
+			name:             "Switch docs_qos from named policy to inline QoS",
+			input:            ClusterStr + "update the docs_qos volume on the marketing svm setting an inline QoS limit of max_iops 100",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm.name=marketing&fields=qos.policy.max_throughput_iops", validationFunc: verifyQoSMaxIOPS(100)},
+		},
+		// Cleanup
+		{
+			name:             "Clean volume docs_qos after test",
+			input:            ClusterStr + "delete volume docs_qos in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume docs_qos2 after test",
+			input:            ClusterStr + "delete volume docs_qos2 in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos2&svm=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume docs_qos3 after test",
+			input:            ClusterStr + "delete volume docs_qos3 in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean QoS policy qos_docs_200iops after test",
+			input:            ClusterStr + "delete qos_docs_200iops QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=qos_docs_200iops", validationFunc: deleteObject},
 		},
 
 		// CIFS share operations
@@ -619,38 +720,16 @@ func SkipIfMissing(t *testing.T, vars ...string) {
 }
 
 func createObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	url := fmt.Sprintf("https://%s/%s", poller.Addr, api)
-
-	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
-	if err != nil {
-		t.Errorf("Error creating request: %v\n", err)
-		return false
-	}
-
-	req.SetBasicAuth(poller.Username, poller.Password)
-	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Errorf("Error sending request: %v\n", err)
-		return false
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			t.Fatalf("Error while closing the Response.Body: %v", err)
-		}
-	}()
-
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("API returned status %d: %s\n", resp.StatusCode, resp.Status)
-		return false
-	}
-	bodyBytes, _ := io.ReadAll(resp.Body)
 	var data ontap.GetData
-	if err := json.Unmarshal(bodyBytes, &data); err != nil {
-		t.Errorf("Error parsing the response data: %v\n", err)
+	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		t.Errorf("createObject: request failed: %v", err)
 		return false
 	}
-
 	if data.NumRecords != 1 {
 		t.Errorf("No records found")
 		return false
@@ -659,38 +738,16 @@ func createObject(t *testing.T, api string, poller *config.Poller, client *http.
 }
 
 func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	url := fmt.Sprintf("https://%s/%s", poller.Addr, api)
-
-	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
-	if err != nil {
-		t.Errorf("Error deleting request: %v\n", err)
-		return false
-	}
-
-	req.SetBasicAuth(poller.Username, poller.Password)
-	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Errorf("Error sending request: %v\n", err)
-		return false
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			t.Fatalf("Error while closing the Response.Body: %v", err)
-		}
-	}()
-
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("API returned status %d: %s\n", resp.StatusCode, resp.Status)
-		return false
-	}
-	bodyBytes, _ := io.ReadAll(resp.Body)
 	var data ontap.GetData
-	if err := json.Unmarshal(bodyBytes, &data); err != nil {
-		t.Errorf("Error parsing the response data: %v\n", err)
+	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		t.Errorf("deleteObject: request failed: %v", err)
 		return false
 	}
-
 	if data.NumRecords != 0 {
 		t.Errorf("Records should not be found")
 		return false
@@ -698,32 +755,92 @@ func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.
 	return true
 }
 
-func listObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	url := fmt.Sprintf("https://%s/%s", poller.Addr, api)
-
-	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
-	if err != nil {
-		t.Errorf("Error listing request: %v\n", err)
-		return false
-	}
-
-	req.SetBasicAuth(poller.Username, poller.Password)
-	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Errorf("Error sending request: %v\n", err)
-		return false
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			t.Fatalf("Error while closing the Response.Body: %v", err)
+func verifyQoSAssigned(policyName string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type qosPolicy struct {
+			Name string `json:"name"`
 		}
-	}()
+		type qos struct {
+			Policy qosPolicy `json:"policy"`
+		}
+		type volumeRecord struct {
+			QoS qos `json:"qos"`
+		}
+		type response struct {
+			NumRecords int            `json:"num_records"`
+			Records    []volumeRecord `json:"records"`
+		}
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("API returned status %d: %s\n", resp.StatusCode, resp.Status)
+		var data response
+		err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyQoSAssigned: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyQoSAssigned: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+		got := data.Records[0].QoS.Policy.Name
+		if got != policyName {
+			t.Errorf("verifyQoSAssigned: qos.policy.name = %q, want %q", got, policyName)
+			return false
+		}
+		return true
+	}
+}
+
+func verifyQoSMaxIOPS(wantIOPS int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type qosPolicy struct {
+			MaxThroughIOPS int `json:"max_throughput_iops"`
+		}
+		type qos struct {
+			Policy qosPolicy `json:"policy"`
+		}
+		type volumeRecord struct {
+			QoS qos `json:"qos"`
+		}
+		type response struct {
+			NumRecords int            `json:"num_records"`
+			Records    []volumeRecord `json:"records"`
+		}
+
+		var data response
+		err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyQoSMaxIOPS: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyQoSMaxIOPS: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+		got := data.Records[0].QoS.Policy.MaxThroughIOPS
+		if got != wantIOPS {
+			t.Errorf("verifyQoSMaxIOPS: qos.policy.max_throughput_iops = %d, want %d", got, wantIOPS)
+			return false
+		}
+		return true
+	}
+}
+
+func listObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		Fetch(context.Background())
+	if err != nil {
+		t.Errorf("listObject: request failed: %v", err)
 		return false
 	}
-
 	return true
 }

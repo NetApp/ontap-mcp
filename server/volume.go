@@ -151,6 +151,15 @@ func newCreateVolume(in tool.Volume) (ontap.Volume, error) {
 		}
 	}
 
+	if in.QoS.PolicyName != "" {
+		out.QoS.Policy.Name = in.QoS.PolicyName
+	} else {
+		out.QoS.Policy.MaxThroughIOPS = in.QoS.MaxIOPS
+		out.QoS.Policy.MinThroughIOPS = in.QoS.MinIOPS
+		out.QoS.Policy.MaxThroughMBPS = in.QoS.MaxMBPS
+		out.QoS.Policy.MinThroughMBPS = in.QoS.MinMBPS
+	}
+
 	return out, nil
 }
 
@@ -202,6 +211,15 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 	}
 	if in.Autosize.ShrinkThreshold != "" {
 		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
+	}
+
+	if in.QoS.PolicyName != "" {
+		out.QoS.Policy.Name = in.QoS.PolicyName
+	} else {
+		out.QoS.Policy.MaxThroughIOPS = in.QoS.MaxIOPS
+		out.QoS.Policy.MinThroughIOPS = in.QoS.MinIOPS
+		out.QoS.Policy.MaxThroughMBPS = in.QoS.MaxMBPS
+		out.QoS.Policy.MinThroughMBPS = in.QoS.MinMBPS
 	}
 
 	return out, nil
