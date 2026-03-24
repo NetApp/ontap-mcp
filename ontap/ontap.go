@@ -63,6 +63,10 @@ type NASExportPolicy struct {
 	Name string `json:"name"`
 }
 
+type Target struct {
+	Alias string `json:"alias"`
+}
+
 type NAS struct {
 	ExportPolicy NASExportPolicy `json:"export_policy,omitzero"`
 	Path         string          `json:"path,omitzero"`
@@ -167,6 +171,12 @@ type CIFSShare struct {
 	SVM  NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Name string      `json:"name,omitzero" jsonschema:"cifs share name"`
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
+}
+
+type IscsiService struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Enabled bool        `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
+	Target  Target      `json:"target,omitzero" jsonschema:"target of iSCSI service,omitzero"`
 }
 
 const (

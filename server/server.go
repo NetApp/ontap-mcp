@@ -123,6 +123,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
 
+	// operation on iSCSI service object
+	addTool(a, server, "create_iscsi_service", descriptions.CreateIscsiService, createAnnotation, a.CreateIscsiService)
+	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
+	addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)
