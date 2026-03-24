@@ -188,7 +188,7 @@ type CIFSShare struct {
 
 type IscsiService struct {
 	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
-	Enabled bool        `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
+	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
 	Target  Target      `json:"target,omitzero" jsonschema:"target of iSCSI service,omitzero"`
 }
 

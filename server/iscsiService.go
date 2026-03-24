@@ -105,7 +105,7 @@ func newCreateIscsiService(in tool.IscsiService) (ontap.IscsiService, error) {
 		return out, errors.New("SVM name is required")
 	}
 	if in.TargetAlias == "" {
-		return out, errors.New("cifs share path is required")
+		return out, errors.New("target alias is required")
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}

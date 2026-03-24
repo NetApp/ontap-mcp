@@ -103,7 +103,7 @@ type CIFSShare struct {
 type IscsiService struct {
 	Cluster     string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM         string `json:"svm_name,omitzero" jsonschema:"SVM name"`
-	Enabled     bool   `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
+	Enabled     string `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
 	TargetAlias string `json:"target.alias,omitzero" jsonschema:"iSCSI target alias of the iSCSI service"`
 }
 
