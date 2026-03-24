@@ -79,10 +79,10 @@ type Autosize struct {
 
 type VolumeQoSPolicy struct {
 	Name           string `json:"name,omitzero"`
-	MaxThroughIOPS int    `json:"max_throughput_iops,omitzero"`
-	MinThroughIOPS int    `json:"min_throughput_iops,omitzero"`
-	MaxThroughMBPS int    `json:"max_throughput_mbps,omitzero"`
-	MinThroughMBPS int    `json:"min_throughput_mbps,omitzero"`
+	MaxThroughIOPS *int   `json:"max_throughput_iops,omitzero"`
+	MinThroughIOPS *int   `json:"min_throughput_iops,omitzero"`
+	MaxThroughMBPS *int   `json:"max_throughput_mbps,omitzero"`
+	MinThroughMBPS *int   `json:"min_throughput_mbps,omitzero"`
 }
 
 type VolumeQoS struct {

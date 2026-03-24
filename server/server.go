@@ -398,8 +398,8 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	for k, v := range p.Filters {
 		params.Set(k, v)
 	}
-	if len(p.Fields) > 0 {
-		params.Set("fields", strings.Join(p.Fields, ","))
+	if p.Fields != "" {
+		params.Set("fields", p.Fields)
 	}
 	if p.MaxRecords > 0 {
 		params.Set("max_records", strconv.Itoa(p.MaxRecords))

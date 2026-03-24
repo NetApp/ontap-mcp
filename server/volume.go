@@ -7,6 +7,8 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
+	"strconv"
+	"strings"
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Volume) (*mcp.CallToolResult, any, error) {
@@ -151,13 +153,25 @@ func newCreateVolume(in tool.Volume) (ontap.Volume, error) {
 		}
 	}
 
-	if in.QoS.PolicyName != "" {
+	switch {
+	case in.QoS.RemovePolicy:
+		out.QoS.Policy.Name = "none"
+	case in.QoS.PolicyName != "":
 		out.QoS.Policy.Name = in.QoS.PolicyName
-	} else {
-		out.QoS.Policy.MaxThroughIOPS = in.QoS.MaxIOPS
-		out.QoS.Policy.MinThroughIOPS = in.QoS.MinIOPS
-		out.QoS.Policy.MaxThroughMBPS = in.QoS.MaxMBPS
-		out.QoS.Policy.MinThroughMBPS = in.QoS.MinMBPS
+	default:
+		var err error
+		if out.QoS.Policy.MaxThroughIOPS, err = parseQoSLimit(in.QoS.MaxIOPS); err != nil {
+			return out, fmt.Errorf("invalid max_iops: %w", err)
+		}
+		if out.QoS.Policy.MinThroughIOPS, err = parseQoSLimit(in.QoS.MinIOPS); err != nil {
+			return out, fmt.Errorf("invalid min_iops: %w", err)
+		}
+		if out.QoS.Policy.MaxThroughMBPS, err = parseQoSLimit(in.QoS.MaxMBPS); err != nil {
+			return out, fmt.Errorf("invalid max_mbps: %w", err)
+		}
+		if out.QoS.Policy.MinThroughMBPS, err = parseQoSLimit(in.QoS.MinMBPS); err != nil {
+			return out, fmt.Errorf("invalid min_mbps: %w", err)
+		}
 	}
 
 	return out, nil
@@ -213,14 +227,37 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
 	}
 
-	if in.QoS.PolicyName != "" {
+	switch {
+	case in.QoS.RemovePolicy:
+		out.QoS.Policy.Name = "none"
+	case in.QoS.PolicyName != "":
 		out.QoS.Policy.Name = in.QoS.PolicyName
-	} else {
-		out.QoS.Policy.MaxThroughIOPS = in.QoS.MaxIOPS
-		out.QoS.Policy.MinThroughIOPS = in.QoS.MinIOPS
-		out.QoS.Policy.MaxThroughMBPS = in.QoS.MaxMBPS
-		out.QoS.Policy.MinThroughMBPS = in.QoS.MinMBPS
+	default:
+		var err error
+		if out.QoS.Policy.MaxThroughIOPS, err = parseQoSLimit(in.QoS.MaxIOPS); err != nil {
+			return out, fmt.Errorf("invalid max_iops: %w", err)
+		}
+		if out.QoS.Policy.MinThroughIOPS, err = parseQoSLimit(in.QoS.MinIOPS); err != nil {
+			return out, fmt.Errorf("invalid min_iops: %w", err)
+		}
+		if out.QoS.Policy.MaxThroughMBPS, err = parseQoSLimit(in.QoS.MaxMBPS); err != nil {
+			return out, fmt.Errorf("invalid max_mbps: %w", err)
+		}
+		if out.QoS.Policy.MinThroughMBPS, err = parseQoSLimit(in.QoS.MinMBPS); err != nil {
+			return out, fmt.Errorf("invalid min_mbps: %w", err)
+		}
 	}
 
 	return out, nil
+}
+
+func parseQoSLimit(s string) (*int, error) {
+	if s == "" {
+		return nil, nil
+	}
+	v, err := strconv.Atoi(strings.TrimSpace(s))
+	if err != nil || v < 0 {
+		return nil, fmt.Errorf("must be a non-negative integer, got %q", s)
+	}
+	return &v, nil
 }
