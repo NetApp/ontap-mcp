@@ -22,12 +22,11 @@ type Volume struct {
 }
 
 type VolumeQoS struct {
-	RemovePolicy bool   `json:"remove_qos_policy,omitzero" jsonschema:"set to true to remove the QoS policy from the volume"`
-	PolicyName   string `json:"policy_name,omitzero" jsonschema:"name of an existing QoS policy to assign. Mutually exclusive with inline throughput fields and remove_qos_policy"`
-	MaxIOPS      string `json:"max_iops,omitzero" jsonschema:"inline: max throughput in IOPS (\"0\" = none, removes limit). Mutually exclusive with policy_name"`
-	MinIOPS      string `json:"min_iops,omitzero" jsonschema:"inline: min throughput in IOPS (\"0\" = none, removes limit, AFF only). Mutually exclusive with policy_name"`
-	MaxMBPS      string `json:"max_mbps,omitzero" jsonschema:"inline: max throughput in MB/s (\"0\" = none, removes limit). Mutually exclusive with policy_name"`
-	MinMBPS      string `json:"min_mbps,omitzero" jsonschema:"inline: min throughput in MB/s (\"0\" = none, removes limit). Mutually exclusive with policy_name"`
+	PolicyName string `json:"policy_name,omitzero" jsonschema:"name of an existing QoS policy to assign. Mutually exclusive with inline throughput fields"`
+	MaxIOPS    int    `json:"max_iops,omitzero" jsonschema:"inline: max throughput in IOPS (0 = none). Mutually exclusive with policy_name"`
+	MinIOPS    int    `json:"min_iops,omitzero" jsonschema:"inline: min throughput in IOPS (0 = none, AFF only). Mutually exclusive with policy_name"`
+	MaxMBPS    int    `json:"max_mbps,omitzero" jsonschema:"inline: max throughput in MB/s (0 = none). Mutually exclusive with policy_name"`
+	MinMBPS    int    `json:"min_mbps,omitzero" jsonschema:"inline: min throughput in MB/s (0 = none). Mutually exclusive with policy_name"`
 }
 
 type Autosize struct {
@@ -104,7 +103,7 @@ type CIFSShare struct {
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Path       string            `json:"path" jsonschema:"ONTAP REST API collection path without /api prefix, e.g. /storage/volumes"`
-	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
+	Fields     []string          `json:"fields,omitzero" jsonschema:"dot-notation fields to return as array of strings, e.g. [\"name\",\"svm.name\",\"space.size\"] — use space.* to expand all space sub-fields"`
 	Filters    map[string]string `json:"filters,omitzero" jsonschema:"filter key-value pairs using ONTAP query syntax as JSON object, e.g. {\"svm.name\":\"vs1\",\"state\":\"online\"}"`
 	MaxRecords int               `json:"max_records,omitzero" jsonschema:"limit results. omit to return all records"`
 }
