@@ -748,6 +748,12 @@ func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
 	return lrw.ResponseWriter.Write(b)
 }
 
+func (lrw *loggingResponseWriter) Flush() {
+	if f, ok := lrw.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 // parseSizeEmptyAllowed is similar to parseSize but allows empty string as valid input, which will be interpreted as 0 bytes.
 func parseSizeEmptyAllowed(size string) (int64, error) {
 	trimmed := strings.TrimSpace(size)
