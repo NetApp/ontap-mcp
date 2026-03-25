@@ -31,6 +31,12 @@ type APIEndpoint struct {
 	Fields     map[string]FieldInfo  `json:"fields,omitempty"`
 }
 
+// ExcludedPathPrefixes lists ONTAP REST path prefixes that are covered by dedicated typed tools.
+// These paths are excluded from the generated catalog so the LLM uses the typed tools instead.
+var ExcludedPathPrefixes = []string{
+	"/storage/qos",
+}
+
 type APICatalog map[string]APIEndpoint
 
 type File struct {

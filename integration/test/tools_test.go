@@ -507,6 +507,60 @@ func (a *Agent) Chat(ctx context.Context, t *testing.T, userMessage string, expe
 	return nil
 }
 
+func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage string, expectedOntapErrorStr string) (string, error) {
+	messages := []openai.ChatCompletionMessageParamUnion{
+		openai.UserMessage(userMessage),
+	}
+
+	tools := a.convertMCPToolsToOpenAI()
+	maxIterations := 10
+
+	for range maxIterations {
+		completion, err := a.openaiClient.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+			Model:    a.model,
+			Messages: messages,
+			Tools:    tools,
+			User:     openai.String(a.userName),
+		})
+
+		if err != nil {
+			return "", fmt.Errorf("OpenAI error: %w", err)
+		}
+
+		assistantMessage := completion.Choices[0].Message
+
+		if len(assistantMessage.ToolCalls) == 0 {
+			return assistantMessage.Content, nil
+		}
+
+		messages = append(messages, assistantMessage.ToParam())
+
+		for _, toolCall := range assistantMessage.ToolCalls {
+			toolName := toolCall.Function.Name
+
+			var args map[string]any
+			if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
+				return "", fmt.Errorf("failed to parse tool args: %w", err)
+			}
+
+			slog.Debug("", slog.String("Calling tool", toolName), slog.Any("args", args))
+
+			result, err := a.callMCPTool(ctx, toolName, args)
+			if err != nil {
+				if expectedOntapErrorStr == "" || !strings.Contains(err.Error(), expectedOntapErrorStr) {
+					t.Errorf("Error: %s %s %v", slog.String("tool", toolName), slog.Any("args", args), slog.Any("err", err))
+				}
+			}
+
+			slog.Debug("", slog.Any("Tool result", result))
+
+			messages = append(messages, openai.ToolMessage(result, toolCall.ID))
+		}
+	}
+
+	return "", nil
+}
+
 func (a *Agent) Close() {
 	if a.mcpSession != nil {
 		//goland:noinspection GoUnhandledErrorResult

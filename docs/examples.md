@@ -41,6 +41,30 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 ### Manage QoS Policies
 
+**List All QoS Policies**
+
+- On the umeng-aff300-05-06 cluster, list all qos policies
+
+- <span class="key">Expected Response</span>: A list of all QoS policies including both SVM-scoped and cluster-scoped policies.
+
+**List QoS Policies for a Specific SVM**
+
+- On the umeng-aff300-05-06 cluster, list all qos policies for the marketing svm
+
+- <span class="key">Expected Response</span>: All QoS policies for the marketing SVM plus all cluster-scoped policies (cluster-scoped policies are always included).
+
+**List Only Fixed QoS Policies**
+
+- On the umeng-aff300-05-06 cluster, list all fixed qos policies
+
+- <span class="key">Expected Response</span>: A list of fixed QoS policies.
+
+**List Only Adaptive QoS Policies**
+
+- On the umeng-aff300-05-06 cluster, list all adaptive qos policies
+
+- <span class="key">Expected Response</span>: A list of adaptive QoS policies including cluster-scoped ones.
+
 **Create a QoS Policy**
 
 - On the umeng-aff300-05-06 cluster, create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops.

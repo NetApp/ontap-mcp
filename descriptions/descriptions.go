@@ -40,6 +40,19 @@ const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster n
 const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster name.`
 const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
+const ListQoSPolicies = `List QoS policies from an ONTAP cluster — includes both SVM-scoped and cluster-scoped (admin vserver) policies.
+
+The response is split into two sections:
+- svm_policies: policies scoped to a specific SVM
+- cluster_policies: policies that govern every workload on the cluster, regardless of SVM
+
+Cluster-scoped policies (cluster_policies) must ALWAYS be included in your response — never omit them, even when the user asks about a specific SVM.
+When svm_name is provided, the response also includes a "message" field that explains both counts.
+
+Units:
+- Adaptive: expected_iops and peak_iops are in IOPS/TB. absolute_min_iops is in IOPS.
+- Fixed: *_iops fields are in IOPS; *_mbps fields are in MB/s.`
+
 const CreateQoSPolicy = `Create a QoS policy on a cluster by cluster name.`
 const UpdateQoSPolicy = `Update a QoS policy on a cluster by cluster name.`
 const DeleteQoSPolicy = `Delete a QoS policy on a cluster by cluster name.`
