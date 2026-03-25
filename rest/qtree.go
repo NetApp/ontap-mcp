@@ -82,6 +82,7 @@ func (c *Client) DeleteQtree(ctx context.Context, qtree ontap.Qtree) error {
 	params.Set("name", qtree.Name)
 	params.Set("svm", qtree.SVM.Name)
 	params.Set("volume", qtree.Volume.Name)
+	params.Set("fields", "id,volume.uuid")
 
 	builder := c.baseRequestBuilder(`/api/storage/qtrees`, &statusCode, responseHeaders).
 		Params(params).
