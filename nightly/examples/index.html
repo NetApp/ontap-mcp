@@ -841,6 +841,42 @@
 <p><span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been updated to a maximum of 150 IOPS.</p>
 </li>
 </ul>
+<p><strong>Switch a Volume from Inline QoS to a Named QoS Policy</strong></p>
+<ul>
+<li>
+<p>On the umeng-aff300-05-06 cluster, apply the gold QoS policy to the docs volume on the marketing svm</p>
+</li>
+<li>
+<p><span class="key">Expected Response</span>: The QoS policy "gold" has been successfully applied to the "docs" volume, replacing the previous inline QoS limits.</p>
+</li>
+</ul>
+<p><strong>Switch a Volume from a Named QoS Policy to Inline QoS</strong></p>
+<ul>
+<li>
+<p>On the umeng-aff300-05-06 cluster, update the docs volume on the marketing svm setting an inline QoS limit of max_iops 500</p>
+</li>
+<li>
+<p><span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been set to a maximum of 500 IOPS.</p>
+</li>
+</ul>
+<p><strong>Remove Inline QoS Limits from a Volume</strong></p>
+<ul>
+<li>
+<p>On the umeng-aff300-05-06 cluster, update the docs volume on the marketing svm and remove the inline QoS limit by setting max_iops to 0</p>
+</li>
+<li>
+<p><span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been removed. The volume no longer has a maximum IOPS constraint.</p>
+</li>
+</ul>
+<p><strong>Remove a Named QoS Policy from a Volume</strong></p>
+<ul>
+<li>
+<p>On the umeng-aff300-05-06 cluster, remove the QoS policy from the docs volume on the marketing svm</p>
+</li>
+<li>
+<p><span class="key">Expected Response</span>: The QoS policy has been successfully removed from the "docs" volume on the marketing SVM.</p>
+</li>
+</ul>
 <hr />
 <h3 id="cifs-share-provisioning">CIFS share Provisioning<a class="headerlink" href="#cifs-share-provisioning" title="Permanent link">&para;</a></h3>
 <p><strong>Create a CIFS share</strong></p>
