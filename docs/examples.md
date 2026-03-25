@@ -206,6 +206,19 @@ Expected Response: The schedule has been successfully created.
 
 ---
 
+### Manage Qtrees
+
+- On the umeng-aff300-05-06 cluster, create a qtree named staff in docs volume on the marketing SVM
+
+Expected Response: The qtree has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, rename a qtree named staff to pay in docs volume on the marketing SVM
+
+Expected Response: The qtree has been successfully renamed.
+
+---
+
+
 ### Querying Specific Fields
 
 **Get volume space and protection details**

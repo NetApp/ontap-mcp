@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/netapp/ontap-mcp/ontap"
 	"io"
 	"log"
 	"log/slog"
@@ -24,7 +25,6 @@ import (
 	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/descriptions"
-	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/rest"
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
@@ -122,6 +122,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
+
+	// operation on Qtree object
+	addTool(a, server, "create_qtree", descriptions.CreateQtree, createAnnotation, a.CreateQtree)
+	addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
+	addTool(a, server, "delete_qtree", descriptions.DeleteQtree, deleteAnnotation, a.DeleteQtree)
 
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
@@ -734,7 +739,6 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 		a.logger.Warn("skipping registration of destructive tool in read-only mode", slog.String("tool", name))
 		return
 	}
-
 	tt := &mcp.Tool{
 		Name:        name,
 		Description: description,
@@ -771,6 +775,7 @@ func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
 	lrw.body.Write(b)
 	return lrw.ResponseWriter.Write(b)
 }
+
 func parseQoSLimit(s string) (*int, error) {
 	if s == "" {
 		return nil, nil

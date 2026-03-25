@@ -51,6 +51,7 @@ type GetData struct {
 		Index   int          `json:"index,omitzero"`
 		Name    string       `json:"name,omitzero"`
 		Svm     NameAndUUID  `json:"svm,omitzero"`
+		Volume  NameAndUUID  `json:"volume,omitzero"`
 		RoRule  []string     `json:"ro_rule,omitzero"`
 		RwRule  []string     `json:"rw_rule,omitzero"`
 		Clients []ClientData `json:"clients,omitzero"`
@@ -180,6 +181,12 @@ type CIFSShare struct {
 	SVM  NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Name string      `json:"name,omitzero" jsonschema:"cifs share name"`
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
+}
+
+type Qtree struct {
+	SVM    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Volume NameAndUUID `json:"volume,omitzero" jsonschema:"volume name"`
+	Name   string      `json:"name,omitzero" jsonschema:"qtree name"`
 }
 
 const (

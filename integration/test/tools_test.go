@@ -23,10 +23,11 @@ import (
 )
 
 const (
-	CheckTools = "CHECK_TOOLS"
-	ConfigFile = "ontap.yaml"
-	Cluster    = "umeng-aff300-05-06"
-	ClusterStr = "On the " + Cluster + " cluster, "
+	CheckTools         = "CHECK_TOOLS"
+	OpenaiModelVersion = "gpt-4.1"
+	ConfigFile         = "ontap.yaml"
+	Cluster            = "umeng-aff300-05-06"
+	ClusterStr         = "On the " + Cluster + " cluster, "
 )
 
 var testAgent *Agent
@@ -562,7 +563,7 @@ func loadEnv() (envConfig, error) {
 	llmBaseURL := cmp.Or(os.Getenv("LLM_PROXY"), "https://llm-proxy-api.ai.openeng.netapp.com/v1")
 	slog.Debug("", slog.String("LLM PROXY Base URL", llmBaseURL))
 
-	openaiModel := cmp.Or(os.Getenv("OPENAI_MODEL"), "gpt-5.2-chat")
+	openaiModel := OpenaiModelVersion
 	slog.Debug("", slog.String("Model", openaiModel))
 
 	mcpServerURL := cmp.Or(os.Getenv("MCP_URL"), "http://localhost:8083")
