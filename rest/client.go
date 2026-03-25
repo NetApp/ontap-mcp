@@ -7,7 +7,6 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/version"
 	"log/slog"
@@ -77,9 +76,7 @@ func (c *Client) DeleteVolume(ctx context.Context, volume ontap.Volume) error {
 		Delete().
 		ToBytesBuffer(&buf)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
@@ -101,45 +98,6 @@ func (c *Client) handleJob(ctx context.Context, statusCode int, buf bytes.Buffer
 	}
 
 	return nil
-}
-
-func (c *Client) GetVolume(ctx context.Context, volume ontap.Volume) ([]string, error) {
-	var (
-		vol     ontap.GetData
-		volumes []string
-	)
-	responseHeaders := http.Header{}
-
-	// If we only have the volume name we need to find the volume's UUID
-
-	params := url.Values{}
-	svmName := volume.SVM.Name
-	if svmName != "" {
-		params.Set("svm", svmName)
-	}
-
-	builder := c.baseRequestBuilder(`/api/storage/volumes`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&vol)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	if vol.NumRecords == 0 {
-		if svmName != "" {
-			return []string{}, fmt.Errorf("no volumes found on svm: %s", svmName)
-		}
-		return []string{}, errors.New("no volumes found in the cluster")
-	}
-
-	for _, v := range vol.Records {
-		volumes = append(volumes, v.Name)
-	}
-
-	return volumes, nil
 }
 
 func (c *Client) CreateVolume(ctx context.Context, volume ontap.Volume) error {
@@ -185,9 +143,7 @@ func (c *Client) CreateVolume(ctx context.Context, volume ontap.Volume) error {
 		BodyJSON(volume).
 		ToBytesBuffer(&buf)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
@@ -232,10 +188,8 @@ func (c *Client) UpdateVolume(ctx context.Context, volume ontap.Volume, oldVolum
 		ToBytesBuffer(&buf).
 		BodyJSON(volume)
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
-		return fmt.Errorf("error during update volume request: %w", err)
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
 
 	return c.handleJob(ctx, statusCode, buf)
@@ -304,6 +258,14 @@ func (c *Client) waitForJob(ctx context.Context, jobLocation string, duration ti
 			return ctx.Err()
 		}
 	}
+}
+
+func (c *Client) checkStatus(statusCode int) error {
+	if statusCode != http.StatusOK && statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
+		return fmt.Errorf("failed to finish the job, unexpected status code: %d", statusCode)
+	}
+
+	return nil
 }
 
 func ontapValidator(response *http.Response) error {
@@ -460,16 +422,11 @@ func (c *Client) CreateExportPolicy(ctx context.Context, volume ontap.Volume) er
 	builder := c.baseRequestBuilder(`/api/protocols/nfs/export-policies`, &statusCode, nil).
 		BodyJSON(newExportPolicy)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	if statusCode != http.StatusCreated && statusCode != http.StatusAccepted {
-		return fmt.Errorf(`unexpected status code: %d`, statusCode)
-	}
-
-	return nil
+	return c.checkStatus(statusCode)
 }
 
 // getAuth returns the appropriate authentication credentials

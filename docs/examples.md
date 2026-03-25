@@ -71,6 +71,30 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 - <span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been updated to a maximum of 150 IOPS.
 
+**Switch a Volume from Inline QoS to a Named QoS Policy**
+
+- On the umeng-aff300-05-06 cluster, apply the gold QoS policy to the docs volume on the marketing svm
+
+- <span class="key">Expected Response</span>: The QoS policy "gold" has been successfully applied to the "docs" volume, replacing the previous inline QoS limits.
+
+**Switch a Volume from a Named QoS Policy to Inline QoS**
+
+- On the umeng-aff300-05-06 cluster, update the docs volume on the marketing svm setting an inline QoS limit of max_iops 500
+
+- <span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been set to a maximum of 500 IOPS.
+
+**Remove Inline QoS Limits from a Volume**
+
+- On the umeng-aff300-05-06 cluster, update the docs volume on the marketing svm and remove the inline QoS limit by setting max_iops to 0
+
+- <span class="key">Expected Response</span>: The inline QoS limit on volume "docs" has been removed. The volume no longer has a maximum IOPS constraint.
+
+**Remove a Named QoS Policy from a Volume**
+
+- On the umeng-aff300-05-06 cluster, remove the QoS policy from the docs volume on the marketing svm
+
+- <span class="key">Expected Response</span>: The QoS policy has been successfully removed from the "docs" volume on the marketing SVM.
+
 ---
 
 ### CIFS share Provisioning
@@ -182,15 +206,32 @@ Expected Response: The schedule has been successfully created.
 
 ---
 
+### Manage Qtrees
+
+- On the umeng-aff300-05-06 cluster, create a qtree named staff in docs volume on the marketing SVM
+
+Expected Response: The qtree has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, rename a qtree named staff to pay in docs volume on the marketing SVM
+
+Expected Response: The qtree has been successfully renamed.
+
+---
+
+
 ### Manage Iscsi Service
 
 - On the umeng-aff300-05-06 cluster, create iscsi service target named alias tgpath on the marketing svm
 
 Expected Response: The iscsi service has been successfully created.
 
-- On the umeng-aff300-05-06 cluster, disabled iscsi service on the marketing svm
+- On the umeng-aff300-05-06 cluster, disable the iscsi service on the marketing svm
 
 Expected Response: The iscsi service has been successfully updated.
+
+- On the umeng-aff300-05-06 cluster, delete the iscsi service on the marketing svm
+
+Expected Response: The iscsi service has been successfully deleted.
 
 ---
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/netapp/ontap-mcp/ontap"
 	"io"
 	"log"
 	"log/slog"
@@ -24,7 +25,6 @@ import (
 	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/descriptions"
-	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/rest"
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
@@ -122,6 +122,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
+
+	// operation on Qtree object
+	addTool(a, server, "create_qtree", descriptions.CreateQtree, createAnnotation, a.CreateQtree)
+	addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
+	addTool(a, server, "delete_qtree", descriptions.DeleteQtree, deleteAnnotation, a.DeleteQtree)
 
 	// operation on iSCSI service object
 	addTool(a, server, "create_iscsi_service", descriptions.CreateIscsiService, createAnnotation, a.CreateIscsiService)
@@ -400,8 +405,8 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	for k, v := range p.Filters {
 		params.Set(k, v)
 	}
-	if len(p.Fields) > 0 {
-		params.Set("fields", strings.Join(p.Fields, ","))
+	if p.Fields != "" {
+		params.Set("fields", p.Fields)
 	}
 	if p.MaxRecords > 0 {
 		params.Set("max_records", strconv.Itoa(p.MaxRecords))
@@ -619,13 +624,25 @@ func newCreateVolume(in tool.Volume) (ontap.Volume, error) {
 		}
 	}
 
-	if in.QoS.PolicyName != "" {
+	switch {
+	case in.QoS.RemovePolicy:
+		out.QoS.Policy.Name = "none"
+	case in.QoS.PolicyName != "":
 		out.QoS.Policy.Name = in.QoS.PolicyName
-	} else {
-		out.QoS.Policy.MaxThroughIOPS = in.QoS.MaxIOPS
-		out.QoS.Policy.MinThroughIOPS = in.QoS.MinIOPS
-		out.QoS.Policy.MaxThroughMBPS = in.QoS.MaxMBPS
-		out.QoS.Policy.MinThroughMBPS = in.QoS.MinMBPS
+	default:
+		var err error
+		if out.QoS.Policy.MaxThroughIOPS, err = parseQoSLimit(in.QoS.MaxIOPS); err != nil {
+			return out, fmt.Errorf("invalid max_iops: %w", err)
+		}
+		if out.QoS.Policy.MinThroughIOPS, err = parseQoSLimit(in.QoS.MinIOPS); err != nil {
+			return out, fmt.Errorf("invalid min_iops: %w", err)
+		}
+		if out.QoS.Policy.MaxThroughMBPS, err = parseQoSLimit(in.QoS.MaxMBPS); err != nil {
+			return out, fmt.Errorf("invalid max_mbps: %w", err)
+		}
+		if out.QoS.Policy.MinThroughMBPS, err = parseQoSLimit(in.QoS.MinMBPS); err != nil {
+			return out, fmt.Errorf("invalid min_mbps: %w", err)
+		}
 	}
 
 	return out, nil
@@ -681,13 +698,25 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
 	}
 
-	if in.QoS.PolicyName != "" {
+	switch {
+	case in.QoS.RemovePolicy:
+		out.QoS.Policy.Name = "none"
+	case in.QoS.PolicyName != "":
 		out.QoS.Policy.Name = in.QoS.PolicyName
-	} else {
-		out.QoS.Policy.MaxThroughIOPS = in.QoS.MaxIOPS
-		out.QoS.Policy.MinThroughIOPS = in.QoS.MinIOPS
-		out.QoS.Policy.MaxThroughMBPS = in.QoS.MaxMBPS
-		out.QoS.Policy.MinThroughMBPS = in.QoS.MinMBPS
+	default:
+		var err error
+		if out.QoS.Policy.MaxThroughIOPS, err = parseQoSLimit(in.QoS.MaxIOPS); err != nil {
+			return out, fmt.Errorf("invalid max_iops: %w", err)
+		}
+		if out.QoS.Policy.MinThroughIOPS, err = parseQoSLimit(in.QoS.MinIOPS); err != nil {
+			return out, fmt.Errorf("invalid min_iops: %w", err)
+		}
+		if out.QoS.Policy.MaxThroughMBPS, err = parseQoSLimit(in.QoS.MaxMBPS); err != nil {
+			return out, fmt.Errorf("invalid max_mbps: %w", err)
+		}
+		if out.QoS.Policy.MinThroughMBPS, err = parseQoSLimit(in.QoS.MinMBPS); err != nil {
+			return out, fmt.Errorf("invalid min_mbps: %w", err)
+		}
 	}
 
 	return out, nil
@@ -715,7 +744,6 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 		a.logger.Warn("skipping registration of destructive tool in read-only mode", slog.String("tool", name))
 		return
 	}
-
 	tt := &mcp.Tool{
 		Name:        name,
 		Description: description,
@@ -751,6 +779,23 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
 	lrw.body.Write(b)
 	return lrw.ResponseWriter.Write(b)
+}
+
+func parseQoSLimit(s string) (*int, error) {
+	if s == "" {
+		return nil, nil
+	}
+	v, err := strconv.Atoi(strings.TrimSpace(s))
+	if err != nil || v < 0 {
+		return nil, fmt.Errorf("must be a non-negative integer, got %q", s)
+	}
+	return &v, nil
+}
+
+func (lrw *loggingResponseWriter) Flush() {
+	if f, ok := lrw.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
 }
 
 // parseSizeEmptyAllowed is similar to parseSize but allows empty string as valid input, which will be interpreted as 0 bytes.

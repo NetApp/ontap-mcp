@@ -51,6 +51,7 @@ type GetData struct {
 		Index   int          `json:"index,omitzero"`
 		Name    string       `json:"name,omitzero"`
 		Svm     NameAndUUID  `json:"svm,omitzero"`
+		Volume  NameAndUUID  `json:"volume,omitzero"`
 		RoRule  []string     `json:"ro_rule,omitzero"`
 		RwRule  []string     `json:"rw_rule,omitzero"`
 		Clients []ClientData `json:"clients,omitzero"`
@@ -82,10 +83,10 @@ type Autosize struct {
 
 type VolumeQoSPolicy struct {
 	Name           string `json:"name,omitzero"`
-	MaxThroughIOPS int    `json:"max_throughput_iops,omitzero"`
-	MinThroughIOPS int    `json:"min_throughput_iops,omitzero"`
-	MaxThroughMBPS int    `json:"max_throughput_mbps,omitzero"`
-	MinThroughMBPS int    `json:"min_throughput_mbps,omitzero"`
+	MaxThroughIOPS *int   `json:"max_throughput_iops,omitzero"`
+	MinThroughIOPS *int   `json:"min_throughput_iops,omitzero"`
+	MaxThroughMBPS *int   `json:"max_throughput_mbps,omitzero"`
+	MinThroughMBPS *int   `json:"min_throughput_mbps,omitzero"`
 }
 
 type VolumeQoS struct {
@@ -186,8 +187,14 @@ type CIFSShare struct {
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type Qtree struct {
+	SVM    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Volume NameAndUUID `json:"volume,omitzero" jsonschema:"volume name"`
+	Name   string      `json:"name,omitzero" jsonschema:"qtree name"`
+}
+
 type IscsiService struct {
-	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	SVM     NameAndUUID `json:"svm" jsonschema:"svm name"`
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
 	Target  Target      `json:"target,omitzero" jsonschema:"target of iSCSI service,omitzero"`
 }

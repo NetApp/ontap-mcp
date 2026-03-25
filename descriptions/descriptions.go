@@ -51,9 +51,13 @@ const CreateNFSExportPolicyRules = `Create NFS Export policies rules on a cluste
 const UpdateNFSExportPolicyRules = `Update NFS Export policies rules on a cluster by cluster name.`
 const DeleteNFSExportPolicyRules = `Delete NFS Export policies rules on a cluster by cluster name.`
 
-const CreateCIFSShare = `Create CIFS share a cluster by cluster name.`
+const CreateCIFSShare = `Create CIFS share on a cluster by cluster name.`
 const UpdateCIFSShare = `Update CIFS share on a cluster by cluster name.`
 const DeleteCIFSShare = `Delete CIFS share on a cluster by cluster name.`
+
+const CreateQtree = `Create Qtree on a cluster by cluster name.`
+const UpdateQtree = `Update Qtree on a cluster by cluster name.`
+const DeleteQtree = `Delete Qtree on a cluster by cluster name.`
 
 const CreateIscsiService = `Create iSCSI service on a cluster by cluster name.`
 const UpdateIscsiService = `Update iSCSI service on a cluster by cluster name.`
