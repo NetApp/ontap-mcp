@@ -206,6 +206,18 @@ Expected Response: The schedule has been successfully created.
 
 ---
 
+### Manage NVMe Service
+
+- On the umeng-aff300-05-06 cluster, create nvme service on the marketing svm
+
+Expected Response: The nvme service has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, disabled nvme service on the marketing svm
+
+Expected Response: The nvme service has been successfully updated.
+
+---
+
 ### Querying Specific Fields
 
 **Get volume space and protection details**

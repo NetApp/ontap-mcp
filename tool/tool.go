@@ -101,6 +101,12 @@ type CIFSShare struct {
 	Path    string `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type NVMeService struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Path       string            `json:"path" jsonschema:"ONTAP REST API collection path without /api prefix, e.g. /storage/volumes"`

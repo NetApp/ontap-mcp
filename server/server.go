@@ -123,6 +123,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
 
+	// operation on NVMe service object
+	addTool(a, server, "create_nvme_service", descriptions.CreateNVMeService, createAnnotation, a.CreateNVMeService)
+	addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
+	addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)

@@ -182,6 +182,11 @@ type CIFSShare struct {
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type NVMeService struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
+}
+
 const (
 	ASAr2 = "asar2"
 	CDOT  = "cdot"

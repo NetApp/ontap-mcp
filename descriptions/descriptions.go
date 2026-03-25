@@ -55,6 +55,10 @@ const CreateCIFSShare = `Create CIFS share a cluster by cluster name.`
 const UpdateCIFSShare = `Update CIFS share on a cluster by cluster name.`
 const DeleteCIFSShare = `Delete CIFS share on a cluster by cluster name.`
 
+const CreateNVMeService = `Create NVMe service on a cluster by cluster name.`
+const UpdateNVMeService = `Update NVMe service on a cluster by cluster name.`
+const DeleteNVMeService = `Delete NVMe service on a cluster by cluster name.`
+
 const ListOntapEndpoints = `List ONTAP REST collection endpoints in the catalog.
 The catalog contains all endpoints — can be large. Prefer search_ontap_endpoints for targeted discovery.
 Use the optional 'match' parameter to filter by substring or regex pattern (e.g. "snapshot", "lun", ".*nfs.*export.*").
