@@ -104,6 +104,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
 
 	// operation on QoS Policy object
+	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicies, readOnlyAnnotation, a.ListQoSPolicies)
 	addTool(a, server, "create_qos_policy", descriptions.CreateQoSPolicy, createAnnotation, a.CreateQoSPolicy)
 	addTool(a, server, "update_qos_policy", descriptions.UpdateQoSPolicy, updateAnnotation, a.UpdateQosPolicy)
 	addTool(a, server, "delete_qos_policy", descriptions.DeleteQoSPolicy, deleteAnnotation, a.DeleteQoSPolicy)

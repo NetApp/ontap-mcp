@@ -133,6 +133,15 @@ func isSkippedParam(name string) bool {
 	return false
 }
 
+func isExcludedPath(path string) bool {
+	for _, prefix := range catalog.ExcludedPathPrefixes {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 // stripHTML removes HTML tags and normalises whitespace from swagger descriptions.
 func stripHTML(s string) string {
 	var b strings.Builder
@@ -245,6 +254,11 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 		// Only include pure collection endpoints – paths with no {param} placeholders.
 		// This ensures the LLM can query them without knowing a UUID upfront.
 		if strings.Contains(path, "{") {
+			skipped++
+			continue
+		}
+
+		if isExcludedPath(path) {
 			skipped++
 			continue
 		}
