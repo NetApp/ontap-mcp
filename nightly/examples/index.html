@@ -481,6 +481,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#manage-qtrees" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage Qtrees
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#querying-specific-fields" class="md-nav__link">
     <span class="md-ellipsis">
       Querying Specific Fields
@@ -709,6 +718,15 @@
   <a href="#manage-schedule" class="md-nav__link">
     <span class="md-ellipsis">
       Manage Schedule
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-qtrees" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage Qtrees
     </span>
   </a>
   
@@ -966,6 +984,16 @@ Expected Response if schedule not exist: no schedule 2weekday12_30min found</p>
 <li>On the umeng-aff300-05-06 cluster, create a cron schedule with * * 11 1-2 * named as 11dayjantofeb</li>
 </ul>
 <p>Expected Response: The schedule has been successfully created.</p>
+<hr />
+<h3 id="manage-qtrees">Manage Qtrees<a class="headerlink" href="#manage-qtrees" title="Permanent link">&para;</a></h3>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create a qtree named staff in docs volume on the marketing SVM</li>
+</ul>
+<p>Expected Response: The qtree has been successfully created.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, rename a qtree named staff to pay in docs volume on the marketing SVM</li>
+</ul>
+<p>Expected Response: The qtree has been successfully renamed.</p>
 <hr />
 <h3 id="querying-specific-fields">Querying Specific Fields<a class="headerlink" href="#querying-specific-fields" title="Permanent link">&para;</a></h3>
 <p><strong>Get volume space and protection details</strong></p>
