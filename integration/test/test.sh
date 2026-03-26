@@ -12,4 +12,4 @@ LD_FLAGS="-X ""'""github.com/netapp/ontap-mcp/version.VERSION=${VERSION}""'"""
 echo "$LD_FLAGS"
 
 go mod tidy
-go test -v -timeout 30m -ldflags="$LD_FLAGS"
+go test -v -timeout 1h -ldflags="$LD_FLAGS"

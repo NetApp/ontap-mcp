@@ -101,6 +101,14 @@ type CIFSShare struct {
 	Path    string `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type Qtree struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+	Volume  string `json:"volume_name,omitzero" jsonschema:"Volume name"`
+	Name    string `json:"name,omitzero" jsonschema:"qtree name"`
+	NewName string `json:"new_name,omitzero" jsonschema:"new qtree name"`
+}
+
 type NVMeService struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`

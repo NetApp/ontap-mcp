@@ -23,10 +23,11 @@ import (
 )
 
 const (
-	CheckTools = "CHECK_TOOLS"
-	ConfigFile = "ontap.yaml"
-	Cluster    = "umeng-aff300-05-06"
-	ClusterStr = "On the " + Cluster + " cluster, "
+	CheckTools         = "CHECK_TOOLS"
+	OpenaiModelVersion = "gpt-4.1"
+	ConfigFile         = "ontap.yaml"
+	Cluster            = "umeng-aff300-05-06"
+	ClusterStr         = "On the " + Cluster + " cluster, "
 )
 
 var testAgent *Agent
@@ -360,7 +361,7 @@ func TestOntapMCPTools(t *testing.T) {
 			slog.Debug("", slog.String("Input", tt.input))
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
-			if err = testAgent.Chat(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
+			if _, err = testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
@@ -451,7 +452,7 @@ func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[
 	return output.String(), nil
 }
 
-func (a *Agent) Chat(ctx context.Context, t *testing.T, userMessage string, expectedOntapErrorStr string) error {
+func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage string, expectedOntapErrorStr string) (string, error) {
 	messages := []openai.ChatCompletionMessageParamUnion{
 		openai.UserMessage(userMessage),
 	}
@@ -464,17 +465,17 @@ func (a *Agent) Chat(ctx context.Context, t *testing.T, userMessage string, expe
 			Model:    a.model,
 			Messages: messages,
 			Tools:    tools,
-			User:     openai.String(a.userName), // Required by NetApp proxy
+			User:     openai.String(a.userName),
 		})
 
 		if err != nil {
-			return fmt.Errorf("OpenAI error: %w", err)
+			return "", fmt.Errorf("OpenAI error: %w", err)
 		}
 
 		assistantMessage := completion.Choices[0].Message
 
 		if len(assistantMessage.ToolCalls) == 0 {
-			return nil
+			return assistantMessage.Content, nil
 		}
 
 		messages = append(messages, assistantMessage.ToParam())
@@ -484,16 +485,15 @@ func (a *Agent) Chat(ctx context.Context, t *testing.T, userMessage string, expe
 
 			var args map[string]any
 			if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args); err != nil {
-				return fmt.Errorf("failed to parse tool args: %w", err)
+				return "", fmt.Errorf("failed to parse tool args: %w", err)
 			}
 
 			slog.Debug("", slog.String("Calling tool", toolName), slog.Any("args", args))
 
 			result, err := a.callMCPTool(ctx, toolName, args)
-			// Only error out when we don't expect the error scenarios
 			if err != nil {
 				if expectedOntapErrorStr == "" || !strings.Contains(err.Error(), expectedOntapErrorStr) {
-					t.Errorf("Error: %s %s %v", slog.String("tool", toolName), slog.Any("args", args), slog.Any("err", err))
+					t.Errorf("Error calling tool %q with args %v: %v", toolName, args, err)
 				}
 			}
 
@@ -503,7 +503,7 @@ func (a *Agent) Chat(ctx context.Context, t *testing.T, userMessage string, expe
 		}
 	}
 
-	return nil
+	return "", fmt.Errorf("max iterations (%d) reached without final assistant message", maxIterations)
 }
 
 func (a *Agent) Close() {
@@ -562,7 +562,7 @@ func loadEnv() (envConfig, error) {
 	llmBaseURL := cmp.Or(os.Getenv("LLM_PROXY"), "https://llm-proxy-api.ai.openeng.netapp.com/v1")
 	slog.Debug("", slog.String("LLM PROXY Base URL", llmBaseURL))
 
-	openaiModel := cmp.Or(os.Getenv("OPENAI_MODEL"), "gpt-5.2-chat")
+	openaiModel := OpenaiModelVersion
 	slog.Debug("", slog.String("Model", openaiModel))
 
 	mcpServerURL := cmp.Or(os.Getenv("MCP_URL"), "http://localhost:8083")
