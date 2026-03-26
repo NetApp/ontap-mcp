@@ -243,7 +243,7 @@ Expected Response: The qtree has been successfully renamed.
 ---
 
 
-### Manage Iscsi Service
+### Manage iSCSI Service
 
 - On the umeng-aff300-05-06 cluster, create iscsi service target named alias tgpath on the marketing svm
 

@@ -21,25 +21,25 @@ func TestIscsiProtocol(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
-			name:             "Clean Iscsi service",
+			name:             "Clean iSCSI service",
 			input:            ClusterStr + "delete iscsi service in marketing svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
 		},
 		{
-			name:             "Create Iscsi service",
+			name:             "Create iSCSI service",
 			input:            ClusterStr + "create iscsi service target named alias tgpath on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: createObject},
 		},
 		{
-			name:             "Update Iscsi service",
+			name:             "Update iSCSI service",
 			input:            ClusterStr + "disabled iscsi service on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
-			name:             "Clean Iscsi service",
+			name:             "Clean iSCSI service",
 			input:            ClusterStr + "delete iscsi service in marketing svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
@@ -64,7 +64,7 @@ func TestIscsiProtocol(t *testing.T) {
 			slog.Debug("", slog.String("Input", tt.input))
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
-			if err = testAgent.Chat(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
+			if _, err = testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {

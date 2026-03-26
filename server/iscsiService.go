@@ -30,7 +30,7 @@ func (a *App) CreateIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 		return errorResult(err), nil, err
 	}
 
-	responseText := "Iscsi Service created successfully"
+	responseText := "iSCSI Service created successfully"
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -60,7 +60,7 @@ func (a *App) UpdateIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 		return errorResult(err), nil, err
 	}
 
-	responseText := "Iscsi Service updated successfully"
+	responseText := "iSCSI Service updated successfully"
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -90,7 +90,7 @@ func (a *App) DeleteIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 		return errorResult(err), nil, err
 	}
 
-	responseText := "Iscsi Service deleted successfully"
+	responseText := "iSCSI Service deleted successfully"
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
