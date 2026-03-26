@@ -37,7 +37,7 @@ func TestNVMeService(t *testing.T) {
 		},
 		{
 			name:             "Update NVMe service",
-			input:            SarClusterStr + "disabled nvme service on the marketing svm",
+			input:            SarClusterStr + "update nvme service to disable on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
@@ -71,7 +71,7 @@ func TestNVMeService(t *testing.T) {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
-				t.Errorf("Error while accessing the object via prompt %s", slog.Any("input", tt.input))
+				t.Errorf("Error while accessing the object via prompt %s", tt.input)
 			}
 		})
 	}

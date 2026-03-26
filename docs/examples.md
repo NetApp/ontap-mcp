@@ -249,7 +249,7 @@ Expected Response: The qtree has been successfully renamed.
 
 Expected Response: The nvme service has been successfully created.
 
-- On the umeng-aff300-05-06 cluster, disabled nvme service on the marketing svm
+- On the umeng-aff300-05-06 cluster, disable nvme service on the marketing svm
 
 Expected Response: The nvme service has been successfully updated.
 

@@ -20,16 +20,11 @@ func (c *Client) CreateNVMeService(ctx context.Context, nvmeService ontap.NVMeSe
 		ToBytesBuffer(&buf).
 		BodyJSON(nvmeService)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	if statusCode == http.StatusCreated {
-		return nil
-	}
-	return err
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) UpdateNVMeService(ctx context.Context, svmName string, nvmeService ontap.NVMeService) error {
@@ -62,12 +57,11 @@ func (c *Client) UpdateNVMeService(ctx context.Context, svmName string, nvmeServ
 		ToJSON(&nvmeSr).
 		Patch()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) DeleteNVMeService(ctx context.Context, nvmeService ontap.NVMeService) error {
@@ -98,10 +92,9 @@ func (c *Client) DeleteNVMeService(ctx context.Context, nvmeService ontap.NVMeSe
 	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
 		Delete()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
