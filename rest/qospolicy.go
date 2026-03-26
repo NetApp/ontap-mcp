@@ -39,42 +39,39 @@ func (c *Client) GetAdminSVM(ctx context.Context) (string, error) {
 }
 
 func (c *Client) GetSVMQoSPolicies(ctx context.Context, svmName string) ([]json.RawMessage, error) {
-	var result struct {
-		Records    []json.RawMessage `json:"records"`
-		NumRecords int               `json:"num_records"`
-	}
-	responseHeaders := http.Header{}
 	params := url.Values{}
 	params.Set("fields", "*")
 	if svmName != "" {
 		params.Set("svm.name", svmName)
 	}
 
-	builder := c.baseRequestBuilder(`/api/storage/qos/policies`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&result)
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+	raw, err := c.GenericGet(ctx, "/storage/qos/policies", params, 0)
+	if err != nil {
+		return nil, err
+	}
+	var result struct {
+		Records []json.RawMessage `json:"records"`
+	}
+	if err := json.Unmarshal(raw, &result); err != nil {
 		return nil, err
 	}
 	return result.Records, nil
 }
 
 func (c *Client) GetAdminSVMFixedPolicies(ctx context.Context, adminVserver string) ([]json.RawMessage, error) {
-	var result struct {
-		Records []cliFixedRecord `json:"records"`
-	}
-	responseHeaders := http.Header{}
 	params := url.Values{}
 	params.Set("vserver", adminVserver)
 	params.Set("class", "user_defined")
 	params.Set("fields", "policy_group,vserver,class,max_throughput,min_throughput,num_workloads,is_shared")
 
-	builder := c.baseRequestBuilder(`/api/private/cli/qos/policy-group`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&result)
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+	raw, err := c.GenericGet(ctx, "/private/cli/qos/policy-group", params, 0)
+	if err != nil {
+		return nil, err
+	}
+	var result struct {
+		Records []cliFixedRecord `json:"records"`
+	}
+	if err := json.Unmarshal(raw, &result); err != nil {
 		return nil, err
 	}
 
@@ -143,19 +140,18 @@ func (c *Client) GetAdminSVMFixedPolicies(ctx context.Context, adminVserver stri
 }
 
 func (c *Client) GetAdminSVMAdaptivePolicies(ctx context.Context, adminVserver string) ([]json.RawMessage, error) {
-	var result struct {
-		Records []cliAdaptiveRecord `json:"records"`
-	}
-	responseHeaders := http.Header{}
 	params := url.Values{}
 	params.Set("vserver", adminVserver)
 	params.Set("fields", "policy_group,vserver,expected_iops,peak_iops,absolute_min_iops,expected_iops_allocation,peak_iops_allocation,block_size,num_workloads")
 
-	builder := c.baseRequestBuilder(`/api/private/cli/qos/adaptive-policy-group`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&result)
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+	raw, err := c.GenericGet(ctx, "/private/cli/qos/adaptive-policy-group", params, 0)
+	if err != nil {
+		return nil, err
+	}
+	var result struct {
+		Records []cliAdaptiveRecord `json:"records"`
+	}
+	if err := json.Unmarshal(raw, &result); err != nil {
 		return nil, err
 	}
 

@@ -57,7 +57,7 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 - On the umeng-aff300-05-06 cluster, list all fixed qos policies
 
-- <span class="key">Expected Response</span>: A list of fixed QoS policies.
+- <span class="key">Expected Response</span>: A list of fixed QoS policies including cluster-scoped ones.
 
 **List Only Adaptive QoS Policies**
 

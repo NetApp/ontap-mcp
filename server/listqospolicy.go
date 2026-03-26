@@ -55,23 +55,39 @@ type QoSPoliciesResponse struct {
 	NumRecords      int               `json:"num_records"`
 }
 
+type listQoSPoliciesArgs struct {
+	cluster    string
+	svmName    string
+	policyType string
+}
+
+func newListQoSPolicies(p ListQoSPoliciesParams) (listQoSPoliciesArgs, error) {
+	if p.Cluster == "" {
+		return listQoSPoliciesArgs{}, errors.New("cluster_name is required")
+	}
+	pt := strings.ToLower(strings.TrimSpace(p.PolicyType))
+	if pt != "" && pt != "fixed" && pt != "adaptive" {
+		return listQoSPoliciesArgs{}, fmt.Errorf("unsupported policy_type %q: must be \"fixed\" or \"adaptive\"", p.PolicyType)
+	}
+	return listQoSPoliciesArgs{cluster: p.Cluster, svmName: p.SVMName, policyType: pt}, nil
+}
+
 func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, p ListQoSPoliciesParams) (*mcp.CallToolResult, QoSPoliciesResponse, error) {
 	empty := QoSPoliciesResponse{}
-	if p.Cluster == "" {
-		return errorResult(errors.New("cluster_name is required")), empty, nil
+	args, err := newListQoSPolicies(p)
+	if err != nil {
+		return errorResult(err), empty, nil
 	}
 
-	policyType := strings.ToLower(p.PolicyType)
+	a.locks.RLock(args.cluster)
+	defer a.locks.RUnlock(args.cluster)
 
-	a.locks.RLock(p.Cluster)
-	defer a.locks.RUnlock(p.Cluster)
-
-	client, err := a.getClient(p.Cluster)
+	client, err := a.getClient(args.cluster)
 	if err != nil {
 		return errorResult(err), empty, err
 	}
 
-	svmRecords, err := client.GetSVMQoSPolicies(ctx, p.SVMName)
+	svmRecords, err := client.GetSVMQoSPolicies(ctx, args.svmName)
 	if err != nil {
 		return errorResult(fmt.Errorf("failed to fetch SVM-scoped qos policies: %w", err)), empty, err
 	}
@@ -82,14 +98,14 @@ func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, p Lis
 	}
 
 	var adminRecords []json.RawMessage
-	if policyType == "" || policyType == "fixed" {
+	if args.policyType == "" || args.policyType == "fixed" {
 		fixed, err := client.GetAdminSVMFixedPolicies(ctx, adminSVM)
 		if err != nil {
 			return errorResult(fmt.Errorf("failed to fetch cluster-scope fixed qos policies: %w", err)), empty, err
 		}
 		adminRecords = append(adminRecords, fixed...)
 	}
-	if policyType == "" || policyType == "adaptive" {
+	if args.policyType == "" || args.policyType == "adaptive" {
 		adaptive, err := client.GetAdminSVMAdaptivePolicies(ctx, adminSVM)
 		if err != nil {
 			return errorResult(fmt.Errorf("failed to fetch cluster-scope adaptive qos policies: %w", err)), empty, err
@@ -97,8 +113,8 @@ func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, p Lis
 		adminRecords = append(adminRecords, adaptive...)
 	}
 
-	if policyType != "" {
-		svmRecords = filterRecordsByType(svmRecords, policyType)
+	if args.policyType != "" {
+		svmRecords = filterRecordsByType(svmRecords, args.policyType)
 	}
 
 	svmPolicies := make([]qoSPolicyRecord, 0, len(svmRecords))
@@ -126,10 +142,10 @@ func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, p Lis
 		ClusterPolicies: clusterPolicies,
 		NumRecords:      len(svmPolicies) + len(clusterPolicies),
 	}
-	if p.SVMName != "" {
+	if args.svmName != "" {
 		resp.Message = fmt.Sprintf(
 			"Showing %d SVM-scoped policies for '%s' and %d cluster-wide policies. Cluster-wide policies govern all workloads on the cluster regardless of SVM and must be presented.",
-			len(svmPolicies), p.SVMName, len(clusterPolicies),
+			len(svmPolicies), args.svmName, len(clusterPolicies),
 		)
 	}
 	return nil, resp, nil

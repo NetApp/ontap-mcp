@@ -40,7 +40,7 @@ const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster n
 const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster name.`
 const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
-const ListQoSPolicies = `List QoS policies from an ONTAP cluster — includes both SVM-scoped and cluster-scoped (admin vserver) policies.
+const ListQoSPolicies = `List QoS policies from an ONTAP cluster — includes both SVM-scoped and cluster-scoped (admin SVM) policies.
 
 The response is split into two sections:
 - svm_policies: policies scoped to a specific SVM
