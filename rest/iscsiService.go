@@ -20,16 +20,11 @@ func (c *Client) CreateIscsiService(ctx context.Context, iscsiService ontap.Iscs
 		ToBytesBuffer(&buf).
 		BodyJSON(iscsiService)
 
-	err := c.buildAndExecuteRequest(ctx, builder)
-
-	if err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	if statusCode == http.StatusCreated {
-		return nil
-	}
-	return err
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) UpdateIscsiService(ctx context.Context, svmName string, iscsiService ontap.IscsiService) error {
@@ -41,7 +36,7 @@ func (c *Client) UpdateIscsiService(ctx context.Context, svmName string, iscsiSe
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("svm", svmName)
+	params.Set("svm.name", svmName)
 
 	builder := c.baseRequestBuilder(`/api/protocols/san/iscsi/services`, &statusCode, responseHeaders).
 		Params(params).
@@ -62,12 +57,11 @@ func (c *Client) UpdateIscsiService(ctx context.Context, svmName string, iscsiSe
 		ToJSON(&iscsiSr).
 		Patch()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) DeleteIscsiService(ctx context.Context, iscsiService ontap.IscsiService) error {
@@ -79,7 +73,7 @@ func (c *Client) DeleteIscsiService(ctx context.Context, iscsiService ontap.Iscs
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("svm", iscsiService.SVM.Name)
+	params.Set("svm.name", iscsiService.SVM.Name)
 
 	builder := c.baseRequestBuilder(`/api/protocols/san/iscsi/services`, &statusCode, responseHeaders).
 		Params(params).
@@ -98,10 +92,9 @@ func (c *Client) DeleteIscsiService(ctx context.Context, iscsiService ontap.Iscs
 	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
 		Delete()
 
-	err = c.buildAndExecuteRequest(ctx, builder)
-
-	if statusCode == http.StatusOK {
-		return nil
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
 	}
-	return err
+
+	return c.checkStatus(statusCode)
 }

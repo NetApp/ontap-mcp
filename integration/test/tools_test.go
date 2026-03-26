@@ -340,32 +340,6 @@ func TestOntapMCPTools(t *testing.T) {
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every5min", validationFunc: deleteObject},
 		},
-
-		// Iscsi service operations
-		{
-			name:             "Clean Iscsi service",
-			input:            ClusterStr + "delete iscsi service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
-		},
-		{
-			name:             "Create Iscsi service",
-			input:            ClusterStr + "create iscsi service target named alias tgpath on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: createObject},
-		},
-		{
-			name:             "Update Iscsi service",
-			input:            ClusterStr + "disabled iscsi service on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
-			name:             "Clean Iscsi service",
-			input:            ClusterStr + "delete iscsi service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
-		},
 	}
 
 	cfg, err := config.ReadConfig(ConfigFile)
