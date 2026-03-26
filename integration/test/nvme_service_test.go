@@ -67,7 +67,7 @@ func TestNVMeService(t *testing.T) {
 			slog.Debug("", slog.String("Input", tt.input))
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
-			if err = testAgent.Chat(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
+			if _, err = testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
