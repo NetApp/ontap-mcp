@@ -63,7 +63,7 @@ func (c *Client) UpdateNVMeService(ctx context.Context, svmName string, nvmeServ
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) DeleteNVMeService(ctx context.Context, nvmeService ontap.NVMeService) error {
+func (c *Client) DeleteNVMeService(ctx context.Context, svmName string) error {
 	var (
 		statusCode int
 		nvmeSr     ontap.GetData
@@ -72,7 +72,7 @@ func (c *Client) DeleteNVMeService(ctx context.Context, nvmeService ontap.NVMeSe
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("svm.name", nvmeService.SVM.Name)
+	params.Set("svm.name", svmName)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/services`, &statusCode, responseHeaders).
 		Params(params).
@@ -85,7 +85,21 @@ func (c *Client) DeleteNVMeService(ctx context.Context, nvmeService ontap.NVMeSe
 	}
 
 	if nvmeSr.NumRecords == 0 {
-		return fmt.Errorf("failed to get detail of nvme service in svm %s because it does not exist", nvmeService.SVM.Name)
+		return fmt.Errorf("failed to get detail of nvme service in svm %s because it does not exist", svmName)
+	}
+
+	// Disable nvme service first before delete
+	nvmeService := ontap.NVMeService{Enabled: "false"}
+	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
+		BodyJSON(nvmeService).
+		Patch()
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	if err := c.checkStatus(statusCode); err != nil {
+		return err
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).

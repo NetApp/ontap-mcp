@@ -75,8 +75,7 @@ func (a *App) DeleteNVMeService(ctx context.Context, _ *mcp.CallToolRequest, par
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	nvmeServiceDelete, err := newDeleteNVMeService(parameters)
-	if err != nil {
+	if err := newDeleteNVMeService(parameters); err != nil {
 		return nil, nil, err
 	}
 
@@ -84,7 +83,7 @@ func (a *App) DeleteNVMeService(ctx context.Context, _ *mcp.CallToolRequest, par
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNVMeService(ctx, nvmeServiceDelete)
+	err = client.DeleteNVMeService(ctx, parameters.SVM)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -119,11 +118,9 @@ func newUpdateNVMeService(in tool.NVMeService) (ontap.NVMeService, error) {
 	return out, nil
 }
 
-func newDeleteNVMeService(in tool.NVMeService) (ontap.NVMeService, error) {
-	out := ontap.NVMeService{}
+func newDeleteNVMeService(in tool.NVMeService) error {
 	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
+		return errors.New("SVM name is required")
 	}
-	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	return out, nil
+	return nil
 }
