@@ -104,13 +104,12 @@ func newCreateIscsiService(in tool.IscsiService) (ontap.IscsiService, error) {
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
-	if in.TargetAlias == "" {
-		return out, errors.New("target alias is required")
+	if in.TargetAlias != "" {
+		out.Target.Alias = in.TargetAlias
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Enabled = in.Enabled
-	out.Target.Alias = in.TargetAlias
 	return out, nil
 }
 

@@ -54,7 +54,6 @@ func (c *Client) UpdateIscsiService(ctx context.Context, svmName string, iscsiSe
 
 	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
 		BodyJSON(iscsiService).
-		ToJSON(&iscsiSr).
 		Patch()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
@@ -87,6 +86,20 @@ func (c *Client) DeleteIscsiService(ctx context.Context, iscsiService ontap.Iscs
 
 	if iscsiSr.NumRecords == 0 {
 		return fmt.Errorf("failed to get detail of iscsi service in svm %s because it does not exist", iscsiService.SVM.Name)
+	}
+
+	// Disable iscsi service first before delete
+	iscsiService.Enabled = "false"
+	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
+		BodyJSON(iscsiService).
+		Patch()
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	if err := c.checkStatus(statusCode); err != nil {
+		return err
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
