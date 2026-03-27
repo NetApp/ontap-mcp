@@ -36,7 +36,7 @@ func (c *Client) UpdateNVMeService(ctx context.Context, svmName string, nvmeServ
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("svm", svmName)
+	params.Set("svm.name", svmName)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/services`, &statusCode, responseHeaders).
 		Params(params).
@@ -54,7 +54,6 @@ func (c *Client) UpdateNVMeService(ctx context.Context, svmName string, nvmeServ
 
 	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
 		BodyJSON(nvmeService).
-		ToJSON(&nvmeSr).
 		Patch()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
@@ -73,7 +72,7 @@ func (c *Client) DeleteNVMeService(ctx context.Context, nvmeService ontap.NVMeSe
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("svm", nvmeService.SVM.Name)
+	params.Set("svm.name", nvmeService.SVM.Name)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/services`, &statusCode, responseHeaders).
 		Params(params).
