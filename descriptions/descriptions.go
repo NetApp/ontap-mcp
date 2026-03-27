@@ -84,33 +84,26 @@ Pass cluster_name to automatically filter out fields and filters not available i
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 
-CRITICAL: ALWAYS pass the 'fields' parameter with only the specific fields you need.
-Omitting 'fields' returns 50+ fields per record and floods the context window with noise.
-BAD:  {"cluster_name": "dc1", "path": "/storage/volumes"}                              ← returns everything
-GOOD: {"cluster_name": "dc1", "path": "/storage/volumes", "fields": "name,state,svm.name,space.used"}
+RULES:
+1. Always specify 'fields' — omitting it returns 50+ fields per record and floods the context window.
+   BAD:  {"cluster_name":"dc1","path":"/storage/volumes"}
+   GOOD: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,state,svm.name"}
+2. Always use 'filters' to narrow results — NEVER fetch all records to find one item. This is wasteful and will exceed the context window.
+   WRONG: fetch /storage/volumes (all), then scan for the volume you want
+   RIGHT: fetch /storage/volumes with filters={"name":"<vol>","svm.name":"<svm>"}
+3. To query a sub-resource with a UUID path (e.g. /storage/volumes/{volume.uuid}/snapshots):
+   a. GET the collection with filters={"name":"<vol>","svm.name":"<svm>"} and fields="uuid" to fetch just that UUID.
+   b. GET the sub-resource using path_params={"volume.uuid":"<uuid-from-a>"}.
 
-- path: endpoint path without /api prefix — collection (e.g. /storage/volumes) or resource template (e.g. /storage/volumes/{volume.uuid}/snapshots)
-- path_params: (OBJECT) values for {param} placeholders in the path, e.g. {"volume.uuid": "abc-123"}.
-  Obtain the UUID/key first by querying the collection endpoint (e.g. GET /storage/volumes with fields="uuid,name").
-- fields: (STRING) comma-separated dot-notation fields to return, e.g. "name,svm.name,space.size" — use "space.*" to expand sub-objects
-- filters: (OBJECT) ONTAP query syntax — exact:"vs1" wildcard:"vol*" range:">1073741824" OR:"online|offline" NOT:"!offline"
-- max_records: limit results; omit to return all
+Parameters:
+- fields:      comma-separated fields, e.g. "name,svm.name,space.size" — use "space.*" to expand sub-objects
+- filters:     key-value object using ONTAP query syntax (see system instructions for syntax reference)
+- path_params: values for {param} placeholders in templated paths, e.g. {"volume.uuid":"abc-123"}
+- max_records: cap result count; omit to return all
 
-Examples:
-  Collection:
-  {
-    "cluster_name": "dc1",
-    "path": "/storage/volumes",
-    "fields": "name,uuid,svm.name,space.size,state",
-    "filters": {"svm.name": "vs1", "state": "online"}
-  }
+Example — collection:
+{"cluster_name":"dc1","path":"/storage/volumes","fields":"name,uuid,svm.name,state","filters":{"svm.name":"vs1"}}
 
-  Resource (snapshots for a volume — first get the volume UUID from /storage/volumes):
-  {
-    "cluster_name": "dc1",
-    "path": "/storage/volumes/{volume.uuid}/snapshots",
-    "path_params": {"volume.uuid": "abc-1234-5678"},
-    "fields": "name,create_time,comment"
-  }
-
-Call describe_ontap_endpoint first to learn valid field, filter, and path-param names.`
+Example — snapshots for a volume (2 calls):
+Call 1: {"cluster_name":"dc1","path":"/storage/volumes","fields":"uuid","filters":{"name":"vol1","svm.name":"vs1"}}
+Call 2: {"cluster_name":"dc1","path":"/storage/volumes/{volume.uuid}/snapshots","path_params":{"volume.uuid":"<uuid-from-call-1>"},"fields":"name,create_time,comment"}`
