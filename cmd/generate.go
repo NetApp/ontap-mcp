@@ -106,6 +106,19 @@ var skipParams = toSet(
 	"order_by", "offset", "pretty", "continue_on_failure", "ignore_unknown_fields",
 )
 
+// uuidEndpointAllowlist is the set of resource/sub-resource endpoints that
+// contain path parameters such as uuid
+var uuidEndpointAllowlist = toSet(
+	"/storage/volumes/{volume.uuid}/snapshots",
+	"/storage/volumes/{volume.uuid}/snapshots/{uuid}",
+
+	"/protocols/san/igroups/{igroup.uuid}/igroups",
+	"/protocols/san/igroups/{igroup.uuid}/igroups/{uuid}",
+	"/protocols/san/igroups/{igroup.uuid}/initiators",
+
+	"/snapmirror/relationships/{relationship.uuid}/transfers",
+)
+
 // skipPrefixes are param name prefixes for performance counters.
 var skipPrefixes = []string{
 	"statistics.",
@@ -251,9 +264,8 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 			continue
 		}
 
-		// Only include pure collection endpoints – paths with no {param} placeholders.
-		// This ensures the LLM can query them without knowing a UUID upfront.
-		if strings.Contains(path, "{") {
+		// Skip private/internal endpoints not meant for external use.
+		if sp.Get.Visibility.Type == "private" {
 			skipped++
 			continue
 		}
@@ -263,8 +275,9 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 			continue
 		}
 
-		// Skip private/internal endpoints not meant for external use.
-		if sp.Get.Visibility.Type == "private" {
+		// For endpoints with path parameters (e.g. {uuid}), only include those
+		// in the allowlist.
+		if strings.Contains(path, "{") && !uuidEndpointAllowlist[path] {
 			skipped++
 			continue
 		}
@@ -273,29 +286,38 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 		summary := extractSummary(stripHTML(op.Description))
 
 		apiVersion := op.Introduced
+
+		// Collect path parameters (e.g. {uuid}, {name}) for endpoints that have them.
+		pathParams := make(map[string]catalog.PathParamInfo)
 		filters := make(map[string]catalog.FilterInfo)
 		for _, p := range op.Parameters {
-			if p.In != "query" {
-				continue
+			switch p.In {
+			case "path":
+				ppi := catalog.PathParamInfo{}
+				if d := strings.TrimSpace(p.Description); d != "" {
+					ppi.Desc = stripHTML(d)
+				}
+				pathParams[p.Name] = ppi
+			case "query":
+				if isSkippedParam(p.Name) {
+					continue
+				}
+				if p.Visibility.Type == "private" {
+					continue
+				}
+				t := p.Type
+				if t == "string" || t == "" {
+					t = ""
+				}
+				fi := catalog.FilterInfo{Type: t}
+				if v := p.Introduced; v != "" && v != "DO_NOT_DISPLAY" && v != apiVersion {
+					fi.Since = v
+				}
+				if d := strings.TrimSpace(p.Description); d != "" && !isGenericFilterDesc(d) {
+					fi.Desc = stripHTML(d)
+				}
+				filters[p.Name] = fi
 			}
-			if isSkippedParam(p.Name) {
-				continue
-			}
-			if p.Visibility.Type == "private" {
-				continue
-			}
-			t := p.Type
-			if t == "string" || t == "" {
-				t = ""
-			}
-			fi := catalog.FilterInfo{Type: t}
-			if v := p.Introduced; v != "" && v != "DO_NOT_DISPLAY" && v != apiVersion {
-				fi.Since = v
-			}
-			if d := strings.TrimSpace(p.Description); d != "" && !isGenericFilterDesc(d) {
-				fi.Desc = stripHTML(d)
-			}
-			filters[p.Name] = fi
 		}
 
 		ep := catalog.APIEndpoint{
@@ -303,6 +325,9 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 			Tags:       op.Tags,
 			Introduced: apiVersion,
 			Fields:     extractFieldDescs(op, doc.Definitions, apiVersion),
+		}
+		if len(pathParams) > 0 {
+			ep.PathParams = pathParams
 		}
 		if len(filters) > 0 {
 			ep.Filters = filters
@@ -315,7 +340,7 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 		return fmt.Errorf("save catalog: %w", err)
 	}
 
-	fmt.Printf("Generated catalog: %d endpoints written to %s (%d path-param paths skipped)\n",
+	fmt.Printf("Generated catalog: %d endpoints written to %s (%d paths skipped)\n",
 		len(cat), outputPath, skipped)
 	return nil
 }

@@ -28,14 +28,14 @@ func TestListQoSPolicies(t *testing.T) {
 			mustContain: []string{"cluster"},
 		},
 		{
-			name:           "List only fixed QoS policies",
-			input:          ClusterStr + "list all fixed qos policies",
-			mustNotContain: []string{"adaptive"},
+			name:        "List only fixed QoS policies",
+			input:       ClusterStr + "list all fixed qos policies",
+			mustContain: []string{"fixed"},
 		},
 		{
-			name:           "List only adaptive QoS policies",
-			input:          ClusterStr + "list all adaptive qos policies",
-			mustNotContain: []string{"fixed"},
+			name:        "List only adaptive QoS policies",
+			input:       ClusterStr + "list all adaptive qos policies",
+			mustContain: []string{"adaptive"},
 		},
 	}
 

@@ -82,24 +82,35 @@ const SearchOntapEndpoints = `Search the catalog by keyword across endpoint path
 const DescribeOntapEndpoint = `Get filterable query params for an endpoint. Call before ontap_get to learn valid filter names and which sub-objects need explicit fields (e.g. "space.*", "efficiency.*").
 Pass cluster_name to automatically filter out fields and filters not available in that cluster's ONTAP version.`
 
-const OntapGet = `Execute a read-only GET against any ONTAP REST collection endpoint.
+const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 
 CRITICAL: ALWAYS pass the 'fields' parameter with only the specific fields you need.
 Omitting 'fields' returns 50+ fields per record and floods the context window with noise.
 BAD:  {"path": "/storage/volumes"}                              ← returns everything
 GOOD: {"path": "/storage/volumes", "fields": ["name", "state", "svm.name", "space.used"]}
 
-- path: collection path without /api prefix, e.g. /storage/volumes
+- path: endpoint path without /api prefix — collection (e.g. /storage/volumes) or resource template (e.g. /storage/volumes/{uuid})
+- path_params: (OBJECT) values for {param} placeholders in the path, e.g. {"uuid": "abc-123"}.
+  Obtain the UUID/key first by querying the collection endpoint (e.g. GET /storage/volumes with fields=["uuid","name"]).
 - fields: (ARRAY) dot-notation fields to return, e.g. ["name","svm.name","space.size"] — use "space.*" to expand sub-objects
 - filters: (OBJECT) ONTAP query syntax — exact:"vs1" wildcard:"vol*" range:">1073741824" OR:"online|offline" NOT:"!offline"
 - max_records: limit results; omit to return all
 
-Example:
+Examples:
+  Collection:
   {
     "cluster_name": "dc1",
     "path": "/storage/volumes",
-    "fields": ["name", "svm.name", "space.size", "state"],
+    "fields": ["name", "uuid", "svm.name", "space.size", "state"],
     "filters": {"svm.name": "vs1", "state": "online"}
   }
 
-Call describe_ontap_endpoint first to learn valid field and filter names.`
+  Resource (single object by UUID):
+  {
+    "cluster_name": "dc1",
+    "path": "/storage/volumes/{uuid}",
+    "path_params": {"uuid": "abc-1234-5678"},
+    "fields": ["name", "space.*", "efficiency.*"]
+  }
+
+Call describe_ontap_endpoint first to learn valid field, filter, and path-param names.`
