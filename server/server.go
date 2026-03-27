@@ -328,6 +328,23 @@ func (a *App) DescribeOntapEndpoint(ctx context.Context, _ *mcp.CallToolRequest,
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "%s (since %s%s)\n", p.Path, ep.Introduced, versionNote)
 
+	if len(ep.PathParams) > 0 {
+		names := make([]string, 0, len(ep.PathParams))
+		for k := range ep.PathParams {
+			names = append(names, k)
+		}
+		sort.Strings(names)
+		sb.WriteString("Path parameters required, supply via path_params in ontap_get:\n")
+		for _, name := range names {
+			pp := ep.PathParams[name]
+			if pp.Desc != "" {
+				fmt.Fprintf(&sb, "  %s — %s\n", name, pp.Desc)
+			} else {
+				fmt.Fprintf(&sb, "  %s\n", name)
+			}
+		}
+	}
+
 	if len(ep.Filters) > 0 {
 		names := make([]string, 0, len(ep.Filters))
 		for k := range ep.Filters {
@@ -388,6 +405,17 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	if !strings.HasPrefix(p.Path, "/") {
 		return errorResult(fmt.Errorf("path must start with /, got %q", p.Path)), nil, nil
 	}
+
+	// Resolve any path-parameter placeholders (e.g. {volume.uuid}) before making the request.
+	resolvedPath := p.Path
+	for k, v := range p.PathParams {
+		escaped := url.PathEscape(v)
+		resolvedPath = strings.ReplaceAll(resolvedPath, "{"+k+"}", escaped)
+	}
+	if strings.Contains(resolvedPath, "{") {
+		return errorResult(fmt.Errorf("path %q has unresolved placeholders. Provide their values via path_params (e.g. {\"volume.uuid\": \"<value>\"})", resolvedPath)), nil, nil
+	}
+	p.Path = resolvedPath
 
 	a.locks.RLock(p.Cluster)
 	defer a.locks.RUnlock(p.Cluster)
