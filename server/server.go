@@ -406,13 +406,14 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 		return errorResult(fmt.Errorf("path must start with /, got %q", p.Path)), nil, nil
 	}
 
-	// Resolve any path-parameter placeholders (e.g. {uuid}) before making the request.
+	// Resolve any path-parameter placeholders (e.g. {volume.uuid}) before making the request.
 	resolvedPath := p.Path
 	for k, v := range p.PathParams {
-		resolvedPath = strings.ReplaceAll(resolvedPath, "{"+k+"}", v)
+		escaped := url.PathEscape(v)
+		resolvedPath = strings.ReplaceAll(resolvedPath, "{"+k+"}", escaped)
 	}
 	if strings.Contains(resolvedPath, "{") {
-		return errorResult(fmt.Errorf("path %q has unresolved placeholders. Provide their values via path_params (e.g. {\"uuid\": \"<value>\"})", resolvedPath)), nil, nil
+		return errorResult(fmt.Errorf("path %q has unresolved placeholders. Provide their values via path_params (e.g. {\"volume.uuid\": \"<value>\"})", resolvedPath)), nil, nil
 	}
 	p.Path = resolvedPath
 

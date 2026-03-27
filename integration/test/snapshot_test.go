@@ -60,7 +60,7 @@ func TestSnapshot(t *testing.T) {
 		},
 		{
 			name:        "List snapshots on a volume",
-			input:       "List snapshots on volume harvest_root on svm harvest on " + ClusterStr,
+			input:       ClusterStr + "list snapshots on volume harvest_root on svm harvest",
 			mustContain: []string{"snapshot"},
 		},
 	}
@@ -85,10 +85,10 @@ func TestSnapshot(t *testing.T) {
 			defer cancel()
 			response, err := testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr)
 			if err != nil {
-				slog.Error("Error processing input", slog.Any("error", err))
+				t.Fatalf("Error processing input %q: %v", tt.input, err)
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
-				t.Errorf("Error while accessing the object via prompt %s", slog.Any("input", tt.input))
+				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 			lower := strings.ToLower(response)
 			for _, want := range tt.mustContain {

@@ -128,6 +128,7 @@ func (ep APIEndpoint) FilterByVersion(ontapVersion string) APIEndpoint {
 		Summary:    ep.Summary,
 		Tags:       ep.Tags,
 		Introduced: ep.Introduced,
+		PathParams: ep.PathParams,
 	}
 	out.Filters = make(map[string]FilterInfo, len(ep.Filters))
 	for k, v := range ep.Filters {

@@ -201,11 +201,15 @@ Expected Response: NFS Export Policy Rules updated successfully.
 
 ---
 
-### Manage Snapshot Policies
+### List Snapshots
 
 - On the umeng-aff300-05-06 cluster, list the snapshots on volume docs on svm marketing.
 
 - <span class="key">Expected Response</span>: A list of snapshots for the volume docs on the marketing SVM.
+
+---
+
+### Manage Snapshot Policies
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.
 
