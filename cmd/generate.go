@@ -306,7 +306,7 @@ func generateAPICatalog(data []byte, ontapVersion string, outputPath string) err
 					continue
 				}
 				t := p.Type
-				if t == "string" || t == "" {
+				if t == "string" {
 					t = ""
 				}
 				fi := catalog.FilterInfo{Type: t}
