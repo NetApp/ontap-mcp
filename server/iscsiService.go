@@ -75,8 +75,7 @@ func (a *App) DeleteIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	iscsiServiceDelete, err := newDeleteIscsiService(parameters)
-	if err != nil {
+	if err := newDeleteIscsiService(parameters); err != nil {
 		return nil, nil, err
 	}
 
@@ -84,7 +83,7 @@ func (a *App) DeleteIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteIscsiService(ctx, iscsiServiceDelete)
+	err = client.DeleteIscsiService(ctx, parameters.SVM)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -122,11 +121,9 @@ func newUpdateIscsiService(in tool.IscsiService) (ontap.IscsiService, error) {
 	return out, nil
 }
 
-func newDeleteIscsiService(in tool.IscsiService) (ontap.IscsiService, error) {
-	out := ontap.IscsiService{}
+func newDeleteIscsiService(in tool.IscsiService) error {
 	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
+		return errors.New("SVM name is required")
 	}
-	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	return out, nil
+	return nil
 }
