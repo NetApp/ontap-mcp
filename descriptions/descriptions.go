@@ -86,8 +86,8 @@ const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 
 CRITICAL: ALWAYS pass the 'fields' parameter with only the specific fields you need.
 Omitting 'fields' returns 50+ fields per record and floods the context window with noise.
-BAD:  {"path": "/storage/volumes"}                              ← returns everything
-GOOD: {"path": "/storage/volumes", "fields": "name,state,svm.name,space.used"}
+BAD:  {"cluster_name": "dc1", "path": "/storage/volumes"}                              ← returns everything
+GOOD: {"cluster_name": "dc1", "path": "/storage/volumes", "fields": "name,state,svm.name,space.used"}
 
 - path: endpoint path without /api prefix — collection (e.g. /storage/volumes) or resource template (e.g. /storage/volumes/{volume.uuid}/snapshots)
 - path_params: (OBJECT) values for {param} placeholders in the path, e.g. {"volume.uuid": "abc-123"}.
