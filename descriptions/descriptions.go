@@ -89,11 +89,11 @@ RULES:
    BAD:  {"cluster_name":"dc1","path":"/storage/volumes"}
    GOOD: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,state,svm.name"}
 2. Always use 'filters' to narrow results — NEVER fetch all records to find one item. This is wasteful and will exceed the context window.
-   WRONG: fetch /storage/volumes (all), then scan for the volume you want
-   RIGHT: fetch /storage/volumes with filters={"name":"<vol>","svm.name":"<svm>"}
+   WRONG: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,uuid"}  ← fetches everything
+   RIGHT: {"cluster_name":"dc1","path":"/storage/volumes","fields":"uuid","filters":{"name":"<vol>","svm.name":"<svm>"}}
 3. To query a sub-resource with a UUID path (e.g. /storage/volumes/{volume.uuid}/snapshots):
-   a. GET the collection with filters={"name":"<vol>","svm.name":"<svm>"} and fields="uuid" to fetch just that UUID.
-   b. GET the sub-resource using path_params={"volume.uuid":"<uuid-from-a>"}.
+   a. {"cluster_name":"dc1","path":"/storage/volumes","fields":"uuid","filters":{"name":"<vol>","svm.name":"<svm>"}}
+   b. {"cluster_name":"dc1","path":"/storage/volumes/{volume.uuid}/snapshots","path_params":{"volume.uuid":"<uuid-from-a>"},"fields":"name,create_time"}
 
 Parameters:
 - fields:      comma-separated fields, e.g. "name,svm.name,space.size" — use "space.*" to expand sub-objects
