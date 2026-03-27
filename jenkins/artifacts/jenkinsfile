@@ -159,6 +159,20 @@ pipeline {
     }
 
     post {
+        always {
+            sh '''
+                containers=$(docker ps -aq)
+                if [ -n "$containers" ]; then
+                    echo "$containers" | xargs docker rm -f
+                fi
+                images=$(docker images -q | sort -u)
+                if [ -n "$images" ]; then
+                    echo "$images" | xargs docker rmi -f
+                fi
+                docker builder prune --force
+                docker system prune --force --volumes
+            '''
+        }
         failure {
             sendNotification("FAILED")
         }
