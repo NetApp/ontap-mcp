@@ -265,6 +265,18 @@ Expected Response: The iscsi service has been successfully updated.
 
 Expected Response: The iscsi service has been successfully deleted.
 
+- on the umeng-aff300-05-06 cluster, create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with default ipspace on node umeng-aff300-06
+
+Expected Response: The Network IP interface created successfully.
+
+- on the umeng-aff300-05-06 cluster, change auto revert to false in cluster scope network interface named cl_mg
+
+Expected Response: The Network IP interface updated successfully.
+
+- on the umeng-aff300-05-06 cluster, delete svm scope network interface named svg1 in marketing svm
+
+Expected Response: The Network IP interface deleted successfully.
+
 ---
 
 ### Querying Specific Fields

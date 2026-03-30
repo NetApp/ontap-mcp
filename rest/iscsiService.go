@@ -111,3 +111,98 @@ func (c *Client) DeleteIscsiService(ctx context.Context, svmName string) error {
 
 	return c.checkStatus(statusCode)
 }
+
+func (c *Client) CreateNwIPInterface(ctx context.Context, nwInterface ontap.NwIPInterface) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
+	responseHeaders := http.Header{}
+
+	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
+		ToBytesBuffer(&buf).
+		BodyJSON(nwInterface)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	return c.checkStatus(statusCode)
+}
+
+func (c *Client) UpdateNwIPInterface(ctx context.Context, scope string, interfaceName string, nwInterface ontap.NwIPInterface) error {
+	var (
+		statusCode    int
+		interfaceData ontap.GetData
+	)
+
+	responseHeaders := http.Header{}
+
+	params := url.Values{}
+	params.Set("name", interfaceName)
+	if scope != "" {
+		params.Set("scope", scope)
+	}
+
+	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
+		Params(params).
+		ToJSON(&interfaceData)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	if interfaceData.NumRecords == 0 {
+		return fmt.Errorf("failed to get detail of network interface name %s because it does not exist", interfaceName)
+	}
+
+	builder = c.baseRequestBuilder(`/api/network/ip/interfaces/`+interfaceData.Records[0].UUID, &statusCode, responseHeaders).
+		BodyJSON(nwInterface).
+		Patch()
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	return c.checkStatus(statusCode)
+}
+
+func (c *Client) DeleteNwIPInterface(ctx context.Context, scope string, interfaceName string) error {
+	var (
+		statusCode    int
+		interfaceData ontap.GetData
+	)
+
+	responseHeaders := http.Header{}
+
+	params := url.Values{}
+	params.Set("name", interfaceName)
+	if scope != "" {
+		params.Set("scope", scope)
+	}
+
+	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
+		Params(params).
+		ToJSON(&interfaceData)
+
+	err := c.buildAndExecuteRequest(ctx, builder)
+
+	if err != nil {
+		return err
+	}
+
+	if interfaceData.NumRecords == 0 {
+		return fmt.Errorf("failed to get detail of network interface name %s because it does not exist", interfaceName)
+	}
+
+	builder = c.baseRequestBuilder(`/api/network/ip/interfaces/`+interfaceData.Records[0].UUID, &statusCode, responseHeaders).
+		Delete()
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	return c.checkStatus(statusCode)
+}

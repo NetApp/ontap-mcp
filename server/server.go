@@ -134,6 +134,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
 	addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
 
+	// operation on Network Interface object
+	addTool(a, server, "create_network_ip_interface", descriptions.CreateNetworkIPInterface, createAnnotation, a.CreateNwIPInterface)
+	addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNwIPInterface)
+	addTool(a, server, "delete_network_ip_interface", descriptions.DeleteNetworkIPInterface, deleteAnnotation, a.DeleteNwIPInterface)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)
