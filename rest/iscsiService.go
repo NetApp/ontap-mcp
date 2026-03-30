@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -11,13 +10,11 @@ import (
 
 func (c *Client) CreateIscsiService(ctx context.Context, iscsiService ontap.IscsiService) error {
 	var (
-		buf        bytes.Buffer
 		statusCode int
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/protocols/san/iscsi/services`, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
 		BodyJSON(iscsiService)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
@@ -114,13 +111,11 @@ func (c *Client) DeleteIscsiService(ctx context.Context, svmName string) error {
 
 func (c *Client) CreateNwIPInterface(ctx context.Context, nwInterface ontap.NwIPInterface) error {
 	var (
-		buf        bytes.Buffer
 		statusCode int
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
 		BodyJSON(nwInterface)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {

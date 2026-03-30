@@ -46,7 +46,7 @@ func TestIscsiProtocol(t *testing.T) {
 		},
 		{
 			name:             "Create cluster scope network interface",
-			input:            ClusterStr + "create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with default ipspace on node umeng-aff300-06",
+			input:            ClusterStr + "create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with Default ipspace on node umeng-aff300-06",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=cl_mg&scope=cluster", validationFunc: createObject},
 		},
