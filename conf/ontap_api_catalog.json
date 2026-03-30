@@ -1,6 +1,6 @@
 {
   "ontap_version": "9.16",
-  "generated_at": "2026-03-24T10:56:23Z",
+  "generated_at": "2026-03-26T14:07:52Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
@@ -7921,6 +7921,61 @@
         }
       }
     },
+    "/protocols/san/igroups/{igroup.uuid}/igroups": {
+      "summary": "Retrieves nested initiator groups of an initiator group. This API only reports the nested initiator groups that are direct children of the initiator group. Further nested initiator groups are reported",
+      "tags": [
+        "SAN"
+      ],
+      "api_introduced": "9.9",
+      "fields": {
+        "name": {
+          "desc": "The name of the initiator group."
+        },
+        "records": {
+          "desc": "An array of initiator groups specified to add multiple nested initiator groups to an initiator group in a single API call. Not allowed when the `name` property is used."
+        },
+        "uuid": {
+          "desc": "The unique identifier of the initiator group."
+        }
+      }
+    },
+    "/protocols/san/igroups/{igroup.uuid}/igroups/{uuid}": {
+      "summary": "Retrieves a nested initiator group of an initiator group. This API only reports the nested initiator groups that are direct children of the initiator group. Further nested initiator groups are reporte",
+      "tags": [
+        "SAN"
+      ],
+      "api_introduced": "9.9"
+    },
+    "/protocols/san/igroups/{igroup.uuid}/initiators": {
+      "summary": "Retrieves initiators of an initiator group. This API only reports initiators owned directly by the initiator group. Initiators of nested initiator groups are not included in this collection. ### Expen",
+      "tags": [
+        "SAN"
+      ],
+      "api_introduced": "9.6",
+      "fields": {
+        "comment": {
+          "since": "9.9",
+          "desc": "A comment available for use by the administrator. Valid in POST and PATCH."
+        },
+        "connectivity_tracking": {
+          "since": "9.11",
+          "desc": "Overview of the initiator's connections to ONTAP."
+        },
+        "igroup": {
+          "desc": "The initiator group in which the initiator is found. Note that this does not mean that the initiator cannot also be found in other initiator groups."
+        },
+        "name": {
+          "desc": "The FC WWPN, iSCSI IQN, or iSCSI EUI that identifies the host initiator. Valid in POST only and not allowed when the `records` property is used. An FC WWPN consists of 16 hexadecimal digits grouped as 8 pairs separated by colons. The format for an iSCSI IQN is _iqn.yyyy-mm.reverse_domain_name:any_. The iSCSI EUI format consists of the _eui._ prefix followed by 16 hexadecimal characters."
+        },
+        "proximity": {
+          "since": "9.15",
+          "desc": "Properties that define to what SVMs the initiator is proximal. This information is used to properly report active optimized and active non-optimized network paths via ALUA. If no configuration has been specified for an initiator, the sub-object will not be present in GET. These properties can be set via initiator group POST and PATCH and apply to all instances of the initiator in all initiator groups in the SVM and its peers. The `proximity` sub-object for an initiator is set in POST and PATCH in its entirety and replaces any previously set proximity for the initiator within the SVM for the initiator within the SVM. The `local_svm` property must always be set to `true` or `false` when setting the `proximity` property. To clear any previously set proximity, POST or PATCH the `proximity` object to `null`."
+        },
+        "records": {
+          "desc": "An array of initiators specified to add multiple initiators to an initiator group in a single API call. Not allowed when the `name` property is used."
+        }
+      }
+    },
     "/protocols/san/initiators": {
       "summary": "Retrieves initiators. ### Related ONTAP commands * `lun igroup initiator show` ### Learn more * [`DOC /protocols/san/initiators`](#docs-SAN-protocols_san_initiators)",
       "tags": [
@@ -10680,6 +10735,134 @@
         },
         "uuid": {
           "desc": "Unique identifier of the SnapMirror relationship."
+        }
+      }
+    },
+    "/snapmirror/relationships/{relationship.uuid}/transfers": {
+      "summary": "Retrieves the list of ongoing SnapMirror transfers for the specified relationship. ### Related ONTAP commands * `snapmirror show` ### Example ``` GET \"/api/snapmirror/relationships/293baa53-e63d-11e8-",
+      "tags": [
+        "SnapMirror"
+      ],
+      "api_introduced": "9.6",
+      "path_params": {
+        "relationship.uuid": {
+          "desc": "SnapMirror relationship UUID"
+        }
+      },
+      "filters": {
+        "bytes_transferred": {
+          "type": "integer"
+        },
+        "checkpoint_size": {
+          "type": "integer"
+        },
+        "end_time": {
+          "since": "9.10"
+        },
+        "error_info.code": {
+          "type": "integer",
+          "since": "9.10"
+        },
+        "error_info.message": {
+          "since": "9.10"
+        },
+        "last_updated_time": {
+          "since": "9.14"
+        },
+        "network_compression_ratio": {
+          "since": "9.13"
+        },
+        "on_demand_attrs": {
+          "since": "9.13"
+        },
+        "relationship.destination.cluster.name": {
+          "since": "9.7"
+        },
+        "relationship.destination.cluster.uuid": {
+          "since": "9.7"
+        },
+        "relationship.destination.consistency_group_volumes.name": {
+          "since": "9.8"
+        },
+        "relationship.destination.luns.name": {
+          "since": "9.16"
+        },
+        "relationship.destination.luns.uuid": {
+          "since": "9.16"
+        },
+        "relationship.destination.path": {},
+        "relationship.destination.svm.name": {},
+        "relationship.destination.svm.uuid": {},
+        "relationship.restore": {
+          "type": "boolean"
+        },
+        "snapshot": {},
+        "state": {},
+        "throttle": {
+          "type": "integer",
+          "since": "9.9"
+        },
+        "total_duration": {
+          "since": "9.10"
+        },
+        "uuid": {}
+      },
+      "fields": {
+        "bytes_transferred": {
+          "desc": "Bytes transferred"
+        },
+        "checkpoint_size": {
+          "desc": "Amount of data transferred in bytes as recorded in the restart checkpoint."
+        },
+        "end_time": {
+          "since": "9.10",
+          "desc": "End time of the transfer."
+        },
+        "error_info": {
+          "since": "9.10",
+          "desc": "Error information for the transfer."
+        },
+        "files": {
+          "desc": "This is supported for transfer of restore relationship only. This specifies the list of files or LUNs to be restored. Can contain up to eight files or LUNs."
+        },
+        "last_updated_time": {
+          "since": "9.14",
+          "desc": "Last updated time of the bytes transferred in an active transfer."
+        },
+        "network_compression_ratio": {
+          "since": "9.13",
+          "desc": "Specifies the compression ratio achieved for the data sent over the wire with network compression enabled. This property is only valid for active transfers."
+        },
+        "on_demand_attrs": {
+          "since": "9.13",
+          "desc": "Specifies whether or not an on-demand restore is being carried out. This is only supported for the transfer of restore relationships for entire volumes from the object store. A value for read_write_with_user_data_pull should be provided to start an on-demand restore. A file restore from the object store does not support this option."
+        },
+        "options": {
+          "since": "9.14",
+          "desc": "Options for snapmirror transfer."
+        },
+        "snapshot": {
+          "desc": "Name of snapshot being transferred."
+        },
+        "source_snapshot": {
+          "desc": "Specifies the snapshot on the source to be transferred to the destination."
+        },
+        "state": {
+          "desc": "Status of the transfer. Set PATCH state to \"aborted\" to abort the transfer. Set PATCH state to \"hard_aborted\" to abort the transfer and discard the restart checkpoint. To find \"queued\" transfers refer to relationships GET API."
+        },
+        "storage_efficiency_enabled": {
+          "desc": "This is supported for transfer of restore relationship only. Set this property to \"false\" to turn off storage efficiency for data transferred over the wire and written to the destination."
+        },
+        "throttle": {
+          "since": "9.9",
+          "desc": "Throttle, in KBs per second. This \"throttle\" overrides the \"throttle\" set on the SnapMirror relationship or SnapMirror relationship's policy. If neither of these are set, defaults to 0, which is interpreted as unlimited."
+        },
+        "total_duration": {
+          "since": "9.10",
+          "desc": "Elapsed transfer time."
+        },
+        "uuid": {
+          "desc": "Unique identifier of the SnapMirror transfer."
         }
       }
     },
@@ -15132,6 +15315,156 @@
         "validate_only": {
           "since": "9.14",
           "desc": "Validate the volume move or volume conversion operations and their parameters, without actually performing the operation."
+        }
+      }
+    },
+    "/storage/volumes/{volume.uuid}/snapshots": {
+      "summary": "Retrieves a collection of volume snapshots. ### Expensive properties There is an added computational cost to retrieving the amount of reclaimable space for snapshots, as the calculation is done on dem",
+      "tags": [
+        "Storage"
+      ],
+      "api_introduced": "9.6",
+      "path_params": {
+        "volume.uuid": {
+          "desc": "Volume"
+        }
+      },
+      "filters": {
+        "comment": {},
+        "compress_savings": {
+          "type": "integer",
+          "since": "9.16"
+        },
+        "create_time": {},
+        "dedup_savings": {
+          "type": "integer",
+          "since": "9.16"
+        },
+        "delta.size_consumed": {
+          "type": "integer",
+          "since": "9.12"
+        },
+        "delta.time_elapsed": {
+          "since": "9.12"
+        },
+        "expiry_time": {},
+        "logical_size": {
+          "type": "integer",
+          "since": "9.12"
+        },
+        "name": {},
+        "owners": {
+          "since": "9.7"
+        },
+        "provenance_volume.uuid": {
+          "since": "9.11"
+        },
+        "reclaimable_space": {
+          "type": "integer",
+          "since": "9.10"
+        },
+        "size": {
+          "type": "integer",
+          "since": "9.9"
+        },
+        "snaplock.expired": {
+          "type": "boolean",
+          "since": "9.15"
+        },
+        "snaplock.expiry_time": {
+          "since": "9.15"
+        },
+        "snaplock.time_until_expiry": {
+          "since": "9.15"
+        },
+        "snaplock_expiry_time": {},
+        "snapmirror_label": {
+          "since": "9.8"
+        },
+        "state": {},
+        "svm.name": {},
+        "svm.uuid": {},
+        "uuid": {},
+        "vbn0_savings": {
+          "type": "integer",
+          "since": "9.16"
+        },
+        "version_uuid": {
+          "since": "9.11"
+        },
+        "volume.name": {}
+      },
+      "fields": {
+        "comment": {
+          "desc": "A comment associated with the snapshot. This is an optional attribute for POST or PATCH."
+        },
+        "compress_savings": {
+          "since": "9.16",
+          "desc": "Savings due to compression at the time the snapshot was taken in bytes."
+        },
+        "create_time": {
+          "desc": "Creation time of the snapshot. It is the volume access time when the snapshot was created."
+        },
+        "dedup_savings": {
+          "since": "9.16",
+          "desc": "Savings due to dedup at the time the snapshot was taken in bytes."
+        },
+        "expiry_time": {
+          "desc": "The expiry time for the snapshot. This is an optional attribute for POST or PATCH. Snapshots with an expiry time set are not allowed to be deleted until the retention time is reached."
+        },
+        "logical_size": {
+          "since": "9.12",
+          "desc": "Size of the logical used file system at the time the snapshot is captured."
+        },
+        "name": {
+          "desc": "Snapshot. Valid in POST or PATCH."
+        },
+        "reclaimable_space": {
+          "since": "9.10",
+          "desc": "Space reclaimed when the snapshot is deleted, in bytes."
+        },
+        "size": {
+          "since": "9.9",
+          "desc": "Size of the active file system at the time the snapshot is captured. The actual size of the snapshot also includes those blocks trapped by other snapshots. On a snapshot deletion, the \"size\" amount of blocks is the maximum number of blocks available. On a snapshot restore, the \"afs-used size\" value will match the snapshot \"size\" value."
+        },
+        "snaplock_expiry_time": {
+          "desc": "SnapLock expiry time for the snapshot, if the snapshot is taken on a SnapLock volume. A snapshot is not allowed to be deleted or renamed until the SnapLock ComplianceClock time goes beyond this retention time. This option can be set during snapshot POST and snapshot PATCH on snapshot locking enabled volumes. This field will no longer be supported in a future release. Use snaplock.expiry_time instead."
+        },
+        "snapmirror_label": {
+          "since": "9.8",
+          "desc": "Label for SnapMirror operations"
+        },
+        "state": {
+          "desc": "State of the FlexGroup volume snapshot. In the \"pre_conversion\" state, the snapshot was created before converting the FlexVol to a FlexGroup volume. A recently created snapshot can be in the \"unknown\" state while the system is calculating the state. In the \"partial\" state, the snapshot is consistent but exists only on the subset of the constituents that existed prior to the FlexGroup's expansion. Partial snapshots cannot be used for a snapshot restore operation. A snapshot is in an \"invalid\" state when it is present in some FlexGroup constituents but not in others. At all other times, a snapshot is valid."
+        },
+        "svm": {
+          "desc": "SVM, applies only to SVM-scoped objects."
+        },
+        "uuid": {
+          "desc": "The UUID of the snapshot in the volume that uniquely identifies the snapshot in that volume."
+        },
+        "vbn0_savings": {
+          "since": "9.16",
+          "desc": "Savings due vbn0 at the time the snapshot was taken in bytes."
+        },
+        "version_uuid": {
+          "since": "9.11",
+          "desc": "The 128 bit identifier that uniquely identifies a snapshot and its logical data layout."
+        }
+      }
+    },
+    "/storage/volumes/{volume.uuid}/snapshots/{uuid}": {
+      "summary": "Retrieves details of a specific volume snapshot. ### Related ONTAP commands * `snapshot show` ### Learn more * [`DOC /storage/volumes/{volume.uuid}/snapshots`](#docs-storage-storage_volumes_{volume.uu",
+      "tags": [
+        "Storage"
+      ],
+      "api_introduced": "9.6",
+      "path_params": {
+        "uuid": {
+          "desc": "Snapshot UUID"
+        },
+        "volume.uuid": {
+          "desc": "Volume UUID"
         }
       }
     },

@@ -23,12 +23,18 @@ type FieldInfo struct {
 	Desc  string `json:"desc"`
 }
 
+// PathParamInfo describes a path parameter (e.g. {uuid}) in an endpoint template.
+type PathParamInfo struct {
+	Desc string `json:"desc,omitempty"`
+}
+
 type APIEndpoint struct {
-	Summary    string                `json:"summary"`
-	Tags       []string              `json:"tags"`
-	Introduced string                `json:"api_introduced,omitempty"`
-	Filters    map[string]FilterInfo `json:"filters,omitempty"`
-	Fields     map[string]FieldInfo  `json:"fields,omitempty"`
+	Summary    string                   `json:"summary"`
+	Tags       []string                 `json:"tags"`
+	Introduced string                   `json:"api_introduced,omitempty"`
+	PathParams map[string]PathParamInfo `json:"path_params,omitempty"`
+	Filters    map[string]FilterInfo    `json:"filters,omitempty"`
+	Fields     map[string]FieldInfo     `json:"fields,omitempty"`
 }
 
 // ExcludedPathPrefixes lists ONTAP REST path prefixes that are covered by dedicated typed tools.
@@ -122,6 +128,7 @@ func (ep APIEndpoint) FilterByVersion(ontapVersion string) APIEndpoint {
 		Summary:    ep.Summary,
 		Tags:       ep.Tags,
 		Introduced: ep.Introduced,
+		PathParams: ep.PathParams,
 	}
 	out.Filters = make(map[string]FilterInfo, len(ep.Filters))
 	for k, v := range ep.Filters {
