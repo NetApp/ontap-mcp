@@ -111,7 +111,7 @@ type Qtree struct {
 
 type NVMeService struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM     string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
 	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
