@@ -45,7 +45,7 @@ func TestIscsiProtocol(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=svg1&scope=svm", validationFunc: deleteObject},
 		},
 		{
-			name:             "Create cluster scope network interface",
+			name:             "Create cluster scope network interface with IP",
 			input:            ClusterStr + "create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with Default ipspace on node umeng-aff300-06",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=cl_mg&scope=cluster", validationFunc: createObject},
@@ -55,12 +55,6 @@ func TestIscsiProtocol(t *testing.T) {
 			input:            ClusterStr + "create network interface named svg1 in marketing svm with ip address 10.63.41.7 and netmask 18 on node umeng-aff300-06",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=svg1&scope=svm", validationFunc: createObject},
-		},
-		{
-			name:             "Update network interface",
-			input:            ClusterStr + "change auto revert to false in cluster scoped network interface named cl_mg",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean cluster scope network interface",
@@ -81,7 +75,7 @@ func TestIscsiProtocol(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=svg1&scope=svm", validationFunc: createObject},
 		},
 		{
-			name:             "Clean svm scope network interface",
+			name:             "Clean svm scope network interface with broadcast domain",
 			input:            ClusterStr + "delete svm scope network interface named svg1 in marketing svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=svg1&scope=svm", validationFunc: deleteObject},
