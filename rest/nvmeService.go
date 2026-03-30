@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -11,13 +10,11 @@ import (
 
 func (c *Client) CreateNVMeService(ctx context.Context, nvmeService ontap.NVMeService) error {
 	var (
-		buf        bytes.Buffer
 		statusCode int
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/services`, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
 		BodyJSON(nvmeService)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
