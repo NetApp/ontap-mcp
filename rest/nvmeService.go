@@ -88,20 +88,6 @@ func (c *Client) DeleteNVMeService(ctx context.Context, svmName string) error {
 		return fmt.Errorf("failed to get detail of nvme service in svm %s because it does not exist", svmName)
 	}
 
-	// Disable nvme service first before delete
-	nvmeService := ontap.NVMeService{Enabled: "false"}
-	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
-		BodyJSON(nvmeService).
-		Patch()
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
-	}
-
-	if err := c.checkStatus(statusCode); err != nil {
-		return err
-	}
-
 	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
 		Delete()
 
