@@ -85,20 +85,6 @@ func (c *Client) DeleteIscsiService(ctx context.Context, svmName string) error {
 		return fmt.Errorf("failed to get detail of iscsi service in svm %s because it does not exist", svmName)
 	}
 
-	// Disable iscsi service first before delete
-	iscsiService := ontap.IscsiService{Enabled: "false"}
-	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
-		BodyJSON(iscsiService).
-		Patch()
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
-	}
-
-	if err := c.checkStatus(statusCode); err != nil {
-		return err
-	}
-
 	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
 		Delete()
 
@@ -153,6 +139,10 @@ func (c *Client) UpdateNwIPInterface(ctx context.Context, scope string, interfac
 		return fmt.Errorf("failed to get detail of network interface name %s because it does not exist", interfaceName)
 	}
 
+	if interfaceData.NumRecords > 1 {
+		return fmt.Errorf("multiple network interfaces found with name %s; please specify additional filters", interfaceName)
+	}
+
 	builder = c.baseRequestBuilder(`/api/network/ip/interfaces/`+interfaceData.Records[0].UUID, &statusCode, responseHeaders).
 		BodyJSON(nwInterface).
 		Patch()
@@ -190,6 +180,10 @@ func (c *Client) DeleteNwIPInterface(ctx context.Context, scope string, interfac
 
 	if interfaceData.NumRecords == 0 {
 		return fmt.Errorf("failed to get detail of network interface name %s because it does not exist", interfaceName)
+	}
+
+	if interfaceData.NumRecords > 1 {
+		return fmt.Errorf("multiple network interfaces found with name %s; please specify additional filters", interfaceName)
 	}
 
 	builder = c.baseRequestBuilder(`/api/network/ip/interfaces/`+interfaceData.Records[0].UUID, &statusCode, responseHeaders).

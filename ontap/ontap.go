@@ -70,7 +70,7 @@ type Target struct {
 
 type IP struct {
 	Address string `json:"address" jsonschema:"IP address for the interface"`
-	Netmask string `json:"netmask" jsonschema:"IP subnet of the interface"`
+	Netmask string `json:"netmask" jsonschema:"IP netmask for the interface"`
 }
 
 type Location struct {

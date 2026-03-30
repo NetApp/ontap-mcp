@@ -235,7 +235,7 @@ func newCreateNwIPInterface(in tool.NwIPInterface) (ontap.NwIPInterface, error) 
 	if in.Subnet != "" {
 		out.Subnet.Name = in.Subnet
 	} else {
-		if in.IPAddress == "" && in.IPNetmask == "" {
+		if in.IPAddress == "" || in.IPNetmask == "" {
 			return out, errors.New("network IP address and IP netmask are required")
 		}
 		out.IP = ontap.IP{Address: in.IPAddress, Netmask: in.IPNetmask}
