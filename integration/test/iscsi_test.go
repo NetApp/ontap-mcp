@@ -122,7 +122,7 @@ func TestIscsiProtocol(t *testing.T) {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
-				t.Errorf("Error while accessing the object via prompt %s", slog.Any("input", tt.input))
+				t.Errorf("Error while accessing the object via prompt %s", tt.input)
 			}
 		})
 	}
