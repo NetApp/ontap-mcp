@@ -118,8 +118,9 @@ type IscsiService struct {
 
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
-	Path       string            `json:"path" jsonschema:"ONTAP REST API collection path without /api prefix, e.g. /storage/volumes"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
+	Path       string            `json:"path" jsonschema:"ONTAP REST API path without /api prefix. May be a collection (e.g. /storage/volumes) or a resource template (e.g. /storage/volumes/{uuid})"`
+	PathParams map[string]string `json:"path_params,omitzero" jsonschema:"values for path placeholders when the path contains {param} segments, e.g. {\"volume.uuid\":\"abc-123\"}. Get the UUID first from the collection endpoint."`
 	Filters    map[string]string `json:"filters,omitzero" jsonschema:"filter key-value pairs using ONTAP query syntax as JSON object, e.g. {\"svm.name\":\"vs1\",\"state\":\"online\"}"`
 	MaxRecords int               `json:"max_records,omitzero" jsonschema:"limit results. omit to return all records"`
 }
