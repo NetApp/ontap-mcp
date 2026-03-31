@@ -8,6 +8,12 @@ if [ -z "$VERSION" ]; then
   echo "VERSION not supplied, using $VERSION"
 fi
 
+if [ -z "$TEST_PREFIX" ]; then
+  TEST_PREFIX="ci"
+fi
+export TEST_PREFIX
+echo "TEST_PREFIX: $TEST_PREFIX"
+
 LD_FLAGS="-X ""'""github.com/netapp/ontap-mcp/version.VERSION=${VERSION}""'"""
 echo "$LD_FLAGS"
 

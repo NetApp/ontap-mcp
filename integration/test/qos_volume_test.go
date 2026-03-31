@@ -24,126 +24,126 @@ func TestQoSVolumePolicy(t *testing.T) {
 	}{
 		{
 			name:             "Clean QoS policy qos_docs_200iops",
-			input:            ClusterStr + "delete qos_docs_200iops QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("qos_docs_200iops")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=qos_docs_200iops", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("qos_docs_200iops")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume docs_qos",
-			input:            ClusterStr + "delete volume docs_qos in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs_qos")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume docs_qos2",
-			input:            ClusterStr + "delete volume docs_qos2 in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs_qos2")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos2&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos2")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume docs_qos3",
-			input:            ClusterStr + "delete volume docs_qos3 in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs_qos3")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos3")), validationFunc: deleteObject},
 		},
 
 		{
 			name:             "Create fixed QoS policy qos_docs_200iops",
-			input:            ClusterStr + "create a fixed QoS policy named qos_docs_200iops on the marketing svm with a max throughput of 200 iops and min throughput of 0 iops",
+			input:            fmt.Sprintf("%screate a fixed QoS policy named %s on the marketing svm with a max throughput of 200 iops and min throughput of 0 iops", ClusterStr, rn("qos_docs_200iops")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=qos_docs_200iops", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("qos_docs_200iops")), validationFunc: createObject},
 		},
 		{
 			name:             "Create volume docs_qos",
-			input:            ClusterStr + "create a 20MB volume named docs_qos on the marketing svm and the harvest_vc_aggr aggregate",
+			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate", ClusterStr, rn("docs_qos")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos")), validationFunc: createObject},
 		},
 
 		{
 			name:             "Apply named QoS policy to existing volume",
-			input:            ClusterStr + "apply the qos_docs_200iops QoS policy to the docs_qos volume on the marketing svm",
+			input:            fmt.Sprintf("%sapply the %s QoS policy to the %s volume on the marketing svm", ClusterStr, rn("qos_docs_200iops"), rn("docs_qos")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.name", rn("docs_qos")), validationFunc: verifyQoSAssigned(rn("qos_docs_200iops"))},
 		},
 
 		{
 			name:             "Create volume docs_qos2 with named QoS policy",
-			input:            ClusterStr + "create a 20MB volume named docs_qos2 on the marketing svm and the harvest_vc_aggr aggregate with QoS policy qos_docs_200iops",
+			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate with QoS policy %s", ClusterStr, rn("docs_qos2"), rn("qos_docs_200iops")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos2&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.name", rn("docs_qos2")), validationFunc: verifyQoSAssigned(rn("qos_docs_200iops"))},
 		},
 
 		{
 			name:             "Create volume docs_qos3 with inline QoS max 300 iops",
-			input:            ClusterStr + "create a 20MB volume named docs_qos3 on the marketing svm and the harvest_vc_aggr aggregate with an inline QoS limit of max_iops 300",
+			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate with an inline QoS limit of max_iops 300", ClusterStr, rn("docs_qos3")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.max_throughput_iops", validationFunc: verifyQoSMaxIOPS(300)},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.max_throughput_iops", rn("docs_qos3")), validationFunc: verifyQoSMaxIOPS(300)},
 		},
 		{
 			name:             "Update volume docs_qos3 inline QoS to max 150 iops",
-			input:            ClusterStr + "update the docs_qos3 volume on the marketing svm setting an inline QoS limit of max_iops 150",
+			input:            fmt.Sprintf("%supdate the %s volume on the marketing svm setting an inline QoS limit of max_iops 150", ClusterStr, rn("docs_qos3")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.max_throughput_iops", validationFunc: verifyQoSMaxIOPS(150)},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.max_throughput_iops", rn("docs_qos3")), validationFunc: verifyQoSMaxIOPS(150)},
 		},
 
 		{
 			name:             "Switch docs_qos3 from inline to named QoS policy",
-			input:            ClusterStr + "apply the qos_docs_200iops QoS policy to the docs_qos3 volume on the marketing svm",
+			input:            fmt.Sprintf("%sapply the %s QoS policy to the %s volume on the marketing svm", ClusterStr, rn("qos_docs_200iops"), rn("docs_qos3")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.name", rn("docs_qos3")), validationFunc: verifyQoSAssigned(rn("qos_docs_200iops"))},
 		},
 
 		{
 			name:             "Switch docs_qos from named policy to inline QoS",
-			input:            ClusterStr + "update the docs_qos volume on the marketing svm setting an inline QoS limit of max_iops 100",
+			input:            fmt.Sprintf("%supdate the %s volume on the marketing svm setting an inline QoS limit of max_iops 100", ClusterStr, rn("docs_qos")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm.name=marketing&fields=qos.policy.max_throughput_iops", validationFunc: verifyQoSMaxIOPS(100)},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.max_throughput_iops", rn("docs_qos")), validationFunc: verifyQoSMaxIOPS(100)},
 		},
 
 		{
 			name:             "Remove inline QoS from docs_qos by setting max_iops to 0",
-			input:            ClusterStr + "update the docs_qos volume on the marketing svm and remove the inline QoS limit by setting max_iops to 0",
+			input:            fmt.Sprintf("%supdate the %s volume on the marketing svm and remove the inline QoS limit by setting max_iops to 0", ClusterStr, rn("docs_qos")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSNoPolicy},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.name", rn("docs_qos")), validationFunc: verifyQoSNoPolicy},
 		},
 
 		{
 			name:             "Re-apply named QoS policy to docs_qos3 before removal test",
-			input:            ClusterStr + "apply the qos_docs_200iops QoS policy to the docs_qos3 volume on the marketing svm",
+			input:            fmt.Sprintf("%sapply the %s QoS policy to the %s volume on the marketing svm", ClusterStr, rn("qos_docs_200iops"), rn("docs_qos3")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSAssigned("qos_docs_200iops")},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.name", rn("docs_qos3")), validationFunc: verifyQoSAssigned(rn("qos_docs_200iops"))},
 		},
 		{
 			name:             "Remove named QoS policy from docs_qos3 by specifying none",
-			input:            ClusterStr + "remove the QoS policy from the docs_qos3 volume on the marketing svm",
+			input:            fmt.Sprintf("%sremove the QoS policy from the %s volume on the marketing svm", ClusterStr, rn("docs_qos3")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm.name=marketing&fields=qos.policy.name", validationFunc: verifyQoSNoPolicy},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm.name=marketing&fields=qos.policy.name", rn("docs_qos3")), validationFunc: verifyQoSNoPolicy},
 		},
 
 		{
 			name:             "Clean volume docs_qos after test",
-			input:            ClusterStr + "delete volume docs_qos in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs_qos")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume docs_qos2 after test",
-			input:            ClusterStr + "delete volume docs_qos2 in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs_qos2")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos2&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos2")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume docs_qos3 after test",
-			input:            ClusterStr + "delete volume docs_qos3 in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs_qos3")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs_qos3&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs_qos3")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy qos_docs_200iops after test",
-			input:            ClusterStr + "delete qos_docs_200iops QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("qos_docs_200iops")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=qos_docs_200iops", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("qos_docs_200iops")), validationFunc: deleteObject},
 		},
 	}
 
@@ -169,7 +169,7 @@ func TestQoSVolumePolicy(t *testing.T) {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
-				t.Errorf("Error while accessing the object via prompt %s", slog.Any("input", tt.input))
+				t.Errorf("Error while accessing the object via prompt %s", tt.input)
 			}
 		})
 	}

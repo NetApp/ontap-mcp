@@ -4,11 +4,12 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/netapp/ontap-mcp/ontap"
 
 	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
@@ -25,45 +26,45 @@ func TestQtree(t *testing.T) {
 	}{
 		{
 			name:             "Clean qtree staff",
-			input:            ClusterStr + "delete staff qtree in doc volume in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s qtree in %s volume in marketing svm", ClusterStr, rn("staff"), rn("doc")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("staff")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean qtree pay",
-			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			input:            fmt.Sprintf("%sDelete %s qtree in %s volume in marketing svm", ClusterStr, rn("pay"), rn("docs")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("pay")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate", ClusterStr, rn("docs")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: createObject},
 		},
 		{
 			name:             "Create qtree staff",
-			input:            ClusterStr + "create a qtree named staff in docs volume on the marketing SVM",
+			input:            fmt.Sprintf("%screate a qtree named %s in %s volume on the marketing SVM", ClusterStr, rn("staff"), rn("docs")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: verifyQtreeName("staff")},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("staff")), validationFunc: verifyQtreeName(rn("staff"))},
 		},
 		{
 			name:             "Rename qtree staff",
-			input:            ClusterStr + "rename a qtree named staff to pay in docs volume on the marketing SVM",
+			input:            fmt.Sprintf("%srename a qtree named %s to %s in %s volume on the marketing SVM", ClusterStr, rn("staff"), rn("pay"), rn("docs")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: verifyQtreeName("pay")},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("pay")), validationFunc: verifyQtreeName(rn("pay"))},
 		},
 		{
 			name:             "Clean qtree policy pay",
-			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			input:            fmt.Sprintf("%sDelete %s qtree in %s volume in marketing svm", ClusterStr, rn("pay"), rn("docs")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("pay")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume docs in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: deleteObject},
 		},
 	}
 
@@ -89,7 +90,7 @@ func TestQtree(t *testing.T) {
 				slog.Error("Error processing input", slog.Any("error", err))
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
-				t.Errorf("Error while accessing the object via prompt %s", slog.Any("input", tt.input))
+				t.Errorf("Error while accessing the object via prompt %s", tt.input)
 			}
 		})
 	}

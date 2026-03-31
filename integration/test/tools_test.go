@@ -7,18 +7,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/carlmjohnson/requests"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/ontap"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/carlmjohnson/requests"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/ontap"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 )
 
 const (
@@ -30,8 +31,18 @@ const (
 )
 
 var testAgent *Agent
+var testPrefix string
+
+func rn(base string) string {
+	if testPrefix == "" {
+		return base
+	}
+	return base + "_" + testPrefix
+}
 
 func TestMain(m *testing.M) {
+	testPrefix = os.Getenv("TEST_PREFIX")
+	slog.Info("Integration test run", slog.String("TEST_PREFIX", testPrefix))
 	if os.Getenv(CheckTools) != "" {
 		envConfigData, err := loadEnv()
 		if err != nil {

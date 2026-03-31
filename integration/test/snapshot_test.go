@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -24,39 +25,39 @@ func TestSnapshot(t *testing.T) {
 	}{
 		{
 			name:             "Clean snapshot policy every4hours",
-			input:            ClusterStr + "delete every4hours snapshot policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s snapshot policy in marketing svm", ClusterStr, rn("every4hours")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every4hours", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/snapshot-policies?name=%s", rn("every4hours")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean snapshot policy every5min",
-			input:            ClusterStr + "Delete every5min snapshot policy in marketing svm",
+			input:            fmt.Sprintf("%sDelete %s snapshot policy in marketing svm", ClusterStr, rn("every5min")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every5min", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/snapshot-policies?name=%s", rn("every5min")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create snapshot policy every4hours",
-			input:            ClusterStr + "create a snapshot policy named every4hours on the marketing SVM. The schedule is 4hours and keeps the last 5 snapshots",
+			input:            fmt.Sprintf("%screate a snapshot policy named %s on the marketing SVM. The schedule is 4hours and keeps the last 5 snapshots", ClusterStr, rn("every4hours")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every4hours", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/snapshot-policies?name=%s", rn("every4hours")), validationFunc: createObject},
 		},
 		{
 			name:             "Create snapshot policy every5min",
-			input:            ClusterStr + "create a snapshot policy named every5min on the marketing SVM. The schedule is 5minutes and keeps the last 2 snapshots",
+			input:            fmt.Sprintf("%screate a snapshot policy named %s on the marketing SVM. The schedule is 5minutes and keeps the last 2 snapshots", ClusterStr, rn("every5min")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every5min", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/snapshot-policies?name=%s", rn("every5min")), validationFunc: createObject},
 		},
 		{
 			name:             "Clean snapshot policy every4hours",
-			input:            ClusterStr + "delete every4hours snapshot policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s snapshot policy in marketing svm", ClusterStr, rn("every4hours")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every4hours", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/snapshot-policies?name=%s", rn("every4hours")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean snapshot policy every5min",
-			input:            ClusterStr + "Delete every5min snapshot policy in marketing svm",
+			input:            fmt.Sprintf("%sDelete %s snapshot policy in marketing svm", ClusterStr, rn("every5min")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=every5min", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/snapshot-policies?name=%s", rn("every5min")), validationFunc: deleteObject},
 		},
 		{
 			name:        "List snapshots on a volume",

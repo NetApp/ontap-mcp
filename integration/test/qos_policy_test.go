@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -22,51 +23,51 @@ func TestQoSPolicy(t *testing.T) {
 	}{
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete gold QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("gold")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=gold", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("gold")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete silver QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("silver")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=silver", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("silver")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete payroll QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("payroll")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=payroll", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("payroll")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create fixed QoS policy",
-			input:            ClusterStr + "create a fixed QoS policy named gold on the marketing svm with a max throughput of 5000 iops",
+			input:            fmt.Sprintf("%screate a fixed QoS policy named %s on the marketing svm with a max throughput of 5000 iops", ClusterStr, rn("gold")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=gold", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("gold")), validationFunc: createObject},
 		},
 		{
 			name:             "Create adaptive QoS policy",
-			input:            ClusterStr + "create a adaptive QoS policy named payroll on the marketing svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10",
+			input:            fmt.Sprintf("%screate a adaptive QoS policy named %s on the marketing svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10", ClusterStr, rn("payroll")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=payroll", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("payroll")), validationFunc: createObject},
 		},
 		{
 			name:             "Rename QoS policy",
-			input:            ClusterStr + "rename the QoS policy from gold to silver on the marketing svm",
+			input:            fmt.Sprintf("%srename the QoS policy from %s to %s on the marketing svm", ClusterStr, rn("gold"), rn("silver")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=silver", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("silver")), validationFunc: createObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete silver QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("silver")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=silver", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("silver")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete payroll QoS policy in marketing svm",
+			input:            fmt.Sprintf("%sdelete %s QoS policy in marketing svm", ClusterStr, rn("payroll")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=payroll", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qos/policies?name=%s", rn("payroll")), validationFunc: deleteObject},
 		},
 	}
 

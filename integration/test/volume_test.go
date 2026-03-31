@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -28,81 +29,81 @@ func TestVolume(t *testing.T) {
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume docs in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume docsnew in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docsnew")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docsnew&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docsnew")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate", ClusterStr, rn("docs")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: createObject},
 		},
 		{
 			name:             "Update volume size",
-			input:            ClusterStr + "resize the docs volume on the marketing svm to 25MB",
+			input:            fmt.Sprintf("%sresize the %s volume on the marketing svm to 25MB", ClusterStr, rn("docs")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Update volume size",
-			input:            ClusterStr + "update junction path of the docs volume on the marketing svm to empty",
+			input:            fmt.Sprintf("%supdate junction path of the %s volume on the marketing svm to empty", ClusterStr, rn("docs")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Enable volume autogrowth",
-			input:            ClusterStr + "enable autogrowth and grow percent to 62 on the docs volume in the marketing svm",
+			input:            fmt.Sprintf("%senable autogrowth and grow percent to 62 on the %s volume in the marketing svm", ClusterStr, rn("docs")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Rename volume",
-			input:            ClusterStr + "rename the docs volume on the marketing svm to docsnew",
+			input:            fmt.Sprintf("%srename the %s volume on the marketing svm to %s", ClusterStr, rn("docs"), rn("docsnew")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docsnew&svm=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docsnew")), validationFunc: createObject},
 		},
 		{
 			name:             "Update volume state",
-			input:            ClusterStr + "update state of the docsnew volume on the marketing svm to offline",
+			input:            fmt.Sprintf("%supdate state of the %s volume on the marketing svm to offline", ClusterStr, rn("docsnew")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Update volume state",
-			input:            ClusterStr + "update state of the docsnew volume on the marketing svm to online",
+			input:            fmt.Sprintf("%supdate state of the %s volume on the marketing svm to online", ClusterStr, rn("docsnew")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Update volume junction path",
-			input:            ClusterStr + "update junction path of the docsnew volume on the marketing svm to /docs",
+			input:            fmt.Sprintf("%supdate junction path of the %s volume on the marketing svm to /%s", ClusterStr, rn("docsnew"), rn("docsnew")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "List one volume in one cluster in one svm with specific field",
-			input:            ClusterStr + "for docsnew volume on the marketing svm, show me the name and junction path",
+			input:            fmt.Sprintf("%sfor %s volume on the marketing svm, show me the name and junction path", ClusterStr, rn("docsnew")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docsnew&svm=marketing", validationFunc: listObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docsnew")), validationFunc: listObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume docs in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume docsnew in marketing svm",
+			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docsnew")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docsnew&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docsnew")), validationFunc: deleteObject},
 		},
 	}
 

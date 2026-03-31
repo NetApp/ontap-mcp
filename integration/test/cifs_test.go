@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -22,27 +23,27 @@ func TestCIFSShare(t *testing.T) {
 	}{
 		{
 			name:             "Clean CIFS share",
-			input:            ClusterStr + "delete cifsFin CIFS share in vs_test4 svm",
+			input:            fmt.Sprintf("%sdelete %s CIFS share in vs_test4 svm", ClusterStr, rn("cifsFin")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=cifsFin", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/cifs/shares?name=%s", rn("cifsFin")), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create CIFS share",
-			input:            ClusterStr + "create CIFS share named cifsFin with path as / on the vs_test4 svm",
+			input:            fmt.Sprintf("%screate CIFS share named %s with path as / on the vs_test4 svm", ClusterStr, rn("cifsFin")),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=cifsFin", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/cifs/shares?name=%s", rn("cifsFin")), validationFunc: createObject},
 		},
 		{
 			name:             "Update CIFS share",
-			input:            ClusterStr + "update CIFS share cifsFin path to /vol_test2 on the vs_test4 svm",
+			input:            fmt.Sprintf("%supdate CIFS share %s path to /vol_test2 on the vs_test4 svm", ClusterStr, rn("cifsFin")),
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean CIFS share",
-			input:            ClusterStr + "delete cifsFin CIFS share in vs_test4 svm",
+			input:            fmt.Sprintf("%sdelete %s CIFS share in vs_test4 svm", ClusterStr, rn("cifsFin")),
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=cifsFin", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/cifs/shares?name=%s", rn("cifsFin")), validationFunc: deleteObject},
 		},
 	}
 
