@@ -7,19 +7,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
-	"net/http"
-	"os"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/carlmjohnson/requests"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
+	"log/slog"
+	"net/http"
+	"os"
+	"strings"
+	"testing"
+	"time"
 )
 
 const (
