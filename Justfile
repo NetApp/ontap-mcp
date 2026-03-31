@@ -33,7 +33,7 @@ license-check:
 docs:
     mkdocs serve
 
-ci: license-check lint test
+checks: license-check lint test
 
 build: lint ## Build the ONTAP MCP server binary with development checks
 	@echo "Building ONTAP MCP server..."
@@ -44,3 +44,16 @@ docker-build: ## Build Docker image (use DOCKER_TAG to customize tag, e.g., just
 	@echo "Building Docker image..."
 	@docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} -t {{DOCKER_TAG}} .
 	@echo "✅ Docker image built: {{DOCKER_TAG}}"
+
+ci: ## Run integration tests
+    #!/usr/bin/env bash
+    set -euo pipefail
+    TEST_SUFFIX="$(date +%s)"
+    VERSION="${VERSION:-$(date +%Y.%m.%d | cut -c 3-)}"
+    LD_FLAGS="-X 'github.com/netapp/ontap-mcp/version.VERSION=${VERSION}'"
+    echo "Integration CI: TEST_SUFFIX=$TEST_SUFFIX  VERSION=$VERSION"
+    export TEST_SUFFIX
+    export CHECK_TOOLS=1
+    cd integration/test
+    go mod tidy
+    go test -v -timeout 1h -ldflags="$LD_FLAGS"
