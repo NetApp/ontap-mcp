@@ -204,6 +204,11 @@ type Qtree struct {
 	Name   string      `json:"name,omitzero" jsonschema:"qtree name"`
 }
 
+type NVMeService struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
+}
+
 type IscsiService struct {
 	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`

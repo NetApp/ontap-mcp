@@ -128,6 +128,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
 	addTool(a, server, "delete_qtree", descriptions.DeleteQtree, deleteAnnotation, a.DeleteQtree)
 
+	// operation on NVMe service object
+	addTool(a, server, "create_nvme_service", descriptions.CreateNVMeService, createAnnotation, a.CreateNVMeService)
+	addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
+	addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
+
 	// operation on iSCSI service object
 	addTool(a, server, "create_iscsi_service", descriptions.CreateIscsiService, createAnnotation, a.CreateIscsiService)
 	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)

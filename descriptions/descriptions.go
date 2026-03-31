@@ -72,6 +72,10 @@ const CreateQtree = `Create Qtree on a cluster by cluster name.`
 const UpdateQtree = `Update Qtree on a cluster by cluster name.`
 const DeleteQtree = `Delete Qtree on a cluster by cluster name.`
 
+const CreateNVMeService = `Create NVMe service on a cluster by cluster name.`
+const UpdateNVMeService = `Update NVMe service on a cluster by cluster name.`
+const DeleteNVMeService = `Delete NVMe service on a cluster by cluster name.`
+
 const CreateIscsiService = `Create iSCSI service on a cluster by cluster name.`
 const UpdateIscsiService = `Update iSCSI service on a cluster by cluster name.`
 const DeleteIscsiService = `Delete iSCSI service on a cluster by cluster name.`
