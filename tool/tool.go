@@ -122,7 +122,7 @@ type IscsiService struct {
 	TargetAlias string `json:"target.alias,omitzero" jsonschema:"iSCSI target alias of the iSCSI service"`
 }
 
-type NwIPInterface struct {
+type NetworkIPInterface struct {
 	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM             string `json:"svm_name,omitzero" jsonschema:"SVM name"`
 	IPSpace         string `json:"ipspace_name,omitzero" jsonschema:"ipspace name"`

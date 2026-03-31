@@ -215,7 +215,7 @@ type IscsiService struct {
 	Target  Target      `json:"target,omitzero" jsonschema:"target of iSCSI service"`
 }
 
-type NwIPInterface struct {
+type NetworkIPInterface struct {
 	SVM           NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	IPSpace       NameAndUUID `json:"ipspace,omitzero" jsonschema:"ipspace name"`
 	Name          string      `json:"name" jsonschema:"name of the interface"`

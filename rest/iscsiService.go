@@ -95,7 +95,7 @@ func (c *Client) DeleteIscsiService(ctx context.Context, svmName string) error {
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) CreateNwIPInterface(ctx context.Context, nwInterface ontap.NwIPInterface) error {
+func (c *Client) CreateNetworkIPInterface(ctx context.Context, nwInterface ontap.NetworkIPInterface) error {
 	var (
 		statusCode int
 	)
@@ -111,7 +111,7 @@ func (c *Client) CreateNwIPInterface(ctx context.Context, nwInterface ontap.NwIP
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) UpdateNwIPInterface(ctx context.Context, scope string, interfaceName string, nwInterface ontap.NwIPInterface) error {
+func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, interfaceName string, nwInterface ontap.NetworkIPInterface) error {
 	var (
 		statusCode    int
 		interfaceData ontap.GetData
@@ -154,7 +154,7 @@ func (c *Client) UpdateNwIPInterface(ctx context.Context, scope string, interfac
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) DeleteNwIPInterface(ctx context.Context, scope string, interfaceName string) error {
+func (c *Client) DeleteNetworkIPInterface(ctx context.Context, scope string, interfaceName string) error {
 	var (
 		statusCode    int
 		interfaceData ontap.GetData

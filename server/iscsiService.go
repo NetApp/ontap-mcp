@@ -98,13 +98,13 @@ func (a *App) DeleteIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 	}, nil, nil
 }
 
-func (a *App) CreateNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NwIPInterface) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateNetworkIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NetworkIPInterface) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	nwIPInterfaceCreate, err := newCreateNwIPInterface(parameters)
+	networkIPInterfaceCreate, err := newCreateNetworkIPInterface(parameters)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -113,7 +113,7 @@ func (a *App) CreateNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.CreateNwIPInterface(ctx, nwIPInterfaceCreate)
+	err = client.CreateNetworkIPInterface(ctx, networkIPInterfaceCreate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -128,13 +128,13 @@ func (a *App) CreateNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, p
 	}, nil, nil
 }
 
-func (a *App) UpdateNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NwIPInterface) (*mcp.CallToolResult, any, error) {
+func (a *App) UpdateNetworkIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NetworkIPInterface) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	nwIPInterfaceUpdate, err := newUpdateNwIPInterface(parameters)
+	networkIPInterfaceUpdate, err := newUpdateNetworkIPInterface(parameters)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -143,7 +143,7 @@ func (a *App) UpdateNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.UpdateNwIPInterface(ctx, parameters.Scope, parameters.Name, nwIPInterfaceUpdate)
+	err = client.UpdateNetworkIPInterface(ctx, parameters.Scope, parameters.Name, networkIPInterfaceUpdate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -158,13 +158,13 @@ func (a *App) UpdateNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, p
 	}, nil, nil
 }
 
-func (a *App) DeleteNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NwIPInterface) (*mcp.CallToolResult, any, error) {
+func (a *App) DeleteNetworkIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NetworkIPInterface) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if err := newDeleteNwIPInterface(parameters); err != nil {
+	if err := newDeleteNetworkIPInterface(parameters); err != nil {
 		return nil, nil, err
 	}
 
@@ -172,7 +172,7 @@ func (a *App) DeleteNwIPInterface(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNwIPInterface(ctx, parameters.Scope, parameters.Name)
+	err = client.DeleteNetworkIPInterface(ctx, parameters.Scope, parameters.Name)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -217,8 +217,8 @@ func newDeleteIscsiService(in tool.IscsiService) error {
 	return nil
 }
 
-func newCreateNwIPInterface(in tool.NwIPInterface) (ontap.NwIPInterface, error) {
-	out := ontap.NwIPInterface{}
+func newCreateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInterface, error) {
+	out := ontap.NetworkIPInterface{}
 	if in.Name == "" {
 		return out, errors.New("network interface name is required")
 	}
@@ -265,8 +265,8 @@ func newCreateNwIPInterface(in tool.NwIPInterface) (ontap.NwIPInterface, error) 
 	return out, nil
 }
 
-func newUpdateNwIPInterface(in tool.NwIPInterface) (ontap.NwIPInterface, error) {
-	out := ontap.NwIPInterface{}
+func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInterface, error) {
+	out := ontap.NetworkIPInterface{}
 	if in.Name == "" {
 		return out, errors.New("network interface name is required")
 	}
@@ -280,7 +280,7 @@ func newUpdateNwIPInterface(in tool.NwIPInterface) (ontap.NwIPInterface, error) 
 	return out, nil
 }
 
-func newDeleteNwIPInterface(in tool.NwIPInterface) error {
+func newDeleteNetworkIPInterface(in tool.NetworkIPInterface) error {
 	if in.Name == "" {
 		return errors.New("network interface name is required")
 	}
