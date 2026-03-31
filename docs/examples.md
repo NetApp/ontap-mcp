@@ -261,6 +261,18 @@ Expected Response: The nvme service has been successfully created.
 
 Expected Response: The nvme service has been successfully updated.
 
+- On the umeng-aff300-05-06 cluster, create nvme subsystem sys1 with linux os on the marketing svm
+
+Expected Response: The nvme subsystem has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, add host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem linux os in marketing svm
+
+Expected Response: The nvme subsystem Host added successfully.
+
+- On the umeng-aff300-05-06 cluster, delete nvme subsystem sys2 with linux os in marketing svm
+
+Expected Response: The nvme subsystem deleted successfully.
+
 ---
 
 ### Querying Specific Fields

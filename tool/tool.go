@@ -115,6 +115,24 @@ type NVMeService struct {
 	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
+type NVMeSubsystem struct {
+	Cluster  string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM      string   `json:"svm_name" jsonschema:"SVM name"`
+	Name     string   `json:"name" jsonschema:"name for NVMe subsystem"`
+	OSType   string   `json:"os_type" jsonschema:"operating system of the NVMe subsystem's hosts"`
+	HostNQNs []string `json:"hosts_nqns,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+	Comment  string   `json:"comment,omitzero" jsonschema:"configurable comment for the NVMe subsystem"`
+}
+
+type NVMeSubsystemHost struct {
+	Cluster string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string   `json:"svm_name" jsonschema:"SVM name"`
+	Name    string   `json:"name" jsonschema:"name for NVMe subsystem"`
+	OSType  string   `json:"os_type" jsonschema:"operating system of the NVMe subsystem's hosts"`
+	NQN     string   `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+	Records []string `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`

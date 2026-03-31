@@ -194,6 +194,23 @@ type NVMeService struct {
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
+type NVMeSubsystem struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Name    string      `json:"name,omitzero" jsonschema:"name for NVMe subsystem"`
+	OSType  string      `json:"os_type,omitzero" jsonschema:"operating system of the NVMe subsystem's hosts"`
+	Hosts   []Hosts     `json:"hosts,omitzero" jsonschema:"NVMe hosts configured for access to the NVMe subsystem"`
+	Comment string      `json:"comment,omitzero" jsonschema:"configurable comment for the NVMe subsystem"`
+}
+
+type Hosts struct {
+	NQN string `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+}
+
+type NVMeSubsystemHost struct {
+	NQN     string  `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+	Records []Hosts `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
+}
+
 const (
 	ASAr2 = "asar2"
 	CDOT  = "cdot"

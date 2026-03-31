@@ -133,6 +133,15 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
 	addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
 
+	// operation on NVMe subsystem object
+	addTool(a, server, "create_nvme_subsystem", descriptions.CreateNVMeSubsystem, createAnnotation, a.CreateNVMeSubsystem)
+	addTool(a, server, "update_nvme_subsystem", descriptions.UpdateNVMeSubsystem, updateAnnotation, a.UpdateNVMeSubsystem)
+	addTool(a, server, "delete_nvme_subsystem", descriptions.DeleteNVMeSubsystem, deleteAnnotation, a.DeleteNVMeSubsystem)
+
+	// operation on NVMe subsystem host object
+	addTool(a, server, "add_nvme_subsystem_host", descriptions.AddNVMeSubsystemHost, createAnnotation, a.AddNVMeSubsystemHost)
+	addTool(a, server, "remove_nvme_subsystem_host", descriptions.RemoveNVMeSubsystemHost, deleteAnnotation, a.RemoveNVMeSubsystemHost)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)
