@@ -22,27 +22,27 @@ func TestCIFSShare(t *testing.T) {
 	}{
 		{
 			name:             "Clean CIFS share",
-			input:            ClusterStr + "delete cifsFin CIFS share in vs_test4 svm",
+			input:            ClusterStr + "delete " + rn("cifsFin") + " CIFS share in vs_test4 svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=cifsFin", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=" + rn("cifsFin"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create CIFS share",
-			input:            ClusterStr + "create CIFS share named cifsFin with path as / on the vs_test4 svm",
+			input:            ClusterStr + "create CIFS share named " + rn("cifsFin") + " with path as / on the vs_test4 svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=cifsFin", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=" + rn("cifsFin"), validationFunc: createObject},
 		},
 		{
 			name:             "Update CIFS share",
-			input:            ClusterStr + "update CIFS share cifsFin path to /vol_test2 on the vs_test4 svm",
+			input:            ClusterStr + "update CIFS share " + rn("cifsFin") + " path to /vol_test2 on the vs_test4 svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean CIFS share",
-			input:            ClusterStr + "delete cifsFin CIFS share in vs_test4 svm",
+			input:            ClusterStr + "delete " + rn("cifsFin") + " CIFS share in vs_test4 svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=cifsFin", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=" + rn("cifsFin"), validationFunc: deleteObject},
 		},
 	}
 
