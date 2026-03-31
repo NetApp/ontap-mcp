@@ -109,6 +109,12 @@ type Qtree struct {
 	NewName string `json:"new_name,omitzero" jsonschema:"new qtree name"`
 }
 
+type NVMeService struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
+	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
