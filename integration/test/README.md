@@ -9,7 +9,7 @@
   LLM_TOKEN=<your-llm-token>
   ```
   Get your token from https://llm-proxy-api.ai.openeng.netapp.com/ui/
-- MCP server running on port `8083`
+- Start MCP server `go run main.go start --inspect-traffic --port 8083`
 
 ## Running
 
