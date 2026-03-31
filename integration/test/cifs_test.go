@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -23,27 +22,27 @@ func TestCIFSShare(t *testing.T) {
 	}{
 		{
 			name:             "Clean CIFS share",
-			input:            fmt.Sprintf("%sdelete %s CIFS share in vs_test4 svm", ClusterStr, rn("cifsFin")),
+			input:            ClusterStr + "delete " + rn("cifsFin") + " CIFS share in vs_test4 svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/cifs/shares?name=%s", rn("cifsFin")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=" + rn("cifsFin"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create CIFS share",
-			input:            fmt.Sprintf("%screate CIFS share named %s with path as / on the vs_test4 svm", ClusterStr, rn("cifsFin")),
+			input:            ClusterStr + "create CIFS share named " + rn("cifsFin") + " with path as / on the vs_test4 svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/cifs/shares?name=%s", rn("cifsFin")), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=" + rn("cifsFin"), validationFunc: createObject},
 		},
 		{
 			name:             "Update CIFS share",
-			input:            fmt.Sprintf("%supdate CIFS share %s path to /vol_test2 on the vs_test4 svm", ClusterStr, rn("cifsFin")),
+			input:            ClusterStr + "update CIFS share " + rn("cifsFin") + " path to /vol_test2 on the vs_test4 svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean CIFS share",
-			input:            fmt.Sprintf("%sdelete %s CIFS share in vs_test4 svm", ClusterStr, rn("cifsFin")),
+			input:            ClusterStr + "delete " + rn("cifsFin") + " CIFS share in vs_test4 svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/cifs/shares?name=%s", rn("cifsFin")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/cifs/shares?name=" + rn("cifsFin"), validationFunc: deleteObject},
 		},
 	}
 

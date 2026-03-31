@@ -7,18 +7,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/carlmjohnson/requests"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/ontap"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/carlmjohnson/requests"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/ontap"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 )
 
 const (
@@ -303,7 +304,7 @@ func SkipIfMissing(t *testing.T, vars ...string) {
 
 func createObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	var data ontap.GetData
-	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+	err := requests.URL("https://"+poller.Addr+"/"+api).
 		BasicAuth(poller.Username, poller.Password).
 		Client(client).
 		ToJSON(&data).
@@ -321,7 +322,7 @@ func createObject(t *testing.T, api string, poller *config.Poller, client *http.
 
 func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	var data ontap.GetData
-	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+	err := requests.URL("https://"+poller.Addr+"/"+api).
 		BasicAuth(poller.Username, poller.Password).
 		Client(client).
 		ToJSON(&data).
@@ -338,7 +339,7 @@ func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.
 }
 
 func listObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+	err := requests.URL("https://"+poller.Addr+"/"+api).
 		BasicAuth(poller.Username, poller.Password).
 		Client(client).
 		Fetch(context.Background())

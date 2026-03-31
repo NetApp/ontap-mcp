@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -26,45 +25,45 @@ func TestQtree(t *testing.T) {
 	}{
 		{
 			name:             "Clean qtree staff",
-			input:            fmt.Sprintf("%sdelete %s qtree in %s volume in marketing svm", ClusterStr, rn("staff"), rn("doc")),
+			input:            ClusterStr + "delete " + rn("staff") + " qtree in " + rn("doc") + " volume in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("staff")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("staff"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean qtree pay",
-			input:            fmt.Sprintf("%sDelete %s qtree in %s volume in marketing svm", ClusterStr, rn("pay"), rn("docs")),
+			input:            ClusterStr + "Delete " + rn("pay") + " qtree in " + rn("docs") + " volume in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("pay")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create volume",
-			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate", ClusterStr, rn("docs")),
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the marketing svm and the harvest_vc_aggr aggregate",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: createObject},
 		},
 		{
 			name:             "Create qtree staff",
-			input:            fmt.Sprintf("%screate a qtree named %s in %s volume on the marketing SVM", ClusterStr, rn("staff"), rn("docs")),
+			input:            ClusterStr + "create a qtree named " + rn("staff") + " in " + rn("docs") + " volume on the marketing SVM",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("staff")), validationFunc: verifyQtreeName(rn("staff"))},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("staff"), validationFunc: verifyQtreeName(rn("staff"))},
 		},
 		{
 			name:             "Rename qtree staff",
-			input:            fmt.Sprintf("%srename a qtree named %s to %s in %s volume on the marketing SVM", ClusterStr, rn("staff"), rn("pay"), rn("docs")),
+			input:            ClusterStr + "rename a qtree named " + rn("staff") + " to " + rn("pay") + " in " + rn("docs") + " volume on the marketing SVM",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("pay")), validationFunc: verifyQtreeName(rn("pay"))},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: verifyQtreeName(rn("pay"))},
 		},
 		{
 			name:             "Clean qtree policy pay",
-			input:            fmt.Sprintf("%sDelete %s qtree in %s volume in marketing svm", ClusterStr, rn("pay"), rn("docs")),
+			input:            ClusterStr + "Delete " + rn("pay") + " qtree in " + rn("docs") + " volume in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/qtrees?name=%s", rn("pay")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs")),
+			input:            ClusterStr + "delete volume " + rn("docs") + " in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: deleteObject},
 		},
 	}
 
@@ -99,7 +98,7 @@ func TestQtree(t *testing.T) {
 func verifyQtreeName(qtreeName string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool { //nolint:unparam
 	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 		var data ontap.GetData
-		err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+		err := requests.URL("https://"+poller.Addr+"/"+api).
 			BasicAuth(poller.Username, poller.Password).
 			Client(client).
 			ToJSON(&data).

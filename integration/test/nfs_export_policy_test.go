@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -23,51 +22,51 @@ func TestNFSExportPolicy(t *testing.T) {
 	}{
 		{
 			name:             "Clean NFS export policy",
-			input:            fmt.Sprintf("%sdelete %s NFS export policy", ClusterStr, rn("nfsEngPolicy")),
+			input:            ClusterStr + "delete " + rn("nfsEngPolicy") + " NFS export policy",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/nfs/export-policies?name=%s", rn("nfsEngPolicy")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NFS export policy",
-			input:            fmt.Sprintf("%sdelete %s NFS export policy", ClusterStr, rn("nfsMgrPolicy")),
+			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/nfs/export-policies?name=%s", rn("nfsMgrPolicy")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create NFS export policy",
-			input:            fmt.Sprintf("%screate an NFS export policy name %s on the marketing svm", ClusterStr, rn("nfsEngPolicy")),
+			input:            ClusterStr + "create an NFS export policy name " + rn("nfsEngPolicy") + " on the marketing svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/nfs/export-policies?name=%s", rn("nfsEngPolicy")), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy"), validationFunc: createObject},
 		},
 		{
 			name:             "Create volume",
-			input:            fmt.Sprintf("%screate a 20MB volume named %s on the marketing svm and the harvest_vc_aggr aggregate", ClusterStr, rn("docs")),
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the marketing svm and the harvest_vc_aggr aggregate",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: createObject},
 		},
 		{
 			name:             "Attach NFS export policy to volume",
-			input:            fmt.Sprintf("%sapply %s NFS export policy to the %s volume in the marketing svm", ClusterStr, rn("nfsEngPolicy"), rn("docs")),
+			input:            ClusterStr + "apply " + rn("nfsEngPolicy") + " NFS export policy to the " + rn("docs") + " volume in the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Rename NFS export policy",
-			input:            fmt.Sprintf("%srename the NFS export policy from %s to %s on the marketing svm", ClusterStr, rn("nfsEngPolicy"), rn("nfsMgrPolicy")),
+			input:            ClusterStr + "rename the NFS export policy from " + rn("nfsEngPolicy") + " to " + rn("nfsMgrPolicy") + " on the marketing svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/nfs/export-policies?name=%s", rn("nfsMgrPolicy")), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: createObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            fmt.Sprintf("%sdelete volume %s in marketing svm", ClusterStr, rn("docs")),
+			input:            ClusterStr + "delete volume " + rn("docs") + " in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/storage/volumes?name=%s&svm=marketing", rn("docs")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NFS export policy",
-			input:            fmt.Sprintf("%sdelete %s NFS export policy", ClusterStr, rn("nfsMgrPolicy")),
+			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: fmt.Sprintf("api/protocols/nfs/export-policies?name=%s", rn("nfsMgrPolicy")), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: deleteObject},
 		},
 	}
 
