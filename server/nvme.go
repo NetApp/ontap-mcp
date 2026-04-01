@@ -231,7 +231,11 @@ func newCreateNVMeSubsystem(in tool.NVMeSubsystem) (ontap.NVMeSubsystem, error) 
 	out.OSType = in.OSType
 
 	for _, nqn := range in.HostNQNs {
-		out.Hosts = append(out.Hosts, ontap.Hosts{NQN: nqn})
+		out.Hosts = append(out.Hosts, ontap.NVMeHost{NQN: nqn})
+	}
+
+	if in.Comment != "" {
+		out.Comment = in.Comment
 	}
 
 	return out, nil
@@ -341,14 +345,24 @@ func newAddNVMeSubsystemHost(in tool.NVMeSubsystemHost) (ontap.NVMeSubsystemHost
 	}
 
 	if in.NQN == "" && len(in.Records) == 0 {
-		return out, errors.New("NVMe subsystem host NQN OR Array of NQNs are required")
+		return out, errors.New("either NVMe subsystem host NQN OR one or more host NQNs (records) must be provided")
 	}
+
+	// Enforce mutual exclusivity: cannot specify both a single NQN and an array
+	if in.NQN != "" && len(in.Records) > 0 {
+		return out, errors.New("specify either a single NVMe subsystem host NQN or an array of NQNs, but not both")
+	}
+
 	if in.NQN != "" {
 		out.NQN = in.NQN
+		return out, nil
 	}
 
 	for _, nqn := range in.Records {
-		out.Records = append(out.Records, ontap.Hosts{NQN: nqn})
+		if nqn == "" {
+			return out, errors.New("all NQNs in the array must be non-empty")
+		}
+		out.Records = append(out.Records, ontap.NVMeHost{NQN: nqn})
 	}
 	return out, nil
 }
@@ -464,7 +478,7 @@ func newCreateNVMeNamespace(in tool.NVMeNamespace) (ontap.NVMeNamespace, error) 
 		return out, errors.New("SVM name is required")
 	}
 	if in.Name == "" {
-		return out, errors.New("NVMe subsystem name is required")
+		return out, errors.New("NVMe namespace name is required")
 	}
 	if in.OSType == "" {
 		return out, errors.New("OS type is required")
@@ -535,7 +549,7 @@ func (a *App) CreateNVMeSubsystemMap(ctx context.Context, _ *mcp.CallToolRequest
 		return errorResult(err), nil, err
 	}
 
-	responseText := "NVMe Subsystem Map create successfully"
+	responseText := "NVMe Subsystem Map created successfully"
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -586,7 +600,7 @@ func newCreateNVMeSubsystemMap(in tool.NVMeSubsystemMap) (ontap.NVMeSubsystemMap
 	}
 
 	out.SVM.Name = in.SVM
-	out.Subsystemn.Name = in.Subsystem
+	out.Subsystem.Name = in.Subsystem
 	out.Namespace.Name = in.Namespace
 	return out, nil
 }

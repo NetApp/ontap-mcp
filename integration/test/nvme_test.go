@@ -103,6 +103,9 @@ func TestNVMeService(t *testing.T) {
 	}
 
 	poller := cfg.Pollers[SarCluster]
+	if poller == nil {
+		t.Skipf("Cluster %q not found in %s, skipping NVMe tests", SarCluster, ConfigFile)
+	}
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: poller.UseInsecureTLS, // #nosec G402
@@ -116,7 +119,7 @@ func TestNVMeService(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			if _, err = testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
-				slog.Error("Error processing input", slog.Any("error", err))
+				t.Fatalf("Error processing input %q: %v", tt.input, err)
 			}
 			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
 				t.Errorf("Error while accessing the object via prompt %s", tt.input)

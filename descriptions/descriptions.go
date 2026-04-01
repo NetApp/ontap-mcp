@@ -80,8 +80,8 @@ const CreateNVMeSubsystem = `Create NVMe subsystem on a cluster by cluster name.
 const UpdateNVMeSubsystem = `Update NVMe subsystem on a cluster by cluster name.`
 const DeleteNVMeSubsystem = `Delete NVMe subsystem on a cluster by cluster name.`
 
-const AddNVMeSubsystemHost = `Add a host NQN to a NVMe subsystem on a cluster by cluster name.`
-const RemoveNVMeSubsystemHost = `Remove a host NQN from a NVMe subsystem on a cluster by cluster name.`
+const AddNVMeSubsystemHost = `Add a host NQN to an NVMe subsystem on a cluster by cluster name.`
+const RemoveNVMeSubsystemHost = `Remove a host NQN from an NVMe subsystem on a cluster by cluster name.`
 
 const CreateNVMeNamespace = `Create NVMe namespace on a cluster by cluster name.`
 const UpdateNVMeNamespace = `Update NVMe namespace on a cluster by cluster name.`

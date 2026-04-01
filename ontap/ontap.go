@@ -198,19 +198,19 @@ type NVMeSubsystem struct {
 	SVM                    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Name                   string      `json:"name,omitzero" jsonschema:"name for NVMe subsystem"`
 	OSType                 string      `json:"os_type,omitzero" jsonschema:"operating system of the NVMe subsystem's hosts"`
-	Hosts                  []Hosts     `json:"hosts,omitzero" jsonschema:"NVMe hosts configured for access to the NVMe subsystem"`
+	Hosts                  []NVMeHost  `json:"hosts,omitzero" jsonschema:"NVMe hosts configured for access to the NVMe subsystem"`
 	Comment                string      `json:"comment,omitzero" jsonschema:"configurable comment for the NVMe subsystem"`
 	AllowDeleteWhileMapped bool        `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows for the deletion of a mapped NVMe subsystem. This parameter should be used with caution."`
 	AllowDeleteWithHosts   bool        `json:"allow_delete_with_hosts,omitzero" jsonschema:"Allows for the deletion of an NVMe subsystem with NVMe hosts. This parameter should be used with caution."`
 }
 
-type Hosts struct {
-	NQN string `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+type NVMeHost struct {
+	NQN string `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe host"`
 }
 
 type NVMeSubsystemHost struct {
-	NQN     string  `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
-	Records []Hosts `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
+	NQN     string     `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+	Records []NVMeHost `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
 }
 
 type NVMeNamespace struct {
@@ -226,9 +226,9 @@ type Space struct {
 }
 
 type NVMeSubsystemMap struct {
-	SVM        NameAndUUID `json:"svm" jsonschema:"svm name"`
-	Subsystemn NameAndUUID `json:"subsystem" jsonschema:"subsystem name"`
-	Namespace  NameAndUUID `json:"namespace" jsonschema:"namespace name"`
+	SVM       NameAndUUID `json:"svm" jsonschema:"svm name"`
+	Subsystem NameAndUUID `json:"subsystem" jsonschema:"subsystem name"`
+	Namespace NameAndUUID `json:"namespace" jsonschema:"namespace name"`
 }
 
 const (

@@ -271,7 +271,7 @@ func (c *Client) RemoveNVMeSubsystemHost(ctx context.Context, svmName string, na
 			name, svmName, nvmeSs.NumRecords)
 	}
 
-	builder2 := c.baseRequestBuilder(`/api/protocols/nvme/subsystems/`+nvmeSs.Records[0].UUID+`/hosts/`+nqn, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/nvme/subsystems/`+nvmeSs.Records[0].UUID+`/hosts/`+url.PathEscape(nqn), &statusCode, responseHeaders).
 		Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
