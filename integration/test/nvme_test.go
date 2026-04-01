@@ -72,18 +72,6 @@ func TestNVMeService(t *testing.T) {
 			verifyAPI:        ontapVerifier{},
 		},
 		{
-			name:             "Remove host in NVMe subsystem",
-			input:            SarClusterStr + "remove host nqn as nqn.1992-01.example.com:host1 in sys2 nvme subsystem linux os in marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
-			name:             "Remove host in NVMe subsystem",
-			input:            SarClusterStr + "remove host nqn as nqn.1992-01.example.com:host2 in sys2 nvme subsystem linux os in marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
 			name:             "Clean NVMe subsystem",
 			input:            SarClusterStr + "delete nvme subsystem sys1 with linux os in marketing svm",
 			expectedOntapErr: "because it does not exist",
@@ -91,7 +79,7 @@ func TestNVMeService(t *testing.T) {
 		},
 		{
 			name:             "Clean NVMe subsystem",
-			input:            SarClusterStr + "delete nvme subsystem sys2 with linux os in marketing svm",
+			input:            SarClusterStr + "delete nvme subsystem sys2 with linux os in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=sys2", validationFunc: deleteObject},
 		},

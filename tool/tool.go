@@ -116,12 +116,14 @@ type NVMeService struct {
 }
 
 type NVMeSubsystem struct {
-	Cluster  string   `json:"cluster_name" jsonschema:"cluster name"`
-	SVM      string   `json:"svm_name" jsonschema:"SVM name"`
-	Name     string   `json:"name" jsonschema:"name for NVMe subsystem"`
-	OSType   string   `json:"os_type" jsonschema:"operating system of the NVMe subsystem's hosts"`
-	HostNQNs []string `json:"hosts_nqns,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
-	Comment  string   `json:"comment,omitzero" jsonschema:"configurable comment for the NVMe subsystem"`
+	Cluster                string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string   `json:"svm_name" jsonschema:"SVM name"`
+	Name                   string   `json:"name" jsonschema:"name for NVMe subsystem"`
+	OSType                 string   `json:"os_type" jsonschema:"operating system of the NVMe subsystem's hosts"`
+	HostNQNs               []string `json:"hosts_nqns,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+	Comment                string   `json:"comment,omitzero" jsonschema:"configurable comment for the NVMe subsystem"`
+	AllowDeleteWhileMapped bool     `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows for the deletion of a mapped NVMe subsystem. This parameter should be used with caution."`
+	AllowDeleteWithHosts   bool     `json:"allow_delete_with_hosts,omitzero" jsonschema:"Allows for the deletion of an NVMe subsystem with NVMe hosts. This parameter should be used with caution."`
 }
 
 type NVMeSubsystemHost struct {
@@ -131,6 +133,22 @@ type NVMeSubsystemHost struct {
 	OSType  string   `json:"os_type" jsonschema:"operating system of the NVMe subsystem's hosts"`
 	NQN     string   `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
 	Records []string `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
+}
+
+type NVMeNamespace struct {
+	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string `json:"svm_name" jsonschema:"SVM name"`
+	Name                   string `json:"name" jsonschema:"name for NVMe namespace"`
+	OSType                 string `json:"os_type" jsonschema:"operating system type of the NVMe namespace"`
+	Size                   string `json:"space.size" jsonschema:"total provisioned size of the NVMe namespace (e.g., '100GB', '1TB')"`
+	AllowDeleteWhileMapped bool   `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows deletion of a mapped NVMe namespace. This parameter should be used with caution."`
+}
+
+type NVMeSubsystemMap struct {
+	Cluster   string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM       string `json:"svm_name" jsonschema:"SVM name"`
+	Subsystem string `json:"subsystem_name" jsonschema:"name for NVMe subsystem"`
+	Namespace string `json:"namespace_name" jsonschema:"name for NVMe namespace"`
 }
 
 type OntapGetParams struct {

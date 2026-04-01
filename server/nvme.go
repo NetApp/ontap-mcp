@@ -199,7 +199,7 @@ func (a *App) DeleteNVMeSubsystem(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNVMeSubsystem(ctx, parameters.SVM, parameters.Name, parameters.OSType)
+	err = client.DeleteNVMeSubsystem(ctx, parameters.SVM, parameters.Name, parameters.OSType, parameters.AllowDeleteWhileMapped, parameters.AllowDeleteWithHosts)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -365,6 +365,241 @@ func newRemoveNVMeSubsystemHost(in tool.NVMeSubsystemHost) error {
 	}
 	if in.NQN == "" {
 		return errors.New("NQN is required")
+	}
+	return nil
+}
+
+func (a *App) CreateNVMeNamespace(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NVMeNamespace) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	nvmeNamespaceCreate, err := newCreateNVMeNamespace(parameters)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+	err = client.CreateNVMeNamespace(ctx, nvmeNamespaceCreate)
+
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	responseText := "NVMe Namespace created successfully"
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: responseText},
+		},
+	}, nil, nil
+}
+
+func (a *App) UpdateNVMeNamespace(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NVMeNamespace) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	nvmeNamespaceUpdate, err := newUpdateNVMeNamespace(parameters)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+	err = client.UpdateNVMeNamespace(ctx, parameters.SVM, parameters.Name, parameters.OSType, nvmeNamespaceUpdate)
+
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	responseText := "NVMe Namespace updated successfully"
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: responseText},
+		},
+	}, nil, nil
+}
+
+func (a *App) DeleteNVMeNamespace(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NVMeNamespace) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if err := newDeleteNVMeNamespace(parameters); err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+	err = client.DeleteNVMeNamespace(ctx, parameters.SVM, parameters.Name, parameters.OSType, parameters.AllowDeleteWhileMapped)
+
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	responseText := "NVMe Namespace deleted successfully"
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: responseText},
+		},
+	}, nil, nil
+}
+
+func newCreateNVMeNamespace(in tool.NVMeNamespace) (ontap.NVMeNamespace, error) {
+	out := ontap.NVMeNamespace{}
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
+	if in.Name == "" {
+		return out, errors.New("NVMe subsystem name is required")
+	}
+	if in.OSType == "" {
+		return out, errors.New("OS type is required")
+	}
+	if in.Size == "" {
+		return out, errors.New("size of namespace is required")
+	}
+
+	out.SVM = ontap.NameAndUUID{Name: in.SVM}
+	out.Name = in.Name
+	out.OSType = in.OSType
+	out.Space.Size = in.Size
+
+	return out, nil
+}
+
+func newUpdateNVMeNamespace(in tool.NVMeNamespace) (ontap.NVMeNamespace, error) {
+	out := ontap.NVMeNamespace{}
+
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
+	if in.Name == "" {
+		return out, errors.New("NVMe subsystem name is required")
+	}
+	if in.OSType == "" {
+		return out, errors.New("OS type is required")
+	}
+	if in.Size != "" {
+		out.Space.Size = in.Size
+	}
+
+	return out, nil
+}
+
+func newDeleteNVMeNamespace(in tool.NVMeNamespace) error {
+	if in.SVM == "" {
+		return errors.New("SVM name is required")
+	}
+	if in.Name == "" {
+		return errors.New("NVMe subsystem name is required")
+	}
+	if in.OSType == "" {
+		return errors.New("OS type is required")
+	}
+
+	return nil
+}
+
+func (a *App) CreateNVMeSubsystemMap(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NVMeSubsystemMap) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	nvmeSubsystemMapCreate, err := newCreateNVMeSubsystemMap(parameters)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+	err = client.CreateNVMeSubsystemMap(ctx, nvmeSubsystemMapCreate)
+
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	responseText := "NVMe Subsystem Map create successfully"
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: responseText},
+		},
+	}, nil, nil
+}
+
+func (a *App) DeleteNVMeSubsystemMap(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NVMeSubsystemMap) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if err := newDeleteNVMeSubsystemMap(parameters); err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+	err = client.DeleteNVMeSubsystemMap(ctx, parameters.SVM, parameters.Subsystem, parameters.Namespace)
+
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	responseText := "NVMe Subsystem Map deleted successfully"
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: responseText},
+		},
+	}, nil, nil
+}
+
+func newCreateNVMeSubsystemMap(in tool.NVMeSubsystemMap) (ontap.NVMeSubsystemMap, error) {
+	out := ontap.NVMeSubsystemMap{}
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
+	if in.Subsystem == "" {
+		return out, errors.New("NVMe subsystem name is required")
+	}
+	if in.Namespace == "" {
+		return out, errors.New("NVMe namespace name is required")
+	}
+
+	out.SVM.Name = in.SVM
+	out.Subsystemn.Name = in.Subsystem
+	out.Namespace.Name = in.Namespace
+	return out, nil
+}
+
+func newDeleteNVMeSubsystemMap(in tool.NVMeSubsystemMap) error {
+	if in.SVM == "" {
+		return errors.New("SVM name is required")
+	}
+	if in.Subsystem == "" {
+		return errors.New("NVMe subsystem name is required")
+	}
+	if in.Namespace == "" {
+		return errors.New("NVMe namespace name is required")
 	}
 	return nil
 }
