@@ -90,8 +90,9 @@ pipeline {
                         stage('Running Test') {
                             steps {
                                 sh """
+                                export PATH=\$PATH:/usr/local/go/bin
                                 export VERSION=$VERSION
-                                CHECK_TOOLS=1 bash $WORKSPACE/ontap-mcp/integration/test/test.sh
+                                cd $WORKSPACE/ontap-mcp && just ci
                                 """
 
                             }

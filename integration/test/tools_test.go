@@ -30,8 +30,18 @@ const (
 )
 
 var testAgent *Agent
+var testPrefix string
+
+func rn(base string) string {
+	if testPrefix == "" {
+		return base
+	}
+	return base + "_" + testPrefix
+}
 
 func TestMain(m *testing.M) {
+	testPrefix = os.Getenv("TEST_SUFFIX")
+	slog.Info("Integration test run", slog.String("TEST_SUFFIX", testPrefix))
 	if os.Getenv(CheckTools) != "" {
 		envConfigData, err := loadEnv()
 		if err != nil {
@@ -293,7 +303,7 @@ func SkipIfMissing(t *testing.T, vars ...string) {
 
 func createObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	var data ontap.GetData
-	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+	err := requests.URL("https://"+poller.Addr+"/"+api).
 		BasicAuth(poller.Username, poller.Password).
 		Client(client).
 		ToJSON(&data).
@@ -311,7 +321,7 @@ func createObject(t *testing.T, api string, poller *config.Poller, client *http.
 
 func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	var data ontap.GetData
-	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+	err := requests.URL("https://"+poller.Addr+"/"+api).
 		BasicAuth(poller.Username, poller.Password).
 		Client(client).
 		ToJSON(&data).
@@ -328,7 +338,7 @@ func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.
 }
 
 func listObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+	err := requests.URL("https://"+poller.Addr+"/"+api).
 		BasicAuth(poller.Username, poller.Password).
 		Client(client).
 		Fetch(context.Background())
