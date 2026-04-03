@@ -115,6 +115,22 @@ type NVMeService struct {
 	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
+type FCPService struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
+	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
+}
+
+type FCInterface struct {
+	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM          string `json:"svm_name" jsonschema:"SVM name"`
+	Name         string `json:"name" jsonschema:"FC interface name"`
+	DataProtocol string `json:"data_protocol,omitzero" jsonschema:"data protocol of the FC interface (e.g. fcp)"`
+	Enabled      string `json:"enabled,omitzero" jsonschema:"admin state of the FC interface"`
+	HomeNodeName string `json:"home_node_name,omitzero" jsonschema:"name of the home node for the FC interface"`
+	HomePortName string `json:"home_port_name,omitzero" jsonschema:"name of the home port on the home node for the FC interface"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
