@@ -566,7 +566,7 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 					slog.String("tool", name),
 					slog.Any("panic", rec),
 					slog.String("stack", string(debug.Stack())))
-				res = errorResult(fmt.Errorf("internal error in tool %s: %v", name, rec))
+				res = errorResult(fmt.Errorf("internal error in tool %s", name))
 			}
 		}()
 		res, out, err = handler(ctx, req, params)
