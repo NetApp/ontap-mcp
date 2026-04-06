@@ -559,18 +559,25 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 		tt.InputSchema = json.RawMessage(`{"type":"object","properties":{}}`)
 	}
 
-	safeHandler := func(ctx context.Context, req *mcp.CallToolRequest, params In) (res *mcp.CallToolResult, out Out, err error) { //nolint:nonamedreturns
-		defer func() {
-			if rec := recover(); rec != nil {
-				a.logger.Error("panic in tool handler",
-					slog.String("tool", name),
-					slog.Any("panic", rec),
-					slog.String("stack", string(debug.Stack())))
-				res = errorResult(fmt.Errorf("internal error in tool %s", name))
-			}
+	safeHandler := func(ctx context.Context, req *mcp.CallToolRequest, params In) (*mcp.CallToolResult, Out, error) {
+		var (
+			res *mcp.CallToolResult
+			out Out
+			err error
+		)
+		func() {
+			defer func() {
+				if rec := recover(); rec != nil {
+					a.logger.Error("panic in tool handler",
+						slog.String("tool", name),
+						slog.Any("panic", rec),
+						slog.String("stack", string(debug.Stack())))
+					res = errorResult(fmt.Errorf("internal error in tool %s", name))
+				}
+			}()
+			res, out, err = handler(ctx, req, params)
 		}()
-		res, out, err = handler(ctx, req, params)
-		return
+		return res, out, err
 	}
 
 	mcp.AddTool(server, tt, safeHandler)
