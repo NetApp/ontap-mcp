@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"reflect"
+	"runtime/debug"
 	"slices"
 	"sort"
 	"strconv"
@@ -168,7 +168,9 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 			// Example debugging; you could also capture the response.
 			body, err := io.ReadAll(req.Body)
 			if err != nil {
-				log.Fatal(err)
+				a.logger.Error("failed to read request body", slog.Any("error", err))
+				http.Error(w, "failed to read request body", http.StatusBadRequest)
+				return
 			}
 			//goland:noinspection GoUnhandledErrorResult
 			req.Body.Close() //nolint:gosec
@@ -410,6 +412,13 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 		return errorResult(fmt.Errorf("path must start with /, got %q", p.Path)), nil, nil
 	}
 
+	if p.PathParams == nil {
+		p.PathParams = make(map[string]string)
+	}
+	if p.Filters == nil {
+		p.Filters = make(map[string]string)
+	}
+
 	// Resolve any path-parameter placeholders (e.g. {volume.uuid}) before making the request.
 	resolvedPath := p.Path
 	for k, v := range p.PathParams {
@@ -550,7 +559,21 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 		tt.InputSchema = json.RawMessage(`{"type":"object","properties":{}}`)
 	}
 
-	mcp.AddTool(server, tt, handler)
+	safeHandler := func(ctx context.Context, req *mcp.CallToolRequest, params In) (res *mcp.CallToolResult, out Out, err error) { //nolint:nonamedreturns
+		defer func() {
+			if rec := recover(); rec != nil {
+				a.logger.Error("panic in tool handler",
+					slog.String("tool", name),
+					slog.Any("panic", rec),
+					slog.String("stack", string(debug.Stack())))
+				res = errorResult(fmt.Errorf("internal error in tool %s: %v", name, rec))
+			}
+		}()
+		res, out, err = handler(ctx, req, params)
+		return
+	}
+
+	mcp.AddTool(server, tt, safeHandler)
 }
 
 type loggingResponseWriter struct {
