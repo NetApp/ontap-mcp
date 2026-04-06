@@ -76,6 +76,9 @@ func TestFCP(t *testing.T) {
 	}
 
 	poller := cfg.Pollers[SarCluster]
+	if poller == nil {
+		t.Skipf("Cluster %q not found in %s, skipping FCP tests", SarCluster, ConfigFile)
+	}
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: poller.UseInsecureTLS, // #nosec G402

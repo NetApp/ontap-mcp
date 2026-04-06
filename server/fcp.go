@@ -252,7 +252,7 @@ func newUpdateFCInterface(in tool.FCInterface) (ontap.FCInterface, error) {
 		out.Enabled = in.Enabled
 	}
 	if (in.HomeNodeName == "" && in.HomePortName != "") || (in.HomeNodeName != "" && in.HomePortName == "") {
-		return out, errors.New("home node name and home port name both are required")
+		return out, errors.New("both home_node_name and home_port_name must be provided together or both omitted")
 	}
 	if in.HomeNodeName != "" && in.HomePortName != "" {
 		out.Location = ontap.FCInterfaceLocation{
