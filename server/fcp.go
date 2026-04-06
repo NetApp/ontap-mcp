@@ -100,6 +100,9 @@ func newCreateFCPService(in tool.FCPService) (ontap.FCPService, error) {
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
+	if in.Enabled != "" {
+		out.Enabled = in.Enabled
+	}
 	return out, nil
 }
 
@@ -247,6 +250,9 @@ func newUpdateFCInterface(in tool.FCInterface) (ontap.FCInterface, error) {
 	}
 	if in.Enabled != "" {
 		out.Enabled = in.Enabled
+	}
+	if in.HomeNodeName == "" || in.HomePortName == "" {
+		return out, errors.New("home node name and home port name both are required")
 	}
 	if in.HomeNodeName != "" && in.HomePortName != "" {
 		out.Location = ontap.FCInterfaceLocation{

@@ -195,7 +195,7 @@ type NVMeService struct {
 }
 
 type FCPService struct {
-	SVM     NameAndUUID `json:"svm" jsonschema:"svm name"`
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
 }
 
