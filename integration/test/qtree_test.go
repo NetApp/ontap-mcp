@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/netapp/ontap-mcp/ontap"
 
 	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
@@ -25,45 +25,45 @@ func TestQtree(t *testing.T) {
 	}{
 		{
 			name:             "Clean qtree staff",
-			input:            ClusterStr + "delete staff qtree in doc volume in marketing svm",
+			input:            ClusterStr + "delete " + rn("staff") + " qtree in " + rn("docs") + " volume in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("staff"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean qtree pay",
-			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			input:            ClusterStr + "Delete " + rn("pay") + " qtree in " + rn("docs") + " volume in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate",
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the marketing svm and the harvest_vc_aggr aggregate",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: createObject},
 		},
 		{
 			name:             "Create qtree staff",
-			input:            ClusterStr + "create a qtree named staff in docs volume on the marketing SVM",
+			input:            ClusterStr + "create a qtree named " + rn("staff") + " in " + rn("docs") + " volume on the marketing SVM",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=staff", validationFunc: verifyQtreeName("staff")},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("staff"), validationFunc: verifyQtreeName(rn("staff"))},
 		},
 		{
 			name:             "Rename qtree staff",
-			input:            ClusterStr + "rename a qtree named staff to pay in docs volume on the marketing SVM",
+			input:            ClusterStr + "rename a qtree named " + rn("staff") + " to " + rn("pay") + " in " + rn("docs") + " volume on the marketing SVM",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: verifyQtreeName("pay")},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: verifyQtreeName(rn("pay"))},
 		},
 		{
 			name:             "Clean qtree policy pay",
-			input:            ClusterStr + "Delete pay qtree in docs volume in marketing svm",
+			input:            ClusterStr + "Delete " + rn("pay") + " qtree in " + rn("docs") + " volume in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=pay", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume docs in marketing svm",
+			input:            ClusterStr + "delete volume " + rn("docs") + " in marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=docs&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: deleteObject},
 		},
 	}
 
@@ -98,7 +98,7 @@ func TestQtree(t *testing.T) {
 func verifyQtreeName(qtreeName string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool { //nolint:unparam
 	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 		var data ontap.GetData
-		err := requests.URL(fmt.Sprintf("https://%s/%s", poller.Addr, api)).
+		err := requests.URL("https://"+poller.Addr+"/"+api).
 			BasicAuth(poller.Username, poller.Password).
 			Client(client).
 			ToJSON(&data).
