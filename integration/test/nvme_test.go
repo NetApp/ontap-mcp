@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -11,8 +13,8 @@ import (
 	"github.com/netapp/ontap-mcp/config"
 )
 
-const SarCluster = "sar"
-const SarClusterStr = "On the " + SarCluster + " cluster, "
+const NvmeCluster = "aff"
+const NvmeClusterStr = "On the " + NvmeCluster + " cluster, "
 
 func TestNVMeService(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
@@ -24,76 +26,94 @@ func TestNVMeService(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
-			name:             "Update NVMe service",
-			input:            SarClusterStr + "update nvme service to disable on the marketing svm",
+			name:             "Clean NVMe subsystem",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys2") + " with linux os in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
-			name:             "Clean NVMe service",
-			input:            SarClusterStr + "delete nvme service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/services?svm.name=marketing", validationFunc: deleteObject},
-		},
-		{
-			name:             "Create NVMe service",
-			input:            SarClusterStr + "create nvme service on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/services?svm.name=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=" + rn("sys2"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create NVMe subsystem",
-			input:            SarClusterStr + "create nvme subsystem sys1 with linux os on the marketing svm",
+			input:            NvmeClusterStr + "create nvme subsystem " + rn("sys2") + " with linux os and with host nqns as nqn.1992-01.example.com:host1, nqn.1992-01.example.com:host2 on the marketing svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=sys1", validationFunc: createObject},
-		},
-		{
-			name:             "Create NVMe subsystem",
-			input:            SarClusterStr + "create nvme subsystem sys2 with linux os and with host nqns as nqn.1992-01.example.com:host1, nqn.1992-01.example.com:host2 on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=sys2", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=" + rn("sys2"), validationFunc: createObject},
 		},
 		{
 			name:             "Update NVMe subsystem",
-			input:            SarClusterStr + "add comment as `comment about the` in sys1 nvme subsystem linux os on the marketing svm",
+			input:            NvmeClusterStr + "add comment as `comment about the` in " + rn("sys2") + " nvme subsystem linux os on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Add host in NVMe subsystem",
-			input:            SarClusterStr + "add host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem linux os in marketing svm",
+			input:            NvmeClusterStr + "add host nqn as nqn.1992-01.example.com:host3 in " + rn("sys2") + " nvme subsystem linux os in marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Remove host in NVMe subsystem",
-			input:            SarClusterStr + "remove host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem linux os in marketing svm",
+			input:            NvmeClusterStr + "remove host nqn as nqn.1992-01.example.com:host3 in " + rn("sys2") + " nvme subsystem linux os in marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean NVMe subsystem",
-			input:            SarClusterStr + "delete nvme subsystem sys1 with linux os in marketing svm",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys2") + " with linux os in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=sys1", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=" + rn("sys2"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NVMe subsystem",
-			input:            SarClusterStr + "delete nvme subsystem sys2 with linux os in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys1") + " with linux os in nvmevs1 svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=sys2", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=nvmevs1&name=" + rn("sys1"), validationFunc: deleteObject},
 		},
 		{
-			name:             "Update NVMe service",
-			input:            SarClusterStr + "update nvme service to disable on the marketing svm",
+			name:             "Create NVMe subsystem",
+			input:            NvmeClusterStr + "create nvme subsystem " + rn("sys1") + " with linux os on the nvmevs1 svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=nvmevs1&name=" + rn("sys1"), validationFunc: createObject},
+		},
+		{
+			name:             "Clean NVMe namespace",
+			input:            NvmeClusterStr + "delete nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os in nvmevs1 svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/namespaces?svm.name=nvmevs1&name=" + rn(`/vol/docns/ns1`), validationFunc: deleteObject},
+		},
+		{
+			name:             "Create NVMe namespace",
+			input:            NvmeClusterStr + "create nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os and 20mb size in nvmevs1 svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/namespaces?svm.name=nvmevs1&name=" + rn(`/vol/docns/ns1`), validationFunc: createObject},
+		},
+		{
+			name:             "Update NVMe namespace",
+			input:            NvmeClusterStr + "update nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os to 40mb size in nvmevs1 svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
-			name:             "Clean NVMe service",
-			input:            SarClusterStr + "delete nvme service in marketing svm",
+			name:             "Create NVMe subsystem map",
+			input:            NvmeClusterStr + "create subsystem map of " + rn("sys1") + " subsystem and '" + rn("/vol/docns/ns1") + "' namespace in nvmevs1 svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystem-maps?svm.name=nvmevs1", validationFunc: verifySubsystemMaps(rn("sys1"), rn(`/vol/docns/ns1`), true)},
+		},
+		{
+			name:             "Clean NVMe subsystem map",
+			input:            NvmeClusterStr + "delete subsystem map of " + rn("sys1") + " subsystem and namespace '" + rn("/vol/docns/ns1") + "' in nvmevs1 svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/services?svm.name=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystem-maps?svm.name=nvmevs1", validationFunc: verifySubsystemMaps(rn("sys1"), rn(`/vol/docns/ns1`), false)},
+		},
+		{
+			name:             "Clean NVMe namespace",
+			input:            NvmeClusterStr + "delete nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os in nvmevs1 svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/namespaces?svm.name=nvmevs1&name=" + rn(`/vol/docns/ns1`), validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean NVMe subsystem",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys1") + " with linux os in nvmevs1 svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=nvmevs1&name=" + rn("sys1"), validationFunc: deleteObject},
 		},
 	}
 
@@ -102,9 +122,9 @@ func TestNVMeService(t *testing.T) {
 		t.Fatalf("Error parsing the config: %v", err)
 	}
 
-	poller := cfg.Pollers[SarCluster]
+	poller := cfg.Pollers[NvmeCluster]
 	if poller == nil {
-		t.Skipf("Cluster %q not found in %s, skipping NVMe tests", SarCluster, ConfigFile)
+		t.Skipf("Cluster %q not found in %s, skipping NVMe tests", NvmeCluster, ConfigFile)
 	}
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -125,5 +145,55 @@ func TestNVMeService(t *testing.T) {
 				t.Errorf("Error while accessing the object via prompt %s", tt.input)
 			}
 		})
+	}
+}
+
+func verifySubsystemMaps(subsystemName, namespaceName string, exist bool) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool { //nolint:unparam
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type subsystemMapRecord struct {
+			Namespace ontap.NameAndUUID `json:"namespace"`
+			Subsystem ontap.NameAndUUID `json:"subsystem"`
+		}
+		type response struct {
+			NumRecords int                  `json:"num_records"`
+			Records    []subsystemMapRecord `json:"records"`
+		}
+
+		var data response
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifySubsystemMaps: request failed: %v", err)
+			return false
+		}
+
+		if exist {
+			for _, record := range data.Records {
+				gotSubsystem := record.Subsystem.Name
+				gotNamespace := record.Namespace.Name
+				if gotSubsystem == subsystemName && gotNamespace == namespaceName {
+					return true
+				}
+			}
+			t.Errorf("sybsystem map is not exist")
+		} else {
+			sbsMapRecord := false
+			for _, record := range data.Records {
+				gotSubsystem := record.Subsystem.Name
+				gotNamespace := record.Namespace.Name
+				if gotSubsystem == subsystemName && gotNamespace == namespaceName {
+					sbsMapRecord = true
+					break
+				}
+			}
+			if !sbsMapRecord {
+				return true
+			}
+			t.Errorf("subsystem map is exist")
+		}
+		return false
 	}
 }

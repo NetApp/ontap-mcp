@@ -251,7 +251,7 @@ Expected Response: The qtree has been successfully renamed.
 ---
 
 
-### Manage NVMe Service
+### Manage NVMe
 
 - On the umeng-aff300-05-06 cluster, create nvme service on the marketing svm
 
@@ -272,6 +272,14 @@ Expected Response: The nvme subsystem Host has been successfully added.
 - On the umeng-aff300-05-06 cluster, delete nvme subsystem sys1 with linux os in marketing svm
 
 Expected Response: The nvme subsystem has been successfully deleted.
+
+- On the umeng-aff300-05-06 cluster, create nvme namespace /vol/docns/ns1 with linux os and 20mb size in nvmevs1 svm
+
+Expected Response: The nvme namespace has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create subsystem map of sys1 subsystem and /vol/docns/ns1 namespace in nvmevs1 svm
+
+Expected Response: The nvme subsystem map has been successfully created.
 
 ---
 
