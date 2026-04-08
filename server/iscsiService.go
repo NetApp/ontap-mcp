@@ -274,7 +274,7 @@ func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 		return out, errors.New("scope is required")
 	}
 	if in.Scope == "svm" && in.SVM == "" {
-		return out, errors.New("svm name is required")
+		return out, errors.New("SVM name is required")
 	}
 
 	hasUpdates := false
@@ -287,7 +287,7 @@ func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 		hasUpdates = true
 	}
 	if !hasUpdates {
-		return out, errors.New("at least one field to update must be provided: auto_revert or service_policy")
+		return out, errors.New("at least one supported update field must be provided; only auto_revert and service_policy are supported for update")
 	}
 
 	return out, nil
@@ -301,7 +301,7 @@ func newDeleteNetworkIPInterface(in tool.NetworkIPInterface) error {
 		return errors.New("scope is required")
 	}
 	if in.Scope == "svm" && in.SVM == "" {
-		return errors.New("svm name is required")
+		return errors.New("SVM name is required")
 	}
 	return nil
 }
