@@ -121,9 +121,7 @@ func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, int
 
 	params := url.Values{}
 	params.Set("name", interfaceName)
-	if scope != "" {
-		params.Set("scope", scope)
-	}
+	params.Set("scope", scope)
 	if svmName != "" {
 		params.Set("svm.name", svmName)
 	}
@@ -167,9 +165,7 @@ func (c *Client) DeleteNetworkIPInterface(ctx context.Context, scope string, int
 
 	params := url.Values{}
 	params.Set("name", interfaceName)
-	if scope != "" {
-		params.Set("scope", scope)
-	}
+	params.Set("scope", scope)
 	if svmName != "" {
 		params.Set("svm.name", svmName)
 	}

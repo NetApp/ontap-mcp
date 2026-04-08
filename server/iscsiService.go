@@ -270,6 +270,12 @@ func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 	if in.Name == "" {
 		return out, errors.New("network interface name is required")
 	}
+	if in.Scope == "" {
+		return out, errors.New("scope is required")
+	}
+	if in.Scope == "svm" && in.SVM == "" {
+		return out, errors.New("svm name is required")
+	}
 
 	hasUpdates := false
 	if in.AutoRevert != "" {
@@ -290,6 +296,12 @@ func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 func newDeleteNetworkIPInterface(in tool.NetworkIPInterface) error {
 	if in.Name == "" {
 		return errors.New("network interface name is required")
+	}
+	if in.Scope == "" {
+		return errors.New("scope is required")
+	}
+	if in.Scope == "svm" && in.SVM == "" {
+		return errors.New("svm name is required")
 	}
 	return nil
 }

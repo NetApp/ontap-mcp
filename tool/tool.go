@@ -127,7 +127,7 @@ type NetworkIPInterface struct {
 	SVM             string `json:"svm_name,omitzero" jsonschema:"SVM name"`
 	IPSpace         string `json:"ipspace_name,omitzero" jsonschema:"ipspace name"`
 	Name            string `json:"name" jsonschema:"name of the interface"`
-	Scope           string `json:"scope,omitzero" jsonschema:"scope of network interface(e.g., 'cluster', 'svm')"`
+	Scope           string `json:"scope" jsonschema:"scope of network interface(e.g., 'cluster', 'svm')"`
 	IPAddress       string `json:"ip.address,omitzero" jsonschema:"IP address for the interface"`
 	IPNetmask       string `json:"ip.netmask,omitzero" jsonschema:"IP netmask of the interface"`
 	Subnet          string `json:"subnet_name,omitzero" jsonschema:"subnet name"`
