@@ -111,8 +111,9 @@ func newUpdateFCPService(in tool.FCPService) (ontap.FCPService, error) {
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
-	if in.Enabled != "" {
-		out.Enabled = in.Enabled
+	out.Enabled = in.Enabled
+	if out.Enabled == "" {
+		return out, errors.New("at least one field must be provided for update (e.g. enabled)")
 	}
 	return out, nil
 }
@@ -248,8 +249,11 @@ func newUpdateFCInterface(in tool.FCInterface) (ontap.FCInterface, error) {
 	if in.Name == "" {
 		return out, errors.New("FC interface name is required")
 	}
+
+	hasUpdates := false
 	if in.Enabled != "" {
 		out.Enabled = in.Enabled
+		hasUpdates = true
 	}
 	if (in.HomeNodeName == "" && in.HomePortName != "") || (in.HomeNodeName != "" && in.HomePortName == "") {
 		return out, errors.New("both home_node_name and home_port_name must be provided together or both omitted")
@@ -261,6 +265,10 @@ func newUpdateFCInterface(in tool.FCInterface) (ontap.FCInterface, error) {
 				Node: ontap.NameAndUUID{Name: in.HomeNodeName},
 			},
 		}
+		hasUpdates = true
+	}
+	if !hasUpdates {
+		return out, errors.New("at least one supported update field must be provided; only enabled and home-node & home-port are supported for update")
 	}
 	return out, nil
 }

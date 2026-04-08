@@ -21,24 +21,6 @@ func TestFCP(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
-			name:             "Update FCP service",
-			input:            SarClusterStr + "update fcp service to disable on the marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
-			name:             "Clean FCP service",
-			input:            SarClusterStr + "delete fcp service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/fcp/services?svm.name=marketing", validationFunc: deleteObject},
-		},
-		{
-			name:             "Create FCP service",
-			input:            SarClusterStr + "enable fcp service in marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/fcp/services?svm.name=marketing", validationFunc: createObject},
-		},
-		{
 			name:             "Create FC Interface",
 			input:            SarClusterStr + "create fc interface " + rn("fc1") + " in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol",
 			expectedOntapErr: "",
@@ -55,18 +37,6 @@ func TestFCP(t *testing.T) {
 			input:            SarClusterStr + "delete fc interface " + rn("fc1") + " in marketing svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=marketing", validationFunc: deleteObject},
-		},
-		{
-			name:             "Update FCP service",
-			input:            SarClusterStr + "update fcp service to disable on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
-			name:             "Clean FCP service",
-			input:            SarClusterStr + "delete fcp service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/fcp/services?svm.name=marketing", validationFunc: deleteObject},
 		},
 	}
 

@@ -141,7 +141,7 @@ func (c *Client) UpdateFCInterface(ctx context.Context, svmName string, name str
 	}
 
 	if fcIfSr.NumRecords != 1 {
-		return fmt.Errorf("failed to update fc interface %s in svm=%s because there are %d matching records",
+		return fmt.Errorf("failed to get unique fc interface %s in svm=%s because there are %d matching records",
 			name, svmName, fcIfSr.NumRecords)
 	}
 
