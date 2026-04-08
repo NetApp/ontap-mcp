@@ -133,6 +133,13 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
 	addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
 
+	// operation on igroup object
+	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
+	addTool(a, server, "update_igroup", descriptions.UpdateIGroup, updateAnnotation, a.UpdateIGroup)
+	addTool(a, server, "delete_igroup", descriptions.DeleteIGroup, deleteAnnotation, a.DeleteIGroup)
+	addTool(a, server, "add_igroup_initiator", descriptions.AddIGroupInitiator, createAnnotation, a.AddIGroupInitiator)
+	addTool(a, server, "remove_igroup_initiator", descriptions.RemoveIGroupInitiator, deleteAnnotation, a.RemoveIGroupInitiator)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)

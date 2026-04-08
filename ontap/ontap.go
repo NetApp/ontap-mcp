@@ -194,6 +194,25 @@ type NVMeService struct {
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
+type InitiatorName struct {
+	Name string `json:"name,omitzero" jsonschema:"The FC WWPN, iSCSI IQN, or iSCSI EUI that identifies the host initiator."`
+}
+
+type IGroupInitiator struct {
+	Name    string          `json:"name,omitzero"`
+	Comment string          `json:"comment,omitzero"`
+	Records []InitiatorName `json:"records,omitzero" jsonschema:"An array of initiators specified to add multiple initiators to an initiator group in a single API call. Not allowed when the name property is used."`
+}
+
+type IGroup struct {
+	SVM        NameAndUUID       `json:"svm,omitzero"`
+	Name       string            `json:"name,omitzero"`
+	OSType     string            `json:"os_type,omitzero"`
+	Protocol   string            `json:"protocol,omitzero"`
+	Comment    string            `json:"comment,omitzero"`
+	Initiators []IGroupInitiator `json:"initiators,omitzero"`
+}
+
 const (
 	ASAr2 = "asar2"
 	CDOT  = "cdot"

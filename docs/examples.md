@@ -279,6 +279,40 @@ Expected Response: A summary of aggregate free space, followed by a recommendati
 
 ---
 
+### Manage iGroups (SAN)
+
+**Create an iGroup**
+
+- On the umeng-aff300-05-06 cluster, create an igroup named igroupFin with OS type linux and protocol iscsi on the vs_test4 svm
+
+Expected Response: igroup created successfully.
+
+**Rename an iGroup**
+
+- On the umeng-aff300-05-06 cluster, rename igroup igroupFin to igroupFinNew on the vs_test4 svm
+
+Expected Response: igroup updated successfully.
+
+**Add an Initiator to an iGroup**
+
+- On the umeng-aff300-05-06 cluster, add initiator iqn.2021-01.com.example:test to igroup igroupFinNew on the vs_test4 svm
+
+Expected Response: initiator added to igroup successfully.
+
+**Remove an Initiator from an iGroup**
+
+- On the umeng-aff300-05-06 cluster, remove initiator iqn.2021-01.com.example:test from igroup igroupFinNew on the vs_test4 svm
+
+Expected Response: initiator removed from igroup successfully.
+
+**Delete an iGroup**
+
+- On the umeng-aff300-05-06 cluster, delete igroup igroupFinNew on the vs_test4 svm
+
+Expected Response: igroup deleted successfully.
+
+---
+
 ## MCP Clients
 
 Common MCP clients that work with ONTAP MCP Server:

@@ -115,6 +115,27 @@ type NVMeService struct {
 	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
+type IGroup struct {
+	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string `json:"svm_name" jsonschema:"SVM name"`
+	Name                   string `json:"name,omitzero" jsonschema:"igroup name"`
+	NewName                string `json:"new_name,omitzero" jsonschema:"new igroup name"`
+	OSType                 string `json:"os_type,omitzero" jsonschema:"OS type (aix, hpux, hyper_v, linux, netware, openvms, solaris, vmware, windows, xen)"`
+	Protocol               string `json:"protocol,omitzero" jsonschema:"protocol (fcp, iscsi, mixed)"`
+	Comment                string `json:"comment,omitzero" jsonschema:"comment"`
+	AllowDeleteWhileMapped bool   `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows the deletion of a mapped initiator group. This parameter should be used with caution"`
+}
+
+type IGroupInitiator struct {
+	Cluster                string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string   `json:"svm_name" jsonschema:"SVM name"`
+	IGroupName             string   `json:"igroup_name" jsonschema:"igroup name"`
+	InitiatorName          string   `json:"initiator_name" jsonschema:"initiator name (IQN for iSCSI or WWPN for FC)"`
+	Comment                string   `json:"comment,omitzero" jsonschema:"comment"`
+	Records                []string `json:"records,omitzero" jsonschema:"An array of initiators specified to add multiple initiators to an initiator group in a single API call"`
+	AllowDeleteWhileMapped bool     `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows the deletion of an initiator from of a mapped initiator group. This parameter should be used with caution."`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
