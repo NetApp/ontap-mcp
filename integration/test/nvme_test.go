@@ -27,7 +27,7 @@ func TestNVMe(t *testing.T) {
 	}{
 		{
 			name:             "Clean NVMe subsystem",
-			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys2") + " with linux os in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys2") + " with in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=" + rn("sys2"), validationFunc: deleteObject},
 		},
@@ -39,31 +39,31 @@ func TestNVMe(t *testing.T) {
 		},
 		{
 			name:             "Update NVMe subsystem",
-			input:            NvmeClusterStr + "add comment as `comment about the` in " + rn("sys2") + " nvme subsystem linux os on the marketing svm",
+			input:            NvmeClusterStr + "add comment as `comment about the` in " + rn("sys2") + " nvme subsystem on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Add host in NVMe subsystem",
-			input:            NvmeClusterStr + "add host nqn as nqn.1992-01.example.com:host3 in " + rn("sys2") + " nvme subsystem linux os in marketing svm",
+			input:            NvmeClusterStr + "add host nqn as nqn.1992-01.example.com:host3 in " + rn("sys2") + " nvme subsystem in marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Remove host in NVMe subsystem",
-			input:            NvmeClusterStr + "remove host nqn as nqn.1992-01.example.com:host3 in " + rn("sys2") + " nvme subsystem linux os in marketing svm",
+			input:            NvmeClusterStr + "remove host nqn as nqn.1992-01.example.com:host3 in " + rn("sys2") + " nvme subsystem in marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean NVMe subsystem",
-			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys2") + " with linux os in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys2") + " with in marketing svm with allow_delete_while_mapped and allow_delete_with_hosts",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=marketing&name=" + rn("sys2"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NVMe subsystem",
-			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys1") + " with linux os in nvmevs1 svm",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys1") + " with in nvmevs1 svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=nvmevs1&name=" + rn("sys1"), validationFunc: deleteObject},
 		},
@@ -75,7 +75,7 @@ func TestNVMe(t *testing.T) {
 		},
 		{
 			name:             "Clean NVMe namespace",
-			input:            NvmeClusterStr + "delete nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os in nvmevs1 svm",
+			input:            NvmeClusterStr + "delete nvme namespace '" + rn("/vol/docns/ns1") + "' with in nvmevs1 svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/namespaces?svm.name=nvmevs1&name=" + rn(`/vol/docns/ns1`), validationFunc: deleteObject},
 		},
@@ -87,7 +87,7 @@ func TestNVMe(t *testing.T) {
 		},
 		{
 			name:             "Update NVMe namespace",
-			input:            NvmeClusterStr + "update nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os to 40mb size in nvmevs1 svm",
+			input:            NvmeClusterStr + "update nvme namespace '" + rn("/vol/docns/ns1") + "' with to 40mb size in nvmevs1 svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
@@ -105,13 +105,13 @@ func TestNVMe(t *testing.T) {
 		},
 		{
 			name:             "Clean NVMe namespace",
-			input:            NvmeClusterStr + "delete nvme namespace '" + rn("/vol/docns/ns1") + "' with linux os in nvmevs1 svm",
+			input:            NvmeClusterStr + "delete nvme namespace '" + rn("/vol/docns/ns1") + "' with in nvmevs1 svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/namespaces?svm.name=nvmevs1&name=" + rn(`/vol/docns/ns1`), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NVMe subsystem",
-			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys1") + " with linux os in nvmevs1 svm",
+			input:            NvmeClusterStr + "delete nvme subsystem " + rn("sys1") + " with in nvmevs1 svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nvme/subsystems?svm.name=nvmevs1&name=" + rn("sys1"), validationFunc: deleteObject},
 		},

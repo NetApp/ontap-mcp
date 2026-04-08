@@ -170,7 +170,7 @@ func (a *App) UpdateNVMeSubsystem(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.UpdateNVMeSubsystem(ctx, parameters.SVM, parameters.Name, parameters.OSType, nvmeSubsystemUpdate)
+	err = client.UpdateNVMeSubsystem(ctx, parameters.SVM, parameters.Name, nvmeSubsystemUpdate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -199,7 +199,7 @@ func (a *App) DeleteNVMeSubsystem(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNVMeSubsystem(ctx, parameters.SVM, parameters.Name, parameters.OSType, parameters.AllowDeleteWhileMapped, parameters.AllowDeleteWithHosts)
+	err = client.DeleteNVMeSubsystem(ctx, parameters.SVM, parameters.Name, parameters.AllowDeleteWhileMapped, parameters.AllowDeleteWithHosts)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -250,12 +250,10 @@ func newUpdateNVMeSubsystem(in tool.NVMeSubsystem) (ontap.NVMeSubsystem, error) 
 	if in.Name == "" {
 		return out, errors.New("NVMe subsystem name is required")
 	}
-	if in.OSType == "" {
-		return out, errors.New("OS type is required")
-	}
 
-	if in.Comment != "" {
-		out.Comment = in.Comment
+	out.Comment = in.Comment
+	if out.Comment == "" {
+		return out, errors.New("no update fields provided; specify at least one of: comment")
 	}
 	return out, nil
 }
@@ -266,9 +264,6 @@ func newDeleteNVMeSubsystem(in tool.NVMeSubsystem) error {
 	}
 	if in.Name == "" {
 		return errors.New("NVMe subsystem name is required")
-	}
-	if in.OSType == "" {
-		return errors.New("OS type is required")
 	}
 	return nil
 }
@@ -288,7 +283,7 @@ func (a *App) AddNVMeSubsystemHost(ctx context.Context, _ *mcp.CallToolRequest, 
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.AddNVMeSubsystemHost(ctx, parameters.SVM, parameters.Name, parameters.OSType, nvmeSubsystemHostAdd)
+	err = client.AddNVMeSubsystemHost(ctx, parameters.SVM, parameters.Name, nvmeSubsystemHostAdd)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -317,7 +312,7 @@ func (a *App) RemoveNVMeSubsystemHost(ctx context.Context, _ *mcp.CallToolReques
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.RemoveNVMeSubsystemHost(ctx, parameters.SVM, parameters.Name, parameters.OSType, parameters.NQN)
+	err = client.RemoveNVMeSubsystemHost(ctx, parameters.SVM, parameters.Name, parameters.NQN)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -339,9 +334,6 @@ func newAddNVMeSubsystemHost(in tool.NVMeSubsystemHost) (ontap.NVMeSubsystemHost
 	}
 	if in.Name == "" {
 		return out, errors.New("NVMe subsystem name is required")
-	}
-	if in.OSType == "" {
-		return out, errors.New("OS type is required")
 	}
 
 	if in.NQN == "" && len(in.Records) == 0 {
@@ -373,9 +365,6 @@ func newRemoveNVMeSubsystemHost(in tool.NVMeSubsystemHost) error {
 	}
 	if in.Name == "" {
 		return errors.New("NVMe subsystem name is required")
-	}
-	if in.OSType == "" {
-		return errors.New("OS type is required")
 	}
 	if in.NQN == "" {
 		return errors.New("NQN is required")
@@ -428,7 +417,7 @@ func (a *App) UpdateNVMeNamespace(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.UpdateNVMeNamespace(ctx, parameters.SVM, parameters.Name, parameters.OSType, nvmeNamespaceUpdate)
+	err = client.UpdateNVMeNamespace(ctx, parameters.SVM, parameters.Name, nvmeNamespaceUpdate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -457,7 +446,7 @@ func (a *App) DeleteNVMeNamespace(ctx context.Context, _ *mcp.CallToolRequest, p
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNVMeNamespace(ctx, parameters.SVM, parameters.Name, parameters.OSType, parameters.AllowDeleteWhileMapped)
+	err = client.DeleteNVMeNamespace(ctx, parameters.SVM, parameters.Name, parameters.AllowDeleteWhileMapped)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -504,9 +493,6 @@ func newUpdateNVMeNamespace(in tool.NVMeNamespace) (ontap.NVMeNamespace, error) 
 	if in.Name == "" {
 		return out, errors.New("NVMe namespace name is required")
 	}
-	if in.OSType == "" {
-		return out, errors.New("OS type is required")
-	}
 	if in.Size != "" {
 		out.Space.Size = in.Size
 	}
@@ -520,9 +506,6 @@ func newDeleteNVMeNamespace(in tool.NVMeNamespace) error {
 	}
 	if in.Name == "" {
 		return errors.New("NVMe namespace name is required")
-	}
-	if in.OSType == "" {
-		return errors.New("OS type is required")
 	}
 
 	return nil

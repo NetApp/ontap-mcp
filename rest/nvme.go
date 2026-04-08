@@ -112,7 +112,7 @@ func (c *Client) CreateNVMeSubsystem(ctx context.Context, nvmeSubsystem ontap.NV
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) UpdateNVMeSubsystem(ctx context.Context, svmName string, name string, osType string, nvmeSubsystem ontap.NVMeSubsystem) error {
+func (c *Client) UpdateNVMeSubsystem(ctx context.Context, svmName string, name string, nvmeSubsystem ontap.NVMeSubsystem) error {
 	var (
 		statusCode int
 		nvmeSs     ontap.GetData
@@ -123,7 +123,6 @@ func (c *Client) UpdateNVMeSubsystem(ctx context.Context, svmName string, name s
 	params := url.Values{}
 	params.Set("svm.name", svmName)
 	params.Set("name", name)
-	params.Set("os_type", osType)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/subsystems`, &statusCode, responseHeaders).
 		Params(params).
@@ -155,7 +154,7 @@ func (c *Client) UpdateNVMeSubsystem(ctx context.Context, svmName string, name s
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) DeleteNVMeSubsystem(ctx context.Context, svmName string, name string, osType string, allowDeleteWhileMapped bool, allowDeleteWithHosts bool) error {
+func (c *Client) DeleteNVMeSubsystem(ctx context.Context, svmName string, name string, allowDeleteWhileMapped bool, allowDeleteWithHosts bool) error {
 	var (
 		statusCode int
 		nvmeSs     ontap.GetData
@@ -166,7 +165,6 @@ func (c *Client) DeleteNVMeSubsystem(ctx context.Context, svmName string, name s
 	params := url.Values{}
 	params.Set("svm.name", svmName)
 	params.Set("name", name)
-	params.Set("os_type", osType)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/subsystems`, &statusCode, responseHeaders).
 		Params(params).
@@ -201,7 +199,7 @@ func (c *Client) DeleteNVMeSubsystem(ctx context.Context, svmName string, name s
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) AddNVMeSubsystemHost(ctx context.Context, svmName string, name string, osType string, nvmeSubsystemHost ontap.NVMeSubsystemHost) error {
+func (c *Client) AddNVMeSubsystemHost(ctx context.Context, svmName string, name string, nvmeSubsystemHost ontap.NVMeSubsystemHost) error {
 	var (
 		statusCode int
 		nvmeSs     ontap.GetData
@@ -212,7 +210,6 @@ func (c *Client) AddNVMeSubsystemHost(ctx context.Context, svmName string, name 
 	params := url.Values{}
 	params.Set("svm.name", svmName)
 	params.Set("name", name)
-	params.Set("os_type", osType)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/subsystems`, &statusCode, responseHeaders).
 		Params(params).
@@ -243,7 +240,7 @@ func (c *Client) AddNVMeSubsystemHost(ctx context.Context, svmName string, name 
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) RemoveNVMeSubsystemHost(ctx context.Context, svmName string, name string, osType string, nqn string) error {
+func (c *Client) RemoveNVMeSubsystemHost(ctx context.Context, svmName string, name string, nqn string) error {
 	var (
 		statusCode int
 		nvmeSs     ontap.GetData
@@ -254,7 +251,6 @@ func (c *Client) RemoveNVMeSubsystemHost(ctx context.Context, svmName string, na
 	params := url.Values{}
 	params.Set("svm.name", svmName)
 	params.Set("name", name)
-	params.Set("os_type", osType)
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/subsystems`, &statusCode, responseHeaders).
 		Params(params).
@@ -301,7 +297,7 @@ func (c *Client) CreateNVMeNamespace(ctx context.Context, nvmeNamespace ontap.NV
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name string, osType string, nvmeNamespace ontap.NVMeNamespace) error {
+func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name string, nvmeNamespace ontap.NVMeNamespace) error {
 	var (
 		statusCode int
 		nvmeNs     ontap.GetData
@@ -312,7 +308,6 @@ func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name s
 	params := url.Values{}
 	params.Set("svm.name", svmName)
 	params.Set("name", name)
-	params.Set("os_type", osType)
 
 	builder := c.baseRequestBuilder(`/api/storage/namespaces`, &statusCode, responseHeaders).
 		Params(params).
@@ -344,7 +339,7 @@ func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name s
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) DeleteNVMeNamespace(ctx context.Context, svmName string, name string, osType string, allowDeleteWhileMapped bool) error {
+func (c *Client) DeleteNVMeNamespace(ctx context.Context, svmName string, name string, allowDeleteWhileMapped bool) error {
 	var (
 		statusCode int
 		nvmeNs     ontap.GetData
@@ -355,7 +350,6 @@ func (c *Client) DeleteNVMeNamespace(ctx context.Context, svmName string, name s
 	params := url.Values{}
 	params.Set("svm.name", svmName)
 	params.Set("name", name)
-	params.Set("os_type", osType)
 
 	builder := c.baseRequestBuilder(`/api/storage/namespaces`, &statusCode, responseHeaders).
 		Params(params).
