@@ -187,7 +187,11 @@ func (c *Client) DeleteNVMeSubsystem(ctx context.Context, svmName string, name s
 			name, svmName, nvmeSs.NumRecords)
 	}
 
-	builder = c.baseRequestBuilder(`/api/protocols/nvme/subsystems/`+nvmeSs.Records[0].UUID+`?allow_delete_while_mapped=`+strconv.FormatBool(allowDeleteWhileMapped)+`&allow_delete_with_hosts=`+strconv.FormatBool(allowDeleteWithHosts), &statusCode, responseHeaders).
+	deleteParams := url.Values{}
+	deleteParams.Set("allow_delete_while_mapped", strconv.FormatBool(allowDeleteWhileMapped))
+	deleteParams.Set("allow_delete_with_hosts", strconv.FormatBool(allowDeleteWithHosts))
+	builder = c.baseRequestBuilder(`/api/protocols/nvme/subsystems/`+nvmeSs.Records[0].UUID, &statusCode, responseHeaders).
+		Params(deleteParams).
 		Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
@@ -372,7 +376,10 @@ func (c *Client) DeleteNVMeNamespace(ctx context.Context, svmName string, name s
 			name, svmName, nvmeNs.NumRecords)
 	}
 
-	builder = c.baseRequestBuilder(`/api/storage/namespaces/`+nvmeNs.Records[0].UUID+`?allow_delete_while_mapped=`+strconv.FormatBool(allowDeleteWhileMapped), &statusCode, responseHeaders).
+	deleteParams := url.Values{}
+	deleteParams.Set("allow_delete_while_mapped", strconv.FormatBool(allowDeleteWhileMapped))
+	builder = c.baseRequestBuilder(`/api/storage/namespaces/`+nvmeNs.Records[0].UUID, &statusCode, responseHeaders).
+		Params(deleteParams).
 		Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {

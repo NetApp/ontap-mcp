@@ -502,7 +502,7 @@ func newUpdateNVMeNamespace(in tool.NVMeNamespace) (ontap.NVMeNamespace, error) 
 		return out, errors.New("SVM name is required")
 	}
 	if in.Name == "" {
-		return out, errors.New("NVMe subsystem name is required")
+		return out, errors.New("NVMe namespace name is required")
 	}
 	if in.OSType == "" {
 		return out, errors.New("OS type is required")
@@ -519,7 +519,7 @@ func newDeleteNVMeNamespace(in tool.NVMeNamespace) error {
 		return errors.New("SVM name is required")
 	}
 	if in.Name == "" {
-		return errors.New("NVMe subsystem name is required")
+		return errors.New("NVMe namespace name is required")
 	}
 	if in.OSType == "" {
 		return errors.New("OS type is required")

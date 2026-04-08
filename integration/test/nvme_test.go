@@ -16,7 +16,7 @@ import (
 const NvmeCluster = "aff"
 const NvmeClusterStr = "On the " + NvmeCluster + " cluster, "
 
-func TestNVMeService(t *testing.T) {
+func TestNVMe(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
 
 	tests := []struct {
@@ -178,7 +178,7 @@ func verifySubsystemMaps(subsystemName, namespaceName string, exist bool) func(t
 					return true
 				}
 			}
-			t.Errorf("sybsystem map is not exist")
+			t.Errorf("subsystem map does not exist")
 		} else {
 			sbsMapRecord := false
 			for _, record := range data.Records {
@@ -192,7 +192,7 @@ func verifySubsystemMaps(subsystemName, namespaceName string, exist bool) func(t
 			if !sbsMapRecord {
 				return true
 			}
-			t.Errorf("subsystem map is exist")
+			t.Errorf("subsystem map exists")
 		}
 		return false
 	}

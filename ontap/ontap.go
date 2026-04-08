@@ -209,7 +209,7 @@ type NVMeHost struct {
 }
 
 type NVMeSubsystemHost struct {
-	NQN     string     `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe storage target"`
+	NQN     string     `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe host"`
 	Records []NVMeHost `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
 }
 
