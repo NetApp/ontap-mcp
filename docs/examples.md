@@ -279,7 +279,7 @@ Expected Response: The iscsi service has been successfully deleted.
 
 - on the umeng-aff300-05-06 cluster, create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with Default ipspace on node umeng-aff300-06
 
-Expected Response: The Network IP interface created successfully.
+Expected Response: The Network IP interface has been created successfully.
 
 - on the umeng-aff300-05-06 cluster, change auto revert to false in cluster scope network interface named cl_mg
 

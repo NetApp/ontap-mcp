@@ -270,11 +270,18 @@ func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 	if in.Name == "" {
 		return out, errors.New("network interface name is required")
 	}
+
+	hasUpdates := false
 	if in.AutoRevert != "" {
 		out.Location.AutoRevert = in.AutoRevert
+		hasUpdates = true
 	}
 	if in.ServicePolicy != "" {
 		out.ServicePolicy.Name = in.ServicePolicy
+		hasUpdates = true
+	}
+	if !hasUpdates {
+		return out, errors.New("at least one field to update must be provided: auto_revert or service_policy")
 	}
 
 	return out, nil
