@@ -143,7 +143,7 @@ func (a *App) UpdateNetworkIPInterface(ctx context.Context, _ *mcp.CallToolReque
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.UpdateNetworkIPInterface(ctx, parameters.Scope, parameters.Name, networkIPInterfaceUpdate)
+	err = client.UpdateNetworkIPInterface(ctx, parameters.Scope, parameters.Name, parameters.SVM, networkIPInterfaceUpdate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -172,7 +172,7 @@ func (a *App) DeleteNetworkIPInterface(ctx context.Context, _ *mcp.CallToolReque
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNetworkIPInterface(ctx, parameters.Scope, parameters.Name)
+	err = client.DeleteNetworkIPInterface(ctx, parameters.Scope, parameters.Name, parameters.SVM)
 
 	if err != nil {
 		return errorResult(err), nil, err

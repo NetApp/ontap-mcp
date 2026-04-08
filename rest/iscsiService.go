@@ -111,7 +111,7 @@ func (c *Client) CreateNetworkIPInterface(ctx context.Context, nwInterface ontap
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, interfaceName string, nwInterface ontap.NetworkIPInterface) error {
+func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, interfaceName string, svmName string, nwInterface ontap.NetworkIPInterface) error {
 	var (
 		statusCode    int
 		interfaceData ontap.GetData
@@ -123,6 +123,9 @@ func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, int
 	params.Set("name", interfaceName)
 	if scope != "" {
 		params.Set("scope", scope)
+	}
+	if svmName != "" {
+		params.Set("svm.name", svmName)
 	}
 
 	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
@@ -154,7 +157,7 @@ func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, int
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) DeleteNetworkIPInterface(ctx context.Context, scope string, interfaceName string) error {
+func (c *Client) DeleteNetworkIPInterface(ctx context.Context, scope string, interfaceName string, svmName string) error {
 	var (
 		statusCode    int
 		interfaceData ontap.GetData
@@ -166,6 +169,9 @@ func (c *Client) DeleteNetworkIPInterface(ctx context.Context, scope string, int
 	params.Set("name", interfaceName)
 	if scope != "" {
 		params.Set("scope", scope)
+	}
+	if svmName != "" {
+		params.Set("svm.name", svmName)
 	}
 
 	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
