@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/netapp/ontap-mcp/version"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -18,6 +17,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/netapp/ontap-mcp/version"
 
 	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
@@ -425,7 +426,9 @@ func (c *Client) GenericGet(ctx context.Context, path string, params url.Values,
 		}
 
 		var page paginatedResponse
-		_ = json.Unmarshal(buf.Bytes(), &page)
+		if err := json.Unmarshal(buf.Bytes(), &page); err != nil {
+			return nil, fmt.Errorf("failed to decode ONTAP response from %s: %w", nextURL, err)
+		}
 		if page.Records == nil {
 			return buf.Bytes(), nil
 		}
