@@ -263,6 +263,34 @@ Expected Response: The nvme service has been successfully updated.
 
 ---
 
+### Manage iSCSI Service
+
+- On the umeng-aff300-05-06 cluster, create iscsi service target named alias tgpath on the marketing svm
+
+Expected Response: The iscsi service has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, disable the iscsi service on the marketing svm
+
+Expected Response: The iscsi service has been successfully updated.
+
+- On the umeng-aff300-05-06 cluster, delete the iscsi service on the marketing svm
+
+Expected Response: The iscsi service has been successfully deleted.
+
+- on the umeng-aff300-05-06 cluster, create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with Default ipspace on node umeng-aff300-06
+
+Expected Response: The Network IP interface has been created successfully.
+
+- on the umeng-aff300-05-06 cluster, change auto revert to false in cluster scope network interface named cl_mg
+
+Expected Response: The Network IP interface updated successfully.
+
+- on the umeng-aff300-05-06 cluster, delete svm scope network interface named svg1 in marketing svm
+
+Expected Response: The Network IP interface deleted successfully.
+
+---
+
 ### Manage FCP
 
 - On the umeng-aff300-05-06 cluster, enable fcp service in marketing svm

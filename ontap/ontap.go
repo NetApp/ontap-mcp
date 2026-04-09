@@ -64,6 +64,21 @@ type NASExportPolicy struct {
 	Name string `json:"name"`
 }
 
+type Target struct {
+	Alias string `json:"alias"`
+}
+
+type IP struct {
+	Address string `json:"address" jsonschema:"IP address for the interface"`
+	Netmask string `json:"netmask" jsonschema:"IP netmask for the interface"`
+}
+
+type Location struct {
+	HomeNode        NameAndUUID `json:"home_node,omitzero" jsonschema:"home node"`
+	BroadcastDomain NameAndUUID `json:"broadcast_domain,omitzero" jsonschema:"broadcast domain"`
+	AutoRevert      string      `json:"auto_revert,omitzero" jsonschema:"auto revert"`
+}
+
 type NAS struct {
 	ExportPolicy NASExportPolicy `json:"export_policy,omitzero"`
 	Path         string          `json:"path,omitzero"`
@@ -192,6 +207,23 @@ type Qtree struct {
 type NVMeService struct {
 	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
+}
+
+type IscsiService struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
+	Target  Target      `json:"target,omitzero" jsonschema:"target of iSCSI service"`
+}
+
+type NetworkIPInterface struct {
+	SVM           NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	IPSpace       NameAndUUID `json:"ipspace,omitzero" jsonschema:"ipspace name"`
+	Name          string      `json:"name" jsonschema:"name of the interface"`
+	Scope         string      `json:"scope,omitzero" jsonschema:"scope"` // enum: cluster, svm
+	IP            IP          `json:"ip,omitzero" jsonschema:"ip address"`
+	Subnet        NameAndUUID `json:"subnet,omitzero" jsonschema:"subnet name"`
+	Location      Location    `json:"location,omitzero" jsonschema:"location name"`
+	ServicePolicy NameAndUUID `json:"service_policy,omitzero" jsonschema:"service policy"`
 }
 
 type FCPService struct {

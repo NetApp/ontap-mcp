@@ -115,6 +115,28 @@ type NVMeService struct {
 	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the NVMe service"`
 }
 
+type IscsiService struct {
+	Cluster     string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM         string `json:"svm_name" jsonschema:"SVM name"`
+	Enabled     string `json:"enabled,omitzero" jsonschema:"admin state of the iSCSI service"`
+	TargetAlias string `json:"target.alias,omitzero" jsonschema:"iSCSI target alias of the iSCSI service"`
+}
+
+type NetworkIPInterface struct {
+	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM             string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+	IPSpace         string `json:"ipspace_name,omitzero" jsonschema:"ipspace name"`
+	Name            string `json:"name" jsonschema:"name of the interface"`
+	Scope           string `json:"scope" jsonschema:"scope of network interface(e.g., 'cluster', 'svm')"`
+	IPAddress       string `json:"ip.address,omitzero" jsonschema:"IP address for the interface"`
+	IPNetmask       string `json:"ip.netmask,omitzero" jsonschema:"IP netmask of the interface"`
+	Subnet          string `json:"subnet_name,omitzero" jsonschema:"subnet name"`
+	HomeNode        string `json:"location.home_node,omitzero" jsonschema:"home node"`
+	BroadcastDomain string `json:"location.broadcast_domain,omitzero" jsonschema:"broadcast domain"`
+	AutoRevert      string `json:"location.auto_revert,omitzero" jsonschema:"auto_revert"`
+	ServicePolicy   string `json:"service_policy,omitzero" jsonschema:"service policy"`
+}
+
 type FCPService struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM     string `json:"svm_name" jsonschema:"SVM name"`
