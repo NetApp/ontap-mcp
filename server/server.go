@@ -133,6 +133,16 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
 	addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
 
+	// operation on iSCSI service object
+	addTool(a, server, "create_iscsi_service", descriptions.CreateIscsiService, createAnnotation, a.CreateIscsiService)
+	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
+	addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
+
+	// operation on Network Interface object
+	addTool(a, server, "create_network_ip_interface", descriptions.CreateNetworkIPInterface, createAnnotation, a.CreateNetworkIPInterface)
+	addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNetworkIPInterface)
+	addTool(a, server, "delete_network_ip_interface", descriptions.DeleteNetworkIPInterface, deleteAnnotation, a.DeleteNetworkIPInterface)
+
 	// operation on NVMe subsystem object
 	addTool(a, server, "create_nvme_subsystem", descriptions.CreateNVMeSubsystem, createAnnotation, a.CreateNVMeSubsystem)
 	addTool(a, server, "update_nvme_subsystem", descriptions.UpdateNVMeSubsystem, updateAnnotation, a.UpdateNVMeSubsystem)
