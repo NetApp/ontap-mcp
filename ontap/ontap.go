@@ -56,6 +56,8 @@ type GetData struct {
 		RwRule  []string     `json:"rw_rule,omitzero"`
 		Clients []ClientData `json:"clients,omitzero"`
 		Nas     NAS          `json:"nas,omitzero"`
+		Lun     NameAndUUID  `json:"lun,omitzero"`
+		IGroup  NameAndUUID  `json:"igroup,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -211,6 +213,12 @@ type IGroup struct {
 	Protocol   string            `json:"protocol,omitzero"`
 	Comment    string            `json:"comment,omitzero"`
 	Initiators []IGroupInitiator `json:"initiators,omitzero"`
+}
+
+type LunMap struct {
+	SVM    NameAndUUID `json:"svm,omitzero"`
+	Lun    NameAndUUID `json:"lun,omitzero"`
+	IGroup NameAndUUID `json:"igroup,omitzero"`
 }
 
 const (

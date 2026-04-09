@@ -287,6 +287,14 @@ Expected Response: A summary of aggregate free space, followed by a recommendati
 
 Expected Response: igroup created successfully.
 
+- On the umeng-aff300-05-06 cluster, create lun map of lun named lunpayroll and an igroup named igroupFin on the marketing svm
+
+Expected Response: lun map created successfully.
+
+- On the umeng-aff300-05-06 cluster, delete lun map of lun named lunpayroll and an igroup named igroupFin on the marketing svm
+
+Expected Response: lun map deleted successfully.
+
 **Rename an iGroup**
 
 - On the umeng-aff300-05-06 cluster, rename igroup igroupFin to igroupFinNew and os type as windows on the marketing svm
