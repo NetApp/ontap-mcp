@@ -11,7 +11,7 @@ import (
 	"github.com/netapp/ontap-mcp/config"
 )
 
-func TestIGroup(t *testing.T) {
+func TestIGroupLUNMap(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
 
 	tests := []struct {
@@ -39,22 +39,34 @@ func TestIGroup(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=marketing", validationFunc: createObject},
 		},
 		{
-			name:             "Update igroup",
-			input:            ClusterStr + "rename igroup " + rn("igroupFin") + " to " + rn("igroupFinNew") + " and os type as windows on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=marketing", validationFunc: createObject},
-		},
-		{
 			name:             "Add initiator to igroup",
-			input:            ClusterStr + "add initiator iqn.2021-01.com.example:test to igroup " + rn("igroupFinNew") + " on the marketing svm",
+			input:            ClusterStr + "add initiator iqn.2021-01.com.example:test to igroup " + rn("igroupFin") + " on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Remove initiator from igroup",
-			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFinNew") + " on the marketing svm",
+			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFin") + " on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "Rename igroup",
+			input:            ClusterStr + "rename igroup from " + rn("igroupFin") + " to " + rn("igroupFinNew") + " on the marketing svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=marketing", validationFunc: createObject},
+		},
+		{
+			name:             "Create lun map",
+			input:            ClusterStr + "create lun map of lun named " + "/vol/vol1/lunpayroll" + " and an igroup named " + rn("igroupFinNew") + " on the marketing svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/lun-maps?igroup.name=" + rn("igroupFinNew") + "&lun.name=" + "/vol/vol1/lunpayroll" + "&svm.name=marketing", validationFunc: createObject},
+		},
+		{
+			name:             "Clean lun map",
+			input:            ClusterStr + "delete lun map of lun named " + "/vol/vol1/lunpayroll" + " and an igroup named " + rn("igroupFinNew") + " on the marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/lun-maps?igroup.name=" + rn("igroupFinNew") + "&lun.name=" + "/vol/vol1/lunpayroll" + "&svm.name=marketing", validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean igroup",

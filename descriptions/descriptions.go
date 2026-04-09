@@ -90,6 +90,9 @@ const DeleteIGroup = `Delete an igroup on a cluster by cluster name.`
 const AddIGroupInitiator = `Add an initiator to an igroup on a cluster by cluster name.`
 const RemoveIGroupInitiator = `Remove an initiator from an igroup on a cluster by cluster name.`
 
+const CreateLunMap = `Create a LUN map on a cluster by cluster name. Maps a LUN to an igroup, making the LUN accessible to the initiators in the igroup.`
+const DeleteLunMap = `Delete a LUN map on a cluster by cluster name. Removes the mapping between a LUN and an igroup.`
+
 const ListOntapEndpoints = `List ONTAP REST collection endpoints in the catalog.
 The catalog contains all endpoints — can be large. Prefer search_ontap_endpoints for targeted discovery.
 Use the optional 'match' parameter to filter by substring or regex pattern (e.g. "snapshot", "lun", ".*nfs.*export.*").

@@ -158,6 +158,13 @@ type IGroupInitiator struct {
 	AllowDeleteWhileMapped bool     `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows the deletion of an initiator from of a mapped initiator group. This parameter should be used with caution."`
 }
 
+type LunMap struct {
+	Cluster    string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM        string `json:"svm_name" jsonschema:"SVM name"`
+	LunName    string `json:"lun_name" jsonschema:"LUN name (full path, e.g. /vol/vol1/lun1)"`
+	IGroupName string `json:"igroup_name" jsonschema:"igroup name to map the LUN to"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`

@@ -207,7 +207,7 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 				if expectedOntapErrorStr != "" && strings.Contains(err.Error(), expectedOntapErrorStr) {
 					slog.Debug("Expected tool error", slog.String("tool", toolName), slog.Any("error", err))
 				} else {
-					t.Errorf("Tool %q returned error LLM will retry: %v", toolName, err)
+					t.Errorf("Tool %q args %v returned error LLM will retry: %v", toolName, args, err)
 				}
 				result = "Error: " + err.Error()
 			}
