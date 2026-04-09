@@ -47,10 +47,10 @@ func (c *Client) UpdateIGroup(ctx context.Context, igroup ontap.IGroup, igroupNa
 	}
 
 	if ig.NumRecords == 0 {
-		return fmt.Errorf("failed to update igroup=%s on svm=%s because it does not exist", igroupName, svmName)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because it does not exist", igroupName, svmName)
 	}
 	if ig.NumRecords != 1 {
-		return fmt.Errorf("failed to update igroup=%s on svm=%s because there are %d matching records", igroupName, svmName, ig.NumRecords)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because there are %d matching records", igroupName, svmName, ig.NumRecords)
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/san/igroups/`+ig.Records[0].UUID, &statusCode, responseHeaders).
@@ -85,10 +85,10 @@ func (c *Client) DeleteIGroup(ctx context.Context, igroup ontap.IGroup, allowDel
 	}
 
 	if ig.NumRecords == 0 {
-		return fmt.Errorf("failed to delete igroup=%s on svm=%s because it does not exist", igroup.Name, igroup.SVM.Name)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because it does not exist", igroup.Name, igroup.SVM.Name)
 	}
 	if ig.NumRecords != 1 {
-		return fmt.Errorf("failed to delete igroup=%s on svm=%s because there are %d matching records", igroup.Name, igroup.SVM.Name, ig.NumRecords)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because there are %d matching records", igroup.Name, igroup.SVM.Name, ig.NumRecords)
 	}
 
 	deleteParams := url.Values{}
@@ -125,10 +125,10 @@ func (c *Client) AddIGroupInitiator(ctx context.Context, igroupName, svmName str
 	}
 
 	if ig.NumRecords == 0 {
-		return fmt.Errorf("failed to add initiator to igroup=%s on svm=%s because the igroup does not exist", igroupName, svmName)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because the igroup does not exist", igroupName, svmName)
 	}
 	if ig.NumRecords != 1 {
-		return fmt.Errorf("failed to add initiator to igroup=%s on svm=%s because there are %d matching records", igroupName, svmName, ig.NumRecords)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because there are %d matching records", igroupName, svmName, ig.NumRecords)
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/san/igroups/`+ig.Records[0].UUID+`/initiators`, &statusCode, responseHeaders).
@@ -162,10 +162,10 @@ func (c *Client) RemoveIGroupInitiator(ctx context.Context, igroupName, svmName 
 	}
 
 	if ig.NumRecords == 0 {
-		return fmt.Errorf("failed to remove initiator from igroup=%s on svm=%s because the igroup does not exist", igroupName, svmName)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because the igroup does not exist", igroupName, svmName)
 	}
 	if ig.NumRecords != 1 {
-		return fmt.Errorf("failed to remove initiator from igroup=%s on svm=%s because there are %d matching records", igroupName, svmName, ig.NumRecords)
+		return fmt.Errorf("failed to get igroup=%s on svm=%s because there are %d matching records", igroupName, svmName, ig.NumRecords)
 	}
 
 	deleteParams := url.Values{}
