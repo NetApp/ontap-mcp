@@ -22,39 +22,45 @@ func TestIGroup(t *testing.T) {
 	}{
 		{
 			name:             "Clean igroup",
-			input:            ClusterStr + "delete igroup " + rn("igroupFin") + " on the vs_test4 svm",
+			input:            ClusterStr + "delete igroup " + rn("igroupFin") + " on the marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=vs_test4", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=marketing", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean igroup",
+			input:            ClusterStr + "delete igroup " + rn("igroupFinNew") + " on the marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=marketing", validationFunc: deleteObject},
 		},
 		{
 			name:             "Create igroup",
-			input:            ClusterStr + "create an igroup named " + rn("igroupFin") + " with OS type linux and protocol iscsi on the vs_test4 svm",
+			input:            ClusterStr + "create an igroup named " + rn("igroupFin") + " with OS type linux and protocol iscsi on the marketing svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=vs_test4", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=marketing", validationFunc: createObject},
 		},
 		{
 			name:             "Update igroup",
-			input:            ClusterStr + "rename igroup " + rn("igroupFin") + " to " + rn("igroupFinNew") + " on the vs_test4 svm",
+			input:            ClusterStr + "rename igroup " + rn("igroupFin") + " to " + rn("igroupFinNew") + " and os type as windows on the marketing svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=vs_test4", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=marketing", validationFunc: createObject},
 		},
 		{
 			name:             "Add initiator to igroup",
-			input:            ClusterStr + "add initiator iqn.2021-01.com.example:test to igroup " + rn("igroupFinNew") + " on the vs_test4 svm",
+			input:            ClusterStr + "add initiator iqn.2021-01.com.example:test to igroup " + rn("igroupFinNew") + " on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Remove initiator from igroup",
-			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFinNew") + " on the vs_test4 svm",
+			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFinNew") + " on the marketing svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean igroup",
-			input:            ClusterStr + "delete igroup " + rn("igroupFinNew") + " on the vs_test4 svm",
+			input:            ClusterStr + "delete igroup " + rn("igroupFinNew") + " on the marketing svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=vs_test4", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=marketing", validationFunc: deleteObject},
 		},
 	}
 
