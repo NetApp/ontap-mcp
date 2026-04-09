@@ -76,6 +76,14 @@ const CreateNVMeService = `Create NVMe service on a cluster by cluster name.`
 const UpdateNVMeService = `Update NVMe service on a cluster by cluster name.`
 const DeleteNVMeService = `Delete NVMe service on a cluster by cluster name.`
 
+const CreateIscsiService = `Create iSCSI service on a cluster by cluster name.`
+const UpdateIscsiService = `Update iSCSI service on a cluster by cluster name.`
+const DeleteIscsiService = `Delete iSCSI service on a cluster by cluster name.`
+
+const CreateNetworkIPInterface = `Create Network IP interface on a cluster by cluster name.`
+const UpdateNetworkIPInterface = `Update Network IP interface on a cluster by cluster name.`
+const DeleteNetworkIPInterface = `Delete Network IP interface on a cluster by cluster name.`
+
 const CreateIGroup = `Create an igroup (initiator group) on a cluster by cluster name.`
 const UpdateIGroup = `Update an igroup on a cluster by cluster name.`
 const DeleteIGroup = `Delete an igroup on a cluster by cluster name.`
