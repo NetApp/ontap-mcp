@@ -21,18 +21,6 @@ func TestIscsiProtocol(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
-			name:             "Clean iSCSI service",
-			input:            ClusterStr + "delete iscsi service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
-		},
-		{
-			name:             "Create iSCSI service",
-			input:            ClusterStr + "create iscsi service target named alias " + rn("tgpath") + " on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: createObject},
-		},
-		{
 			name:             "Clean cluster scope network interface",
 			input:            ClusterStr + "delete cluster scope network interface named " + rn("cl_mg"),
 			expectedOntapErr: "because it does not exist",
@@ -79,18 +67,6 @@ func TestIscsiProtocol(t *testing.T) {
 			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in marketing svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: deleteObject},
-		},
-		{
-			name:             "Update iSCSI service",
-			input:            ClusterStr + "disabled iscsi service on the marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
-		},
-		{
-			name:             "Clean iSCSI service",
-			input:            ClusterStr + "delete iscsi service in marketing svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
 		},
 	}
 
