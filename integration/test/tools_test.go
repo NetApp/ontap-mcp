@@ -208,13 +208,13 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 			result, err := a.callMCPTool(ctx, toolName, args)
 			if err != nil {
 				if expectedOntapErrorStr != "" && strings.Contains(err.Error(), expectedOntapErrorStr) {
-					slog.Debug("Expected tool error", slog.String("tool", toolName), slog.Any("error", err))
-				} else {
-					failedTool = toolName
-					argsUsed = args
-					errFound = err
-					slog.Warn("LLM will retry", slog.String("tool", toolName), slog.Any("args", args), slog.Any("error", err))
+					return "", nil // test passed, expected error was observed
 				}
+				failedTool = toolName
+				argsUsed = args
+				errFound = err
+				slog.Warn("LLM will retry", slog.String("tool", toolName), slog.Any("args", args), slog.Any("error", err))
+
 				result = "Error: " + err.Error()
 			}
 
@@ -224,7 +224,7 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 	}
 
 	t.Errorf("Tool %q args %v returned error %v", failedTool, argsUsed, errFound)
-	return "", fmt.Errorf("max iterations (%d) reached without final assistant message", maxIterations)
+	return "", fmt.Errorf("max iterations (%d) reached; last tool %q args %v error: %w", maxIterations, failedTool, argsUsed, errFound)
 }
 
 func (a *Agent) Close() {
