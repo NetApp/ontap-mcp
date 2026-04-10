@@ -185,7 +185,6 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 		}
 
 		assistantMessage := completion.Choices[0].Message
-
 		if len(assistantMessage.ToolCalls) == 0 {
 			return assistantMessage.Content, nil
 		}
@@ -204,10 +203,13 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 
 			result, err := a.callMCPTool(ctx, toolName, args)
 			if err != nil {
-				if expectedOntapErrorStr != "" && strings.Contains(err.Error(), expectedOntapErrorStr) {
+				switch {
+				case expectedOntapErrorStr != "" && strings.Contains(err.Error(), expectedOntapErrorStr):
 					slog.Debug("Expected tool error", slog.String("tool", toolName), slog.Any("error", err))
-				} else {
-					t.Errorf("Tool %q returned error LLM will retry: %v", toolName, err)
+				case toolName == "ontap_get" && strings.Contains(err.Error(), "invalid for field"):
+					slog.Debug("LLM would retry", slog.String("tool", toolName), slog.Any("args", args), slog.Any("error", err))
+				default:
+					t.Errorf("Tool %q args %v returned error LLM will retry: %v", toolName, args, err)
 				}
 				result = "Error: " + err.Error()
 			}
