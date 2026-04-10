@@ -198,6 +198,18 @@ type CIFSShare struct {
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type LUNSpace struct {
+	Size int64 `json:"size,omitempty" jsonschema:"size of the LUN"`
+}
+
+type LUN struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Name    string      `json:"name,omitempty" jsonschema:"LUN name"`
+	Space   LUNSpace    `json:"space,omitzero" jsonschema:"LUN space detail"`
+	OsType  string      `json:"os_type,omitempty" jsonschema:"os type of LUN"`
+	Enabled *bool       `json:"enabled,omitempty" jsonschema:"LUN admin state"`
+}
+
 type Qtree struct {
 	SVM    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Volume NameAndUUID `json:"volume,omitzero" jsonschema:"volume name"`

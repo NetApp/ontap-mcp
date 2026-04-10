@@ -138,6 +138,11 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
 	addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
 
+	// operation on LUN object
+	addTool(a, server, "create_lun", descriptions.CreateLUN, createAnnotation, a.CreateLUN)
+	addTool(a, server, "update_lun", descriptions.UpdateLUN, updateAnnotation, a.UpdateLUN)
+	addTool(a, server, "delete_lun", descriptions.DeleteLUN, deleteAnnotation, a.DeleteLUN)
+
 	// operation on Network Interface object
 	addTool(a, server, "create_network_ip_interface", descriptions.CreateNetworkIPInterface, createAnnotation, a.CreateNetworkIPInterface)
 	addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNetworkIPInterface)

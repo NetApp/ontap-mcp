@@ -109,6 +109,18 @@ type Qtree struct {
 	NewName string `json:"new_name,omitzero" jsonschema:"new qtree name"`
 }
 
+type LUN struct {
+	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string `json:"svm_name" jsonschema:"SVM name"`
+	Volume                 string `json:"volume_name" jsonschema:"volume name where the LUN resides"`
+	Name                   string `json:"lun_name" jsonschema:"LUN name"`
+	NewName                string `json:"new_lun_name,omitzero" jsonschema:"new LUN name for rename operation"`
+	Size                   string `json:"size,omitzero" jsonschema:"size of the LUN (e.g., '10GB', '1TB')"`
+	OsType                 string `json:"os_type,omitzero" jsonschema:"OS type (e.g., linux, windows, windows_2008, windows_gpt, aix, esxi, hyper_v, solaris, vmware, xen)"`
+	Enabled                string `json:"enabled,omitzero" jsonschema:"LUN state: 'true' to enable (online) or 'false' to disable (offline) the LUN"`
+	AllowDeleteWhileMapped bool   `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows deletion of a mapped LUN.. This parameter should be used with caution"`
+}
+
 type NVMeService struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM     string `json:"svm_name" jsonschema:"SVM name"`
