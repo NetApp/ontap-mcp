@@ -30,22 +30,21 @@ import (
 	"github.com/netapp/ontap-mcp/version"
 )
 
-type Options struct {
-	Host           string
-	InspectTraffic bool
-	IsTest         bool
-	Port           int
-	ReadOnly       bool
-	TestHTTPClient *http.Client // Optional HTTP client for testing
+type Config struct {
+	Host           string `default:"localhost" help:"Listening address"`
+	Port           int    `default:"8080" help:"Listening port" env:"ONTAP_MCP_PORT"`
+	InspectTraffic bool   `default:"false" help:"Inspect MCP HTTP traffic"`
+	ReadOnly       bool   `default:"false" help:"Run MCP in read-only mode. This disables all tool calls that modify ONTAP state."`
 }
 
 type App struct {
-	logger       *slog.Logger
-	cfg          *config.ONTAP
-	options      Options
-	locks        *lock.Map
-	catalog      catalog.APICatalog
-	versionCache sync.Map
+	logger         *slog.Logger
+	cfg            *config.ONTAP
+	options        Config
+	testHTTPClient *http.Client
+	locks          *lock.Map
+	catalog        catalog.APICatalog
+	versionCache   sync.Map
 }
 
 type cachedVersion struct {
@@ -55,7 +54,7 @@ type cachedVersion struct {
 
 const versionCacheTTL = 24 * time.Hour
 
-func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
+func NewApp(cfg *config.ONTAP, o Config, logger *slog.Logger) *App {
 	app := &App{
 		cfg:     cfg,
 		logger:  logger,
@@ -527,8 +526,8 @@ func (a *App) getClient(cluster string) (*rest.Client, error) {
 		return nil, fmt.Errorf("cluster %s not found", cluster)
 	}
 
-	if a.options.TestHTTPClient != nil {
-		return rest.NewWithClient(poller, a.options.TestHTTPClient), nil
+	if a.testHTTPClient != nil {
+		return rest.NewWithClient(poller, a.testHTTPClient), nil
 	}
 	return rest.New(poller), nil
 }
