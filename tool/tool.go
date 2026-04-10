@@ -158,3 +158,8 @@ type DescribeEndpointParams struct {
 	Path    string `json:"path" jsonschema:"ONTAP REST API path, e.g. /storage/volumes"`
 	Cluster string `json:"cluster_name,omitzero" jsonschema:"cluster name — if provided, filters out fields and filters not available in that cluster's ONTAP version"`
 }
+
+type SVM struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	Name    string `json:"svm_name" jsonschema:"SVM name"`
+}

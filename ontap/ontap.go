@@ -198,6 +198,10 @@ type CIFSShare struct {
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type SVM struct {
+	Name string `json:"name" jsonschema:"svm name"`
+}
+
 type Qtree struct {
 	SVM    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Volume NameAndUUID `json:"volume,omitzero" jsonschema:"volume name"`

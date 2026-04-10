@@ -21,16 +21,28 @@ func TestIscsiProtocol(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
-			name:             "Clean iSCSI service",
-			input:            ClusterStr + "delete iscsi service in marketing svm",
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Create SVM",
+			input:            ClusterStr + "create " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
+			name:             "Clean iSCSI service",
+			input:            ClusterStr + "delete iscsi service in " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create iSCSI service",
-			input:            ClusterStr + "create iscsi service target named alias " + rn("tgpath") + " on the marketing svm",
+			input:            ClusterStr + "create iscsi service target named alias " + rn("tgpath") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
 			name:             "Clean cluster scope network interface",
@@ -40,7 +52,7 @@ func TestIscsiProtocol(t *testing.T) {
 		},
 		{
 			name:             "Clean svm scope network interface",
-			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in marketing svm",
+			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: deleteObject},
 		},
@@ -52,7 +64,7 @@ func TestIscsiProtocol(t *testing.T) {
 		},
 		{
 			name:             "Create svm scope network interface with ip",
-			input:            ClusterStr + "create network interface named " + rn("svg1") + " in marketing svm with ip address 10.63.41.7 and netmask 18 on node umeng-aff300-06",
+			input:            ClusterStr + "create network interface named " + rn("svg1") + " in " + rn("marketing") + " svm with ip address 10.63.41.7 and netmask 18 on node umeng-aff300-06",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: createObject},
 		},
@@ -64,33 +76,39 @@ func TestIscsiProtocol(t *testing.T) {
 		},
 		{
 			name:             "Clean svm scope network interface",
-			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in marketing svm",
+			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: deleteObject},
 		},
 		{
 			name:             "Create svm scope network interface with broadcast domain",
-			input:            ClusterStr + "create network interface named " + rn("svg1") + " in marketing svm with ip address 10.63.41.7 and netmask 18 on broadcast domain as Default",
+			input:            ClusterStr + "create network interface named " + rn("svg1") + " in " + rn("marketing") + " svm with ip address 10.63.41.7 and netmask 18 on broadcast domain as Default",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: createObject},
 		},
 		{
 			name:             "Clean svm scope network interface with broadcast domain",
-			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in marketing svm",
+			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: deleteObject},
 		},
 		{
 			name:             "Update iSCSI service",
-			input:            ClusterStr + "disabled iscsi service on the marketing svm",
+			input:            ClusterStr + "disabled iscsi service on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean iSCSI service",
-			input:            ClusterStr + "delete iscsi service in marketing svm",
+			input:            ClusterStr + "delete iscsi service in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
 
