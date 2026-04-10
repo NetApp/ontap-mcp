@@ -172,6 +172,10 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 	tools := a.convertMCPToolsToOpenAI()
 	maxIterations := 10
 
+	var errFound error
+	failedTool := ""
+	argsUsed := make(map[string]any)
+
 	for range maxIterations {
 		completion, err := a.openaiClient.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 			Model:    a.model,
@@ -185,7 +189,6 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 		}
 
 		assistantMessage := completion.Choices[0].Message
-
 		if len(assistantMessage.ToolCalls) == 0 {
 			return assistantMessage.Content, nil
 		}
@@ -205,20 +208,23 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 			result, err := a.callMCPTool(ctx, toolName, args)
 			if err != nil {
 				if expectedOntapErrorStr != "" && strings.Contains(err.Error(), expectedOntapErrorStr) {
-					slog.Debug("Expected tool error", slog.String("tool", toolName), slog.Any("error", err))
-				} else {
-					t.Errorf("Tool %q returned error LLM will retry: %v", toolName, err)
+					return "", nil // test passed, expected error was observed
 				}
+				failedTool = toolName
+				argsUsed = args
+				errFound = err
+				slog.Warn("LLM will retry", slog.String("tool", toolName), slog.Any("args", args), slog.Any("error", err))
+
 				result = "Error: " + err.Error()
 			}
 
 			slog.Debug("", slog.Any("Tool result", result))
-
 			messages = append(messages, openai.ToolMessage(result, toolCall.ID))
 		}
 	}
 
-	return "", fmt.Errorf("max iterations (%d) reached without final assistant message", maxIterations)
+	t.Errorf("Tool %q args %v returned error %v", failedTool, argsUsed, errFound)
+	return "", fmt.Errorf("max iterations (%d) reached; last tool %q args %v error: %w", maxIterations, failedTool, argsUsed, errFound)
 }
 
 func (a *Agent) Close() {
