@@ -198,6 +198,10 @@ type CIFSShare struct {
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
+type SVM struct {
+	Name string `json:"name" jsonschema:"svm name"`
+}
+
 type LUNSpace struct {
 	Size int64 `json:"size,omitempty" jsonschema:"size of the LUN"`
 }

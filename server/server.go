@@ -118,6 +118,10 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, updateAnnotation, a.UpdateNFSExportPoliciesRule)
 	addTool(a, server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
 
+	// operation on SVM object
+	addTool(a, server, "create_svm", descriptions.CreateSVM, createAnnotation, a.CreateSVM)
+	addTool(a, server, "delete_svm", descriptions.DeleteSVM, deleteAnnotation, a.DeleteSVM)
+
 	// operation on CIFS share object
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
