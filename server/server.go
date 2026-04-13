@@ -147,6 +147,24 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNetworkIPInterface)
 	addTool(a, server, "delete_network_ip_interface", descriptions.DeleteNetworkIPInterface, deleteAnnotation, a.DeleteNetworkIPInterface)
 
+	// operation on NVMe subsystem object
+	addTool(a, server, "create_nvme_subsystem", descriptions.CreateNVMeSubsystem, createAnnotation, a.CreateNVMeSubsystem)
+	addTool(a, server, "update_nvme_subsystem", descriptions.UpdateNVMeSubsystem, updateAnnotation, a.UpdateNVMeSubsystem)
+	addTool(a, server, "delete_nvme_subsystem", descriptions.DeleteNVMeSubsystem, deleteAnnotation, a.DeleteNVMeSubsystem)
+
+	// operation on NVMe subsystem host object
+	addTool(a, server, "add_nvme_subsystem_host", descriptions.AddNVMeSubsystemHost, createAnnotation, a.AddNVMeSubsystemHost)
+	addTool(a, server, "remove_nvme_subsystem_host", descriptions.RemoveNVMeSubsystemHost, deleteAnnotation, a.RemoveNVMeSubsystemHost)
+
+	// operation on NVMe namespace object
+	addTool(a, server, "create_nvme_namespace", descriptions.CreateNVMeNamespace, createAnnotation, a.CreateNVMeNamespace)
+	addTool(a, server, "update_nvme_namespace", descriptions.UpdateNVMeNamespace, updateAnnotation, a.UpdateNVMeNamespace)
+	addTool(a, server, "delete_nvme_namespace", descriptions.DeleteNVMeNamespace, deleteAnnotation, a.DeleteNVMeNamespace)
+
+	// operation on NVMe subsystem map object
+	addTool(a, server, "create_nvme_subsystem_map", descriptions.CreateNVMeSubsystemMap, createAnnotation, a.CreateNVMeSubsystemMap)
+	addTool(a, server, "delete_nvme_subsystem_map", descriptions.DeleteNVMeSubsystemMap, deleteAnnotation, a.DeleteNVMeSubsystemMap)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)
