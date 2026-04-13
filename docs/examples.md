@@ -295,7 +295,7 @@ Expected Response: The Network IP interface deleted successfully.
 
 **Create a LUN**
 
-- On the umeng-aff300-05-06 cluster, create a 20MB lun named lundoc in volume doc on the marketing svm
+- On the umeng-aff300-05-06 cluster, create a 20MB lun named lundoc in volume doc on the marketing svm with os type linux
 
 Expected Response: LUN has been created successfully.
 
@@ -303,19 +303,19 @@ Expected Response: LUN has been created successfully.
 
 - On the umeng-aff300-05-06 cluster, update lun lundoc size to 50mb  in volume doc on the marketing svm
 
-Expected Response: LUN size has been updated successfully.
+Expected Response: LUN has been updated successfully.
 
 **Rename a LUN**
 
 - On the umeng-aff300-05-06 cluster, rename the lun lundoc in volume doc on the marketing svm to lundocnew
 
-Expected Response: LUN rename has been updated successfully.
+Expected Response: LUN has been updated successfully.
 
 **State change of a LUN**
 
 - On the umeng-aff300-05-06 cluster, disable the lun lundocnew in volume doc on the marketing svm
 
-Expected Response: LUN state has been updated successfully.
+Expected Response: LUN has been updated successfully.
 
 **Delete a LUN**
 

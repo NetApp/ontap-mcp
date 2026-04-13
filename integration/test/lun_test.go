@@ -58,7 +58,7 @@ func TestLUN(t *testing.T) {
 		},
 		{
 			name:             "Update lun size",
-			input:            ClusterStr + "update lun " + rn("lundoc") + "size to 50mb  in volume " + rn("doc") + " on the " + rn("marketing") + " svm",
+			input:            ClusterStr + "update lun " + rn("lundoc") + " size to 50mb in volume " + rn("doc") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
@@ -66,7 +66,7 @@ func TestLUN(t *testing.T) {
 			name:             "Rename lun",
 			input:            ClusterStr + "rename the lun " + rn("lundoc") + " in volume " + rn("doc") + " on the " + rn("marketing") + " svm to " + rn("lundocnew"),
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + rn("lundocnew") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocnew") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
 			name:             "Update lun state",

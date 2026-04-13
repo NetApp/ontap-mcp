@@ -118,7 +118,7 @@ type LUN struct {
 	Size                   string `json:"size,omitzero" jsonschema:"size of the LUN (e.g., '10GB', '1TB')"`
 	OsType                 string `json:"os_type,omitzero" jsonschema:"OS type (e.g., linux, windows, windows_2008, windows_gpt, aix, esxi, hyper_v, solaris, vmware, xen)"`
 	Enabled                string `json:"enabled,omitzero" jsonschema:"LUN state: 'true' to enable (online) or 'false' to disable (offline) the LUN"`
-	AllowDeleteWhileMapped bool   `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows deletion of a mapped LUN.. This parameter should be used with caution"`
+	AllowDeleteWhileMapped bool   `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows deletion of a mapped LUN. This parameter should be used with caution"`
 }
 
 type NVMeService struct {
