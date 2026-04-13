@@ -251,7 +251,7 @@ Expected Response: The qtree has been successfully renamed.
 ---
 
 
-### Manage NVMe Service
+### Manage NVMe
 
 - On the umeng-aff300-05-06 cluster, create nvme service on the marketing svm
 
@@ -260,6 +260,26 @@ Expected Response: The nvme service has been successfully created.
 - On the umeng-aff300-05-06 cluster, disable nvme service on the marketing svm
 
 Expected Response: The nvme service has been successfully updated.
+
+- On the umeng-aff300-05-06 cluster, create nvme subsystem sys1 with linux os on the marketing svm
+
+Expected Response: The nvme subsystem has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, add host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem in marketing svm
+
+Expected Response: The nvme subsystem Host has been successfully added.
+
+- On the umeng-aff300-05-06 cluster, delete nvme subsystem sys1 with in marketing svm
+
+Expected Response: The nvme subsystem has been successfully deleted.
+
+- On the umeng-aff300-05-06 cluster, create nvme namespace /vol/docns/ns1 with linux os and 20mb size in nvmevs1 svm
+
+Expected Response: The nvme namespace has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create subsystem map of sys1 subsystem and /vol/docns/ns1 namespace in nvmevs1 svm
+
+Expected Response: The nvme subsystem map has been successfully created.
 
 ---
 
@@ -288,6 +308,40 @@ Expected Response: The Network IP interface updated successfully.
 - on the umeng-aff300-05-06 cluster, delete svm scope network interface named svg1 in marketing svm
 
 Expected Response: The Network IP interface deleted successfully.
+
+---
+
+### LUN Provisioning
+
+**Create a LUN**
+
+- On the umeng-aff300-05-06 cluster, create a 20MB lun named lundoc in volume doc on the marketing svm with os type linux
+
+Expected Response: LUN has been created successfully.
+
+**Resize a LUN**
+
+- On the umeng-aff300-05-06 cluster, update lun lundoc size to 50mb  in volume doc on the marketing svm
+
+Expected Response: LUN has been updated successfully.
+
+**Rename a LUN**
+
+- On the umeng-aff300-05-06 cluster, rename the lun lundoc in volume doc on the marketing svm to lundocnew
+
+Expected Response: LUN has been updated successfully.
+
+**State change of a LUN**
+
+- On the umeng-aff300-05-06 cluster, disable the lun lundocnew in volume doc on the marketing svm
+
+Expected Response: LUN has been updated successfully.
+
+**Delete a LUN**
+
+- On the umeng-aff300-05-06 cluster, delete lun lundocnew in volume doc in marketing svm
+
+Expected Response: LUN has been deleted successfully.
 
 ---
 

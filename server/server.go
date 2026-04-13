@@ -142,10 +142,33 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
 	addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
 
+	// operation on LUN object
+	addTool(a, server, "create_lun", descriptions.CreateLUN, createAnnotation, a.CreateLUN)
+	addTool(a, server, "update_lun", descriptions.UpdateLUN, updateAnnotation, a.UpdateLUN)
+	addTool(a, server, "delete_lun", descriptions.DeleteLUN, deleteAnnotation, a.DeleteLUN)
+
 	// operation on Network Interface object
 	addTool(a, server, "create_network_ip_interface", descriptions.CreateNetworkIPInterface, createAnnotation, a.CreateNetworkIPInterface)
 	addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNetworkIPInterface)
 	addTool(a, server, "delete_network_ip_interface", descriptions.DeleteNetworkIPInterface, deleteAnnotation, a.DeleteNetworkIPInterface)
+
+	// operation on NVMe subsystem object
+	addTool(a, server, "create_nvme_subsystem", descriptions.CreateNVMeSubsystem, createAnnotation, a.CreateNVMeSubsystem)
+	addTool(a, server, "update_nvme_subsystem", descriptions.UpdateNVMeSubsystem, updateAnnotation, a.UpdateNVMeSubsystem)
+	addTool(a, server, "delete_nvme_subsystem", descriptions.DeleteNVMeSubsystem, deleteAnnotation, a.DeleteNVMeSubsystem)
+
+	// operation on NVMe subsystem host object
+	addTool(a, server, "add_nvme_subsystem_host", descriptions.AddNVMeSubsystemHost, createAnnotation, a.AddNVMeSubsystemHost)
+	addTool(a, server, "remove_nvme_subsystem_host", descriptions.RemoveNVMeSubsystemHost, deleteAnnotation, a.RemoveNVMeSubsystemHost)
+
+	// operation on NVMe namespace object
+	addTool(a, server, "create_nvme_namespace", descriptions.CreateNVMeNamespace, createAnnotation, a.CreateNVMeNamespace)
+	addTool(a, server, "update_nvme_namespace", descriptions.UpdateNVMeNamespace, updateAnnotation, a.UpdateNVMeNamespace)
+	addTool(a, server, "delete_nvme_namespace", descriptions.DeleteNVMeNamespace, deleteAnnotation, a.DeleteNVMeNamespace)
+
+	// operation on NVMe subsystem map object
+	addTool(a, server, "create_nvme_subsystem_map", descriptions.CreateNVMeSubsystemMap, createAnnotation, a.CreateNVMeSubsystemMap)
+	addTool(a, server, "delete_nvme_subsystem_map", descriptions.DeleteNVMeSubsystemMap, deleteAnnotation, a.DeleteNVMeSubsystemMap)
 
 	// operation on igroup object
 	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
