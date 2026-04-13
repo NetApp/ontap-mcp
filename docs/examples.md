@@ -311,6 +311,40 @@ Expected Response: The Network IP interface deleted successfully.
 
 ---
 
+### LUN Provisioning
+
+**Create a LUN**
+
+- On the umeng-aff300-05-06 cluster, create a 20MB lun named lundoc in volume doc on the marketing svm with os type linux
+
+Expected Response: LUN has been created successfully.
+
+**Resize a LUN**
+
+- On the umeng-aff300-05-06 cluster, update lun lundoc size to 50mb  in volume doc on the marketing svm
+
+Expected Response: LUN has been updated successfully.
+
+**Rename a LUN**
+
+- On the umeng-aff300-05-06 cluster, rename the lun lundoc in volume doc on the marketing svm to lundocnew
+
+Expected Response: LUN has been updated successfully.
+
+**State change of a LUN**
+
+- On the umeng-aff300-05-06 cluster, disable the lun lundocnew in volume doc on the marketing svm
+
+Expected Response: LUN has been updated successfully.
+
+**Delete a LUN**
+
+- On the umeng-aff300-05-06 cluster, delete lun lundocnew in volume doc in marketing svm
+
+Expected Response: LUN has been deleted successfully.
+
+---
+
 ### Querying Specific Fields
 
 **Get volume space and protection details**
