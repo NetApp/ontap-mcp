@@ -149,8 +149,8 @@ type FCInterface struct {
 	Name         string `json:"name" jsonschema:"FC interface name"`
 	DataProtocol string `json:"data_protocol,omitzero" jsonschema:"data protocol of the FC interface (e.g. fcp)"`
 	Enabled      string `json:"enabled,omitzero" jsonschema:"admin state of the FC interface"`
-	HomeNodeName string `json:"home_node_name,omitzero" jsonschema:"name of the home node for the FC interface"`
-	HomePortName string `json:"home_port_name,omitzero" jsonschema:"name of the home port on the home node for the FC interface"`
+	HomeNodeName string `json:"location.home_port.node.name,omitzero" jsonschema:"name of the home node for the FC interface"`
+	HomePortName string `json:"location.home_port.name,omitzero" jsonschema:"name of the home port on the home node for the FC interface"`
 }
 
 type OntapGetParams struct {
