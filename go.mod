@@ -3,10 +3,10 @@ module github.com/netapp/ontap-mcp
 go 1.26.2
 
 require (
-	github.com/alecthomas/kong v1.14.0
+	github.com/alecthomas/kong v1.15.0
 	github.com/carlmjohnson/requests v0.25.1
 	github.com/goccy/go-yaml v1.19.2
-	github.com/modelcontextprotocol/go-sdk v1.4.1
+	github.com/modelcontextprotocol/go-sdk v1.5.0
 )
 
 require (
