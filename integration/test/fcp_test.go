@@ -21,22 +21,40 @@ func TestFCP(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
-			name:             "Create FC Interface",
-			input:            SarClusterStr + "create fc interface " + rn("fc1") + " in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol",
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Create SVM",
+			input:            ClusterStr + "create " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
+			name:             "Create FC Interface",
+			input:            SarClusterStr + "create fc interface " + rn("fc1") + " in " + rn("marketing") + " svm at port 0e in node umeng-aff300-01 of fcp data protocol",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
 			name:             "Update FC Interface",
-			input:            SarClusterStr + "disable fc interface " + rn("fc1") + " in marketing svm",
+			input:            SarClusterStr + "disable fc interface " + rn("fc1") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Clean FC Interface",
-			input:            SarClusterStr + "delete fc interface " + rn("fc1") + " in marketing svm",
+			input:            SarClusterStr + "delete fc interface " + rn("fc1") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
 
