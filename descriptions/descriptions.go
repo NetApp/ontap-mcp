@@ -84,6 +84,20 @@ const CreateNetworkIPInterface = `Create Network IP interface on a cluster by cl
 const UpdateNetworkIPInterface = `Update Network IP interface on a cluster by cluster name.`
 const DeleteNetworkIPInterface = `Delete Network IP interface on a cluster by cluster name.`
 
+const CreateNVMeSubsystem = `Create NVMe subsystem on a cluster by cluster name.`
+const UpdateNVMeSubsystem = `Update NVMe subsystem on a cluster by cluster name.`
+const DeleteNVMeSubsystem = `Delete NVMe subsystem on a cluster by cluster name.`
+
+const AddNVMeSubsystemHost = `Add a host NQN to an NVMe subsystem on a cluster by cluster name.`
+const RemoveNVMeSubsystemHost = `Remove a host NQN from an NVMe subsystem on a cluster by cluster name.`
+
+const CreateNVMeNamespace = `Create NVMe namespace on a cluster by cluster name.`
+const UpdateNVMeNamespace = `Update NVMe namespace on a cluster by cluster name.`
+const DeleteNVMeNamespace = `Delete NVMe namespace on a cluster by cluster name.`
+
+const CreateNVMeSubsystemMap = `Create NVMe subsystem map on a cluster by cluster name.`
+const DeleteNVMeSubsystemMap = `Delete NVMe subsystem map on a cluster by cluster name.`
+
 const CreateFCPService = `Create FCP service on a cluster by cluster name.`
 const UpdateFCPService = `Update FCP service on a cluster by cluster name.`
 const DeleteFCPService = `Delete FCP service on a cluster by cluster name.`

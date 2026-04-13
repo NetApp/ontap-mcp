@@ -230,6 +230,43 @@ type NetworkIPInterface struct {
 	ServicePolicy NameAndUUID `json:"service_policy,omitzero" jsonschema:"service policy"`
 }
 
+type NVMeSubsystem struct {
+	SVM                    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Name                   string      `json:"name,omitzero" jsonschema:"name for NVMe subsystem"`
+	OSType                 string      `json:"os_type,omitzero" jsonschema:"operating system of the NVMe subsystem's hosts"`
+	Hosts                  []NVMeHost  `json:"hosts,omitzero" jsonschema:"NVMe hosts configured for access to the NVMe subsystem"`
+	Comment                string      `json:"comment,omitzero" jsonschema:"configurable comment for the NVMe subsystem"`
+	AllowDeleteWhileMapped bool        `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows for the deletion of a mapped NVMe subsystem. This parameter should be used with caution."`
+	AllowDeleteWithHosts   bool        `json:"allow_delete_with_hosts,omitzero" jsonschema:"Allows for the deletion of an NVMe subsystem with NVMe hosts. This parameter should be used with caution."`
+}
+
+type NVMeHost struct {
+	NQN string `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe host"`
+}
+
+type NVMeSubsystemHost struct {
+	NQN     string     `json:"nqn,omitzero" jsonschema:"NVMe qualified name (NQN) used to identify the NVMe host"`
+	Records []NVMeHost `json:"records,omitzero" jsonschema:"array of NVMe hosts specified to add multiple NVMe hosts to an NVMe subsystem"`
+}
+
+type NVMeNamespace struct {
+	SVM                    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Name                   string      `json:"name,omitzero" jsonschema:"name for NVMe namespace"`
+	OSType                 string      `json:"os_type,omitzero" jsonschema:"operating system type of the NVMe namespace"`
+	Space                  Space       `json:"space,omitzero" jsonschema:"space of NVMe namespace"`
+	AllowDeleteWhileMapped bool        `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows deletion of a mapped NVMe namespace. This parameter should be used with caution."`
+}
+
+type Space struct {
+	Size string `json:"size,omitzero" jsonschema:"total provisioned size of the NVMe namespace (e.g., '100GB', '1TB')"`
+}
+
+type NVMeSubsystemMap struct {
+	SVM       NameAndUUID `json:"svm" jsonschema:"svm name"`
+	Subsystem NameAndUUID `json:"subsystem" jsonschema:"subsystem name"`
+	Namespace NameAndUUID `json:"namespace" jsonschema:"namespace name"`
+}
+
 type FCPService struct {
 	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
