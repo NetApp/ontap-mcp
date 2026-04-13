@@ -38,7 +38,7 @@ func (a *App) CreateFCPService(ctx context.Context, _ *mcp.CallToolRequest, para
 	}, nil, nil
 }
 
-func (a *App) UpdateFCPService(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCPService) (*mcp.CallToolResult, any, error) {
+func (a *App) UpdateFCPService(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCPServiceUpdate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -106,7 +106,7 @@ func newCreateFCPService(in tool.FCPService) (ontap.FCPService, error) {
 	return out, nil
 }
 
-func newUpdateFCPService(in tool.FCPService) (ontap.FCPService, error) {
+func newUpdateFCPService(in tool.FCPServiceUpdate) (ontap.FCPService, error) {
 	out := ontap.FCPService{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -125,7 +125,7 @@ func newDeleteFCPService(in tool.FCPService) error {
 	return nil
 }
 
-func (a *App) CreateFCInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCInterface) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateFCInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCInterfaceCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -208,7 +208,7 @@ func (a *App) DeleteFCInterface(ctx context.Context, _ *mcp.CallToolRequest, par
 	}, nil, nil
 }
 
-func newCreateFCInterface(in tool.FCInterface) (ontap.FCInterface, error) {
+func newCreateFCInterface(in tool.FCInterfaceCreate) (ontap.FCInterface, error) {
 	out := ontap.FCInterface{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -256,7 +256,7 @@ func newUpdateFCInterface(in tool.FCInterface) (ontap.FCInterface, error) {
 		hasUpdates = true
 	}
 	if (in.HomeNodeName == "" && in.HomePortName != "") || (in.HomeNodeName != "" && in.HomePortName == "") {
-		return out, errors.New("both home_node_name and home_port_name must be provided together or both omitted")
+		return out, errors.New("both location.home_port.node.name and location.home_port.name must be provided together or both omitted")
 	}
 	if in.HomeNodeName != "" && in.HomePortName != "" {
 		out.Location = ontap.FCInterfaceLocation{

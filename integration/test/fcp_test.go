@@ -11,6 +11,9 @@ import (
 	"github.com/netapp/ontap-mcp/config"
 )
 
+const SarCluster = "sar"
+const SarClusterStr = "On the " + SarCluster + " cluster, "
+
 func TestFCP(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
 

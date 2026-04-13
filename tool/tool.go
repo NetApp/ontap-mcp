@@ -172,17 +172,32 @@ type NVMeSubsystemMap struct {
 	Namespace string `json:"namespace_name" jsonschema:"name for NVMe namespace"`
 }
 
+type FCPServiceUpdate struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
+	Enabled string `json:"enabled" jsonschema:"admin state of the FCP service"`
+}
+
 type FCPService struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM     string `json:"svm_name" jsonschema:"SVM name"`
 	Enabled string `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
 }
 
+type FCInterfaceCreate struct {
+	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM          string `json:"svm_name" jsonschema:"SVM name"`
+	Name         string `json:"name" jsonschema:"FC interface name"`
+	DataProtocol string `json:"data_protocol" jsonschema:"data protocol of the FC interface (e.g. fcp)"`
+	Enabled      string `json:"enabled,omitzero" jsonschema:"admin state of the FC interface"`
+	HomeNodeName string `json:"location.home_port.node.name" jsonschema:"name of the home node for the FC interface"`
+	HomePortName string `json:"location.home_port.name" jsonschema:"name of the home port on the home node for the FC interface"`
+}
+
 type FCInterface struct {
 	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM          string `json:"svm_name" jsonschema:"SVM name"`
 	Name         string `json:"name" jsonschema:"FC interface name"`
-	DataProtocol string `json:"data_protocol,omitzero" jsonschema:"data protocol of the FC interface (e.g. fcp)"`
 	Enabled      string `json:"enabled,omitzero" jsonschema:"admin state of the FC interface"`
 	HomeNodeName string `json:"location.home_port.node.name,omitzero" jsonschema:"name of the home node for the FC interface"`
 	HomePortName string `json:"location.home_port.name,omitzero" jsonschema:"name of the home port on the home node for the FC interface"`
