@@ -15,7 +15,7 @@ func lunPath(volume, name string) string {
 	return "/vol/" + volume + "/" + name
 }
 
-func (a *App) CreateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.LUN) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.LUNCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -97,7 +97,7 @@ func (a *App) DeleteLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 
 // newCreateLUN validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateLUN(in tool.LUN) (ontap.LUN, error) {
+func newCreateLUN(in tool.LUNCreate) (ontap.LUN, error) {
 	out := ontap.LUN{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
