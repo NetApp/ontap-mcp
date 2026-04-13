@@ -223,6 +223,7 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 		}
 	}
 
+	t.Errorf("Tool %q args %v returned error %v", failedTool, argsUsed, errFound)
 	return "", fmt.Errorf("max iterations (%d) reached; last tool %q args %v error: %w", maxIterations, failedTool, argsUsed, errFound)
 }
 
