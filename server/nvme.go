@@ -493,9 +493,10 @@ func newUpdateNVMeNamespace(in tool.NVMeNamespace) (ontap.NVMeNamespace, error) 
 	if in.Name == "" {
 		return out, errors.New("NVMe namespace name is required")
 	}
-	if in.Size != "" {
-		out.Space.Size = in.Size
+	if in.Size == "" {
+		return out, errors.New("at least one supported update field must be provided; size is supported for update")
 	}
+	out.Space.Size = in.Size
 
 	return out, nil
 }
