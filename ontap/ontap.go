@@ -241,7 +241,7 @@ type NetworkIPInterface struct {
 	IP            IP          `json:"ip,omitzero" jsonschema:"ip address"`
 	Subnet        NameAndUUID `json:"subnet,omitzero" jsonschema:"subnet name"`
 	Location      Location    `json:"location,omitzero" jsonschema:"location name"`
-	ServicePolicy NameAndUUID `json:"service_policy,omitzero" jsonschema:"service policy"`
+	ServicePolicy NameAndUUID `json:"service_policy,omitzero" jsonschema:"service policy"` // default-data-files , default-data-blocks, default-data-iscsi, default-management, default-intercluster, default-management, default-route-announce
 }
 
 type NVMeSubsystem struct {
