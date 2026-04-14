@@ -64,19 +64,19 @@ func TestSnapshot(t *testing.T) {
 			name:             "Add schedule to snapshot policy every4hours",
 			input:            ClusterStr + "add schedule 2hours in a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM and keeps the last 6 snapshots",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours"), validationFunc: verifySchedule(true, "2hours", "", "", 6)},
+			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours") + "&svm.name=" + rn("marketing") + "&fields=copies", validationFunc: verifySchedule(true, "2hours", "-", 6)},
 		},
 		{
 			name:             "Update schedule in snapshot policy every4hours",
-			input:            ClusterStr + "update schedule named 2hours in a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM with snapshot name prefix as `2h` and snapmirror label as `sm2`",
+			input:            ClusterStr + "update schedule named 2hours in a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM with snapmirror label as `sm2`",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours"), validationFunc: verifySchedule(true, "2hours", "2h", "sm2", 6)},
+			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours") + "&svm.name=" + rn("marketing") + "&fields=copies", validationFunc: verifySchedule(true, "2hours", "sm2", 6)},
 		},
 		{
 			name:             "Remove schedule from snapshot policy every4hours",
 			input:            ClusterStr + "remove schedule named 2hours from a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours"), validationFunc: verifySchedule(false, "2hours", "", "", 0)},
+			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours") + "&svm.name=" + rn("marketing") + "&fields=copies", validationFunc: verifySchedule(false, "2hours", "", 0)},
 		},
 		{
 			name:             "Update snapshot policy every4hours",
@@ -139,17 +139,12 @@ func TestSnapshot(t *testing.T) {
 	}
 }
 
-func verifySchedule(exist bool, scheduleName string, expectedPrefix string, expectedSMLabel string, expectedCount int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+func verifySchedule(exist bool, scheduleName string, expectedSMLabel string, expectedCount int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-		type SnapshotPolicySchedule struct {
+		type Copy struct {
 			Count           int               `json:"count,omitzero" jsonschema:"number of snapshots to keep for this schedule"`
 			Schedule        ontap.NameAndUUID `json:"schedule,omitzero" jsonschema:"name of the schedule"`
-			Prefix          string            `json:"prefix,omitzero" jsonschema:"snapshot name prefix for this schedule"`
 			SnapmirrorLabel string            `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
-		}
-		type Copy struct {
-			Count    int                    `json:"count"`
-			Schedule SnapshotPolicySchedule `json:"schedule"`
 		}
 		type SnapshotPolicy struct {
 			Copies []Copy `json:"copies,omitzero" jsonschema:"snapshot copies"`
@@ -160,6 +155,7 @@ func verifySchedule(exist bool, scheduleName string, expectedPrefix string, expe
 		}
 
 		var data response
+		var scheduleFound bool
 		err := requests.URL("https://"+poller.Addr+"/"+api).
 			BasicAuth(poller.Username, poller.Password).
 			Client(client).
@@ -175,25 +171,28 @@ func verifySchedule(exist bool, scheduleName string, expectedPrefix string, expe
 		}
 
 		for _, ssCopy := range data.Records[0].Copies {
-			if ssCopy.Schedule.Schedule.Name == scheduleName {
-				if !exist {
-					t.Errorf("verifySchedule: schedule should not be exist")
-					return false
-				}
-
-				if expectedPrefix != ssCopy.Schedule.Prefix {
-					t.Errorf("verifySchedule: got = %s, want %s", ssCopy.Schedule.Prefix, expectedPrefix)
-					return false
-				}
-				if expectedSMLabel != ssCopy.Schedule.SnapmirrorLabel {
-					t.Errorf("verifySchedule: got = %s, want %s", ssCopy.Schedule.SnapmirrorLabel, expectedSMLabel)
-					return false
-				}
-				if expectedCount != ssCopy.Schedule.Count {
-					t.Errorf("verifySchedule: got = %d, want %d", ssCopy.Schedule.Count, expectedCount)
-					return false
-				}
+			if ssCopy.Schedule.Name != scheduleName {
+				continue
 			}
+			if !exist {
+				t.Errorf("verifySchedule: schedule should not be exist")
+				return false
+			}
+			scheduleFound = true
+
+			if expectedSMLabel != ssCopy.SnapmirrorLabel {
+				t.Errorf("verifySchedule: got = %s, want %s", ssCopy.SnapmirrorLabel, expectedSMLabel)
+				return false
+			}
+			if expectedCount != ssCopy.Count {
+				t.Errorf("verifySchedule: got = %d, want %d", ssCopy.Count, expectedCount)
+				return false
+			}
+		}
+
+		if !scheduleFound && exist {
+			t.Errorf("verifySchedule: schedule must be exist")
+			return false
 		}
 
 		return true

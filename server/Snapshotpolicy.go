@@ -392,9 +392,6 @@ func newAddScheduleInSnapshotPolicy(in tool.SnapshotPolicySchedule) (ontap.Snaps
 	out.Schedule = ontap.NameAndUUID{Name: in.ScheduleName}
 	out.Count = in.Count
 
-	if in.Prefix != "" {
-		out.Prefix = in.Prefix
-	}
 	if in.SnapmirrorLabel != "" {
 		out.SnapmirrorLabel = in.SnapmirrorLabel
 	}
@@ -414,13 +411,10 @@ func newUpdateScheduleInSnapshotPolicy(in tool.SnapshotPolicySchedule) (ontap.Sn
 	if in.ScheduleName == "" {
 		return out, errors.New("schedule name is required")
 	}
-	if in.Count == 0 && in.Prefix == "" && in.SnapmirrorLabel == "" {
-		return out, errors.New("at least one supported update field must be provided; count, prefix, and snapmirror_label are supported for update")
+	if in.Count == 0 && in.SnapmirrorLabel == "" {
+		return out, errors.New("at least one supported update field must be provided; count and snapmirror_label are supported for update")
 	}
 
-	if in.Prefix != "" {
-		out.Prefix = in.Prefix
-	}
 	if in.SnapmirrorLabel != "" {
 		out.SnapmirrorLabel = in.SnapmirrorLabel
 	}

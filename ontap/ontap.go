@@ -152,7 +152,6 @@ type Schedule struct {
 type SnapshotPolicySchedule struct {
 	Count           int         `json:"count,omitzero" jsonschema:"number of snapshots to keep for this schedule"`
 	Schedule        NameAndUUID `json:"schedule,omitzero" jsonschema:"name of the schedule"`
-	Prefix          string      `json:"prefix,omitzero" jsonschema:"snapshot name prefix for this schedule"`
 	SnapmirrorLabel string      `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
 }
 

@@ -60,7 +60,6 @@ type SnapshotPolicySchedule struct {
 	PolicyName      string `json:"policy_name" jsonschema:"snapshot policy name"`
 	ScheduleName    string `json:"schedule_name" jsonschema:"name of the schedule"`
 	Count           int    `json:"count,omitzero" jsonschema:"number of snapshots to keep for this schedule"`
-	Prefix          string `json:"prefix,omitzero" jsonschema:"snapshot name prefix for this schedule"`
 	SnapmirrorLabel string `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
 }
 

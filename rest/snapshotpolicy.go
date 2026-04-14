@@ -10,16 +10,19 @@ import (
 
 func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy) error {
 	var (
-		statusCode int
-		oc         ontap.OnlyCount
-		err        error
+		statusCode   int
+		scheduleName string
+		oc           ontap.OnlyCount
+		err          error
 	)
 	responseHeaders := http.Header{}
 
 	// If schedule is exist then use it else create new
-	scheduleName := snapshotPolicy.Copies[0].Schedule.Name
+	if len(snapshotPolicy.Copies) > 0 {
+		scheduleName = snapshotPolicy.Copies[0].Schedule.Name
+	}
 	if scheduleName == "" {
-		return fmt.Errorf("no schedule exist with %s name", scheduleName)
+		return fmt.Errorf("schedule name must be required in snapshot policy %s", snapshotPolicy.Name)
 	}
 	params := url.Values{}
 	params.Set("return_records", "false")
@@ -56,35 +59,17 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 func (c *Client) UpdateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy, snapshotPolicyName string, svmName string) error {
 	var (
 		statusCode int
-		ssPolicy   ontap.GetData
 	)
 	responseHeaders := http.Header{}
-	params := url.Values{}
-	params.Set("fields", "uuid")
-	params.Set("name", snapshotPolicyName)
-
-	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&ssPolicy)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
+	policyUUID, err := c.getSnapshotPolicyUUID(ctx, snapshotPolicyName, svmName)
 	if err != nil {
 		return err
 	}
 
-	if ssPolicy.NumRecords == 0 {
-		return fmt.Errorf("failed to get snapshotPolicy=%s on svm=%s because it does not exist", snapshotPolicyName, svmName)
-	}
-	if ssPolicy.NumRecords != 1 {
-		return fmt.Errorf("failed to get snapshotPolicy=%s on svm=%s because there are %d matching records",
-			snapshotPolicyName, svmName, ssPolicy.NumRecords)
-	}
-
-	builder2 := c.baseRequestBuilder(`/api/storage/snapshot-policies`, &statusCode, responseHeaders).
+	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`+policyUUID, &statusCode, responseHeaders).
 		BodyJSON(snapshotPolicy)
 
-	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
@@ -94,35 +79,17 @@ func (c *Client) UpdateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 func (c *Client) DeleteSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.SnapshotPolicy) error {
 	var (
 		statusCode int
-		ssPolicy   ontap.GetData
 	)
 	responseHeaders := http.Header{}
-	params := url.Values{}
-	params.Set("fields", "uuid")
-	params.Set("name", snapshotPolicy.Name)
-
-	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`, nil, responseHeaders).
-		Params(params).
-		ToJSON(&ssPolicy)
-
-	err := c.buildAndExecuteRequest(ctx, builder)
-
+	policyUUID, err := c.getSnapshotPolicyUUID(ctx, snapshotPolicy.Name, snapshotPolicy.SVM.Name)
 	if err != nil {
 		return err
 	}
 
-	if ssPolicy.NumRecords == 0 {
-		return fmt.Errorf("failed to get snapshotPolicy=%s on svm=%s because it does not exist", snapshotPolicy.Name, snapshotPolicy.SVM.Name)
-	}
-	if ssPolicy.NumRecords != 1 {
-		return fmt.Errorf("failed to get snapshotPolicy=%s on svm=%s because there are %d matching records",
-			snapshotPolicy.Name, snapshotPolicy.SVM.Name, ssPolicy.NumRecords)
-	}
-
-	builder2 := c.baseRequestBuilder(`/api/storage/snapshot-policies/`+ssPolicy.Records[0].UUID, &statusCode, responseHeaders).
+	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies/`+policyUUID, &statusCode, responseHeaders).
 		Delete()
 
-	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
