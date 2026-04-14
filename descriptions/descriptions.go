@@ -98,6 +98,10 @@ const DeleteNVMeNamespace = `Delete NVMe namespace on a cluster by cluster name.
 const CreateNVMeSubsystemMap = `Create NVMe subsystem map on a cluster by cluster name.`
 const DeleteNVMeSubsystemMap = `Delete NVMe subsystem map on a cluster by cluster name.`
 
+const CreateLUN = `Create a LUN on a specified volume and SVM with a given size and OS type.`
+const UpdateLUN = `Update a LUN: resize, rename, or toggle enabled/disabled state (online/offline).`
+const DeleteLUN = `Delete a LUN from a specified volume and SVM.`
+
 const CreateFCPService = `Create FCP service on a cluster by cluster name.`
 const UpdateFCPService = `Update FCP service on a cluster by cluster name.`
 const DeleteFCPService = `Delete FCP service on a cluster by cluster name.`
