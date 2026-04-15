@@ -4,12 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/config"
 	"log/slog"
 	"net/http"
 	"testing"
 	"time"
-
-	"github.com/netapp/ontap-mcp/config"
 )
 
 func TestSVM(t *testing.T) {

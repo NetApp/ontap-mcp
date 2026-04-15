@@ -9,7 +9,7 @@ import (
 	"net/url"
 )
 
-func (c *Client) CreateSVM(ctx context.Context, svm ontap.SVM) error {
+func (c *Client) CreateSVM(ctx context.Context, svm ontap.SVMCreate) error {
 	var (
 		buf        bytes.Buffer
 		statusCode int

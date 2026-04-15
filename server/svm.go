@@ -92,8 +92,8 @@ func (a *App) DeleteSVM(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}, nil, nil
 }
 
-func newCreateSVM(in tool.SVMCreate) (ontap.SVM, error) {
-	out := ontap.SVM{}
+func newCreateSVM(in tool.SVMCreate) (ontap.SVMCreate, error) {
+	out := ontap.SVMCreate{}
 	if in.Name == "" {
 		return out, errors.New("SVM name is required")
 	}
@@ -103,6 +103,10 @@ func newCreateSVM(in tool.SVMCreate) (ontap.SVM, error) {
 
 func newUpdateSVM(in tool.SVM) (ontap.SVM, error) {
 	out := ontap.SVM{}
+
+	if in.Name == "" {
+		return out, errors.New("SVM name is required")
+	}
 
 	hasUpdate := false
 	if in.NewName != "" {

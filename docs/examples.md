@@ -351,25 +351,25 @@ Expected Response: LUN has been deleted successfully.
 
 - On the umeng-aff300-05-06 cluster, create marketing svm
 
-Expected Response: SVM has been created successfully.
+Expected Response: SVM created successfully.
 
 **Rename a SVM**
 
 - On the umeng-aff300-05-06 cluster, rename svm marketing to marketingNew
 
-Expected Response: SVM has been updated successfully.
+Expected Response: SVM updated successfully.
 
 **Update a SVM**
 
 - On the umeng-aff300-05-06 cluster, update svm marketingNew state to stopped and comment as `stop_svm`
 
-Expected Response: SVM has been updated successfully.
+Expected Response: SVM updated successfully.
 
 **Delete a SVM**
 
 - On the umeng-aff300-05-06 cluster, delete marketingNew svm
 
-Expected Response: SVM has been deleted successfully.
+Expected Response: SVM deleted successfully.
 
 ---
 
