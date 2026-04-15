@@ -47,7 +47,7 @@ func TestSVM(t *testing.T) {
 		{
 			name:             "Clean SVM",
 			input:            ClusterStr + "delete " + rn("marketingNew") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketingNew"), validationFunc: deleteObject},
 		},
 	}
