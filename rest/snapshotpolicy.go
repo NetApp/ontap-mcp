@@ -66,8 +66,9 @@ func (c *Client) UpdateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 		return err
 	}
 
-	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies`+policyUUID, &statusCode, responseHeaders).
-		BodyJSON(snapshotPolicy)
+	builder := c.baseRequestBuilder(`/api/storage/snapshot-policies/`+policyUUID, &statusCode, responseHeaders).
+		BodyJSON(snapshotPolicy).
+		Patch()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err

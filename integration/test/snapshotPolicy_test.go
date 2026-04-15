@@ -80,26 +80,26 @@ func TestSnapshot(t *testing.T) {
 		},
 		{
 			name:             "Update snapshot policy every4hours",
-			input:            ClusterStr + "disable a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM with comment as `4 hour policy`",
+			input:            ClusterStr + "disable a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM with comment as `4_hour_policy`",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
+			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours") + "&svm.name=" + rn("marketing") + "&fields=enabled,comment", validationFunc: verifySnapshotPolicy(false, "4_hour_policy")},
 		},
 		{
 			name:             "Clean snapshot policy every4hours",
 			input:            ClusterStr + "delete " + rn("every4hours") + " snapshot policy in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean snapshot policy every5min",
 			input:            ClusterStr + "Delete " + rn("every5min") + " snapshot policy in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every5min"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean SVM",
 			input:            ClusterStr + "delete " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
@@ -192,6 +192,46 @@ func verifySchedule(exist bool, scheduleName string, expectedSMLabel string, exp
 
 		if !scheduleFound && exist {
 			t.Errorf("verifySchedule: schedule must be exist")
+			return false
+		}
+
+		return true
+	}
+}
+
+func verifySnapshotPolicy(expectedState bool, expectedComment string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type SnapshotPolicy struct {
+			Enabled bool   `json:"enabled"`
+			Comment string `json:"comment"`
+		}
+		type response struct {
+			NumRecords int              `json:"num_records"`
+			Records    []SnapshotPolicy `json:"records"`
+		}
+
+		var data response
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifySnapshotPolicy: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifySnapshotPolicy: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+
+		gotSPolicy := data.Records[0]
+		if expectedState != gotSPolicy.Enabled {
+			t.Errorf("verifySnapshotPolicy: got = %v, want %v", gotSPolicy.Enabled, expectedState)
+			return false
+		}
+		if expectedComment != gotSPolicy.Comment {
+			t.Errorf("verifySnapshotPolicy: got = %s, want %s", gotSPolicy.Comment, expectedComment)
 			return false
 		}
 
