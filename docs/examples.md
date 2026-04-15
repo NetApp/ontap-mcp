@@ -345,6 +345,34 @@ Expected Response: LUN has been deleted successfully.
 
 ---
 
+### SVM Provisioning
+
+**Create a SVM**
+
+- On the umeng-aff300-05-06 cluster, create marketing svm
+
+Expected Response: SVM has been created successfully.
+
+**Rename a SVM**
+
+- On the umeng-aff300-05-06 cluster, rename svm marketing to marketingNew
+
+Expected Response: SVM has been updated successfully.
+
+**Update a SVM**
+
+- On the umeng-aff300-05-06 cluster, update svm marketingNew state to stopped and comment as `stop_svm`
+
+Expected Response: SVM has been updated successfully.
+
+**Delete a SVM**
+
+- On the umeng-aff300-05-06 cluster, delete marketingNew svm
+
+Expected Response: SVM has been deleted successfully.
+
+---
+
 ### Querying Specific Fields
 
 **Get volume space and protection details**

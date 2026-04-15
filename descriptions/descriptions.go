@@ -113,6 +113,7 @@ const DescribeOntapEndpoint = `Get filterable query params for an endpoint. Call
 Pass cluster_name to automatically filter out fields and filters not available in that cluster's ONTAP version.`
 
 const CreateSVM = `Create an SVM on a cluster by cluster name.`
+const UpdateSVM = `Update an SVM on a cluster by cluster name.`
 const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
