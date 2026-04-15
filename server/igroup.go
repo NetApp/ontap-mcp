@@ -10,7 +10,7 @@ import (
 	"github.com/netapp/ontap-mcp/tool"
 )
 
-func (a *App) CreateIGroup(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.IGroup) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateIGroup(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.IGroupCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -150,7 +150,7 @@ func (a *App) RemoveIGroupInitiator(ctx context.Context, _ *mcp.CallToolRequest,
 	}, nil, nil
 }
 
-func newCreateIGroup(in tool.IGroup) (ontap.IGroup, error) {
+func newCreateIGroup(in tool.IGroupCreate) (ontap.IGroup, error) {
 	out := ontap.IGroup{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -169,7 +169,9 @@ func newCreateIGroup(in tool.IGroup) (ontap.IGroup, error) {
 	out.Name = in.Name
 	out.OSType = in.OSType
 	out.Protocol = in.Protocol
-	out.Comment = in.Comment
+	if in.Comment != "" {
+		out.Comment = in.Comment
+	}
 	return out, nil
 }
 
@@ -182,14 +184,21 @@ func newUpdateIGroup(in tool.IGroup) (ontap.IGroup, error) {
 		return out, errors.New("igroup name is required")
 	}
 
+	hasUpdate := false
 	if in.NewName != "" {
 		out.Name = in.NewName
+		hasUpdate = true
 	}
 	if in.Comment != "" {
 		out.Comment = in.Comment
+		hasUpdate = true
 	}
 	if in.OSType != "" {
 		out.OSType = in.OSType
+		hasUpdate = true
+	}
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: new_name, comment, or os_type")
 	}
 	return out, nil
 }

@@ -192,13 +192,20 @@ type NVMeSubsystemMap struct {
 	Namespace string `json:"namespace_name" jsonschema:"name for NVMe namespace"`
 }
 
+type IGroupCreate struct {
+	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM      string `json:"svm_name" jsonschema:"SVM name"`
+	Name     string `json:"name" jsonschema:"igroup name"`
+	OSType   string `json:"os_type" jsonschema:"OS type (aix, hpux, hyper_v, linux, netware, openvms, solaris, vmware, windows, xen)"`
+	Protocol string `json:"protocol" jsonschema:"protocol (fcp, iscsi, mixed)"`
+	Comment  string `json:"comment,omitzero" jsonschema:"comment"`
+}
 type IGroup struct {
 	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM                    string `json:"svm_name" jsonschema:"SVM name"`
 	Name                   string `json:"name" jsonschema:"igroup name"`
 	NewName                string `json:"new_name,omitzero" jsonschema:"new igroup name"`
 	OSType                 string `json:"os_type,omitzero" jsonschema:"OS type (aix, hpux, hyper_v, linux, netware, openvms, solaris, vmware, windows, xen)"`
-	Protocol               string `json:"protocol,omitzero" jsonschema:"protocol (fcp, iscsi, mixed)"`
 	Comment                string `json:"comment,omitzero" jsonschema:"comment"`
 	AllowDeleteWhileMapped bool   `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows the deletion of a mapped initiator group. This parameter should be used with caution"`
 }
