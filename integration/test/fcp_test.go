@@ -24,6 +24,12 @@ func TestFCP(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
+			name:             "Clean FC Interface",
+			input:            SarClusterStr + "delete fc interface " + rn("fc1") + " in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=marketing", validationFunc: deleteObject},
+		},
+		{
 			name:             "Create FC Interface",
 			input:            SarClusterStr + "create fc interface " + rn("fc1") + " in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol",
 			expectedOntapErr: "",
@@ -38,7 +44,7 @@ func TestFCP(t *testing.T) {
 		{
 			name:             "Clean FC Interface",
 			input:            SarClusterStr + "delete fc interface " + rn("fc1") + " in marketing svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/fc/interfaces?name=" + rn("fc1") + "&svm.name=marketing", validationFunc: deleteObject},
 		},
 	}
