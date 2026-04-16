@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"github.com/carlmjohnson/requests"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -84,13 +85,13 @@ func TestIGroupLUNMap(t *testing.T) {
 			name:             "Add initiator to igroup",
 			input:            ClusterStr + "add initiator iqn.2021-01.com.example:test to igroup " + rn("igroupFin") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(true, "iqn.2021-01.com.example:test")},
 		},
 		{
 			name:             "Remove initiator from igroup",
 			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFin") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(false, "iqn.2021-01.com.example:test")},
 		},
 		{
 			name:             "Rename igroup",
@@ -119,37 +120,37 @@ func TestIGroupLUNMap(t *testing.T) {
 		{
 			name:             "Clean lun map",
 			input:            ClusterStr + "delete lun map of lun named " + "/vol/" + rn("doc") + "/" + rn("lundoc") + " and an igroup named " + rn("igroupFinNew") + " on the " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/lun-maps?igroup.name=" + rn("igroupFinNew") + "&lun.name=" + "/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean volume",
 			input:            ClusterStr + "delete volume " + rn("doc") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("doc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean LUN",
 			input:            ClusterStr + "delete lun " + rn("lundoc") + " in volume " + rn("doc") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean igroup",
 			input:            ClusterStr + "delete igroup " + rn("igroupFinNew") + " on the " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean svm scope network interface with ip 1",
 			input:            ClusterStr + "delete svm scope network interface named " + rn("svg1") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg1") + "&scope=svm", validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean svm scope network interface with ip 2",
 			input:            ClusterStr + "delete svm scope network interface named " + rn("svg2") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg2") + "&scope=svm", validationFunc: deleteObject},
 		},
 		{
@@ -161,13 +162,13 @@ func TestIGroupLUNMap(t *testing.T) {
 		{
 			name:             "Clean iSCSI service",
 			input:            ClusterStr + "delete iscsi service in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean SVM",
 			input:            ClusterStr + "delete " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
@@ -197,5 +198,52 @@ func TestIGroupLUNMap(t *testing.T) {
 				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 		})
+	}
+}
+
+func verifyInitiator(exist bool, expectedInitiatorName string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type InitiatorName struct {
+			Name string `json:"name"`
+		}
+		type IGroup struct {
+			Initiators []InitiatorName `json:"initiators"`
+		}
+		type response struct {
+			NumRecords int      `json:"num_records"`
+			Records    []IGroup `json:"records"`
+		}
+
+		var data response
+		var initiatorFound bool
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyInitiator: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyInitiator: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+		gotIgroup := data.Records[0]
+		for _, initiator := range gotIgroup.Initiators {
+			if initiator.Name != expectedInitiatorName {
+				continue
+			}
+			if !exist {
+				t.Errorf("verifyInitiator: initiator should not be exist")
+				return false
+			}
+			initiatorFound = true
+		}
+		if !initiatorFound && exist {
+			t.Errorf("verifyInitiator: initiator must be exist")
+			return false
+		}
+		return true
 	}
 }

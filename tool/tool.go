@@ -217,7 +217,7 @@ type IGroupInitiator struct {
 	InitiatorName          string   `json:"initiator_name,omitzero" jsonschema:"initiator name (IQN for iSCSI or WWPN for FC)"`
 	Comment                string   `json:"comment,omitzero" jsonschema:"comment"`
 	Records                []string `json:"records,omitzero" jsonschema:"An array of initiators specified to add multiple initiators to an initiator group in a single API call"`
-	AllowDeleteWhileMapped bool     `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows the deletion of an initiator from of a mapped initiator group. This parameter should be used with caution."`
+	AllowDeleteWhileMapped bool     `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows the deletion of an initiator from a mapped initiator group. This parameter should be used with caution."`
 }
 
 type LunMap struct {
