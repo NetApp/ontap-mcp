@@ -170,6 +170,16 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_nvme_subsystem_map", descriptions.CreateNVMeSubsystemMap, createAnnotation, a.CreateNVMeSubsystemMap)
 	addTool(a, server, "delete_nvme_subsystem_map", descriptions.DeleteNVMeSubsystemMap, deleteAnnotation, a.DeleteNVMeSubsystemMap)
 
+	// operation on FCP service object
+	addTool(a, server, "create_fcp_service", descriptions.CreateFCPService, createAnnotation, a.CreateFCPService)
+	addTool(a, server, "update_fcp_service", descriptions.UpdateFCPService, updateAnnotation, a.UpdateFCPService)
+	addTool(a, server, "delete_fcp_service", descriptions.DeleteFCPService, deleteAnnotation, a.DeleteFCPService)
+
+	// operation on FC interface object
+	addTool(a, server, "create_fc_interface", descriptions.CreateFCInterface, createAnnotation, a.CreateFCInterface)
+	addTool(a, server, "update_fc_interface", descriptions.UpdateFCInterface, updateAnnotation, a.UpdateFCInterface)
+	addTool(a, server, "delete_fc_interface", descriptions.DeleteFCInterface, deleteAnnotation, a.DeleteFCInterface)
+
 	// operation on igroup object
 	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
 	addTool(a, server, "update_igroup", descriptions.UpdateIGroup, updateAnnotation, a.UpdateIGroup)

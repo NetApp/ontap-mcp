@@ -102,6 +102,14 @@ const CreateLUN = `Create a LUN on a specified volume and SVM with a given size 
 const UpdateLUN = `Update a LUN: resize, rename, or toggle enabled/disabled state (online/offline).`
 const DeleteLUN = `Delete a LUN from a specified volume and SVM.`
 
+const CreateFCPService = `Create FCP service on a cluster by cluster name.`
+const UpdateFCPService = `Update FCP service on a cluster by cluster name.`
+const DeleteFCPService = `Delete FCP service on a cluster by cluster name.`
+
+const CreateFCInterface = `Create FC interface on a cluster by cluster name.`
+const UpdateFCInterface = `Update FC interface on a cluster by cluster name.`
+const DeleteFCInterface = `Delete FC interface on a cluster by cluster name.`
+
 const CreateIGroup = `Create an igroup (initiator group) on a cluster by cluster name.`
 const UpdateIGroup = `Update an igroup on a cluster by cluster name.`
 const DeleteIGroup = `Delete an igroup on a cluster by cluster name.`
