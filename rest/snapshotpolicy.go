@@ -22,7 +22,7 @@ func (c *Client) CreateSnapshotPolicy(ctx context.Context, snapshotPolicy ontap.
 		scheduleName = snapshotPolicy.Copies[0].Schedule.Name
 	}
 	if scheduleName == "" {
-		return fmt.Errorf("schedule name must be required in snapshot policy %s", snapshotPolicy.Name)
+		return fmt.Errorf("schedule name is required in snapshot policy %s", snapshotPolicy.Name)
 	}
 	params := url.Values{}
 	params.Set("return_records", "false")
