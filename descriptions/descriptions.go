@@ -102,6 +102,14 @@ const CreateLUN = `Create a LUN on a specified volume and SVM with a given size 
 const UpdateLUN = `Update a LUN: resize, rename, or toggle enabled/disabled state (online/offline).`
 const DeleteLUN = `Delete a LUN from a specified volume and SVM.`
 
+const CreateFCPService = `Create FCP service on a cluster by cluster name.`
+const UpdateFCPService = `Update FCP service on a cluster by cluster name.`
+const DeleteFCPService = `Delete FCP service on a cluster by cluster name.`
+
+const CreateFCInterface = `Create FC interface on a cluster by cluster name.`
+const UpdateFCInterface = `Update FC interface on a cluster by cluster name.`
+const DeleteFCInterface = `Delete FC interface on a cluster by cluster name.`
+
 const ListOntapEndpoints = `List ONTAP REST collection endpoints in the catalog.
 The catalog contains all endpoints — can be large. Prefer search_ontap_endpoints for targeted discovery.
 Use the optional 'match' parameter to filter by substring or regex pattern (e.g. "snapshot", "lun", ".*nfs.*export.*").

@@ -345,6 +345,26 @@ Expected Response: LUN has been deleted successfully.
 
 ---
 
+### Manage FCP
+
+- On the umeng-aff300-05-06 cluster, enable fcp service in marketing svm
+
+Expected Response: The fcp service has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create fc interface fc1 in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol
+
+Expected Response: The fc interface has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, delete fc interface fc1 in marketing svm
+
+Expected Response: The fc interface has been successfully deleted.
+
+- On the umeng-aff300-05-06 cluster, update fcp service to disable on the marketing svm
+
+Expected Response: The fcp service has been successfully updated.
+
+---
+
 ### SVM Provisioning
 
 **Create a SVM**

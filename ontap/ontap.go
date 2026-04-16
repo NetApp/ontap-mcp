@@ -284,6 +284,28 @@ type NVMeSubsystemMap struct {
 	Namespace NameAndUUID `json:"namespace" jsonschema:"namespace name"`
 }
 
+type FCPService struct {
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
+}
+
+type FCInterfacePort struct {
+	Name string      `json:"name,omitzero" jsonschema:"FC port name"`
+	Node NameAndUUID `json:"node,omitzero" jsonschema:"node on which the FC port is located"`
+}
+
+type FCInterfaceLocation struct {
+	HomePort FCInterfacePort `json:"home_port,omitzero" jsonschema:"home port of the FC interface"`
+}
+
+type FCInterface struct {
+	SVM          NameAndUUID         `json:"svm,omitzero" jsonschema:"svm name"`
+	Name         string              `json:"name,omitzero" jsonschema:"FC interface name"`
+	DataProtocol string              `json:"data_protocol,omitzero" jsonschema:"data protocol of the FC interface (e.g. fcp)"`
+	Enabled      string              `json:"enabled,omitzero" jsonschema:"admin state of the FC interface"`
+	Location     FCInterfaceLocation `json:"location,omitzero" jsonschema:"location of the FC interface"`
+}
+
 const (
 	ASAr2 = "asar2"
 	CDOT  = "cdot"
