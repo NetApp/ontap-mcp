@@ -245,7 +245,15 @@ type DescribeEndpointParams struct {
 	Cluster string `json:"cluster_name,omitzero" jsonschema:"cluster name — if provided, filters out fields and filters not available in that cluster's ONTAP version"`
 }
 
+type SVMCreate struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	Name    string `json:"svm_name" jsonschema:"SVM name"`
+}
+
 type SVM struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	Name    string `json:"svm_name" jsonschema:"SVM name"`
+	NewName string `json:"new_name,omitzero" jsonschema:"new name of SVM"`
+	State   string `json:"state,omitzero" jsonschema:"state of SVM (e.g., starting, running, stopping, stopped, deleting, initializing)"`
+	Comment string `json:"comment,omitzero" jsonschema:"comment"`
 }

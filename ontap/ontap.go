@@ -198,8 +198,13 @@ type CIFSShare struct {
 	Path string      `json:"path,omitzero" jsonschema:"cifs share path"`
 }
 
-type SVM struct {
+type SVMCreate struct {
 	Name string `json:"name" jsonschema:"svm name"`
+}
+type SVM struct {
+	Name    string `json:"name,omitzero" jsonschema:"svm name"`
+	State   string `json:"state,omitzero" jsonschema:"svm state"` // enum: starting, running, stopping, stopped, deleting, initializing
+	Comment string `json:"comment,omitzero" jsonschema:"comment"`
 }
 
 type LUNSpace struct {
