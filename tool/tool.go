@@ -154,7 +154,7 @@ type NetworkIPInterface struct {
 	HomeNode        string `json:"location.home_node,omitzero" jsonschema:"home node"`
 	BroadcastDomain string `json:"location.broadcast_domain,omitzero" jsonschema:"broadcast domain"`
 	AutoRevert      string `json:"location.auto_revert,omitzero" jsonschema:"auto_revert"`
-	ServicePolicy   string `json:"service_policy,omitzero" jsonschema:"service policy (e.g., default-data-files , default-data-blocks, default-data-iscsi, default-management, default-intercluster, default-management, default-route-announce)"`
+	ServicePolicy   string `json:"service_policy,omitzero" jsonschema:"service policy (e.g., default-data-files, default-data-blocks, default-data-iscsi, default-management, default-intercluster, default-route-announce)"`
 }
 
 type NVMeSubsystem struct {

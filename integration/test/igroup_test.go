@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"github.com/carlmjohnson/requests"
 	"log/slog"
 	"net/http"
 	"testing"
 	"time"
 
+	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
 )
 
@@ -52,25 +52,25 @@ func TestIGroupLUNMap(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("svg2") + "&scope=svm", validationFunc: createObject},
 		},
 		{
-			name:             "Clean igroup",
+			name:             "Clean igroup igroupFin",
 			input:            ClusterStr + "delete igroup " + rn("igroupFin") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
-			name:             "Clean igroup",
+			name:             "Clean igroup igroupFinNew",
 			input:            ClusterStr + "delete igroup " + rn("igroupFinNew") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFinNew") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
-			name:             "Clean volume",
+			name:             "Clean volume doc",
 			input:            ClusterStr + "delete volume " + rn("doc") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("doc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
-			name:             "Clean LUN",
+			name:             "Clean LUN lundoc",
 			input:            ClusterStr + "delete lun " + rn("lundoc") + " in volume " + rn("doc") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
