@@ -526,6 +526,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#manage-fcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage FCP
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#svm-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      SVM Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#querying-specific-fields" class="md-nav__link">
     <span class="md-ellipsis">
       Querying Specific Fields
@@ -799,6 +817,24 @@
   <a href="#lun-provisioning" class="md-nav__link">
     <span class="md-ellipsis">
       LUN Provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-fcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage FCP
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#svm-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      SVM Provisioning
     </span>
   </a>
   
@@ -1195,6 +1231,46 @@ Expected Response if schedule not exist: no schedule 2weekday12_30min found</p>
 <li>On the umeng-aff300-05-06 cluster, delete lun lundocnew in volume doc in marketing svm</li>
 </ul>
 <p>Expected Response: LUN has been deleted successfully.</p>
+<hr />
+<h3 id="manage-fcp">Manage FCP<a class="headerlink" href="#manage-fcp" title="Permanent link">&para;</a></h3>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, enable fcp service in marketing svm</li>
+</ul>
+<p>Expected Response: The fcp service has been successfully created.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create fc interface fc1 in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol</li>
+</ul>
+<p>Expected Response: The fc interface has been successfully created.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, delete fc interface fc1 in marketing svm</li>
+</ul>
+<p>Expected Response: The fc interface has been successfully deleted.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, update fcp service to disable on the marketing svm</li>
+</ul>
+<p>Expected Response: The fcp service has been successfully updated.</p>
+<hr />
+<h3 id="svm-provisioning">SVM Provisioning<a class="headerlink" href="#svm-provisioning" title="Permanent link">&para;</a></h3>
+<p><strong>Create a SVM</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create marketing svm</li>
+</ul>
+<p>Expected Response: SVM created successfully.</p>
+<p><strong>Rename a SVM</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, rename svm marketing to marketingNew</li>
+</ul>
+<p>Expected Response: SVM updated successfully.</p>
+<p><strong>Update a SVM</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, update svm marketingNew state to stopped and comment as <code>stop_svm</code></li>
+</ul>
+<p>Expected Response: SVM updated successfully.</p>
+<p><strong>Delete a SVM</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, delete marketingNew svm</li>
+</ul>
+<p>Expected Response: SVM deleted successfully.</p>
 <hr />
 <h3 id="querying-specific-fields">Querying Specific Fields<a class="headerlink" href="#querying-specific-fields" title="Permanent link">&para;</a></h3>
 <p><strong>Get volume space and protection details</strong></p>
