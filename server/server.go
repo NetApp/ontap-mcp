@@ -120,6 +120,7 @@ func (a *App) createMCPServer() *mcp.Server {
 
 	// operation on SVM object
 	addTool(a, server, "create_svm", descriptions.CreateSVM, createAnnotation, a.CreateSVM)
+	addTool(a, server, "update_svm", descriptions.UpdateSVM, updateAnnotation, a.UpdateSVM)
 	addTool(a, server, "delete_svm", descriptions.DeleteSVM, deleteAnnotation, a.DeleteSVM)
 
 	// operation on CIFS share object
