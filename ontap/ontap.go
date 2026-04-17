@@ -46,16 +46,17 @@ type PostJob struct {
 
 type GetData struct {
 	Records []struct {
-		ID      int          `json:"id,omitzero"`
-		UUID    string       `json:"uuid,omitzero"`
-		Index   int          `json:"index,omitzero"`
-		Name    string       `json:"name,omitzero"`
-		Svm     NameAndUUID  `json:"svm,omitzero"`
-		Volume  NameAndUUID  `json:"volume,omitzero"`
-		RoRule  []string     `json:"ro_rule,omitzero"`
-		RwRule  []string     `json:"rw_rule,omitzero"`
-		Clients []ClientData `json:"clients,omitzero"`
-		Nas     NAS          `json:"nas,omitzero"`
+		ID       int          `json:"id,omitzero"`
+		UUID     string       `json:"uuid,omitzero"`
+		Index    int          `json:"index,omitzero"`
+		Name     string       `json:"name,omitzero"`
+		Svm      NameAndUUID  `json:"svm,omitzero"`
+		Volume   NameAndUUID  `json:"volume,omitzero"`
+		RoRule   []string     `json:"ro_rule,omitzero"`
+		RwRule   []string     `json:"rw_rule,omitzero"`
+		Clients  []ClientData `json:"clients,omitzero"`
+		Nas      NAS          `json:"nas,omitzero"`
+		Schedule NameAndUUID  `json:"schedule,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -131,9 +132,11 @@ type NameAndSVM struct {
 }
 
 type SnapshotPolicy struct {
-	SVM    NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
-	Name   string      `json:"name,omitzero" jsonschema:"snapshot policy name"`
-	Copies []Copy      `json:"copies,omitzero" jsonschema:"snapshot copies"`
+	SVM     NameAndUUID `json:"svm,omitzero" jsonschema:"svm name"`
+	Name    string      `json:"name,omitzero" jsonschema:"snapshot policy name"`
+	Copies  []Copy      `json:"copies,omitzero" jsonschema:"snapshot copies"`
+	Enabled string      `json:"enabled,omitzero" jsonschema:"the state of snapshot policy"`
+	Comment string      `json:"comment,omitzero" jsonschema:"comment associated with the snapshot policy"`
 }
 
 type Copy struct {
@@ -144,6 +147,12 @@ type Copy struct {
 type Schedule struct {
 	Name string `json:"name"`
 	Cron Cron   `json:"cron,omitzero"`
+}
+
+type SnapshotPolicySchedule struct {
+	Count           int         `json:"count,omitzero" jsonschema:"number of snapshots to keep for this schedule"`
+	Schedule        NameAndUUID `json:"schedule,omitzero" jsonschema:"name of the schedule"`
+	SnapmirrorLabel string      `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
 }
 
 type Cron struct {
