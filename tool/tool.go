@@ -44,12 +44,23 @@ type SnapshotPolicy struct {
 	Name     string `json:"name,omitzero" jsonschema:"snapshot policy name"`
 	Schedule string `json:"schedule,omitzero" jsonschema:"schedule of snapshot policy"`
 	Count    int    `json:"count,omitzero" jsonschema:"number of snapshots"`
+	Enabled  string `json:"enabled,omitzero" jsonschema:"the state of snapshot policy"`
+	Comment  string `json:"comment,omitzero" jsonschema:"comment associated with the snapshot policy"`
 }
 
 type Schedule struct {
 	Cluster        string `json:"cluster_name" jsonschema:"cluster name"`
 	Name           string `json:"name"`
 	CronExpression string `json:"cron_expression" jsonschema:"cron_expression"`
+}
+
+type SnapshotPolicySchedule struct {
+	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM             string `json:"svm_name" jsonschema:"SVM name"`
+	PolicyName      string `json:"policy_name" jsonschema:"snapshot policy name"`
+	ScheduleName    string `json:"schedule_name" jsonschema:"name of the schedule"`
+	Count           int    `json:"count,omitzero" jsonschema:"number of snapshots to keep for this schedule"`
+	SnapmirrorLabel string `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
 }
 
 type Cron struct {

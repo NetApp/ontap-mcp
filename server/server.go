@@ -99,8 +99,12 @@ func (a *App) createMCPServer() *mcp.Server {
 
 	// operation on Snapshot Policy object
 	addTool(a, server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
+	addTool(a, server, "update_snapshot_policy", descriptions.UpdateSnapshotPolicy, updateAnnotation, a.UpdateSnapshotPolicy)
 	addTool(a, server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
 	addTool(a, server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
+	addTool(a, server, "add_schedule_in_snapshot_policy", descriptions.AddScheduleInSnapshotPolicy, createAnnotation, a.AddScheduleInSnapshotPolicy)
+	addTool(a, server, "update_schedule_in_snapshot_policy", descriptions.UpdateScheduleInSnapshotPolicy, updateAnnotation, a.UpdateScheduleInSnapshotPolicy)
+	addTool(a, server, "remove_schedule_in_snapshot_policy", descriptions.RemoveScheduleInSnapshotPolicy, deleteAnnotation, a.RemoveScheduleInSnapshotPolicy)
 
 	// operation on QoS Policy object
 	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicies, readOnlyAnnotation, a.ListQoSPolicies)
