@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"log/slog"
 	"net/http"
+	"slices"
 	"testing"
 	"time"
 
@@ -50,37 +51,43 @@ func TestSnapshot(t *testing.T) {
 		{
 			name:             "Clean snapshot",
 			input:            ClusterStr + "Delete " + rn("localsnap") + " snapshot in " + rn("docs") + " volume in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot("")},
+			expectedOntapErr: "does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot([]string{}, false, 0)},
 		},
 		{
 			name:             "Create snapshot",
 			input:            ClusterStr + "create a snapshot named " + rn("localsnap") + " in the volume " + rn("docs") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot("")},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot([]string{rn("localsnap")}, true, 1)},
+		},
+		{
+			name:             "Create 2nd snapshot",
+			input:            ClusterStr + "create a snapshot named " + rn("recentsnap") + " in the volume " + rn("docs") + " on the " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot([]string{rn("recentsnap"), rn("localsnap")}, true, 2)},
 		},
 		{
 			name:             "Restore volume from snapshot",
-			input:            ClusterStr + "Restore " + rn("doc") + " volume from a snapshot named " + rn("localsnap") + " in the " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot("")},
+			input:            ClusterStr + "Restore " + rn("docs") + " volume from a snapshot named " + rn("localsnap") + " in the " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot([]string{rn("localsnap")}, true, 1)},
 		},
 		{
 			name:             "Clean snapshot",
 			input:            ClusterStr + "Delete " + rn("localsnap") + " snapshot in " + rn("docs") + " volume in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot("")},
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: verifySnapshot([]string{}, false, 0)},
 		},
 		{
 			name:             "Clean volume",
 			input:            ClusterStr + "delete volume " + rn("docs") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean SVM",
 			input:            ClusterStr + "delete " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
@@ -113,27 +120,58 @@ func TestSnapshot(t *testing.T) {
 	}
 }
 
-func verifySnapshot(snapshotName string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool { //nolint:unparam
+func verifySnapshot(snapshotNames []string, exist bool, snapshotCount int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 		var data ontap.GetData
+		var gotSnapshotNames []string
 		err := requests.URL("https://"+poller.Addr+"/"+api).
 			BasicAuth(poller.Username, poller.Password).
 			Client(client).
 			ToJSON(&data).
 			Fetch(context.Background())
 		if err != nil {
-			t.Errorf("verifyQtreeName: request failed: %v", err)
+			t.Errorf("verifySnapshot: request failed: %v", err)
 			return false
 		}
 		if data.NumRecords != 1 {
-			t.Errorf("verifyQtreeName: expected 1 record, got %d", data.NumRecords)
+			t.Errorf("verifySnapshot: expected 1 record, got %d", data.NumRecords)
 			return false
 		}
-		got := data.Records[0].Name
-		if got != qtreeName {
-			t.Errorf("verifyQtreeName: qtree.name = %q, want %q", got, qtreeName)
+		volumeUUID := data.Records[0].UUID
+
+		err = requests.URL("https://"+poller.Addr+"/"+"api/storage/volumes/"+volumeUUID+"/snapshots").
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifySnapshot: request failed: %v", err)
 			return false
 		}
+
+		if !exist {
+			if data.NumRecords != 0 {
+				t.Errorf("verifySnapshot: expected 0 record, got %d", data.NumRecords)
+				return false
+			}
+			return true
+		}
+		if data.NumRecords != snapshotCount {
+			t.Errorf("verifySnapshot: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+
+		for _, record := range data.Records {
+			gotSnapshotNames = append(gotSnapshotNames, record.Name)
+		}
+
+		slices.Sort(gotSnapshotNames)
+		slices.Sort(snapshotNames)
+		if !slices.Equal(gotSnapshotNames, snapshotNames) {
+			t.Errorf("verifySnapshot: snapshot name = %q, want %q", gotSnapshotNames, snapshotNames)
+			return false
+		}
+
 		return true
 	}
 }
