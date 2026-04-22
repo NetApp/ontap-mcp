@@ -159,7 +159,7 @@ func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[
 	if err != nil && errors.Is(err, mcp.ErrConnectionClosed) {
 		slog.Warn("MCP session dropped, reconnecting", slog.Any("error", err))
 		if reconnErr := a.reconnect(ctx); reconnErr != nil {
-			return "", fmt.Errorf("failed to call tool: %w (reconnect failed: %w)", err, reconnErr)
+			return "", fmt.Errorf("failed to call tool: %w", errors.Join(err, fmt.Errorf("reconnect failed: %w", reconnErr)))
 		}
 		result, err = a.mcpSession.CallTool(ctx, &mcp.CallToolParams{
 			Name:      toolName,
