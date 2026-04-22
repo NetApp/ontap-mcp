@@ -45,6 +45,12 @@ func TestLUN(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocnew") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
+			name:             "Clean volume",
+			input:            ClusterStr + "delete volume " + rn("doc") + " in " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("doc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
 			name:             "Create volume",
 			input:            ClusterStr + "create a 100MB volume named " + rn("doc") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate",
 			expectedOntapErr: "",

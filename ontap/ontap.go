@@ -57,6 +57,8 @@ type GetData struct {
 		Clients  []ClientData `json:"clients,omitzero"`
 		Nas      NAS          `json:"nas,omitzero"`
 		Schedule NameAndUUID  `json:"schedule,omitzero"`
+		Lun     NameAndUUID  `json:"lun,omitzero"`
+		IGroup  NameAndUUID  `json:"igroup,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -253,7 +255,7 @@ type NetworkIPInterface struct {
 	IP            IP          `json:"ip,omitzero" jsonschema:"ip address"`
 	Subnet        NameAndUUID `json:"subnet,omitzero" jsonschema:"subnet name"`
 	Location      Location    `json:"location,omitzero" jsonschema:"location name"`
-	ServicePolicy NameAndUUID `json:"service_policy,omitzero" jsonschema:"service policy"`
+	ServicePolicy NameAndUUID `json:"service_policy,omitzero" jsonschema:"service policy"` // default-data-files, default-data-blocks, default-data-iscsi, default-management, default-intercluster, default-route-announce
 }
 
 type NVMeSubsystem struct {
@@ -313,6 +315,30 @@ type FCInterface struct {
 	DataProtocol string              `json:"data_protocol,omitzero" jsonschema:"data protocol of the FC interface (e.g. fcp)"`
 	Enabled      string              `json:"enabled,omitzero" jsonschema:"admin state of the FC interface"`
 	Location     FCInterfaceLocation `json:"location,omitzero" jsonschema:"location of the FC interface"`
+}
+
+type InitiatorName struct {
+	Name string `json:"name,omitzero" jsonschema:"The FC WWPN, iSCSI IQN, or iSCSI EUI that identifies the host initiator."`
+}
+
+type IGroupInitiator struct {
+	Name    string          `json:"name,omitzero"`
+	Comment string          `json:"comment,omitzero"`
+	Records []InitiatorName `json:"records,omitzero" jsonschema:"An array of initiators specified to add multiple initiators to an initiator group in a single API call. Not allowed when the name property is used."`
+}
+
+type IGroup struct {
+	SVM      NameAndUUID `json:"svm,omitzero"`
+	Name     string      `json:"name,omitzero"`
+	OSType   string      `json:"os_type,omitzero"`
+	Protocol string      `json:"protocol,omitzero"`
+	Comment  string      `json:"comment,omitzero"`
+}
+
+type LunMap struct {
+	SVM    NameAndUUID `json:"svm,omitzero"`
+	Lun    NameAndUUID `json:"lun,omitzero"`
+	IGroup NameAndUUID `json:"igroup,omitzero"`
 }
 
 const (
