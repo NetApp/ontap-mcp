@@ -235,13 +235,13 @@ func verifyInitiator(exist bool, expectedInitiatorName string) func(t *testing.T
 				continue
 			}
 			if !exist {
-				t.Errorf("verifyInitiator: initiator should not be exist")
+				t.Errorf("verifyInitiator: initiator should not exist")
 				return false
 			}
 			initiatorFound = true
 		}
 		if !initiatorFound && exist {
-			t.Errorf("verifyInitiator: initiator must be exist")
+			t.Errorf("verifyInitiator: initiator must exist")
 			return false
 		}
 		return true
