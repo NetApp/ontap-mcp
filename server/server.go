@@ -190,6 +190,17 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_fc_interface", descriptions.UpdateFCInterface, updateAnnotation, a.UpdateFCInterface)
 	addTool(a, server, "delete_fc_interface", descriptions.DeleteFCInterface, deleteAnnotation, a.DeleteFCInterface)
 
+	// operation on igroup object
+	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
+	addTool(a, server, "update_igroup", descriptions.UpdateIGroup, updateAnnotation, a.UpdateIGroup)
+	addTool(a, server, "delete_igroup", descriptions.DeleteIGroup, deleteAnnotation, a.DeleteIGroup)
+	addTool(a, server, "add_igroup_initiator", descriptions.AddIGroupInitiator, createAnnotation, a.AddIGroupInitiator)
+	addTool(a, server, "remove_igroup_initiator", descriptions.RemoveIGroupInitiator, deleteAnnotation, a.RemoveIGroupInitiator)
+
+	// operation on LUN map object
+	addTool(a, server, "create_lun_map", descriptions.CreateLunMap, createAnnotation, a.CreateLunMap)
+	addTool(a, server, "delete_lun_map", descriptions.DeleteLunMap, deleteAnnotation, a.DeleteLunMap)
+
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
 		addTool(a, server, "search_ontap_endpoints", descriptions.SearchOntapEndpoints, readOnlyAnnotation, a.SearchOntapEndpoints)

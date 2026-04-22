@@ -261,6 +261,9 @@ func newCreateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 	if in.IPSpace != "" {
 		out.IPSpace = ontap.NameAndUUID{Name: in.IPSpace}
 	}
+	if in.ServicePolicy != "" {
+		out.ServicePolicy.Name = in.ServicePolicy
+	}
 
 	return out, nil
 }
