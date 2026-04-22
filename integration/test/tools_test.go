@@ -138,7 +138,10 @@ func (a *Agent) convertMCPToolsToOpenAI() []openai.ChatCompletionToolUnionParam 
 }
 
 func (a *Agent) reconnect(ctx context.Context) error {
-	_ = a.mcpSession.Close()
+	if a.mcpSession != nil {
+		_ = a.mcpSession.Close()
+		a.mcpSession = nil
+	}
 	session, err := a.mcpClient.Connect(ctx, a.mcpTransport, nil)
 	if err != nil {
 		return fmt.Errorf("failed to reconnect to MCP server: %w", err)
