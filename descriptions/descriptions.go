@@ -36,6 +36,10 @@ const CreateVolume = `Create a volume on a cluster by cluster name.`
 const DeleteVolume = `Delete a volume on a cluster by cluster name.`
 const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
 
+const CreateSnapshot = `Create a snapshot of a volume on a cluster by cluster name.`
+const DeleteSnapshot = `Delete a snapshot of a volume on a cluster by cluster name.`
+const RestoreSnapshot = `Restore a volume to a snapshot on a cluster by cluster name.`
+
 const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster name.`
 const UpdateSnapshotPolicy = `Update a snapshot policy on a cluster by cluster name.`
 const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster name.`

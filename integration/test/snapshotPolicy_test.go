@@ -14,7 +14,7 @@ import (
 	"github.com/netapp/ontap-mcp/config"
 )
 
-func TestSnapshot(t *testing.T) {
+func TestSnapshotPolicy(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
 
 	tests := []struct {
