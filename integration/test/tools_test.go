@@ -7,18 +7,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/carlmjohnson/requests"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/ontap"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/carlmjohnson/requests"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/ontap"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 )
 
 const (
@@ -79,6 +80,7 @@ type Agent struct {
 	openaiClient openai.Client
 	mcpSession   *mcp.ClientSession
 	mcpClient    *mcp.Client
+	mcpTransport *mcp.StreamableClientTransport
 	tools        []*mcp.Tool
 	model        string
 }
@@ -118,6 +120,7 @@ func NewAgent(llmUserName, llmToken, llmBaseURL, openaiModel, mcpServerURL strin
 		openaiClient: openaiClient,
 		mcpSession:   session,
 		mcpClient:    mcpClient,
+		mcpTransport: mcpTransport,
 		tools:        toolsResult.Tools,
 		model:        openaiModel,
 	}, nil
@@ -135,11 +138,32 @@ func (a *Agent) convertMCPToolsToOpenAI() []openai.ChatCompletionToolUnionParam 
 	return tools
 }
 
+func (a *Agent) reconnect(ctx context.Context) error {
+	_ = a.mcpSession.Close()
+	session, err := a.mcpClient.Connect(ctx, a.mcpTransport, nil)
+	if err != nil {
+		return fmt.Errorf("failed to reconnect to MCP server: %w", err)
+	}
+	a.mcpSession = session
+	slog.Info("Reconnected to MCP server")
+	return nil
+}
+
 func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[string]any) (string, error) {
 	result, err := a.mcpSession.CallTool(ctx, &mcp.CallToolParams{
 		Name:      toolName,
 		Arguments: arguments,
 	})
+	if err != nil && strings.Contains(err.Error(), "connection closed") {
+		slog.Warn("MCP session dropped, reconnecting", slog.Any("error", err))
+		if reconnErr := a.reconnect(ctx); reconnErr != nil {
+			return "", fmt.Errorf("failed to call tool: %w (reconnect failed: %w)", err, reconnErr)
+		}
+		result, err = a.mcpSession.CallTool(ctx, &mcp.CallToolParams{
+			Name:      toolName,
+			Arguments: arguments,
+		})
+	}
 	if err != nil {
 		return "", fmt.Errorf("failed to call tool: %w", err)
 	}
@@ -166,6 +190,11 @@ func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[
 
 func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage string, expectedOntapErrorStr string) (string, error) {
 	messages := []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage("When a tool call fails due to a validation error, analyze the error message and check if you " +
+			"misassigned a value to the wrong parameter (e.g. passed the cluster name as the svm name). " +
+			"Correct only the parameter mapping — never modify, truncate, or invent the actual values " +
+			"the user provided. If the error cannot be fixed by correcting a parameter mapping, report the " +
+			"error to the user and stop."),
 		openai.UserMessage(userMessage),
 	}
 
