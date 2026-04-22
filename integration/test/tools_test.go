@@ -7,19 +7,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
-	"net/http"
-	"os"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/carlmjohnson/requests"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
+	"log/slog"
+	"net/http"
+	"os"
+	"strings"
+	"testing"
+	"time"
 )
 
 const (
@@ -154,7 +153,7 @@ func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[
 		Name:      toolName,
 		Arguments: arguments,
 	})
-	if err != nil && strings.Contains(err.Error(), "connection closed") {
+	if err != nil && errors.Is(err, mcp.ErrConnectionClosed) {
 		slog.Warn("MCP session dropped, reconnecting", slog.Any("error", err))
 		if reconnErr := a.reconnect(ctx); reconnErr != nil {
 			return "", fmt.Errorf("failed to call tool: %w (reconnect failed: %w)", err, reconnErr)
