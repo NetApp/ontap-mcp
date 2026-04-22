@@ -192,11 +192,12 @@ func (a *Agent) callMCPTool(ctx context.Context, toolName string, arguments map[
 
 func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage string, expectedOntapErrorStr string) (string, error) {
 	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("When a tool call fails due to a validation error, analyze the error message and check if you " +
-			"misassigned a value to the wrong parameter (e.g. passed the cluster name as the svm name). " +
-			"Correct only the parameter mapping — never modify, truncate, or invent the actual values " +
-			"the user provided. If the error cannot be fixed by correcting a parameter mapping, report the " +
-			"error to the user and stop."),
+		openai.SystemMessage("When a tool call fails due to a validation error, check two things: " +
+			"(1) Did you misassign a value to the wrong parameter (e.g. passed the cluster name as the svm name)? " +
+			"(2) Did you misread or partially extract a value from the user's message (e.g. dropped a path prefix like /vol/vol1/)? " +
+			"In either case, correct the mistake using only values already present in the conversation — " +
+			"never truncate, invent, or change values beyond what is needed to fix the extraction or mapping error. " +
+			"If the error cannot be fixed this way, report it to the user and stop."),
 		openai.UserMessage(userMessage),
 	}
 
