@@ -127,3 +127,30 @@ func newUpdateSVM(in tool.SVM) (ontap.SVM, error) {
 
 	return out, nil
 }
+
+func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SVMPeer) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	err = client.DeleteSVMPeer(ctx, parameters.SVM)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: "SVM peer deleted successfully"},
+		},
+	}, nil, nil
+}

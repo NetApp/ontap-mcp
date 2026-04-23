@@ -105,3 +105,42 @@ func (c *Client) DeleteSVM(ctx context.Context, svmName string) error {
 
 	return c.handleJob(ctx, statusCode, buf)
 }
+
+func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
+	var (
+		buf         bytes.Buffer
+		statusCode  int
+		svmPeerData ontap.GetData
+	)
+	responseHeaders := http.Header{}
+
+	params := url.Values{}
+	params.Set("name", svmName)
+	params.Set("fields", "uuid")
+
+	builder := c.baseRequestBuilder(`/api/svm/peers`, &statusCode, responseHeaders).
+		Params(params).
+		ToJSON(&svmPeerData)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	if svmPeerData.NumRecords == 0 {
+		return fmt.Errorf("failed to get details of SVM peer %s because it does not exist", svmName)
+	}
+	if svmPeerData.NumRecords != 1 {
+		return fmt.Errorf("failed to get detail of SVM peer %s because there are %d matching records",
+			svmName, svmPeerData.NumRecords)
+	}
+
+	builder2 := c.baseRequestBuilder(`/api/svm/peers/`+svmPeerData.Records[0].UUID, &statusCode, responseHeaders).
+		Delete().
+		ToBytesBuffer(&buf)
+
+	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+		return err
+	}
+
+	return c.handleJob(ctx, statusCode, buf)
+}

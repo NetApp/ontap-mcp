@@ -451,6 +451,38 @@ Expected Response: igroup deleted successfully.
 
 ---
 
+### Manage SnapMirror Relationships
+
+**Create a SnapMirror relationship**
+
+- On the umeng-aff300-05-06 cluster, create a snapmirror relationship from source svm srsvm and source volume srvol to destination svm dtsvm and destination volume dtvol with policy name XDPDefault
+
+Expected Response: SnapMirror relationship created successfully
+
+**Update a SnapMirror relationship**
+
+- On the umeng-aff300-05-06 cluster, update a snapmirror relationship of destination svm dtsvm and destination volume dtvol with transfer schedule name to hourly
+
+Expected Response: SnapMirror relationship updated successfully
+
+**Update a SnapMirror relationship state**
+
+- On the umeng-aff300-05-06 cluster, break a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+Expected Response: SnapMirror relationship broken successfully
+
+- On the umeng-aff300-05-06 cluster, resync a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+Expected Response: SnapMirror relationship resynced successfully
+
+**Delete a SnapMirror relationship**
+
+- On the umeng-aff300-05-06 cluster, delete a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+Expected Response: SnapMirror relationship deleted successfully
+
+---
+
 ## MCP Clients
 
 Common MCP clients that work with ONTAP MCP Server:
