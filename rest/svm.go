@@ -51,7 +51,7 @@ func (c *Client) UpdateSVM(ctx context.Context, svm ontap.SVM, svmName string) e
 		return fmt.Errorf("failed to get details of SVM %s because it does not exist", svmName)
 	}
 	if svmData.NumRecords != 1 {
-		return fmt.Errorf("failed to get detail of SVM %s because there are %d matching records",
+		return fmt.Errorf("failed to get details of SVM %s because there are %d matching records",
 			svmName, svmData.NumRecords)
 	}
 
@@ -91,7 +91,7 @@ func (c *Client) DeleteSVM(ctx context.Context, svmName string) error {
 		return fmt.Errorf("failed to get details of SVM %s because it does not exist", svmName)
 	}
 	if svmData.NumRecords != 1 {
-		return fmt.Errorf("failed to get detail of SVM %s because there are %d matching records",
+		return fmt.Errorf("failed to get details of SVM %s because there are %d matching records",
 			svmName, svmData.NumRecords)
 	}
 
@@ -130,7 +130,7 @@ func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
 		return fmt.Errorf("failed to get details of SVM peer %s because it does not exist", svmName)
 	}
 	if svmPeerData.NumRecords != 1 {
-		return fmt.Errorf("failed to get detail of SVM peer %s because there are %d matching records",
+		return fmt.Errorf("failed to get details of SVM peer %s because there are %d matching records",
 			svmName, svmPeerData.NumRecords)
 	}
 

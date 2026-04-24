@@ -125,7 +125,7 @@ const CreateLunMap = `Create a LUN map on a cluster by cluster name. Maps a LUN 
 const DeleteLunMap = `Delete a LUN map on a cluster by cluster name. Removes the mapping between a LUN and an igroup.`
 
 const CreateSnapMirror = `Create a SnapMirror relationship on a cluster by cluster name. Requires source and destination SVM and volume names.`
-const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the policy of an existing relationship identified by its destination SVM and volume.`
+const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the policy and transfer schedule of an existing relationship identified by its destination SVM and volume.`
 const DeleteSnapMirror = `Delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
 const InitializeSnapMirror = `Initialize a SnapMirror relationship on a cluster by cluster name. Starts the baseline transfer from source to destination. Identifies the relationship by destination SVM and volume names.`
 const UpdateSnapMirrorTransfer = `Trigger a SnapMirror update transfer on a cluster by cluster name. Transfers new data from source to destination to bring the relationship up to date. Identifies the relationship by destination SVM and volume names.`
@@ -145,7 +145,7 @@ Pass cluster_name to automatically filter out fields and filters not available i
 const CreateSVM = `Create an SVM on a cluster by cluster name.`
 const UpdateSVM = `Update an SVM on a cluster by cluster name.`
 const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
-const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and peer UUID.`
+const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and peer SVM name. The peer UUID is looked up internally by name.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 

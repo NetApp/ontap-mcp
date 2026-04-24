@@ -13,7 +13,7 @@ import (
 )
 
 func TestSnapMirror(t *testing.T) {
-	SkipIfMissing(t, "CHECK_TOOLSS")
+	SkipIfMissing(t, CheckTools)
 
 	tests := []struct {
 		name             string
