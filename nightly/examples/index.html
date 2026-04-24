@@ -552,6 +552,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#manage-igroups-san" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage iGroups (SAN)
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -844,6 +853,15 @@
   <a href="#querying-specific-fields" class="md-nav__link">
     <span class="md-ellipsis">
       Querying Specific Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-igroups-san" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage iGroups (SAN)
     </span>
   </a>
   
@@ -1283,6 +1301,41 @@ Expected Response if schedule not exist: no schedule 2weekday12_30min found</p>
 <li>On the umeng-aff300-05-06 cluster, can I safely grow the docs volume on the marketing svm by 10GB? Check the aggregate's available space first.</li>
 </ul>
 <p>Expected Response: A summary of aggregate free space, followed by a recommendation on whether it is safe to proceed with the resize.</p>
+<hr />
+<h3 id="manage-igroups-san">Manage iGroups (SAN)<a class="headerlink" href="#manage-igroups-san" title="Permanent link">&para;</a></h3>
+<p><strong>Create an iGroup</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create an igroup named igroupFin with OS type linux and protocol iscsi on the marketing svm</li>
+</ul>
+<p>Expected Response: igroup created successfully.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create lun map of lun named /vol/docs/lunpayroll and an igroup named igroupFin on the marketing svm</li>
+</ul>
+<p>Expected Response: lun map created successfully.</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, delete lun map of lun named /vol/docs/lunpayroll and an igroup named igroupFin on the marketing svm</li>
+</ul>
+<p>Expected Response: lun map deleted successfully.</p>
+<p><strong>Rename an iGroup</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, rename igroup igroupFin to igroupFinNew and os type as windows on the marketing svm</li>
+</ul>
+<p>Expected Response: igroup updated successfully.</p>
+<p><strong>Add an Initiator to an iGroup</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, add initiator iqn.2021-01.com.example:test to igroup igroupFinNew on the marketing svm</li>
+</ul>
+<p>Expected Response: initiator added to igroup successfully.</p>
+<p><strong>Remove an Initiator from an iGroup</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, remove initiator iqn.2021-01.com.example:test from igroup igroupFinNew on the marketing svm</li>
+</ul>
+<p>Expected Response: initiator removed from igroup successfully.</p>
+<p><strong>Delete an iGroup</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, delete igroup igroupFinNew on the marketing svm</li>
+</ul>
+<p>Expected Response: igroup deleted successfully.</p>
 <hr />
 <h2 id="mcp-clients">MCP Clients<a class="headerlink" href="#mcp-clients" title="Permanent link">&para;</a></h2>
 <p>Common MCP clients that work with ONTAP MCP Server:</p>
