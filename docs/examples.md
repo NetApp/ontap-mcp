@@ -168,7 +168,7 @@ Below are example questions that work well with the ONTAP MCP Server:
 - On the umeng-aff300-05-06 cluster, add host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem in marketing svm
 - <span class="key">Expected Response</span>: The nvme subsystem Host has been successfully added.
 
-- On the umeng-aff300-05-06 cluster, delete nvme subsystem sys1 with in marketing svm
+- On the umeng-aff300-05-06 cluster, delete nvme subsystem sys1 in marketing svm
 - <span class="key">Expected Response</span>: The nvme subsystem has been successfully deleted.
 
 - On the umeng-aff300-05-06 cluster, create nvme namespace /vol/docns/ns1 with linux os and 20mb size in nvmevs1 svm
