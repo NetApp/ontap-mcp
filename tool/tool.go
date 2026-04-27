@@ -63,6 +63,13 @@ type SnapshotPolicySchedule struct {
 	SnapmirrorLabel string `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
 }
 
+type Snapshot struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
+	Volume  string `json:"volume_name" jsonschema:"volume name"`
+	Name    string `json:"name" jsonschema:"snapshot name"`
+}
+
 type Cron struct {
 	Days     string `json:"days,omitzero"`
 	Hours    string `json:"hours,omitzero"`
