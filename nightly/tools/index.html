@@ -466,6 +466,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#api-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Discovery
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#volume-management" class="md-nav__link">
     <span class="md-ellipsis">
       Volume Management
@@ -511,6 +520,69 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#svm-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      SVM Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#qtree-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Qtree Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-interface-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network Interface Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lun-and-igroup-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      LUN and igroup Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iscsi-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      iSCSI Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fcp-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      FCP Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nvme-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      NVMe Management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#multi-cluster-management" class="md-nav__link">
     <span class="md-ellipsis">
       Multi-Cluster Management
@@ -536,42 +608,122 @@
 
 <h1 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">&para;</a></h1>
 <p>The following tools are provided by the ONTAP MCP server.</p>
+<p>ONTAP MCP provides a set of tools that can be used to interact with the ONTAP API. These tools are designed to help users discover and manage their ONTAP clusters more efficiently. The tools are categorized based on their functionality, such as API discovery, volume management, data protection, CIFS/SMB integration, NFS export policy management, performance management, SVM management, qtree management, network interface management, LUN and igroup management, iSCSI management, FCP management, NVMe management, and multi-cluster management.</p>
+<p>All ONTAP MCP tools are annotated with hint metadata: <code>readOnlyHint</code>, <code>idempotentHint</code>, and <code>destructiveHint</code>. The <code>readOnlyHint</code> indicates that the tool does not modify any data and is safe to use for discovery and information retrieval. The <code>destructiveHint</code> indicates that the tool performs actions that can modify or delete data, and should be used with caution.</p>
+<p>If you want to run the ONTAP MCP server in read-only mode, you can start the server with the <code>--read-only</code> flag. In this mode, only tools with the <code>readOnlyHint</code> will be available for use, ensuring that no modifications can be made to the ONTAP cluster. See the <a href="../install/#configuration">configuration documentation</a> for more details on how to start the server in read-only mode.</p>
+<h2 id="api-discovery">API Discovery<a class="headerlink" href="#api-discovery" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>list_ontap_endpoints</code> (available when the API catalog is loaded)</li>
+<li><code>search_ontap_endpoints</code> (available when the API catalog is loaded)</li>
+<li><code>describe_ontap_endpoint</code> (available when the API catalog is loaded)</li>
+<li><code>ontap_get</code></li>
+</ul>
 <h2 id="volume-management">Volume Management<a class="headerlink" href="#volume-management" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Volume lifecycle management: create, read, update, delete, resize</li>
-<li>Volume autogrowth: enable, disable, status</li>
-<li>Volume updates (multiple properties in a single operation)</li>
-<li>QoS policy and snapshot policy assignment</li>
-<li>NFS access control with export policies</li>
-<li>Volume details: capacity, usage</li>
+<li><code>create_volume</code></li>
+<li><code>update_volume</code></li>
+<li><code>delete_volume</code></li>
 </ul>
 <h2 id="data-protection">Data Protection<a class="headerlink" href="#data-protection" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Snapshot policies with flexible scheduling</li>
-<li>Snapshot schedules</li>
-<li>Policy application to SVMs</li>
+<li><code>create_snapshot</code></li>
+<li><code>delete_snapshot</code></li>
+<li><code>restore_snapshot</code></li>
+<li><code>create_snapshot_policy</code></li>
+<li><code>update_snapshot_policy</code></li>
+<li><code>delete_snapshot_policy</code></li>
+<li><code>create_schedule</code></li>
+<li><code>add_schedule_in_snapshot_policy</code></li>
+<li><code>update_schedule_in_snapshot_policy</code></li>
+<li><code>remove_schedule_in_snapshot_policy</code></li>
 </ul>
 <h2 id="cifssmb-integration">CIFS/SMB Integration<a class="headerlink" href="#cifssmb-integration" title="Permanent link">&para;</a></h2>
 <ul>
-<li>CIFS list management: create, read, update, delete</li>
-<li>Integration with volume provisioning</li>
+<li><code>create_cifs_share</code></li>
+<li><code>update_cifs_share</code></li>
+<li><code>delete_cifs_share</code></li>
 </ul>
 <h2 id="nfs-export-policy-management">NFS Export Policy Management<a class="headerlink" href="#nfs-export-policy-management" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Export policy management: create, read, update, delete</li>
-<li>Volume-to-policy association</li>
+<li><code>create_nfs_export_policies</code></li>
+<li><code>update_nfs_export_policies</code></li>
+<li><code>delete_nfs_export_policies</code></li>
+<li><code>create_nfs_export_policies_rules</code></li>
+<li><code>update_nfs_export_policies_rules</code></li>
+<li><code>delete_nfs_export_policies_rules</code></li>
 </ul>
 <h2 id="performance-management">Performance Management<a class="headerlink" href="#performance-management" title="Permanent link">&para;</a></h2>
 <ul>
-<li>QoS policy management: create, read, update, delete</li>
-<li>QoS policy assignment to SVMs</li>
-<li>Fixed QoS policies with IOPS/bandwidth limits</li>
-<li>Adaptive QoS policies with dynamic scaling</li>
+<li><code>list_qos_policies</code></li>
+<li><code>create_qos_policy</code></li>
+<li><code>update_qos_policy</code></li>
+<li><code>delete_qos_policy</code></li>
+</ul>
+<h2 id="svm-management">SVM Management<a class="headerlink" href="#svm-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_svm</code></li>
+<li><code>update_svm</code></li>
+<li><code>delete_svm</code></li>
+</ul>
+<h2 id="qtree-management">Qtree Management<a class="headerlink" href="#qtree-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_qtree</code></li>
+<li><code>update_qtree</code></li>
+<li><code>delete_qtree</code></li>
+</ul>
+<h2 id="network-interface-management">Network Interface Management<a class="headerlink" href="#network-interface-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_network_ip_interface</code></li>
+<li><code>update_network_ip_interface</code></li>
+<li><code>delete_network_ip_interface</code></li>
+</ul>
+<h2 id="lun-and-igroup-management">LUN and igroup Management<a class="headerlink" href="#lun-and-igroup-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_lun</code></li>
+<li><code>update_lun</code></li>
+<li><code>delete_lun</code></li>
+<li><code>create_igroup</code></li>
+<li><code>update_igroup</code></li>
+<li><code>delete_igroup</code></li>
+<li><code>add_igroup_initiator</code></li>
+<li><code>remove_igroup_initiator</code></li>
+<li><code>create_lun_map</code></li>
+<li><code>delete_lun_map</code></li>
+</ul>
+<h2 id="iscsi-management">iSCSI Management<a class="headerlink" href="#iscsi-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_iscsi_service</code></li>
+<li><code>update_iscsi_service</code></li>
+<li><code>delete_iscsi_service</code></li>
+</ul>
+<h2 id="fcp-management">FCP Management<a class="headerlink" href="#fcp-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_fcp_service</code></li>
+<li><code>update_fcp_service</code></li>
+<li><code>delete_fcp_service</code></li>
+<li><code>create_fc_interface</code></li>
+<li><code>update_fc_interface</code></li>
+<li><code>delete_fc_interface</code></li>
+</ul>
+<h2 id="nvme-management">NVMe Management<a class="headerlink" href="#nvme-management" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>create_nvme_service</code></li>
+<li><code>update_nvme_service</code></li>
+<li><code>delete_nvme_service</code></li>
+<li><code>create_nvme_subsystem</code></li>
+<li><code>update_nvme_subsystem</code></li>
+<li><code>delete_nvme_subsystem</code></li>
+<li><code>add_nvme_subsystem_host</code></li>
+<li><code>remove_nvme_subsystem_host</code></li>
+<li><code>create_nvme_namespace</code></li>
+<li><code>update_nvme_namespace</code></li>
+<li><code>delete_nvme_namespace</code></li>
+<li><code>create_nvme_subsystem_map</code></li>
+<li><code>delete_nvme_subsystem_map</code></li>
 </ul>
 <h2 id="multi-cluster-management">Multi-Cluster Management<a class="headerlink" href="#multi-cluster-management" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Unified management of multiple ONTAP clusters</li>
-<li>Centralized credential management</li>
+<li><code>list_registered_clusters</code></li>
 </ul>
 
 
