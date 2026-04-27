@@ -100,7 +100,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	// operation on Snapshot object
 	addTool(a, server, "create_snapshot", descriptions.CreateSnapshot, createAnnotation, a.CreateSnapshot)
 	addTool(a, server, "delete_snapshot", descriptions.DeleteSnapshot, deleteAnnotation, a.DeleteSnapshot)
-	addTool(a, server, "restore_snapshot", descriptions.RestoreSnapshot, deleteAnnotation, a.RestoreSnapshot)
+	addTool(a, server, "restore_snapshot", descriptions.RestoreSnapshot, updateAnnotation, a.RestoreSnapshot)
 
 	// operation on Snapshot Policy object
 	addTool(a, server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)

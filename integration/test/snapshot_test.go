@@ -134,7 +134,7 @@ func verifySnapshot(snapshotNames []string, exist bool, snapshotCount int) func(
 			return false
 		}
 		if data.NumRecords != 1 {
-			t.Errorf("verifySnapshot: expected 1 record, got %d", data.NumRecords)
+			t.Errorf("verifySnapshot: expected %d records, got %d", snapshotCount, data.NumRecords)
 			return false
 		}
 		volumeUUID := data.Records[0].UUID
