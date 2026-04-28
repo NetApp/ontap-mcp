@@ -97,7 +97,7 @@ func (c *Client) DeleteSnapMirror(ctx context.Context, destSVM, destVolume strin
 	return c.handleJob(ctx, statusCode, buf)
 }
 
-func (c *Client) InitializeSMUpdateSMTransfer(ctx context.Context, destSVM, destVolume string) error {
+func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destSVM, destVolume string) error {
 	var (
 		statusCode int
 	)
@@ -115,50 +115,4 @@ func (c *Client) InitializeSMUpdateSMTransfer(ctx context.Context, destSVM, dest
 	}
 
 	return c.checkStatus(statusCode)
-}
-
-func (c *Client) BreakSnapMirror(ctx context.Context, destSVM, destVolume string, rel ontap.SnapMirrorRelationship) error {
-	var (
-		buf        bytes.Buffer
-		statusCode int
-	)
-
-	uuid, err := c.getSnapMirrorUUID(ctx, destSVM, destVolume)
-	if err != nil {
-		return err
-	}
-
-	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid, &statusCode, nil).
-		Patch().
-		BodyJSON(rel).
-		ToBytesBuffer(&buf)
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
-	}
-
-	return c.handleJob(ctx, statusCode, buf)
-}
-
-func (c *Client) ResyncSnapMirror(ctx context.Context, destSVM, destVolume string, rel ontap.SnapMirrorRelationship) error {
-	var (
-		buf        bytes.Buffer
-		statusCode int
-	)
-
-	uuid, err := c.getSnapMirrorUUID(ctx, destSVM, destVolume)
-	if err != nil {
-		return err
-	}
-
-	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid, &statusCode, nil).
-		Patch().
-		BodyJSON(rel).
-		ToBytesBuffer(&buf)
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
-	}
-
-	return c.handleJob(ctx, statusCode, buf)
 }

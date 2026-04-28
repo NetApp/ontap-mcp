@@ -207,7 +207,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_snapmirror", descriptions.CreateSnapMirror, createAnnotation, a.CreateSnapMirror)
 	addTool(a, server, "update_snapmirror", descriptions.UpdateSnapMirror, updateAnnotation, a.UpdateSnapMirror)
 	addTool(a, server, "delete_snapmirror", descriptions.DeleteSnapMirror, deleteAnnotation, a.DeleteSnapMirror)
-	addTool(a, server, "initialize_snapmirror", descriptions.InitializeSnapMirror, createAnnotation, a.InitializeSnapMirror)
+	addTool(a, server, "initialize_snapmirror", descriptions.InitializeSnapMirror, updateAnnotation, a.InitializeSnapMirror)
 	addTool(a, server, "update_snapmirror_transfer", descriptions.UpdateSnapMirrorTransfer, createAnnotation, a.UpdateSnapMirrorTransfer)
 	addTool(a, server, "break_snapmirror", descriptions.BreakSnapMirror, updateAnnotation, a.BreakSnapMirror)
 	addTool(a, server, "resync_snapmirror", descriptions.ResyncSnapMirror, updateAnnotation, a.ResyncSnapMirror)
