@@ -279,8 +279,8 @@ type LunMap struct {
 
 type SnapMirrorCreate struct {
 	Cluster           string `json:"cluster_name" jsonschema:"cluster name"`
-	SourceSVM         string `json:"source_svm,omitzero" jsonschema:"source SVM name"`
-	SourceVolume      string `json:"source_volume,omitzero" jsonschema:"source volume name"`
+	SourceSVM         string `json:"source_svm" jsonschema:"source SVM name"`
+	SourceVolume      string `json:"source_volume" jsonschema:"source volume name"`
 	DestinationSVM    string `json:"destination_svm" jsonschema:"destination SVM name"`
 	DestinationVolume string `json:"destination_volume" jsonschema:"destination volume name"`
 	PolicyName        string `json:"policy_name" jsonschema:"SnapMirror policy name"`

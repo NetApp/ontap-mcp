@@ -115,7 +115,7 @@ func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("name", svmName)
+	params.Set("svm.name", svmName)
 	params.Set("fields", "uuid")
 
 	builder := c.baseRequestBuilder(`/api/svm/peers`, &statusCode, responseHeaders).

@@ -128,7 +128,7 @@ const RemoveIGroupInitiator = `Remove an initiator from an igroup on a cluster b
 const CreateLunMap = `Create a LUN map on a cluster by cluster name. Maps a LUN to an igroup, making the LUN accessible to the initiators in the igroup.`
 const DeleteLunMap = `Delete a LUN map on a cluster by cluster name. Removes the mapping between a LUN and an igroup.`
 
-const CreateSnapMirror = `Create a SnapMirror relationship on a cluster by cluster name. Requires source and destination SVM and volume names.`
+const CreateSnapMirror = `Create a SnapMirror relationship on a cluster by cluster name.`
 const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the policy and transfer schedule of an existing relationship identified by its destination SVM and volume.`
 const DeleteSnapMirror = `Delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
 const InitializeSnapMirror = `Initialize a SnapMirror relationship on a cluster by cluster name. Starts the baseline transfer from source to destination. Identifies the relationship by destination SVM and volume names.`
