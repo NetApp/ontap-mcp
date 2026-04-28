@@ -72,7 +72,7 @@ func (c *Client) UpdateVolume(ctx context.Context, volume ontap.Volume, oldVolum
 	params := url.Values{}
 	params.Set("fields", "uuid")
 	params.Set("name", oldVolumeName)
-	params.Set("svm", svmName)
+	params.Set("svm.name", svmName)
 
 	builder := c.baseRequestBuilder(`/api/storage/volumes`, &statusCode, responseHeaders).
 		Params(params).
@@ -117,7 +117,7 @@ func (c *Client) DeleteVolume(ctx context.Context, volume ontap.Volume) error {
 	params := url.Values{}
 	params.Set("fields", "uuid")
 	params.Set("name", volume.Name)
-	params.Set("svm", volume.SVM.Name)
+	params.Set("svm.name", volume.SVM.Name)
 
 	builder := c.baseRequestBuilder(`/api/storage/volumes`, &statusCode, responseHeaders).
 		Params(params).

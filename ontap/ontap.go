@@ -158,6 +158,18 @@ type SnapshotPolicySchedule struct {
 	SnapmirrorLabel string      `json:"snapmirror_label,omitzero" jsonschema:"SnapMirror label for this schedule"`
 }
 
+type Snapshot struct {
+	Name string `json:"name" jsonschema:"snapshot name"`
+}
+
+type RestoreTo struct {
+	Snapshot Snapshot `json:"snapshot" jsonschema:"restore volume with a snapshot"`
+}
+
+type SnapshotRestore struct {
+	RestoreTo RestoreTo `json:"restore_to" jsonschema:"which snapshot to restore"`
+}
+
 type Cron struct {
 	Days     []int `json:"days,omitzero"`
 	Hours    []int `json:"hours,omitzero"`

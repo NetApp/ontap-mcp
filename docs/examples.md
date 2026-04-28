@@ -10,36 +10,176 @@ The following examples were run with Claude Sonnet 4.5 large language model.
 
 Below are example questions that work well with the ONTAP MCP Server:
 
-### Volume Provisioning
+### CIFS shares
 
-**Create a Volume**
+**Create a CIFS share**
 
-- On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate
-- <span class="key">Expected Response</span>: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
+- On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm
+- <span class="key">Expected Response</span>: CIFS share created successfully.
 
-**Resize a Volume**
+**Update a CIFS share**
 
-- On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.
-
-- <span class="key">Expected Response</span>: Volume "docs" has been successfully resized to 25MB on the marketing SVM.
-
-- On the umeng-aff300-05-06 cluster, increase the size of the docs volume on the marketing svm by 5MB.
-
-- <span class="key">Expected Response</span>: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.
-
-**Volume Autogrowth**
-
-- On the umeng-aff300-05-06 cluster, enable autogrowth on the docs volume in the marketing svm
-
-- <span class="key">Expected Response</span>: Autogrowth has been enabled on the "docs" volume in the marketing SVM on the umeng-aff300-05-06 cluster.
-
-- Increase the docs volume autogrow percent to 62
-
-- <span class="key">Expected Response</span>: The autogrow threshold for the docs volume has been successfully increased to 62%. The volume will now automatically grow when it reaches 62% capacity.
+- On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change its path to /cifsFin on the marketing svm
+- <span class="key">Expected Response</span>: CIFS share updated successfully.
 
 ---
 
-### Manage QoS Policies
+### FCP
+
+- On the umeng-aff300-05-06 cluster, enable fcp service in marketing svm
+- <span class="key">Expected Response</span>: The fcp service has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create fc interface fc1 in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol
+- <span class="key">Expected Response</span>: The fc interface has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, delete fc interface fc1 in marketing svm
+- <span class="key">Expected Response</span>: The fc interface has been successfully deleted.
+
+- On the umeng-aff300-05-06 cluster, update fcp service to disable on the marketing svm
+- <span class="key">Expected Response</span>: The fcp service has been successfully updated.
+
+---
+
+### iGroups (SAN)
+
+**Create an iGroup**
+
+- On the umeng-aff300-05-06 cluster, create an igroup named igroupFin with OS type linux and protocol iscsi on the marketing svm
+- <span class="key">Expected Response</span>: igroup created successfully.
+
+- On the umeng-aff300-05-06 cluster, create lun map of lun named /vol/docs/lunpayroll and an igroup named igroupFin on the marketing svm
+- <span class="key">Expected Response</span>: lun map created successfully.
+
+- On the umeng-aff300-05-06 cluster, delete lun map of lun named /vol/docs/lunpayroll and an igroup named igroupFin on the marketing svm
+- <span class="key">Expected Response</span>: lun map deleted successfully.
+
+**Rename an iGroup**
+
+- On the umeng-aff300-05-06 cluster, rename igroup igroupFin to igroupFinNew and os type as windows on the marketing svm
+- <span class="key">Expected Response</span>: igroup updated successfully.
+
+**Add an Initiator to an iGroup**
+
+- On the umeng-aff300-05-06 cluster, add initiator iqn.2021-01.com.example:test to igroup igroupFinNew on the marketing svm
+- <span class="key">Expected Response</span>: initiator added to igroup successfully.
+
+**Remove an Initiator from an iGroup**
+
+- On the umeng-aff300-05-06 cluster, remove initiator iqn.2021-01.com.example:test from igroup igroupFinNew on the marketing svm
+- <span class="key">Expected Response</span>: initiator removed from igroup successfully.
+
+**Delete an iGroup**
+
+- On the umeng-aff300-05-06 cluster, delete igroup igroupFinNew on the marketing svm
+- <span class="key">Expected Response</span>: igroup deleted successfully.
+
+---
+
+### iSCSI
+
+- On the umeng-aff300-05-06 cluster, create iscsi service target named alias tgpath on the marketing svm
+- <span class="key">Expected Response</span>: The iscsi service has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, disable the iscsi service on the marketing svm
+- <span class="key">Expected Response</span>: The iscsi service has been successfully updated.
+
+- On the umeng-aff300-05-06 cluster, delete the iscsi service on the marketing svm
+- <span class="key">Expected Response</span>: The iscsi service has been successfully deleted.
+
+- on the umeng-aff300-05-06 cluster, create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with Default ipspace on node umeng-aff300-06
+- <span class="key">Expected Response</span>: The Network IP interface has been created successfully.
+
+- on the umeng-aff300-05-06 cluster, change auto revert to false in cluster scope network interface named cl_mg
+- <span class="key">Expected Response</span>: The Network IP interface updated successfully.
+
+- on the umeng-aff300-05-06 cluster, delete svm scope network interface named svg1 in marketing svm
+- <span class="key">Expected Response</span>: The Network IP interface deleted successfully.
+
+---
+
+### LUNs
+
+**Create a LUN**
+
+- On the umeng-aff300-05-06 cluster, create a 20MB lun named lundoc in volume doc on the marketing svm with os type linux
+- <span class="key">Expected Response</span>: LUN has been created successfully.
+
+**Resize a LUN**
+
+- On the umeng-aff300-05-06 cluster, update lun lundoc size to 50mb  in volume doc on the marketing svm
+- <span class="key">Expected Response</span>: LUN has been updated successfully.
+
+**Rename a LUN**
+
+- On the umeng-aff300-05-06 cluster, rename the lun lundoc in volume doc on the marketing svm to lundocnew
+- <span class="key">Expected Response</span>: LUN has been updated successfully.
+
+**State change of a LUN**
+
+- On the umeng-aff300-05-06 cluster, disable the lun lundocnew in volume doc on the marketing svm
+- <span class="key">Expected Response</span>: LUN has been updated successfully.
+
+**Delete a LUN**
+
+- On the umeng-aff300-05-06 cluster, delete lun lundocnew in volume doc in marketing svm
+- <span class="key">Expected Response</span>: LUN has been deleted successfully.
+
+---
+
+### NFS Export Policies
+
+**Create an NFS Export policy**
+
+- On the umeng-aff300-05-06 cluster, create an NFS export policy name nfsEngPolicy on the marketing svm
+- <span class="key">Expected Response</span>: NFS Export Policy created successfully.
+
+**Rename an NFS Export policy**
+
+- On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
+- <span class="key">Expected Response</span>: NFS Export Policy updated successfully.
+
+---
+
+### NFS Export Policy Rules
+
+**Create an NFS Export policy rule**
+
+- On the umeng-aff300-05-06 cluster, create an NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
+- <span class="key">Expected Response</span>: NFS Export Policy Rules created successfully.
+
+**Update an NFS Export policy rule**
+
+- On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
+- <span class="key">Expected Response</span>: NFS Export Policy Rules updated successfully.
+
+---
+
+### NVMe
+
+- On the umeng-aff300-05-06 cluster, create nvme service on the marketing svm
+- <span class="key">Expected Response</span>: The nvme service has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, disable nvme service on the marketing svm
+- <span class="key">Expected Response</span>: The nvme service has been successfully updated.
+
+- On the umeng-aff300-05-06 cluster, create nvme subsystem sys1 with linux os on the marketing svm
+- <span class="key">Expected Response</span>: The nvme subsystem has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, add host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem in marketing svm
+- <span class="key">Expected Response</span>: The nvme subsystem Host has been successfully added.
+
+- On the umeng-aff300-05-06 cluster, delete nvme subsystem sys1 in marketing svm
+- <span class="key">Expected Response</span>: The nvme subsystem has been successfully deleted.
+
+- On the umeng-aff300-05-06 cluster, create nvme namespace /vol/docns/ns1 with linux os and 20mb size in nvmevs1 svm
+- <span class="key">Expected Response</span>: The nvme namespace has been successfully created.
+
+- On the umeng-aff300-05-06 cluster, create subsystem map of sys1 subsystem and /vol/docns/ns1 namespace in nvmevs1 svm
+- <span class="key">Expected Response</span>: The nvme subsystem map has been successfully created.
+
+---
+
+### QoS Policies
 
 **List All QoS Policies**
 
@@ -121,275 +261,107 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 ---
 
-### CIFS share Provisioning
+### Qtrees
 
-**Create a CIFS share**
+- On the umeng-aff300-05-06 cluster, create a qtree named staff in docs volume on the marketing SVM
+- <span class="key">Expected Response</span>: The qtree has been successfully created.
 
-- On the umeng-aff300-05-06 cluster, create a CIFS share named cifsFin at the path / on the marketing svm
-
-Expected Response: CIFS share created successfully.
-
-**Update a CIFS share**
-
-- On the umeng-aff300-05-06 cluster, update the CIFS share named cifsFin. Change it's path to /cifsFin on the marketing svm
-
-Expected Response: CIFS share updated successfully.
+- On the umeng-aff300-05-06 cluster, rename a qtree named staff to pay in docs volume on the marketing SVM
+- <span class="key">Expected Response</span>: The qtree has been successfully renamed.
 
 ---
 
-### NFS Export Policy Provisioning
+### Schedules
 
-**Create a NFS Export policy**
+- On the umeng-aff300-05-06 cluster, create a cron schedule with 5 * * * * named as 5minutes
+- <span class="key">Expected Response</span>: The schedule has been successfully created.
 
-- On the umeng-aff300-05-06 cluster, create NFS export policy as nfsEngPolicy on the marketing svm
-
-Expected Response: NFS Export Policy created successfully.
-
-**Update a NFS Export policy**
-
-- On the umeng-aff300-05-06 cluster, update NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm and client match to 1.1.1.1/32, ro rule to any, rw rule to any.
-
-Expected Response: NFS Export Policy updated successfully.
+- On the umeng-aff300-05-06 cluster, create a cron schedule with * * 11 1-2 * named as 11dayjantofeb
+- <span class="key">Expected Response</span>: The schedule has been successfully created.
 
 ---
 
-### NFS Export Policy Rules Provisioning
-
-**Create a NFS Export policy rule**
-
-- On the umeng-aff300-05-06 cluster, create NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
-
-Expected Response: NFS Export Policy Rule created successfully.
-
-**Update a NFS Export policy rule**
-
-- On the umeng-aff300-05-06 cluster, update NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
-
-Expected Response: NFS Export Policy Rules updated successfully.
-
----
-
-### NFS Export Policy Provisioning
-
-**Create an NFS Export policy**
-
-- On the umeng-aff300-05-06 cluster, create an NFS export policy name nfsEngPolicy on the marketing svm
-
-Expected Response: NFS Export Policy created successfully.
-
-**Rename an NFS Export policy**
-
-- On the umeng-aff300-05-06 cluster, rename the NFS export policy from nfsEngPolicy to nfsMgrPolicy on the marketing svm.
-
-Expected Response: NFS Export Policy updated successfully.
-
----
-
-### NFS Export Policy Rules Provisioning
-
-**Create an NFS Export policy rule**
-
-- On the umeng-aff300-05-06 cluster, create an NFS export policy rule as client match 0.0.0.0/0, ro rule any, rw rule any in nfsMgrPolicy on the marketing svm
-
-Expected Response: NFS Export Policy Rule created successfully.
-
-**Update an NFS Export policy rule**
-
-- On the umeng-aff300-05-06 cluster, update the NFS export policy rule for nfsMgrPolicy export policy on the marketing svm ro rule from any to never.
-
-Expected Response: NFS Export Policy Rules updated successfully.
-
----
-
-### List Snapshots
-
-- On the umeng-aff300-05-06 cluster, list the snapshots on volume docs on svm marketing.
-
-- <span class="key">Expected Response</span>: A list of snapshots for the volume docs on the marketing SVM.
-
----
-
-### Manage Snapshot Policies
+### Snapshot Policies
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named every4hours on the gold SVM. The schedule is 4 hours and keeps the last 5 snapshots.
 
 - <span class="key">Expected Response</span>: The snapshot policy "every4hours" has been successfully created on the gold SVM with a schedule of every 4 hours, retaining the last 5 snapshots on the umeng-aff300-05-06 cluster.
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named biweekly on the vs_test SVM. The schedule would be 2weekday12_30min and keeps the last 3 snapshots.
-
-Expected Response if schedule exist: The snapshot policy has been successfully created.
-Expected Response if schedule not exist: no schedule 2weekday12_30min found
+  - <span class="key">Expected Response if the schedule exists</span>: The snapshot policy has been successfully created. 
+  - <span class="key">Expected Response if the schedule does not exist</span>: no schedule 2weekday12_30min found
 
 - On the umeng-aff300-05-06 cluster, create a snapshot policy named every5min on the vs_test SVM. The schedule is 5 min and keeps the last 2 snapshots.
-
-Expected Response: The snapshot policy has been successfully created.
-
----
-
-### Manage Schedule
-
-- On the umeng-aff300-05-06 cluster, create a cron schedule with 5 * * * * named as 5minutes
-
-Expected Response: The schedule has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, create a cron schedule with * * 11 1-2 * named as 11dayjantofeb
-
-Expected Response: The schedule has been successfully created.
+- <span class="key">Expected Response</span>: The snapshot policy has been successfully created.
 
 ---
 
-### Manage Qtrees
+### Snapshots
 
-- On the umeng-aff300-05-06 cluster, create a qtree named staff in docs volume on the marketing SVM
+- On the umeng-aff300-05-06 cluster, create a snapshot named localsnap on the docs volume on the marketing svm.
+- <span class="key">Expected Response</span>: Snapshot created successfully
 
-Expected Response: The qtree has been successfully created.
+- On the umeng-aff300-05-06 cluster, restore the docs volume from a snapshot named localsnap on the marketing svm.
+- <span class="key">Expected Response</span>: Snapshot restored successfully
 
-- On the umeng-aff300-05-06 cluster, rename a qtree named staff to pay in docs volume on the marketing SVM
+- On the umeng-aff300-05-06 cluster, delete the localsnap snapshot on the docs volume on the marketing svm.
+- <span class="key">Expected Response</span>: Snapshot deleted successfully
 
-Expected Response: The qtree has been successfully renamed.
-
----
-
-
-### Manage NVMe
-
-- On the umeng-aff300-05-06 cluster, create nvme service on the marketing svm
-
-Expected Response: The nvme service has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, disable nvme service on the marketing svm
-
-Expected Response: The nvme service has been successfully updated.
-
-- On the umeng-aff300-05-06 cluster, create nvme subsystem sys1 with linux os on the marketing svm
-
-Expected Response: The nvme subsystem has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, add host nqn as nqn.1992-01.example.com:host1 in sys1 nvme subsystem in marketing svm
-
-Expected Response: The nvme subsystem Host has been successfully added.
-
-- On the umeng-aff300-05-06 cluster, delete nvme subsystem sys1 with in marketing svm
-
-Expected Response: The nvme subsystem has been successfully deleted.
-
-- On the umeng-aff300-05-06 cluster, create nvme namespace /vol/docns/ns1 with linux os and 20mb size in nvmevs1 svm
-
-Expected Response: The nvme namespace has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, create subsystem map of sys1 subsystem and /vol/docns/ns1 namespace in nvmevs1 svm
-
-Expected Response: The nvme subsystem map has been successfully created.
+- On the umeng-aff300-05-06 cluster, list the snapshots on the docs volume on svm marketing.
+- <span class="key">Expected Response</span>: A list of snapshots for the volume docs on the marketing SVM.
 
 ---
 
-### Manage iSCSI Service
+### SVMs
 
-- On the umeng-aff300-05-06 cluster, create iscsi service target named alias tgpath on the marketing svm
-
-Expected Response: The iscsi service has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, disable the iscsi service on the marketing svm
-
-Expected Response: The iscsi service has been successfully updated.
-
-- On the umeng-aff300-05-06 cluster, delete the iscsi service on the marketing svm
-
-Expected Response: The iscsi service has been successfully deleted.
-
-- on the umeng-aff300-05-06 cluster, create network interface named cl_mg with ip address 10.63.41.6 and netmask 18 with Default ipspace on node umeng-aff300-06
-
-Expected Response: The Network IP interface has been created successfully.
-
-- on the umeng-aff300-05-06 cluster, change auto revert to false in cluster scope network interface named cl_mg
-
-Expected Response: The Network IP interface updated successfully.
-
-- on the umeng-aff300-05-06 cluster, delete svm scope network interface named svg1 in marketing svm
-
-Expected Response: The Network IP interface deleted successfully.
-
----
-
-### LUN Provisioning
-
-**Create a LUN**
-
-- On the umeng-aff300-05-06 cluster, create a 20MB lun named lundoc in volume doc on the marketing svm with os type linux
-
-Expected Response: LUN has been created successfully.
-
-**Resize a LUN**
-
-- On the umeng-aff300-05-06 cluster, update lun lundoc size to 50mb  in volume doc on the marketing svm
-
-Expected Response: LUN has been updated successfully.
-
-**Rename a LUN**
-
-- On the umeng-aff300-05-06 cluster, rename the lun lundoc in volume doc on the marketing svm to lundocnew
-
-Expected Response: LUN has been updated successfully.
-
-**State change of a LUN**
-
-- On the umeng-aff300-05-06 cluster, disable the lun lundocnew in volume doc on the marketing svm
-
-Expected Response: LUN has been updated successfully.
-
-**Delete a LUN**
-
-- On the umeng-aff300-05-06 cluster, delete lun lundocnew in volume doc in marketing svm
-
-Expected Response: LUN has been deleted successfully.
-
----
-
-### Manage FCP
-
-- On the umeng-aff300-05-06 cluster, enable fcp service in marketing svm
-
-Expected Response: The fcp service has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, create fc interface fc1 in marketing svm at port 0e in node umeng-aff300-01 of fcp data protocol
-
-Expected Response: The fc interface has been successfully created.
-
-- On the umeng-aff300-05-06 cluster, delete fc interface fc1 in marketing svm
-
-Expected Response: The fc interface has been successfully deleted.
-
-- On the umeng-aff300-05-06 cluster, update fcp service to disable on the marketing svm
-
-Expected Response: The fcp service has been successfully updated.
-
----
-
-### SVM Provisioning
-
-**Create a SVM**
+**Create an SVM**
 
 - On the umeng-aff300-05-06 cluster, create marketing svm
+- <span class="key">Expected Response</span>: SVM created successfully.
 
-Expected Response: SVM created successfully.
-
-**Rename a SVM**
+**Rename an SVM**
 
 - On the umeng-aff300-05-06 cluster, rename svm marketing to marketingNew
+- <span class="key">Expected Response</span>: SVM updated successfully.
 
-Expected Response: SVM updated successfully.
-
-**Update a SVM**
+**Update an SVM**
 
 - On the umeng-aff300-05-06 cluster, update svm marketingNew state to stopped and comment as `stop_svm`
+- <span class="key">Expected Response</span>: SVM updated successfully.
 
-Expected Response: SVM updated successfully.
-
-**Delete a SVM**
+**Delete an SVM**
 
 - On the umeng-aff300-05-06 cluster, delete marketingNew svm
+- <span class="key">Expected Response</span>: SVM deleted successfully.
 
-Expected Response: SVM deleted successfully.
+---
+
+### Volumes
+
+**Create a Volume**
+
+- On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate
+- <span class="key">Expected Response</span>: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
+
+**Resize a Volume**
+
+- On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.
+
+- <span class="key">Expected Response</span>: Volume "docs" has been successfully resized to 25MB on the marketing SVM.
+
+- On the umeng-aff300-05-06 cluster, increase the size of the docs volume on the marketing svm by 5MB.
+
+- <span class="key">Expected Response</span>: Volume "docs" has been successfully increased by 5MB to 30MB on the marketing SVM.
+
+**Volume Autogrowth**
+
+- On the umeng-aff300-05-06 cluster, enable autogrowth on the docs volume in the marketing svm
+
+- <span class="key">Expected Response</span>: Autogrowth has been enabled on the "docs" volume in the marketing SVM on the umeng-aff300-05-06 cluster.
+
+- Increase the docs volume autogrow percent to 62
+
+- <span class="key">Expected Response</span>: The autogrow threshold for the docs volume has been successfully increased to 62%. The volume will now automatically grow when it reaches 62% capacity.
 
 ---
 
@@ -398,56 +370,12 @@ Expected Response: SVM deleted successfully.
 **Get volume space and protection details**
 
 - On the umeng-aff300-05-06 cluster, for every volume on the marketing svm, show me the name, junction path, used size, available size, and snapshot policy.
-
-Expected Response: A table of volumes with their junction paths, used/available space, and assigned snapshot policies on the marketing SVM.
+- <span class="key">Expected Response</span>: A table of volumes with their junction paths, used/available space, and assigned snapshot policies on the marketing SVM.
 
 **Check whether it is safe to extend a volume**
 
 - On the umeng-aff300-05-06 cluster, can I safely grow the docs volume on the marketing svm by 10GB? Check the aggregate's available space first.
-
-Expected Response: A summary of aggregate free space, followed by a recommendation on whether it is safe to proceed with the resize.
-
----
-
-### Manage iGroups (SAN)
-
-**Create an iGroup**
-
-- On the umeng-aff300-05-06 cluster, create an igroup named igroupFin with OS type linux and protocol iscsi on the marketing svm
-
-Expected Response: igroup created successfully.
-
-- On the umeng-aff300-05-06 cluster, create lun map of lun named /vol/docs/lunpayroll and an igroup named igroupFin on the marketing svm
-
-Expected Response: lun map created successfully.
-
-- On the umeng-aff300-05-06 cluster, delete lun map of lun named /vol/docs/lunpayroll and an igroup named igroupFin on the marketing svm
-
-Expected Response: lun map deleted successfully.
-
-**Rename an iGroup**
-
-- On the umeng-aff300-05-06 cluster, rename igroup igroupFin to igroupFinNew and os type as windows on the marketing svm
-
-Expected Response: igroup updated successfully.
-
-**Add an Initiator to an iGroup**
-
-- On the umeng-aff300-05-06 cluster, add initiator iqn.2021-01.com.example:test to igroup igroupFinNew on the marketing svm
-
-Expected Response: initiator added to igroup successfully.
-
-**Remove an Initiator from an iGroup**
-
-- On the umeng-aff300-05-06 cluster, remove initiator iqn.2021-01.com.example:test from igroup igroupFinNew on the marketing svm
-
-Expected Response: initiator removed from igroup successfully.
-
-**Delete an iGroup**
-
-- On the umeng-aff300-05-06 cluster, delete igroup igroupFinNew on the marketing svm
-
-Expected Response: igroup deleted successfully.
+- <span class="key">Expected Response</span>: A summary of aggregate free space, followed by a recommendation on whether it is safe to proceed with the resize.
 
 ---
 
