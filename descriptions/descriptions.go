@@ -149,7 +149,7 @@ Pass cluster_name to automatically filter out fields and filters not available i
 const CreateSVM = `Create an SVM on a cluster by cluster name.`
 const UpdateSVM = `Update an SVM on a cluster by cluster name.`
 const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
-const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and peer SVM name. The peer UUID is looked up internally by name.`
+const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and local SVM name. The peer relationship UUID is looked up internally using the svm.name filter.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 

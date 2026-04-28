@@ -127,7 +127,7 @@ func TestSnapMirror(t *testing.T) {
 			name:             "Clean SVM peer",
 			input:            ClusterStr + "delete svm peer of " + rn("srsvm") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/svm/peers?name=" + rn("srsvm"), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/svm/peers?svm.name=" + rn("srsvm"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean source SVM",
@@ -197,7 +197,7 @@ func verifySnapMirror(exist bool, expectedPolicyName string, expectedState strin
 		}
 
 		if exist {
-			if data.NumRecords == 0 {
+			if data.NumRecords != 1 {
 				t.Errorf("verifySnapMirror: expected 1 record, got %d", data.NumRecords)
 				return false
 			}
