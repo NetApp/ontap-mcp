@@ -131,6 +131,8 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_svm", descriptions.CreateSVM, createAnnotation, a.CreateSVM)
 	addTool(a, server, "update_svm", descriptions.UpdateSVM, updateAnnotation, a.UpdateSVM)
 	addTool(a, server, "delete_svm", descriptions.DeleteSVM, deleteAnnotation, a.DeleteSVM)
+	// operation on SVM peer object
+	addTool(a, server, "delete_svm_peer", descriptions.DeleteSVMPeer, deleteAnnotation, a.DeleteSVMPeer)
 
 	// operation on CIFS share object
 	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
@@ -200,6 +202,15 @@ func (a *App) createMCPServer() *mcp.Server {
 	// operation on LUN map object
 	addTool(a, server, "create_lun_map", descriptions.CreateLunMap, createAnnotation, a.CreateLunMap)
 	addTool(a, server, "delete_lun_map", descriptions.DeleteLunMap, deleteAnnotation, a.DeleteLunMap)
+
+	// operation on SnapMirror relationship object
+	addTool(a, server, "create_snapmirror", descriptions.CreateSnapMirror, createAnnotation, a.CreateSnapMirror)
+	addTool(a, server, "update_snapmirror", descriptions.UpdateSnapMirror, updateAnnotation, a.UpdateSnapMirror)
+	addTool(a, server, "delete_snapmirror", descriptions.DeleteSnapMirror, deleteAnnotation, a.DeleteSnapMirror)
+	addTool(a, server, "initialize_snapmirror", descriptions.InitializeSnapMirror, updateAnnotation, a.InitializeSnapMirror)
+	addTool(a, server, "update_snapmirror_transfer", descriptions.UpdateSnapMirrorTransfer, createAnnotation, a.UpdateSnapMirrorTransfer)
+	addTool(a, server, "break_snapmirror", descriptions.BreakSnapMirror, updateAnnotation, a.BreakSnapMirror)
+	addTool(a, server, "resync_snapmirror", descriptions.ResyncSnapMirror, updateAnnotation, a.ResyncSnapMirror)
 
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)

@@ -57,8 +57,8 @@ type GetData struct {
 		Clients  []ClientData `json:"clients,omitzero"`
 		Nas      NAS          `json:"nas,omitzero"`
 		Schedule NameAndUUID  `json:"schedule,omitzero"`
-		Lun     NameAndUUID  `json:"lun,omitzero"`
-		IGroup  NameAndUUID  `json:"igroup,omitzero"`
+		Lun      NameAndUUID  `json:"lun,omitzero"`
+		IGroup   NameAndUUID  `json:"igroup,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -117,6 +117,7 @@ type Volume struct {
 	Nas        NAS           `json:"nas,omitzero"`
 	Autosize   Autosize      `json:"autosize,omitzero"`
 	QoS        VolumeQoS     `json:"qos,omitzero"`
+	Type       string        `json:"type,omitzero"` // enum: rw, dp, ls
 }
 
 type NameAndUUID struct {
@@ -351,6 +352,18 @@ type LunMap struct {
 	SVM    NameAndUUID `json:"svm,omitzero"`
 	Lun    NameAndUUID `json:"lun,omitzero"`
 	IGroup NameAndUUID `json:"igroup,omitzero"`
+}
+
+type SnapMirrorEndpoint struct {
+	Path string `json:"path,omitzero" jsonschema:"SnapMirror endpoint path in the format 'svm:volume'"`
+}
+
+type SnapMirrorRelationship struct {
+	Source           SnapMirrorEndpoint `json:"source,omitzero"`
+	Destination      SnapMirrorEndpoint `json:"destination,omitzero"`
+	Policy           NameAndUUID        `json:"policy,omitzero"`
+	TransferSchedule NameAndUUID        `json:"transfer_schedule,omitzero"`
+	State            string             `json:"state,omitzero"` // enum: broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding
 }
 
 const (

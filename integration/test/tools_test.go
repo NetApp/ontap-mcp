@@ -374,15 +374,3 @@ func deleteObject(t *testing.T, api string, poller *config.Poller, client *http.
 	}
 	return true
 }
-
-func listObject(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	err := requests.URL("https://"+poller.Addr+"/"+api).
-		BasicAuth(poller.Username, poller.Password).
-		Client(client).
-		Fetch(context.Background())
-	if err != nil {
-		t.Errorf("listObject: request failed: %v", err)
-		return false
-	}
-	return true
-}

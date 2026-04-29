@@ -19,6 +19,7 @@ type Volume struct {
 	ExportPolicy string    `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
 	Autosize     Autosize  `json:"autosize,omitzero" jsonschema:"autosize"`
 	QoS          VolumeQoS `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
+	Type         string    `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
 }
 
 type VolumeQoS struct {
@@ -276,6 +277,23 @@ type LunMap struct {
 	IGroupName string `json:"igroup_name" jsonschema:"igroup name to map the LUN to"`
 }
 
+type SnapMirrorCreate struct {
+	Cluster           string `json:"cluster_name" jsonschema:"cluster name"`
+	SourceSVM         string `json:"source_svm" jsonschema:"source SVM name"`
+	SourceVolume      string `json:"source_volume" jsonschema:"source volume name"`
+	DestinationSVM    string `json:"destination_svm" jsonschema:"destination SVM name"`
+	DestinationVolume string `json:"destination_volume" jsonschema:"destination volume name"`
+	PolicyName        string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+}
+type SnapMirror struct {
+	Cluster              string `json:"cluster_name" jsonschema:"cluster name"`
+	DestinationSVM       string `json:"destination_svm" jsonschema:"destination SVM name"`
+	DestinationVolume    string `json:"destination_volume" jsonschema:"destination volume name"`
+	PolicyName           string `json:"policy_name,omitzero" jsonschema:"SnapMirror policy name"`
+	TransferScheduleName string `json:"transfer_schedule_name,omitzero" jsonschema:"SnapMirror transfer schedule name"`
+	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
@@ -309,4 +327,9 @@ type SVM struct {
 	NewName string `json:"new_name,omitzero" jsonschema:"new name of SVM"`
 	State   string `json:"state,omitzero" jsonschema:"state of SVM (e.g., starting, running, stopping, stopped, deleting, initializing)"`
 	Comment string `json:"comment,omitzero" jsonschema:"comment"`
+}
+
+type SVMPeer struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
 }
