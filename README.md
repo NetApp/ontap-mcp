@@ -1,8 +1,5 @@
 # What is NetApp ONTAP-MCP?
 
-> [!NOTE]  
-> NetApp ONTAP-MCP is currently in early access. Please give it a try, and [let us know](SUPPORT.md) how it works for you!
- 
 > ONTAP-MCP is NetApp's ONTAP model context protocol server 
 
 The ONTAP Model Context Protocol (MCP) server provides MCP clients like GitHub Copilot, Claude Desktop, and other large language models (LLMs) access to your NetApp ONTAP storage systems. Create automation tools enabling self-service provisioning and lifecycle management.
