@@ -13,9 +13,9 @@ The ONTAP-MCP team is happy to announce that we've released the 26.04.0 version 
 
 - Join [Discord and GitHub discussions](https://github.com/NetApp/ontap-mcp/blob/main/SUPPORT.md) to participate in the conversation, ask questions, and share your feedback.
 
-- :closed_book: Documentation is available at https://netapp.github.io/ontap-mcp/nightly/
+- :closed_book: Documentation is available at https://netapp.github.io/ontap-mcp/26.04/ and full list of tools is available at https://netapp.github.io/ontap-mcp/26.04/tools/.
 
-Examples showing how you can manage ONTAP from Visual Studio Code: https://netapp.github.io/ontap-mcp/nightly/examples/
+Examples showing how you can manage ONTAP from Visual Studio Code: https://netapp.github.io/ontap-mcp/26.04/examples/
 
 ## Announcements
 
