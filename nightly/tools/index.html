@@ -81,25 +81,6 @@
     </div>
     <div data-md-component="announce">
       
-        <aside class="md-banner">
-          <div class="md-banner__inner md-grid md-typeset">
-            
-              <button class="md-banner__button md-icon" aria-label="Don't show this again">
-                
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
-              </button>
-            
-            
-
-<span>NetApp ONTAP-MCP is currently in early access. Please give it a try,
-    and <a href="https://github.com/NetApp/ontap-mcp/blob/main/SUPPORT.md#getting-help">let use know</a> how it works for you!</span>
-
-          </div>
-          
-            <script>var content,el=document.querySelector("[data-md-component=announce]");el&&(content=el.querySelector(".md-typeset"),__md_hash(content.innerHTML)===__md_get("__announce")&&(el.hidden=!0))</script>
-          
-        </aside>
-      
     </div>
     
       <div data-md-color-scheme="default" data-md-component="outdated" hidden>
@@ -800,7 +781,8 @@
 <p>The following tools are provided by the ONTAP MCP server.</p>
 <p>ONTAP MCP provides a set of tools that can be used to interact with the ONTAP API. These tools are designed to help users discover and manage their ONTAP clusters more efficiently. The tools are categorized based on their functionality, such as API discovery, volume management, data protection, CIFS/SMB integration, NFS export policy management, performance management, SVM management, qtree management, network interface management, LUN and igroup management, iSCSI management, FCP management, NVMe management, and multi-cluster management.</p>
 <p>All ONTAP MCP tools are annotated with hint metadata: <code>readOnlyHint</code>, <code>idempotentHint</code>, and <code>destructiveHint</code>. The <code>readOnlyHint</code> indicates that the tool does not modify any data and is safe to use for discovery and information retrieval. The <code>destructiveHint</code> indicates that the tool performs actions that can modify or delete data, and should be used with caution.</p>
-<p>If you want to run the ONTAP MCP server in read-only mode, you can start the server with the <code>--read-only</code> flag. In this mode, only tools with the <code>readOnlyHint</code> will be available for use, ensuring that no modifications can be made to the ONTAP cluster. See the <a href="../install/#configuration">configuration documentation</a> for more details on how to start the server in read-only mode.</p>
+<p>If you want to run the ONTAP MCP server in read-only mode, you can start the server with the <code>--read-only</code> flag. In this mode, only tools with the <code>readOnlyHint</code> will be available for use, ensuring that no modifications can be made to the ONTAP cluster.</p>
+<p>To run without mcp-session-id header validation (e.g. behind proxies that strip session headers), use the <code>--stateless</code> flag. See the <a href="../install/#configuration">configuration documentation</a> for more details.</p>
 <h2 id="api-discovery">API Discovery<a class="headerlink" href="#api-discovery" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>list_ontap_endpoints</code> (available when the API catalog is loaded)</li>
@@ -991,7 +973,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.e1c3ead8.min.js"></script>
