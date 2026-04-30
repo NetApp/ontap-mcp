@@ -58,6 +58,15 @@ To run without mcp-session-id header validation (e.g. behind proxies that strip 
 - `update_qos_policy`
 - `delete_qos_policy`
 
+## Snapmirror Management
+- `create_snapmirror`
+- `update_snapmirror`
+- `delete_snapmirror`
+- `initialize_snapmirror`
+- `update_snapmirror_transfer`
+- `break_snapmirror`
+- `resync_snapmirror`
+
 ## SVM Management
 
 - `create_svm`
