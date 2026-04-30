@@ -80,7 +80,7 @@ func (a *App) StartServer() {
 		a.logger.Info("MCP server is running in read-only mode; mutating operations are disabled")
 	}
 	if a.options.Stateless {
-		a.logger.Info("MCP server is running in stateless mode; Mcp-Session-Id tracking is disabled")
+		a.logger.Info("MCP server is running in stateless mode; mcp-session-id header validation is disabled")
 	}
 	server := a.createMCPServer()
 	a.runHTTPServer(server)

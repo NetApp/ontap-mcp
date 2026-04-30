@@ -8,7 +8,7 @@ All ONTAP MCP tools are annotated with hint metadata: `readOnlyHint`, `idempoten
 
 If you want to run the ONTAP MCP server in read-only mode, you can start the server with the `--read-only` flag. In this mode, only tools with the `readOnlyHint` will be available for use, ensuring that no modifications can be made to the ONTAP cluster.
 
-To run without session tracking (e.g. behind proxies that strip headers), use the `--stateless` flag. See the [configuration documentation](install.md#configuration) for more details.
+To run without mcp-session-id header validation (e.g. behind proxies that strip session headers), use the `--stateless` flag. See the [configuration documentation](install.md#configuration) for more details.
 
 ## API Discovery
 

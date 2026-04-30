@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/alecthomas/kong"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/server"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/alecthomas/kong"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/server"
 )
 
 var logger = setupLogger()
@@ -29,7 +30,7 @@ type StartCmd struct {
 	Port           int    `default:"8080" help:"Listening port" env:"ONTAP_MCP_PORT"`
 	InspectTraffic bool   `default:"false" help:"Inspect MCP HTTP traffic"`
 	ReadOnly       bool   `default:"false" help:"Run MCP in read-only mode. This disables all tool calls that modify ONTAP state."`
-	Stateless      bool   `default:"false" help:"Run in stateless mode (no Mcp-Session-Id tracking). Required when deploying behind proxies or gateways that don't preserve session headers, e.g. Power Platform on-premises data gateway."`
+	Stateless      bool   `default:"false" help:"Run in stateless mode (no mcp-session-id header validation). Required when deploying behind proxies or gateways that don't preserve session headers, e.g. on-premises data gateways."`
 }
 
 func (a *StartCmd) Run(cli *CLI) error {

@@ -134,7 +134,7 @@ Some commonly used flags:
 | Flag | Description |
 |---|---|
 | `--read-only` | Disable all mutating operations. Only read-only tools are registered. |
-| `--stateless` | Disable `Mcp-Session-Id` tracking. Required when deploying behind proxies or gateways that do not preserve session headers. |
+| `--stateless` | Disable mcp-session-id header validation. Required when deploying behind proxies or gateways that do not preserve session headers, e.g. on-premises data gateways. |
 | `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging. |
 
 ## Next Steps
