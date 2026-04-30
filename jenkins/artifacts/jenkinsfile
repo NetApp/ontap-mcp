@@ -93,6 +93,7 @@ pipeline {
                         writeFile file: gitTokenFile, text: env.GIT_ONTAP_MCP_TOKEN
 
                         sh '''
+                        set -e
                         targetLocation=$targetParentLocation$VERSION-$RELEASE-$BRANCH
                         mkdir -p $targetLocation
                         docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} --build-arg VERSION=$VERSION --build-arg RELEASE=$RELEASE -t ${ghcrOntapMcpImage}:latest -t ${ghcrOntapMcpImage}:$VERSION-$RELEASE . --no-cache
