@@ -17,8 +17,6 @@ The ONTAP-MCP team is happy to announce that we've released the 26.04.0 version 
 
 Examples showing how you can manage ONTAP from Visual Studio Code: https://netapp.github.io/ontap-mcp/26.04/examples/
 
-## Announcements
-
 ## Thanks to all the awesome contributors
 
 :metal: Thanks to all the people who've opened issues, asked questions on Discord, and contributed code for this release:
