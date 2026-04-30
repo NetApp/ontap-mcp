@@ -129,6 +129,14 @@ docker run --rm ghcr.io/netapp/ontap-mcp:latest start --help
 
 This displays all available environment variables with descriptions, authentication options, and advanced settings.
 
+Some commonly used flags:
+
+| Flag | Description |
+|---|---|
+| `--read-only` | Disable all mutating operations. Only read-only tools are registered. |
+| `--stateless` | Disable `Mcp-Session-Id` tracking. Required when deploying behind proxies or gateways that do not preserve session headers. |
+| `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging. |
+
 ## Next Steps
 
 - Explore [Prepare ONTAP](prepare-ontap.md)

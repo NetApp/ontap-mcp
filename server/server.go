@@ -36,6 +36,7 @@ type Options struct {
 	IsTest         bool
 	Port           int
 	ReadOnly       bool
+	Stateless      bool
 	TestHTTPClient *http.Client // Optional HTTP client for testing
 }
 
@@ -77,6 +78,9 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
 func (a *App) StartServer() {
 	if a.options.ReadOnly {
 		a.logger.Info("MCP server is running in read-only mode; mutating operations are disabled")
+	}
+	if a.options.Stateless {
+		a.logger.Info("MCP server is running in stateless mode; Mcp-Session-Id tracking is disabled")
 	}
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
@@ -239,7 +243,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	handler = mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server {
 		return server
-	}, nil)
+	}, &mcp.StreamableHTTPOptions{Stateless: a.options.Stateless})
 
 	if a.options.InspectTraffic {
 		prevHandler := handler
