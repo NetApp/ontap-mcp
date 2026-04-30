@@ -563,6 +563,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#manage-snapmirror-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage SnapMirror Relationships
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -846,6 +855,15 @@
   <a href="#querying-specific-fields" class="md-nav__link">
     <span class="md-ellipsis">
       Querying Specific Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-snapmirror-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage SnapMirror Relationships
     </span>
   </a>
   
@@ -1348,6 +1366,32 @@
 <li>On the umeng-aff300-05-06 cluster, can I safely grow the docs volume on the marketing svm by 10GB? Check the aggregate's available space first.</li>
 <li><span class="key">Expected Response</span>: A summary of aggregate free space, followed by a recommendation on whether it is safe to proceed with the resize.</li>
 </ul>
+<hr />
+<h3 id="manage-snapmirror-relationships">Manage SnapMirror Relationships<a class="headerlink" href="#manage-snapmirror-relationships" title="Permanent link">&para;</a></h3>
+<p><strong>Create a SnapMirror relationship</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, create a snapmirror relationship from source svm srsvm and source volume srvol to destination svm dtsvm and destination volume dtvol with policy name XDPDefault</li>
+</ul>
+<p>Expected Response: SnapMirror relationship created successfully</p>
+<p><strong>Update a SnapMirror relationship</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, update a snapmirror relationship of destination svm dtsvm and destination volume dtvol with transfer schedule name to hourly</li>
+</ul>
+<p>Expected Response: SnapMirror relationship updated successfully</p>
+<p><strong>Update a SnapMirror relationship state</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, break a snapmirror relationship of destination svm dtsvm and destination volume dtvol</li>
+</ul>
+<p>Expected Response: SnapMirror relationship broken successfully</p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, resync a snapmirror relationship of destination svm dtsvm and destination volume dtvol</li>
+</ul>
+<p>Expected Response: SnapMirror relationship resynced successfully</p>
+<p><strong>Delete a SnapMirror relationship</strong></p>
+<ul>
+<li>On the umeng-aff300-05-06 cluster, delete a snapmirror relationship of destination svm dtsvm and destination volume dtvol</li>
+</ul>
+<p>Expected Response: SnapMirror relationship deleted successfully</p>
 <hr />
 <h2 id="mcp-clients">MCP Clients<a class="headerlink" href="#mcp-clients" title="Permanent link">&para;</a></h2>
 <p>Common MCP clients that work with ONTAP MCP Server:</p>
