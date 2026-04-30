@@ -25,7 +25,7 @@ Examples showing how you can manage ONTAP from Visual Studio Code: https://netap
 
 @jbnetapp, @zlucas-netapp, @dmaryuma-ops, @NANAMINER, @ebarron, @dbenadiba, @calvinwonghk, @Antvirf, @leejshades
 
-:seedling: This period includes 19 feature commits, 8 fixes, 3 documentation updates, 22 CI changes, and 3 refactors pull requests.
+:seedling: This period includes 19 feature commits, 8 fixes, 3 documentation updates, 22 CI changes, and 3 refactoring pull requests.
 
 <details>
 
