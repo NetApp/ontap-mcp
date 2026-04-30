@@ -6,7 +6,9 @@ ONTAP MCP provides a set of tools that can be used to interact with the ONTAP AP
 
 All ONTAP MCP tools are annotated with hint metadata: `readOnlyHint`, `idempotentHint`, and `destructiveHint`. The `readOnlyHint` indicates that the tool does not modify any data and is safe to use for discovery and information retrieval. The `destructiveHint` indicates that the tool performs actions that can modify or delete data, and should be used with caution.
 
-If you want to run the ONTAP MCP server in read-only mode, you can start the server with the `--read-only` flag. In this mode, only tools with the `readOnlyHint` will be available for use, ensuring that no modifications can be made to the ONTAP cluster. See the [configuration documentation](install.md#configuration) for more details on how to start the server in read-only mode.
+If you want to run the ONTAP MCP server in read-only mode, you can start the server with the `--read-only` flag. In this mode, only tools with the `readOnlyHint` will be available for use, ensuring that no modifications can be made to the ONTAP cluster.
+
+To run without mcp-session-id header validation (e.g. behind proxies that strip session headers), use the `--stateless` flag. See the [configuration documentation](install.md#configuration) for more details.
 
 ## API Discovery
 
