@@ -1,14 +1,1 @@
-[
-  {
-    "version": "nightly",
-    "title": "nightly",
-    "aliases": []
-  },
-  {
-    "version": "26.04",
-    "title": "26.04",
-    "aliases": [
-      "latest"
-    ]
-  }
-]
+[{"version": "26.04", "title": "26.04", "aliases": ["latest"]}, {"version": "nightly", "title": "nightly", "aliases": []}]
