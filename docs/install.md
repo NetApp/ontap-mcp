@@ -135,6 +135,7 @@ Some commonly used flags:
 |---|---|
 | `--read-only` | Disable all mutating operations. Only read-only tools are registered. |
 | `--stateless` | Disable mcp-session-id header validation. Required when deploying behind proxies or gateways that do not preserve session headers, e.g. on-premises data gateways. |
+| `--json-response` | Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. Power Platform on-premises data gateway. |
 | `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging. |
 
 ## Next Steps

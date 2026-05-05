@@ -37,6 +37,7 @@ type Options struct {
 	Port           int
 	ReadOnly       bool
 	Stateless      bool
+	JSONResponse   bool
 	TestHTTPClient *http.Client // Optional HTTP client for testing
 }
 
@@ -81,6 +82,9 @@ func (a *App) StartServer() {
 	}
 	if a.options.Stateless {
 		a.logger.Info("MCP server is running in stateless mode; mcp-session-id header validation is disabled")
+	}
+	if a.options.JSONResponse {
+		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
@@ -243,7 +247,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	handler = mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server {
 		return server
-	}, &mcp.StreamableHTTPOptions{Stateless: a.options.Stateless})
+	}, &mcp.StreamableHTTPOptions{Stateless: a.options.Stateless, JSONResponse: a.options.JSONResponse})
 
 	if a.options.InspectTraffic {
 		prevHandler := handler
