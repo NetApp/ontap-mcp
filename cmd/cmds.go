@@ -31,7 +31,7 @@ type StartCmd struct {
 	InspectTraffic bool   `default:"false" help:"Inspect MCP HTTP traffic"`
 	ReadOnly       bool   `default:"false" help:"Run MCP in read-only mode. This disables all tool calls that modify ONTAP state."`
 	Stateless      bool   `default:"false" help:"Run in stateless mode (no mcp-session-id header validation). Required when deploying behind proxies or gateways that don't preserve session headers, e.g. on-premises data gateways."`
-	JSONResponse   bool   `default:"false" help:"Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. Power Platform on-premises data gateway."`
+	JSONResponse   bool   `default:"false" help:"Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. on-premises data gateways."`
 }
 
 func (a *StartCmd) Run(cli *CLI) error {
