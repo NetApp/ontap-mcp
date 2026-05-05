@@ -852,6 +852,10 @@ By default, it looks for <code>ontap.yaml</code> in its working directory (<code
 <td>Disable mcp-session-id header validation. Required when deploying behind proxies or gateways that do not preserve session headers, e.g. on-premises data gateways.</td>
 </tr>
 <tr>
+<td><code>--json-response</code></td>
+<td>Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. on-premises data gateways.</td>
+</tr>
+<tr>
 <td><code>--inspect-traffic</code></td>
 <td>Log all MCP HTTP request and response bodies for debugging.</td>
 </tr>
