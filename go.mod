@@ -1,6 +1,6 @@
 module github.com/netapp/ontap-mcp
 
-go 1.26.2
+go 1.26.3
 
 require (
 	github.com/alecthomas/kong v1.15.0
