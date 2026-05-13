@@ -48,6 +48,7 @@ type App struct {
 	locks        *lock.Map
 	catalog      catalog.APICatalog
 	versionCache sync.Map
+	clusterIndex map[string]string // lowercase name → canonical config name
 }
 
 type cachedVersion struct {
@@ -58,11 +59,17 @@ type cachedVersion struct {
 const versionCacheTTL = 24 * time.Hour
 
 func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
+	index := make(map[string]string, len(cfg.Pollers))
+	for name := range cfg.Pollers {
+		index[strings.ToLower(name)] = name
+	}
+
 	app := &App{
-		cfg:     cfg,
-		logger:  logger,
-		options: o,
-		locks:   lock.New(),
+		cfg:          cfg,
+		logger:       logger,
+		options:      o,
+		locks:        lock.New(),
+		clusterIndex: index,
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -313,15 +320,25 @@ type clusterInfo struct {
 	ONTAPVersion string `json:"ontap_version"`
 }
 
+func (a *App) resolveCluster(input string) (string, bool) {
+	canonical, ok := a.clusterIndex[strings.ToLower(input)]
+	return canonical, ok
+}
+
 func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, error) {
-	if cached, ok := a.versionCache.Load(cluster); ok {
+	canonical, ok := a.resolveCluster(cluster)
+	if !ok {
+		return "", fmt.Errorf("cluster %s not found", cluster)
+	}
+
+	if cached, ok := a.versionCache.Load(canonical); ok {
 		cv := cached.(cachedVersion)
 		if time.Since(cv.fetched) < versionCacheTTL {
 			return cv.version, nil
 		}
 	}
 
-	client, err := a.getClient(cluster)
+	client, err := a.getClient(canonical)
 	if err != nil {
 		return "", err
 	}
@@ -330,7 +347,7 @@ func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, er
 		return "", err
 	}
 	ver := fmt.Sprintf("%d.%d", remote.Version.Generation, remote.Version.Major)
-	a.versionCache.Store(cluster, cachedVersion{version: ver, fetched: time.Now()})
+	a.versionCache.Store(canonical, cachedVersion{version: ver, fetched: time.Now()})
 	return ver, nil
 }
 
@@ -595,11 +612,11 @@ func stripLinksValue(v any) any {
 }
 
 func (a *App) getClient(cluster string) (*rest.Client, error) {
-	poller, ok := a.cfg.Pollers[cluster]
+	canonical, ok := a.resolveCluster(cluster)
 	if !ok {
 		return nil, fmt.Errorf("cluster %s not found", cluster)
 	}
-
+	poller := a.cfg.Pollers[canonical]
 	if a.options.TestHTTPClient != nil {
 		return rest.NewWithClient(poller, a.options.TestHTTPClient), nil
 	}
