@@ -58,10 +58,14 @@ type cachedVersion struct {
 
 const versionCacheTTL = 24 * time.Hour
 
-func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
+func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 	index := make(map[string]string, len(cfg.Pollers))
 	for name := range cfg.Pollers {
-		index[strings.ToLower(name)] = name
+		key := strings.ToLower(name)
+		if existing, collision := index[key]; collision {
+			return nil, fmt.Errorf("poller names %q and %q differ only by case; rename one to avoid ambiguity", existing, name)
+		}
+		index[key] = name
 	}
 
 	app := &App{
@@ -80,7 +84,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
 		logger.Warn("API catalog not found — catalog tools disabled", slog.String("path", catalogPath))
 	}
 
-	return app
+	return app, nil
 }
 
 func (a *App) StartServer() {
@@ -338,7 +342,7 @@ func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, er
 		}
 	}
 
-	client, err := a.getClient(canonical)
+	client, err := a.getClient(cluster)
 	if err != nil {
 		return "", err
 	}

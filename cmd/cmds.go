@@ -54,7 +54,10 @@ func (a *StartCmd) Run(cli *CLI) error {
 		JSONResponse:   cli.Start.JSONResponse,
 	}
 
-	app := server.NewApp(cfg, opts, logger)
+	app, err := server.NewApp(cfg, opts, logger)
+	if err != nil {
+		return err
+	}
 	app.StartServer()
 	return nil
 }
