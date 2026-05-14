@@ -1,6 +1,9 @@
 package lock
 
-import "sync"
+import (
+	"strings"
+	"sync"
+)
 
 type Map struct {
 	m sync.Map
@@ -11,7 +14,7 @@ func New() *Map {
 }
 
 func (m *Map) getOrCreate(cluster string) *sync.RWMutex {
-	v, _ := m.m.LoadOrStore(cluster, &sync.RWMutex{})
+	v, _ := m.m.LoadOrStore(strings.ToLower(cluster), &sync.RWMutex{})
 	return v.(*sync.RWMutex)
 }
 
