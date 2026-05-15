@@ -6,7 +6,7 @@ This document describes ONTAP-MCP's release and support lifecycle as well as pla
 
 ## ONTAP-MCP's Release and Support Lifecycle
 
-ONTAP-MCP's current release schedule is quarterly in February, May, August, and November, but it may change at our discretion. 
+ONTAP-MCP's current release schedule is quarterly in January, April, July, and October, but it may change at our discretion. 
 
 Each release of ONTAP-MCP supports the most recently released version of ONTAP. We try our best to also support earlier versions of ONTAP. When that's not possible, breaking changes will be outlined in the changelog.
 

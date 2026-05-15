@@ -10,6 +10,8 @@ If you want to run the ONTAP MCP server in read-only mode, you can start the ser
 
 To run without mcp-session-id header validation (e.g. behind proxies that strip session headers), use the `--stateless` flag. See the [configuration documentation](install.md#configuration) for more details.
 
+To respond with `application/json` instead of `text/event-stream` (e.g. behind gateways that do not relay SSE/chunked responses), use the `--json-response` flag. See the [configuration documentation](install.md#configuration) for more details.
+
 ## API Discovery
 
 - `list_ontap_endpoints` (available when the API catalog is loaded)

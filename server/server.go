@@ -39,6 +39,7 @@ type Options struct {
 	Port           int
 	ReadOnly       bool
 	Stateless      bool
+	JSONResponse   bool
 	OauthServerURL string
 	JwksURL        string
 	ResourceURL    string
@@ -52,6 +53,7 @@ type App struct {
 	locks        *lock.Map
 	catalog      catalog.APICatalog
 	versionCache sync.Map
+	clusterIndex map[string]string // lowercase name → canonical config name
 }
 
 type cachedVersion struct {
@@ -61,12 +63,22 @@ type cachedVersion struct {
 
 const versionCacheTTL = 24 * time.Hour
 
-func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
+func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
+	index := make(map[string]string, len(cfg.Pollers))
+	for name := range cfg.Pollers {
+		key := strings.ToLower(name)
+		if existing, collision := index[key]; collision {
+			return nil, fmt.Errorf("poller names %q and %q differ only by case; rename one to avoid ambiguity", existing, name)
+		}
+		index[key] = name
+	}
+
 	app := &App{
-		cfg:     cfg,
-		logger:  logger,
-		options: o,
-		locks:   lock.New(),
+		cfg:          cfg,
+		logger:       logger,
+		options:      o,
+		locks:        lock.New(),
+		clusterIndex: index,
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -77,7 +89,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) *App {
 		logger.Warn("API catalog not found — catalog tools disabled", slog.String("path", catalogPath))
 	}
 
-	return app
+	return app, nil
 }
 
 func (a *App) StartServer() {
@@ -86,6 +98,9 @@ func (a *App) StartServer() {
 	}
 	if a.options.Stateless {
 		a.logger.Info("MCP server is running in stateless mode; mcp-session-id header validation is disabled")
+	}
+	if a.options.JSONResponse {
+		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
 
 	server := a.createMCPServer()
@@ -257,7 +272,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	handler = mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server {
 		return server
-	}, &mcp.StreamableHTTPOptions{Stateless: a.options.Stateless})
+	}, &mcp.StreamableHTTPOptions{Stateless: a.options.Stateless, JSONResponse: a.options.JSONResponse})
 
 	if a.options.InspectTraffic {
 		prevHandler := handler
@@ -352,8 +367,18 @@ type clusterInfo struct {
 	ONTAPVersion string `json:"ontap_version"`
 }
 
+func (a *App) resolveCluster(input string) (string, bool) {
+	canonical, ok := a.clusterIndex[strings.ToLower(input)]
+	return canonical, ok
+}
+
 func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, error) {
-	if cached, ok := a.versionCache.Load(cluster); ok {
+	canonical, ok := a.resolveCluster(cluster)
+	if !ok {
+		return "", fmt.Errorf("cluster %s not found", cluster)
+	}
+
+	if cached, ok := a.versionCache.Load(canonical); ok {
 		cv := cached.(cachedVersion)
 		if time.Since(cv.fetched) < versionCacheTTL {
 			return cv.version, nil
@@ -369,7 +394,7 @@ func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, er
 		return "", err
 	}
 	ver := fmt.Sprintf("%d.%d", remote.Version.Generation, remote.Version.Major)
-	a.versionCache.Store(cluster, cachedVersion{version: ver, fetched: time.Now()})
+	a.versionCache.Store(canonical, cachedVersion{version: ver, fetched: time.Now()})
 	return ver, nil
 }
 
@@ -634,11 +659,11 @@ func stripLinksValue(v any) any {
 }
 
 func (a *App) getClient(cluster string) (*rest.Client, error) {
-	poller, ok := a.cfg.Pollers[cluster]
+	canonical, ok := a.resolveCluster(cluster)
 	if !ok {
 		return nil, fmt.Errorf("cluster %s not found", cluster)
 	}
-
+	poller := a.cfg.Pollers[canonical]
 	if a.options.TestHTTPClient != nil {
 		return rest.NewWithClient(poller, a.options.TestHTTPClient), nil
 	}
