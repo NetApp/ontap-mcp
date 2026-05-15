@@ -15,8 +15,11 @@ import (
 var logger = setupLogger()
 
 type Globals struct {
-	LogLevel   string `enum:"debug,info,warn,error" default:"info" env:"LOG_LEVEL" help:"Log level, one of: ${enum}"`
-	ConfigPath string `name:"config" default:"ontap.yaml" env:"ONTAP_MCP_CONFIG" help:"ONTAP-MCP config path"`
+	LogLevel       string `enum:"debug,info,warn,error" default:"info" env:"LOG_LEVEL" help:"Log level, one of: ${enum}"`
+	ConfigPath     string `name:"config" default:"ontap.yaml" env:"ONTAP_MCP_CONFIG" help:"ONTAP-MCP config path"`
+	OAuthServerURL string `name:"oauth-server-url" env:"OAUTH_SERVER_URL" help:"Authorization Server URL"`
+	JwksURL        string `name:"jwks-url" env:"JWKS_URL" help:"JWKS URL"`
+	ResourceURL    string `name:"resource-url" env:"RESOURCE_URL" help:"Resource URL for this MCP server"`
 }
 
 type CLI struct {
@@ -50,6 +53,9 @@ func (a *StartCmd) Run(cli *CLI) error {
 		InspectTraffic: cli.Start.InspectTraffic,
 		ReadOnly:       cli.Start.ReadOnly,
 		Stateless:      cli.Start.Stateless,
+		OauthServerURL: cli.OAuthServerURL,
+		JwksURL:        cli.JwksURL,
+		ResourceURL:    cli.ResourceURL,
 	}
 
 	app := server.NewApp(cfg, opts, logger)

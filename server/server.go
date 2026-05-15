@@ -1,11 +1,13 @@
 package server
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/modelcontextprotocol/go-sdk/oauthex"
 	"io"
 	"log/slog"
 	"net/http"
@@ -37,6 +39,9 @@ type Options struct {
 	Port           int
 	ReadOnly       bool
 	Stateless      bool
+	OauthServerURL string
+	JwksURL        string
+	ResourceURL    string
 	TestHTTPClient *http.Client // Optional HTTP client for testing
 }
 
@@ -82,6 +87,7 @@ func (a *App) StartServer() {
 	if a.options.Stateless {
 		a.logger.Info("MCP server is running in stateless mode; mcp-session-id header validation is disabled")
 	}
+
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
 }
@@ -228,18 +234,26 @@ func (a *App) createMCPServer() *mcp.Server {
 
 func (a *App) runHTTPServer(server *mcp.Server) {
 	var handler http.Handler
+	oauthConfig := &OAuthConfig{}
+	authServerURL, jwksURL, resourceURL, oAthExist := a.loadEnv()
+
+	if oAthExist {
+		oauthConfig.AuthServerURL = authServerURL
+		oauthConfig.JwksURL = jwksURL
+		oauthConfig.ResourceURL = resourceURL
+		if err := oauthConfig.InitJWKS(); err != nil {
+			a.logger.Error("failed to initialize JWKS", slog.Any("err", err))
+		}
+		a.logger.Info("MCP Server started with Oauth")
+	} else {
+		a.logger.Info("MCP Server started without any Oauth")
+	}
 
 	address := a.options.Host + ":" + strconv.Itoa(a.options.Port)
 	a.logger.Info("starting MCP server over HTTP transport",
 		slog.String("address", address),
 		slog.String("host", a.options.Host),
 		slog.Int("port", a.options.Port))
-
-	// Health check endpoint
-	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("OK"))
-	})
 
 	handler = mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server {
 		return server
@@ -267,24 +281,52 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		handler = loggingHandler
 	}
 
-	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Skip MCP handler for health endpoint
-		if r.URL.Path == "/health" {
-			http.DefaultServeMux.ServeHTTP(w, r)
-			return
-		}
+	// Setup routing
+	mux := http.NewServeMux()
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Mcp-Protocol-Version, Mcp-Session-Id")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		handler.ServeHTTP(w, r)
+	// Health check endpoint
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
 	})
+
+	if oAthExist {
+		mux.HandleFunc("/.well-known/oauth-protected-resource", func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			metadata := oauthex.ProtectedResourceMetadata{
+				Resource:             oauthConfig.ResourceURL,
+				ScopesSupported:      []string{"mcp:tools"},
+				AuthorizationServers: []string{oauthConfig.AuthServerURL},
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			if err := json.NewEncoder(w).Encode(metadata); err != nil {
+				a.logger.Error("metadata encoding failed", slog.Any("error", err))
+			}
+		})
+
+		// MCP endpoint (OAuth authorization required, with logging)
+		mux.Handle("/", LoggingMiddleware(oauthConfig.OAuthMiddleware(handler)))
+	} else {
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			// Skip MCP handler for health endpoint
+			if r.URL.Path == "/health" {
+				http.DefaultServeMux.ServeHTTP(w, r)
+				return
+			}
+
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Mcp-Protocol-Version, Mcp-Session-Id")
+
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			handler.ServeHTTP(w, r)
+		})
+	}
 
 	//goland:noinspection HttpUrlsUsage
 	a.logger.Info("MCP server endpoint available", slog.String("url", "http://"+address))
@@ -292,7 +334,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	httpServer := &http.Server{
 		Addr:              address,
-		Handler:           wrappedHandler,
+		Handler:           mux,
 		ReadHeaderTimeout: 60 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
@@ -301,6 +343,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		a.logger.Error("http server failed to start", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+
 	a.logger.Info("mcp server shutdown gracefully")
 }
 
@@ -741,4 +784,55 @@ func parseSize(size string) (int64, error) {
 	}
 
 	return 0, fmt.Errorf("invalid size format '%s'. Use '100MB', '2GB', '1TB', or raw bytes", size)
+}
+
+func (a *App) loadEnv() (string, string, string, bool) {
+	file, err := os.Open(".ontap-mcp.env")
+	if err != nil {
+		// .ontap-mcp.env file doesn't exist, that's okay
+		slog.Warn(".ontap-mcp.env file not exist", slog.Any("error", err))
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			slog.Warn("failed to close file", slog.Any("error", err))
+		}
+	}()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			if os.Getenv(key) == "" {
+				if err = os.Setenv(key, value); err != nil {
+					// Log the error and proceed further
+					slog.Error("Error setting environment variable", slog.String("key", key), slog.String("value", value), slog.Any("err", err))
+				}
+			}
+		}
+	}
+
+	oauthServerURL := os.Getenv("OAUTH_SERVER_URL")
+	if a.options.OauthServerURL != "" {
+		oauthServerURL = a.options.OauthServerURL
+	}
+	slog.Debug("", slog.String("OAUTH SERVER URL", oauthServerURL))
+
+	jwksURL := os.Getenv("JWKS_URL")
+	if a.options.JwksURL != "" {
+		jwksURL = a.options.JwksURL
+	}
+	slog.Debug("", slog.String("JWKS URL", jwksURL))
+	resourceURL := os.Getenv("RESOURCE_URL")
+	if a.options.ResourceURL != "" {
+		resourceURL = a.options.ResourceURL
+	}
+	slog.Debug("", slog.String("RESOURCE URL", resourceURL))
+
+	return oauthServerURL, jwksURL, resourceURL, oauthServerURL != "" && resourceURL != "" && jwksURL != ""
 }
