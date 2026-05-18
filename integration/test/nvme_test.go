@@ -17,7 +17,7 @@ const NvmeCluster = "aff"
 const NvmeClusterStr = "On the " + NvmeCluster + " cluster, "
 
 func TestNVMe(t *testing.T) {
-	SkipIfMissing(t, CheckTools)
+	t.Skip("temporarily disabled due to aff cluster issue")
 
 	tests := []struct {
 		name             string
