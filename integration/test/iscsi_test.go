@@ -71,7 +71,7 @@ func TestIscsiProtocol(t *testing.T) {
 		{
 			name:             "Clean cluster scope network interface",
 			input:            ClusterStr + "delete cluster scope network interface named " + rn("cl_mg"),
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?name=" + rn("cl_mg") + "&scope=cluster", validationFunc: deleteObject},
 		},
 		{
