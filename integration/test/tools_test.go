@@ -217,8 +217,12 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 		})
 
 		if err != nil {
-			errFound = err
-			slog.Warn("LLM will retry", slog.Any("error", err))
+			if completion != nil && len(completion.Choices) > 0 && completion.Choices[0].Message.Content != "" {
+				errFound = err
+				slog.Warn("LLM will retry", slog.Any("error", err))
+			} else {
+				return "", fmt.Errorf("OpenAI error: %w", err)
+			}
 		}
 
 		assistantMessage := completion.Choices[0].Message
