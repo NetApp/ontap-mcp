@@ -1,4 +1,8 @@
 # See https://netapp.github.io/ontap-mcp/nightly/
+Defaults:
+  auth_token: your-signed-jwt-token
+  jwks_uri: https://auth.example.com/.well-known/jwks.json
+
 Pollers:
   u2:
     addr: 10.193.48.11

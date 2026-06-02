@@ -3,11 +3,14 @@ package server
 import (
 	"bytes"
 	"context"
+	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
+	"math/big"
 	"net/http"
 	"net/url"
 	"os"
@@ -20,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
@@ -47,6 +51,13 @@ type App struct {
 	options      Options
 	locks        *lock.Map
 	catalog      catalog.APICatalog
+	authToken    string
+	jwksURI      string
+	oauthEnabled bool
+	jwksMu       sync.RWMutex
+	jwksKeys     map[string]*rsa.PublicKey
+	jwksFetched  time.Time
+	httpClient   *http.Client
 	versionCache sync.Map
 	clusterIndex map[string]string // lowercase name → canonical config name
 }
@@ -57,6 +68,20 @@ type cachedVersion struct {
 }
 
 const versionCacheTTL = 24 * time.Hour
+const jwksCacheTTL = 5 * time.Minute
+
+type jwksResponse struct {
+	Keys []jwkKey `json:"keys"`
+}
+
+type jwkKey struct {
+	Kty string `json:"kty"`
+	Kid string `json:"kid"`
+	Use string `json:"use"`
+	Alg string `json:"alg"`
+	N   string `json:"n"`
+	E   string `json:"e"`
+}
 
 func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 	index := make(map[string]string, len(cfg.Pollers))
@@ -68,11 +93,31 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		index[key] = name
 	}
 
+	authToken := ""
+	jwksURI := ""
+	if cfg.Defaults != nil && cfg.Defaults.AuthToken != "" {
+		authToken = strings.TrimSpace(cfg.Defaults.AuthToken)
+	}
+	if cfg.Defaults != nil && cfg.Defaults.JwksURI != "" {
+		jwksURI = strings.TrimSpace(cfg.Defaults.JwksURI)
+	}
+	oauthEnabled := authToken != "" && jwksURI != ""
+
+	httpClient := o.TestHTTPClient
+	if httpClient == nil {
+		httpClient = &http.Client{Timeout: 10 * time.Second}
+	}
+
 	app := &App{
 		cfg:          cfg,
 		logger:       logger,
 		options:      o,
 		locks:        lock.New(),
+		authToken:    authToken,
+		jwksURI:      jwksURI,
+		oauthEnabled: oauthEnabled,
+		jwksKeys:     make(map[string]*rsa.PublicKey),
+		httpClient:   httpClient,
 		clusterIndex: index,
 	}
 
@@ -97,8 +142,20 @@ func (a *App) StartServer() {
 	if a.options.JSONResponse {
 		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
+	switch {
+	case a.oauthEnabled:
+		a.logger.Info("OAuth bearer auth enabled using Defaults.auth_token and Defaults.jwks_uri")
+	case a.authToken == "" && a.jwksURI == "":
+		a.logger.Info("OAuth bearer auth disabled; Defaults.auth_token and Defaults.jwks_uri are not configured")
+	default:
+		a.logger.Error("OAuth bearer auth config incomplete; both Defaults.auth_token and Defaults.jwks_uri are required. Falling back to non-oauth workflow")
+	}
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
+}
+
+func (a *App) authEnabled() bool {
+	return a.oauthEnabled
 }
 
 func (a *App) createMCPServer() *mcp.Server {
@@ -289,9 +346,21 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 			return
 		}
 
+		// OAuth bearer validation is active only when Defaults.auth_token and
+		// Defaults.jwks_uri are both configured.
+		if a.authEnabled() {
+			if err := a.validateJWT(r); err != nil {
+				w.Header().Set("WWW-Authenticate", `Bearer realm="ontap-mcp"`)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				_, _ = fmt.Fprintf(w, `{"error":"unauthorized","message":%q}`, err.Error())
+				return
+			}
+		}
+
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Mcp-Protocol-Version, Mcp-Session-Id")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Mcp-Protocol-Version, Mcp-Session-Id")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -317,6 +386,175 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		os.Exit(1)
 	}
 	a.logger.Info("mcp server shutdown gracefully")
+}
+
+// validateJWT validates the incoming bearer JWT against the configured JWKS.
+// In oauth mode, the bearer token must also match Defaults.auth_token.
+func (a *App) validateJWT(_ *http.Request) error {
+	//nolint:gocritic
+	/*
+		authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+		if authHeader == "" {
+			return errors.New("missing Authorization header")
+		}
+		const prefix = "Bearer "
+		if !strings.HasPrefix(authHeader, prefix) {
+			return errors.New("authorization header must use Bearer scheme")
+		}
+		tokenStr := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))
+	*/
+	tokenStr := a.cfg.Defaults.AuthToken
+	if tokenStr == "" {
+		return errors.New("empty bearer token")
+	}
+	if tokenStr != a.authToken {
+		return errors.New("bearer token does not match configured Defaults.auth_token")
+	}
+
+	token, err := jwt.Parse(tokenStr, a.keyFunc, jwt.WithValidMethods([]string{"RS256"}))
+	if err != nil {
+		return fmt.Errorf("invalid token: %w", err)
+	}
+	if !token.Valid {
+		return errors.New("token is not valid")
+	}
+	return nil
+}
+
+func (a *App) keyFunc(token *jwt.Token) (any, error) {
+	a.logger.Info("a")
+	if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+	}
+	a.logger.Info("b")
+	kid, _ := token.Header["kid"].(string)
+	return a.getPublicKey(context.Background(), kid)
+}
+
+func (a *App) getPublicKey(ctx context.Context, kid string) (*rsa.PublicKey, error) {
+	if key, ok := a.lookupCachedKey(kid); ok {
+		return key, nil
+	}
+
+	if err := a.refreshJWKS(ctx); err != nil {
+		return nil, err
+	}
+
+	if key, ok := a.lookupCachedKey(kid); ok {
+		return key, nil
+	}
+
+	if kid == "" {
+		return nil, errors.New("jwt header is missing kid and jwks did not provide a single unambiguous key")
+	}
+	return nil, fmt.Errorf("no jwks key found for kid %q", kid)
+}
+
+func (a *App) lookupCachedKey(kid string) (*rsa.PublicKey, bool) {
+	a.jwksMu.RLock()
+	defer a.jwksMu.RUnlock()
+
+	if time.Since(a.jwksFetched) > jwksCacheTTL || len(a.jwksKeys) == 0 {
+		return nil, false
+	}
+	if kid != "" {
+		key, ok := a.jwksKeys[kid]
+		return key, ok
+	}
+	if len(a.jwksKeys) == 1 {
+		for _, key := range a.jwksKeys {
+			return key, true
+		}
+	}
+	return nil, false
+}
+
+func (a *App) refreshJWKS(ctx context.Context) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.jwksURI, http.NoBody)
+	if err != nil {
+		return fmt.Errorf("failed to create jwks request: %w", err)
+	}
+
+	resp, err := a.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to fetch jwks from %q: %w", a.jwksURI, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to fetch jwks from %q: status %d", a.jwksURI, resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read jwks response: %w", err)
+	}
+
+	var doc jwksResponse
+	if err := json.Unmarshal(body, &doc); err != nil {
+		return fmt.Errorf("failed to parse jwks response: %w", err)
+	}
+
+	keys := make(map[string]*rsa.PublicKey)
+	anonymousIndex := 0
+	for _, k := range doc.Keys {
+		if k.Kty != "RSA" || k.N == "" || k.E == "" {
+			continue
+		}
+		key, err := rsaPublicKeyFromJWK(k)
+		if err != nil {
+			a.logger.Warn("ignoring invalid jwk", slog.String("kid", k.Kid), slog.String("error", err.Error()))
+			continue
+		}
+		kid := strings.TrimSpace(k.Kid)
+		if kid == "" {
+			kid = fmt.Sprintf("__nokid_%d", anonymousIndex)
+			anonymousIndex++
+		}
+		keys[kid] = key
+	}
+
+	if len(keys) == 0 {
+		return errors.New("jwks does not contain any usable RSA keys")
+	}
+
+	a.jwksMu.Lock()
+	a.jwksKeys = keys
+	a.jwksFetched = time.Now()
+	a.jwksMu.Unlock()
+	a.logger.Info("JWKS fetched successfully", slog.String("url", a.jwksURI), slog.Any("keys", a.jwksKeys))
+
+	return nil
+}
+
+func rsaPublicKeyFromJWK(k jwkKey) (*rsa.PublicKey, error) {
+	nBytes, err := base64.RawURLEncoding.DecodeString(k.N)
+	if err != nil {
+		return nil, fmt.Errorf("invalid modulus n: %w", err)
+	}
+	eBytes, err := base64.RawURLEncoding.DecodeString(k.E)
+	if err != nil {
+		return nil, fmt.Errorf("invalid exponent e: %w", err)
+	}
+
+	if len(eBytes) == 0 {
+		return nil, errors.New("empty exponent e")
+	}
+
+	eInt := 0
+	for _, b := range eBytes {
+		eInt = (eInt << 8) | int(b)
+	}
+	if eInt <= 0 {
+		return nil, errors.New("invalid exponent e")
+	}
+
+	n := new(big.Int).SetBytes(nBytes)
+	if n.Sign() <= 0 {
+		return nil, errors.New("invalid modulus n")
+	}
+
+	return &rsa.PublicKey{N: n, E: eInt}, nil
 }
 
 type clusterInfo struct {

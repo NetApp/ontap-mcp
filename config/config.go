@@ -47,6 +47,8 @@ type ONTAP struct {
 
 type Poller struct {
 	Addr              string            `yaml:"addr,omitempty"`
+	AuthToken         string            `yaml:"auth_token,omitempty"`
+	JwksURI           string            `yaml:"jwks_uri,omitempty"`
 	AuthStyle         string            `yaml:"auth_style,omitempty"`
 	CaCertPath        string            `yaml:"ca_cert,omitempty"`
 	CertificateScript CertificateScript `yaml:"certificate_script,omitempty"`
