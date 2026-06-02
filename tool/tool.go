@@ -316,6 +316,32 @@ type DescribeEndpointParams struct {
 	Cluster string `json:"cluster_name,omitzero" jsonschema:"cluster name — if provided, filters out fields and filters not available in that cluster's ONTAP version"`
 }
 
+type NFSService struct {
+	Cluster    string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM        string `json:"svm_name" jsonschema:"SVM name"`
+	Enabled    string `json:"enabled,omitzero" jsonschema:"admin state of the NFS service (true/false, default: true)"`
+	V3Enabled  string `json:"v3_enabled,omitzero" jsonschema:"enable NFSv3 (true/false)"`
+	V40Enabled string `json:"v40_enabled,omitzero" jsonschema:"enable NFSv4.0 (true/false)"`
+	V41Enabled string `json:"v41_enabled,omitzero" jsonschema:"enable NFSv4.1 (true/false)"`
+}
+
+type CIFSService struct {
+	Cluster    string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM        string `json:"svm_name" jsonschema:"SVM name"`
+	Name       string `json:"cifs_server_name,omitzero" jsonschema:"CIFS server name (NetBIOS name, max 15 chars)"`
+	ADDomain   string `json:"ad_domain,omitzero" jsonschema:"Active Directory domain FQDN to join"`
+	ADUser     string `json:"ad_user,omitzero" jsonschema:"AD admin username with domain join privileges"`
+	ADPassword string `json:"ad_password,omitzero" jsonschema:"AD admin password"`
+	ADOu       string `json:"ad_ou,omitzero" jsonschema:"AD organizational unit (e.g., CN=Computers)"`
+}
+
+type DNSService struct {
+	Cluster string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string   `json:"svm_name" jsonschema:"SVM name"`
+	Domains []string `json:"domains" jsonschema:"list of DNS domain names (e.g., [\"example.com\"])"`
+	Servers []string `json:"servers" jsonschema:"list of DNS server IP addresses (e.g., [\"10.0.0.1\"])"`
+}
+
 type SVMCreate struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	Name    string `json:"svm_name" jsonschema:"SVM name"`

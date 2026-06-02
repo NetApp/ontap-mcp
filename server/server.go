@@ -158,6 +158,20 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
 	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
 
+	// NFS service (enable/disable/configure NFS on an SVM)
+	addTool(a, server, "create_nfs_service", descriptions.CreateNFSService, createAnnotation, a.CreateNFSService)
+	addTool(a, server, "update_nfs_service", descriptions.UpdateNFSService, updateAnnotation, a.UpdateNFSService)
+	addTool(a, server, "delete_nfs_service", descriptions.DeleteNFSService, deleteAnnotation, a.DeleteNFSService)
+
+	// CIFS service (enable/disable CIFS/SMB on an SVM via AD join)
+	addTool(a, server, "create_cifs_service", descriptions.CreateCIFSService, createAnnotation, a.CreateCIFSService)
+	addTool(a, server, "update_cifs_service", descriptions.UpdateCIFSService, updateAnnotation, a.UpdateCIFSService)
+	addTool(a, server, "delete_cifs_service", descriptions.DeleteCIFSService, deleteAnnotation, a.DeleteCIFSService)
+
+	// DNS configuration
+	addTool(a, server, "create_dns", descriptions.CreateDNS, createAnnotation, a.CreateDNS)
+	addTool(a, server, "delete_dns", descriptions.DeleteDNS, deleteAnnotation, a.DeleteDNS)
+
 	// operation on Qtree object
 	addTool(a, server, "create_qtree", descriptions.CreateQtree, createAnnotation, a.CreateQtree)
 	addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
