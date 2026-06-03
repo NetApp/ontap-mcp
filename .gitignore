@@ -20,4 +20,5 @@ bin/
 dist/
 site/
 ontap.yaml
-.ontap-mcp.env
+.ontap-mcp.envstart-ontap-mcp.bat
+stop-ontap-mcp.bat
