@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -23,12 +24,12 @@ func (a *App) CreateNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	err = client.CreateNFSService(ctx, nfsService)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	return &mcp.CallToolResult{
@@ -51,12 +52,12 @@ func (a *App) UpdateNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	err = client.UpdateNFSService(ctx, parameters.SVM, nfsService)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	return &mcp.CallToolResult{
@@ -78,12 +79,12 @@ func (a *App) DeleteNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	err = client.DeleteNFSService(ctx, parameters.SVM)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	return &mcp.CallToolResult{
@@ -102,32 +103,32 @@ func newCreateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 
 	enabled := true
 	if in.Enabled != "" {
-		b, err := parseBool(in.Enabled)
+		b, err := strconv.ParseBool(in.Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for enabled: %s", in.Enabled)
+			return out, fmt.Errorf("invalid value for enabled: %q", in.Enabled)
 		}
 		enabled = b
 	}
 	out.Enabled = &enabled
 
 	if in.V3Enabled != "" {
-		b, err := parseBool(in.V3Enabled)
+		b, err := strconv.ParseBool(in.V3Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v3_enabled: %s", in.V3Enabled)
+			return out, fmt.Errorf("invalid value for v3_enabled: %q", in.V3Enabled)
 		}
 		out.Protocol.V3Enabled = &b
 	}
 	if in.V40Enabled != "" {
-		b, err := parseBool(in.V40Enabled)
+		b, err := strconv.ParseBool(in.V40Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v40_enabled: %s", in.V40Enabled)
+			return out, fmt.Errorf("invalid value for v40_enabled: %q", in.V40Enabled)
 		}
 		out.Protocol.V40Enabled = &b
 	}
 	if in.V41Enabled != "" {
-		b, err := parseBool(in.V41Enabled)
+		b, err := strconv.ParseBool(in.V41Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v41_enabled: %s", in.V41Enabled)
+			return out, fmt.Errorf("invalid value for v41_enabled: %q", in.V41Enabled)
 		}
 		out.Protocol.V41Enabled = &b
 	}
@@ -143,33 +144,33 @@ func newUpdateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 
 	hasUpdate := false
 	if in.Enabled != "" {
-		b, err := parseBool(in.Enabled)
+		b, err := strconv.ParseBool(in.Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for enabled: %s", in.Enabled)
+			return out, fmt.Errorf("invalid value for enabled: %q", in.Enabled)
 		}
 		out.Enabled = &b
 		hasUpdate = true
 	}
 	if in.V3Enabled != "" {
-		b, err := parseBool(in.V3Enabled)
+		b, err := strconv.ParseBool(in.V3Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v3_enabled: %s", in.V3Enabled)
+			return out, fmt.Errorf("invalid value for v3_enabled: %q", in.V3Enabled)
 		}
 		out.Protocol.V3Enabled = &b
 		hasUpdate = true
 	}
 	if in.V40Enabled != "" {
-		b, err := parseBool(in.V40Enabled)
+		b, err := strconv.ParseBool(in.V40Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v40_enabled: %s", in.V40Enabled)
+			return out, fmt.Errorf("invalid value for v40_enabled: %q", in.V40Enabled)
 		}
 		out.Protocol.V40Enabled = &b
 		hasUpdate = true
 	}
 	if in.V41Enabled != "" {
-		b, err := parseBool(in.V41Enabled)
+		b, err := strconv.ParseBool(in.V41Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v41_enabled: %s", in.V41Enabled)
+			return out, fmt.Errorf("invalid value for v41_enabled: %q", in.V41Enabled)
 		}
 		out.Protocol.V41Enabled = &b
 		hasUpdate = true
@@ -181,15 +182,3 @@ func newUpdateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 
 	return out, nil
 }
-
-func parseBool(s string) (bool, error) {
-	switch s {
-	case "true", "True", "TRUE", "1":
-		return true, nil
-	case "false", "False", "FALSE", "0":
-		return false, nil
-	default:
-		return false, fmt.Errorf("cannot parse %q as boolean", s)
-	}
-}
-

@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -11,15 +10,11 @@ import (
 )
 
 func (c *Client) CreateNFSService(ctx context.Context, nfsService ontap.NFSService) error {
-	var (
-		buf        bytes.Buffer
-		statusCode int
-	)
+	var statusCode int
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/protocols/nfs/services`, &statusCode, responseHeaders).
-		BodyJSON(nfsService).
-		ToBytesBuffer(&buf)
+		BodyJSON(nfsService)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err

@@ -23,12 +23,12 @@ func (a *App) CreateCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	err = client.CreateCIFSService(ctx, cifsService)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	return &mcp.CallToolResult{
@@ -51,12 +51,12 @@ func (a *App) UpdateCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	err = client.UpdateCIFSService(ctx, parameters.SVM, cifsService)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	return &mcp.CallToolResult{
@@ -78,12 +78,12 @@ func (a *App) DeleteCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	err = client.DeleteCIFSService(ctx, parameters.SVM, parameters.ADUser, parameters.ADPassword)
 	if err != nil {
-		return errorResult(err), nil, err
+		return errorResult(err), nil, nil
 	}
 
 	return &mcp.CallToolResult{

@@ -108,12 +108,13 @@ func (c *Client) DeleteCIFSService(ctx context.Context, svmName, adUser, adPassw
 	}
 
 	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/services/`+svmData.Records[0].UUID, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
-		Delete()
+		ToBytesBuffer(&buf)
 
 	if body != nil {
 		builder2 = builder2.BodyJSON(body)
 	}
+
+	builder2 = builder2.Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
 		return err
