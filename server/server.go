@@ -51,8 +51,8 @@ type App struct {
 	options      Options
 	locks        *lock.Map
 	catalog      catalog.APICatalog
-	authToken    string
 	jwksURI      string
+	alg          string
 	oauthEnabled bool
 	jwksMu       sync.RWMutex
 	jwksKeys     map[string]*rsa.PublicKey
@@ -93,15 +93,16 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		index[key] = name
 	}
 
-	authToken := ""
 	jwksURI := ""
-	if cfg.Defaults != nil && cfg.Defaults.AuthToken != "" {
-		authToken = strings.TrimSpace(cfg.Defaults.AuthToken)
+	if cfg.McpAuth != nil && cfg.McpAuth.JwksURI != "" {
+		jwksURI = strings.TrimSpace(cfg.McpAuth.JwksURI)
 	}
-	if cfg.Defaults != nil && cfg.Defaults.JwksURI != "" {
-		jwksURI = strings.TrimSpace(cfg.Defaults.JwksURI)
+
+	// Default algorithm would be RS256
+	alg := "RS256"
+	if cfg.McpAuth != nil && cfg.McpAuth.Alg != "" {
+		alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
 	}
-	oauthEnabled := authToken != "" && jwksURI != ""
 
 	httpClient := o.TestHTTPClient
 	if httpClient == nil {
@@ -113,9 +114,9 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		logger:       logger,
 		options:      o,
 		locks:        lock.New(),
-		authToken:    authToken,
 		jwksURI:      jwksURI,
-		oauthEnabled: oauthEnabled,
+		alg:          alg,
+		oauthEnabled: jwksURI != "",
 		jwksKeys:     make(map[string]*rsa.PublicKey),
 		httpClient:   httpClient,
 		clusterIndex: index,
@@ -142,20 +143,14 @@ func (a *App) StartServer() {
 	if a.options.JSONResponse {
 		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
-	switch {
-	case a.oauthEnabled:
-		a.logger.Info("OAuth bearer auth enabled using Defaults.auth_token and Defaults.jwks_uri")
-	case a.authToken == "" && a.jwksURI == "":
-		a.logger.Info("OAuth bearer auth disabled; Defaults.auth_token and Defaults.jwks_uri are not configured")
-	default:
-		a.logger.Error("OAuth bearer auth config incomplete; both Defaults.auth_token and Defaults.jwks_uri are required. Falling back to non-oauth workflow")
+	if a.oauthEnabled {
+		a.logger.Info("OAuth bearer auth enabled using Defaults.jwks_uri")
+	} else {
+		a.logger.Error("OAuth bearer auth disabled; Defaults.jwks_uri is not configured. Falling back to non-oauth workflow")
 	}
+
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
-}
-
-func (a *App) authEnabled() bool {
-	return a.oauthEnabled
 }
 
 func (a *App) createMCPServer() *mcp.Server {
@@ -346,9 +341,8 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 			return
 		}
 
-		// OAuth bearer validation is active only when Defaults.auth_token and
-		// Defaults.jwks_uri are both configured.
-		if a.authEnabled() {
+		// OAuth bearer validation is active only when Defaults.jwks_uri is configured.
+		if a.oauthEnabled {
 			if err := a.validateJWT(r); err != nil {
 				w.Header().Set("WWW-Authenticate", `Bearer realm="ontap-mcp"`)
 				w.Header().Set("Content-Type", "application/json")
@@ -389,29 +383,22 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 }
 
 // validateJWT validates the incoming bearer JWT against the configured JWKS.
-// In oauth mode, the bearer token must also match Defaults.auth_token.
-func (a *App) validateJWT(_ *http.Request) error {
-	//nolint:gocritic
-	/*
-		authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
-		if authHeader == "" {
-			return errors.New("missing Authorization header")
-		}
-		const prefix = "Bearer "
-		if !strings.HasPrefix(authHeader, prefix) {
-			return errors.New("authorization header must use Bearer scheme")
-		}
-		tokenStr := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))
-	*/
-	tokenStr := a.cfg.Defaults.AuthToken
+func (a *App) validateJWT(r *http.Request) error {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" {
+		return errors.New("missing Authorization header")
+	}
+	const prefix = "Bearer "
+	if !strings.HasPrefix(authHeader, prefix) {
+		return errors.New("authorization header must use Bearer scheme")
+	}
+	tokenStr := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))
+
 	if tokenStr == "" {
 		return errors.New("empty bearer token")
 	}
-	if tokenStr != a.authToken {
-		return errors.New("bearer token does not match configured Defaults.auth_token")
-	}
 
-	token, err := jwt.Parse(tokenStr, a.keyFunc, jwt.WithValidMethods([]string{"RS256"}))
+	token, err := jwt.Parse(tokenStr, a.keyFunc, jwt.WithValidMethods([]string{a.alg}))
 	if err != nil {
 		return fmt.Errorf("invalid token: %w", err)
 	}
@@ -422,11 +409,10 @@ func (a *App) validateJWT(_ *http.Request) error {
 }
 
 func (a *App) keyFunc(token *jwt.Token) (any, error) {
-	a.logger.Info("a")
-	if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+	if err := getSigningKeyAndMethod(token, a.alg); err != nil {
+		return nil, err
 	}
-	a.logger.Info("b")
+
 	kid, _ := token.Header["kid"].(string)
 	return a.getPublicKey(context.Background(), kid)
 }
@@ -434,6 +420,16 @@ func (a *App) keyFunc(token *jwt.Token) (any, error) {
 func (a *App) getPublicKey(ctx context.Context, kid string) (*rsa.PublicKey, error) {
 	if key, ok := a.lookupCachedKey(kid); ok {
 		return key, nil
+	}
+
+	a.jwksMu.RLock()
+	cacheFresh := time.Since(a.jwksFetched) <= jwksCacheTTL && len(a.jwksKeys) > 0
+	a.jwksMu.RUnlock()
+	if cacheFresh {
+		if kid == "" {
+			return nil, errors.New("jwt header is missing kid and jwks did not provide a single unambiguous key")
+		}
+		return nil, fmt.Errorf("no jwks key found for kid %q", kid)
 	}
 
 	if err := a.refreshJWKS(ctx); err != nil {
@@ -522,7 +518,6 @@ func (a *App) refreshJWKS(ctx context.Context) error {
 	a.jwksKeys = keys
 	a.jwksFetched = time.Now()
 	a.jwksMu.Unlock()
-	a.logger.Info("JWKS fetched successfully", slog.String("url", a.jwksURI), slog.Any("keys", a.jwksKeys))
 
 	return nil
 }
@@ -1004,4 +999,63 @@ func parseSize(size string) (int64, error) {
 	}
 
 	return 0, fmt.Errorf("invalid size format '%s'. Use '100MB', '2GB', '1TB', or raw bytes", size)
+}
+
+func getSigningKeyAndMethod(token *jwt.Token, algoUpper string) error {
+	var methodDetected jwt.SigningMethod
+
+	switch {
+	// --- Asymmetric RSA ---
+	case strings.HasPrefix(algoUpper, "RS"):
+		switch algoUpper {
+		case "RS256":
+			methodDetected = jwt.SigningMethodRS256
+		case "RS384":
+			methodDetected = jwt.SigningMethodRS384
+		case "RS512":
+			methodDetected = jwt.SigningMethodRS512
+		}
+
+	// --- Asymmetric RSA-PSS ---
+	case strings.HasPrefix(algoUpper, "PS"):
+		switch algoUpper {
+		case "PS256":
+			methodDetected = jwt.SigningMethodPS256
+		case "PS384":
+			methodDetected = jwt.SigningMethodPS384
+		case "PS512":
+			methodDetected = jwt.SigningMethodPS512
+		}
+
+	// --- Asymmetric Elliptic Curve (ECDSA) ---
+	case strings.HasPrefix(algoUpper, "ES"):
+		switch algoUpper {
+		case "ES256":
+			methodDetected = jwt.SigningMethodES256
+		case "ES384":
+			methodDetected = jwt.SigningMethodES384
+		case "ES512":
+			methodDetected = jwt.SigningMethodES512
+		}
+
+	// --- Asymmetric EdDSA (Edwards-curve) ---
+	case strings.HasPrefix(algoUpper, "ED"):
+		if algoUpper == "EDDSA" {
+			methodDetected = jwt.SigningMethodEdDSA
+		}
+	}
+
+	if token.Method.Alg() != methodDetected.Alg() {
+		return fmt.Errorf("unexpected signing method in token header: %v, expected: %v", token.Method.Alg(), methodDetected.Alg())
+	}
+
+	if methodDetected == jwt.SigningMethodEdDSA {
+		// Detect Method Type Interface: Ensure it resolves to EdDSA's internal structure
+		_, isEdDSA := token.Method.(*jwt.SigningMethodEd25519)
+		if !isEdDSA {
+			return errors.New("token method type assertion mismatch for EdDSA")
+		}
+	}
+
+	return nil
 }

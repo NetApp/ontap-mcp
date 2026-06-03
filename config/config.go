@@ -42,13 +42,18 @@ func ReadConfig(path string) (*ONTAP, error) {
 type ONTAP struct {
 	Pollers        map[string]*Poller `yaml:"Pollers,omitempty"`
 	Defaults       *Poller            `yaml:"Defaults,omitempty"`
+	McpAuth        *OAuth             `yaml:"McpAuth,omitempty"`
 	PollersOrdered []string           `yaml:"-"` // poller names in same order as yaml config
 }
 
+type OAuth struct {
+	JwksURI string `yaml:"jwks_uri,omitempty"`
+	Alg     string `yaml:"alg,omitempty"`
+}
+
 type Poller struct {
-	Addr              string            `yaml:"addr,omitempty"`
-	AuthToken         string            `yaml:"auth_token,omitempty"`
-	JwksURI           string            `yaml:"jwks_uri,omitempty"`
+	Addr string `yaml:"addr,omitempty"`
+
 	AuthStyle         string            `yaml:"auth_style,omitempty"`
 	CaCertPath        string            `yaml:"ca_cert,omitempty"`
 	CertificateScript CertificateScript `yaml:"certificate_script,omitempty"`
