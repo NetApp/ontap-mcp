@@ -144,3 +144,34 @@ func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
 
 	return c.handleJob(ctx, statusCode, buf)
 }
+
+
+// getSVMUUID looks up the UUID of an SVM by name.
+func (c *Client) getSVMUUID(ctx context.Context, svmName string) (string, error) {
+var (
+statusCode int
+svmData    ontap.GetData
+)
+responseHeaders := http.Header{}
+
+params := url.Values{}
+params.Set("name", svmName)
+params.Set("fields", "uuid")
+
+builder := c.baseRequestBuilder(`/api/svm/svms`, &statusCode, responseHeaders).
+Params(params).
+ToJSON(&svmData)
+
+if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+return "", err
+}
+
+if svmData.NumRecords == 0 {
+return "", fmt.Errorf("failed to get details of SVM %s because it does not exist", svmName)
+}
+if svmData.NumRecords != 1 {
+return "", fmt.Errorf("failed to get details of SVM %s because there are %d matching records", svmName, svmData.NumRecords)
+}
+
+return svmData.Records[0].UUID, nil
+}

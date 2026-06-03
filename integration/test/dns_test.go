@@ -47,7 +47,7 @@ func TestDNSService(t *testing.T) {
 		{
 			name:             "Delete DNS",
 			input:            ClusterStr + "delete DNS configuration in " + rn("dnsSvc") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc"), validationFunc: deleteObject},
 		},
 		{
