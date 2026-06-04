@@ -5,9 +5,11 @@ import (
 	"crypto/tls"
 	"log/slog"
 	"net/http"
+	"slices"
 	"testing"
 	"time"
 
+	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
 )
 
@@ -42,7 +44,7 @@ func TestDNSService(t *testing.T) {
 			name:             "Create DNS",
 			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc"), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig},
 		},
 		{
 			name:             "Delete DNS",
@@ -84,4 +86,43 @@ func TestDNSService(t *testing.T) {
 			}
 		})
 	}
+}
+
+func verifyDNSConfig(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	type dnsRecord struct {
+		Domains []string `json:"domains"`
+		Servers []string `json:"servers"`
+	}
+	type response struct {
+		NumRecords int         `json:"num_records"`
+		Records    []dnsRecord `json:"records"`
+	}
+
+	var data response
+	err := requests.URL("https://"+poller.Addr+"/"+api).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		t.Errorf("verifyDNSConfig: request failed: %v", err)
+		return false
+	}
+
+	if data.NumRecords != 1 {
+		t.Errorf("verifyDNSConfig: expected 1 record, got %d", data.NumRecords)
+		return false
+	}
+
+	rec := data.Records[0]
+	if !slices.Contains(rec.Domains, "example.com") {
+		t.Errorf("verifyDNSConfig: expected domains to contain 'example.com', got %v", rec.Domains)
+		return false
+	}
+	if !slices.Contains(rec.Servers, "10.10.10.10") {
+		t.Errorf("verifyDNSConfig: expected servers to contain '10.10.10.10', got %v", rec.Servers)
+		return false
+	}
+
+	return true
 }
