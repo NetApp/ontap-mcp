@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 
@@ -8,17 +9,21 @@ import (
 )
 
 func (c *Client) CreateDNS(ctx context.Context, dns ontap.DNSConfig) error {
-	var statusCode int
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/name-services/dns`, &statusCode, responseHeaders).
-		BodyJSON(dns)
+		BodyJSON(dns).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, buf)
 }
 
 func (c *Client) DeleteDNS(ctx context.Context, svmName string) error {

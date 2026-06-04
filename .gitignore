@@ -22,3 +22,4 @@ site/
 ontap.yaml
 .ontap-mcp.envstart-ontap-mcp.bat
 stop-ontap-mcp.bat
+start-ontap-mcp.vbs
