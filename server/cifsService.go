@@ -76,6 +76,10 @@ func (a *App) DeleteCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 		return nil, nil, errors.New("SVM name is required")
 	}
 
+	if (parameters.ADUser == "") != (parameters.ADPassword == "") {
+		return nil, nil, errors.New("both ad_user and ad_password must be provided together, or neither")
+	}
+
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, nil
