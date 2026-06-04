@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
 )
 
@@ -48,7 +49,7 @@ func TestNFSService(t *testing.T) {
 			name:             "Update NFS service",
 			input:            ClusterStr + "update NFS service on the " + rn("nfsSvc") + " svm to enable NFSv4.0",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/services?svm.name=" + rn("nfsSvc") + "&fields=protocol.v40_enabled", validationFunc: verifyNFSv40Enabled},
 		},
 		{
 			name:             "Delete NFS service",
@@ -90,4 +91,40 @@ func TestNFSService(t *testing.T) {
 			}
 		})
 	}
+}
+
+func verifyNFSv40Enabled(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	type protocol struct {
+		V40Enabled bool `json:"v40_enabled"`
+	}
+	type nfsRecord struct {
+		Protocol protocol `json:"protocol"`
+	}
+	type response struct {
+		NumRecords int         `json:"num_records"`
+		Records    []nfsRecord `json:"records"`
+	}
+
+	var data response
+	err := requests.URL("https://"+poller.Addr+"/"+api).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		t.Errorf("verifyNFSv40Enabled: request failed: %v", err)
+		return false
+	}
+
+	if data.NumRecords != 1 {
+		t.Errorf("verifyNFSv40Enabled: expected 1 record, got %d", data.NumRecords)
+		return false
+	}
+
+	if !data.Records[0].Protocol.V40Enabled {
+		t.Errorf("verifyNFSv40Enabled: expected v40_enabled to be true, got false")
+		return false
+	}
+
+	return true
 }

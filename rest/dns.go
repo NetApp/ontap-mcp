@@ -27,7 +27,10 @@ func (c *Client) CreateDNS(ctx context.Context, dns ontap.DNSConfig) error {
 }
 
 func (c *Client) DeleteDNS(ctx context.Context, svmName string) error {
-	var statusCode int
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
 	responseHeaders := http.Header{}
 
 	svmUUID, err := c.getSVMUUID(ctx, svmName)
@@ -36,11 +39,12 @@ func (c *Client) DeleteDNS(ctx context.Context, svmName string) error {
 	}
 
 	builder := c.baseRequestBuilder(`/api/name-services/dns/`+svmUUID, &statusCode, responseHeaders).
+		ToBytesBuffer(&buf).
 		Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, buf)
 }
