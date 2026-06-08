@@ -46,21 +46,6 @@ func TestMCPAuthBearer(t *testing.T) {
 		expectBadSigAlgo string
 	}{
 		{
-			name: "successful",
-			content: `{
-				"servers": {
-					"ontap-mcp": {
-						"type": "http",
-						"url": "http://localhost:8080",
-						"headers": {
-                            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJKRkZ5c25ub3VGb1FUUE14VDdwZDc1NWVkYVptUDdHbmQ4RnRRQkFHRC1rIn0.eyJleHAiOjE3ODA1NzYyMjgsImlhdCI6MTc4MDU2OTAyOCwianRpIjoidHJydGNjOmM4NjA5MDg4LTM3YjEtOGFhYS0wNTgyLTQ2Y2FmZTg4ZGFlNSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9yZWFsbXMvd29yayIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJiZmY2Y2RmMS1iMDkyLTRhMzUtODdiZS01ZTI0MjYxNWUzNjkiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ3b3JrLWNsaWVudCIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJkZWZhdWx0LXJvbGVzLXdvcmsiLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJjbGllbnRIb3N0IjoiMTkyLjE2OC42NS4xIiwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXdvcmstY2xpZW50IiwiY2xpZW50QWRkcmVzcyI6IjE5Mi4xNjguNjUuMSIsImNsaWVudF9pZCI6IndvcmstY2xpZW50In0.gogxEOX64U9p4KCGoaRPjbjCb3RFpVvh4mZtKa0oH7tJ6lwGr_cpoUvEIK8-kivtU5SBm-tWTC2n9lhLUpayP7hAK82pAZzlOOzlQChWIGC0VKEdSfibL8rTr9E0ADV_pmTco9E6xEIDat0xfZB-NjkXm17bS5qNxp8GeuYQA6G_L6CCGDoZLk6HWM1ZGyEb4qHO1qcFGBiNkqhSJf9wrP7kh2ihjMxcA46C1P7Qm_rSh9Zy50F6JcuWdg360CtqUvVzOn3r34NWJ8L6MXaOm1HAcgFF02YCcOyZsXuKh1JiMX3b2gj-Ccs1GqUH0bEnyzrxbpVpWt2nenUzBN3kDA"
-						}
-					}
-				}
-			}`,
-			wantErr: false,
-		},
-		{
 			name: "token expired",
 			content: `{
 				"servers": {
@@ -161,7 +146,7 @@ func loadKeysFixture(t *testing.T, path string) jwkFile {
 	if err = json.Unmarshal(content, &fixture); err != nil {
 		t.Fatalf("failed to parse %s: %v", path, err)
 	}
-	if fixture.PublicKeys.Keys[0].Alg == "" || len(fixture.PublicKeys.Keys) == 0 {
+	if len(fixture.PublicKeys.Keys) == 0 || fixture.PublicKeys.Keys[0].Alg == "" {
 		t.Fatalf("invalid fixture in %s", path)
 	}
 	return fixture

@@ -47,8 +47,9 @@ type ONTAP struct {
 }
 
 type OAuth struct {
-	JwksURI string `yaml:"jwks_uri,omitempty"`
-	Alg     string `yaml:"alg,omitempty"`
+	Issuer           string `yaml:"issuer,omitempty"`
+	AudienceRequired string `yaml:"audience_required,omitempty"`
+	Alg              string `yaml:"alg,omitempty"`
 }
 
 type Poller struct {
