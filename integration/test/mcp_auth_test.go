@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"math/big"
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/golang-jwt/jwt/v5"
+	"time"
 )
 
 type jwkFile struct {
@@ -45,6 +45,21 @@ func TestMCPAuthBearer(t *testing.T) {
 		expectBadSig     bool
 		expectBadSigAlgo string
 	}{
+		{
+			name: "successful",
+			content: `{
+				"servers": {
+					"ontap-mcp": {
+						"type": "http",
+						"url": "http://localhost:8080",
+						"headers": {
+                            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJKRkZ5c25ub3VGb1FUUE14VDdwZDc1NWVkYVptUDdHbmQ4RnRRQkFHRC1rIn0.eyJleHAiOjE3ODA1NzYyMjgsImlhdCI6MTc4MDU2OTAyOCwianRpIjoidHJydGNjOmM4NjA5MDg4LTM3YjEtOGFhYS0wNTgyLTQ2Y2FmZTg4ZGFlNSIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6OTA5MC9yZWFsbXMvd29yayIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJiZmY2Y2RmMS1iMDkyLTRhMzUtODdiZS01ZTI0MjYxNWUzNjkiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ3b3JrLWNsaWVudCIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJkZWZhdWx0LXJvbGVzLXdvcmsiLCJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJjbGllbnRIb3N0IjoiMTkyLjE2OC42NS4xIiwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXdvcmstY2xpZW50IiwiY2xpZW50QWRkcmVzcyI6IjE5Mi4xNjguNjUuMSIsImNsaWVudF9pZCI6IndvcmstY2xpZW50In0.gogxEOX64U9p4KCGoaRPjbjCb3RFpVvh4mZtKa0oH7tJ6lwGr_cpoUvEIK8-kivtU5SBm-tWTC2n9lhLUpayP7hAK82pAZzlOOzlQChWIGC0VKEdSfibL8rTr9E0ADV_pmTco9E6xEIDat0xfZB-NjkXm17bS5qNxp8GeuYQA6G_L6CCGDoZLk6HWM1ZGyEb4qHO1qcFGBiNkqhSJf9wrP7kh2ihjMxcA46C1P7Qm_rSh9Zy50F6JcuWdg360CtqUvVzOn3r34NWJ8L6MXaOm1HAcgFF02YCcOyZsXuKh1JiMX3b2gj-Ccs1GqUH0bEnyzrxbpVpWt2nenUzBN3kDA"
+						}
+					}
+				}
+			}`,
+			wantErr: false,
+		},
 		{
 			name: "token expired",
 			content: `{
@@ -98,6 +113,7 @@ func TestMCPAuthBearer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			algo := keysFixture.PublicKeys.Keys[0].Alg
+			now := time.Unix(1780569028, 0)
 			token, err := jwt.Parse(loadBearerFromMCPJSON(t, tt.content), func(token *jwt.Token) (any, error) {
 				if token.Method.Alg() != algo {
 					return nil, fmt.Errorf("unexpected alg %q", token.Method.Alg())
@@ -108,7 +124,7 @@ func TestMCPAuthBearer(t *testing.T) {
 					return nil, fmt.Errorf("no key found for kid %q", kid)
 				}
 				return key, nil
-			}, jwt.WithValidMethods([]string{algo}))
+			}, jwt.WithValidMethods([]string{algo}), jwt.WithTimeFunc(func() time.Time { return now }))
 
 			if tt.wantErr {
 				if err == nil {

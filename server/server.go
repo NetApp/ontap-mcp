@@ -136,6 +136,9 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		if err != nil {
 			logger.Error("Error to find jwks_uri based on issuer data. Falling back to non-oauth workflow", slog.Any("error", err))
 		} else {
+			if u, e := url.Parse(jwksURI); e != nil || (u.Scheme != "http" && u.Scheme != "https") {
+				return nil, fmt.Errorf("jwks_uri must be an http(s) URL, got %q", jwksURI)
+			}
 			oauthEnabled = true
 		}
 	}
@@ -177,9 +180,9 @@ func (a *App) StartServer() {
 		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
 	if a.oauthEnabled {
-		a.logger.Info("OAuth bearer auth enabled using Defaults.issuer")
+		a.logger.Info("OAuth bearer auth enabled using McpAuth.issuer")
 	} else {
-		a.logger.Error("OAuth bearer auth disabled; Defaults.issuer is not configured or misconfigured. Falling back to non-oauth workflow")
+		a.logger.Error("OAuth bearer auth disabled; McpAuth.issuer is not configured or misconfigured. Falling back to non-oauth workflow")
 	}
 
 	server := a.createMCPServer()
@@ -1141,6 +1144,10 @@ func getSigningKeyAndMethod(token *jwt.Token, algoUpper string) error {
 		if algoUpper == "EDDSA" {
 			methodDetected = jwt.SigningMethodEdDSA
 		}
+	}
+
+	if methodDetected == nil {
+		return fmt.Errorf("unsupported signing algorithm %q", algoUpper)
 	}
 
 	if token.Method.Alg() != methodDetected.Alg() {
