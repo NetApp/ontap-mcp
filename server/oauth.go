@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"io"
@@ -16,21 +15,22 @@ import (
 func (a *App) OAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Authorization header
-		authHeader := r.Header.Get("Authorization")
+		authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
 		if authHeader == "" {
 			a.sendUnauthorized(w, r)
 			return
 		}
 
 		// Bearer token
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader || tokenString == "" {
+		parts := strings.Fields(authHeader)
+		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") || parts[1] == "" {
 			a.sendUnauthorized(w, r)
 			return
 		}
+		tokenString := parts[1]
 
 		// Validate JWT token
-		token, err := jwt.Parse(tokenString, a.keyFunc, jwt.WithValidMethods([]string{a.algUsed}))
+		token, err := jwt.Parse(tokenString, a.keyFunc, jwt.WithValidMethods([]string{a.algUsed}), jwt.WithLeeway(60*time.Second))
 		if err != nil {
 			slog.Error("failed to parse token", slog.Any("err", err))
 			a.sendUnauthorized(w, r)
@@ -50,12 +50,6 @@ func (a *App) OAuthMiddleware(next http.Handler) http.Handler {
 			a.sendUnauthorized(w, r)
 			return
 		}
-
-		slog.Debug("=== JWT Access Token Debug ===")
-		slog.Debug("", slog.String("token", tokenString))
-		claimsJSON, _ := json.MarshalIndent(claims, "", "  ")
-		slog.Debug("", slog.String("claim", string(claimsJSON)))
-		slog.Debug("===============================")
 
 		// Validate audience
 		if !a.validateAudience(claims) {
@@ -140,10 +134,13 @@ func (a *App) validateScope(claims jwt.MapClaims) bool {
 	return slices.Contains(s, "mcp:tools")
 }
 
-func (a *App) sendUnauthorized(w http.ResponseWriter, _ *http.Request) {
-	metadataURL := a.issuer + "/.well-known/oauth-protected-resource"
-	w.Header().Set("WWW-Authenticate",
-		fmt.Sprintf(`Bearer resource_metadata="%q", scope="openid profile email"`, metadataURL))
+func (a *App) sendUnauthorized(w http.ResponseWriter, r *http.Request) {
+	metadataURL := "http://" + r.Host + "/.well-known/oauth-protected-resource"
+	if r.TLS != nil {
+		metadataURL = "https://" + r.Host + "/.well-known/oauth-protected-resource"
+	}
+	w.Header().Set("WWW-Authenticate", fmt.Sprintf(`Bearer resource_metadata=%q, scope=%q`, metadataURL, "mcp:tools"))
+
 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
 }
 

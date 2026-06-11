@@ -120,27 +120,30 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 	oauthEnabled := false
 
 	if cfg.McpAuth != nil {
-		if cfg.McpAuth.Issuer != "" {
-			issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
-		}
-
-		if cfg.McpAuth.AudienceRequired != "" {
-			audReq = strings.TrimSpace(cfg.McpAuth.AudienceRequired)
-		}
-
-		if cfg.McpAuth.Alg != "" {
-			alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
-		}
-
-		jwksURI, err = getJwksURI(issuer, httpClient)
-		if err != nil {
-			logger.Error("Error to find jwks_uri based on issuer data. Falling back to non-oauth workflow", slog.Any("error", err))
+		if cfg.McpAuth.Issuer == "" {
+			logger.Error("McpAuth.issuer is required to enable OAuth; falling back to non-oauth workflow")
 		} else {
-			if u, e := url.Parse(jwksURI); e != nil || (u.Scheme != "http" && u.Scheme != "https") {
-				return nil, fmt.Errorf("jwks_uri must be an http(s) URL, got %q", jwksURI)
+			issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
+			if cfg.McpAuth.AudienceRequired != "" {
+				audReq = strings.TrimSpace(cfg.McpAuth.AudienceRequired)
 			}
-			oauthEnabled = true
+
+			if cfg.McpAuth.Alg != "" {
+				alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
+			}
+
+			jwksURI, err = getJwksURI(issuer, httpClient)
+			if err != nil {
+				logger.Error("Error to find jwks_uri based on issuer data. Falling back to non-oauth workflow", slog.Any("error", err))
+			} else {
+				if u, e := url.Parse(jwksURI); e != nil || (u.Scheme != "http" && u.Scheme != "https") {
+					return nil, fmt.Errorf("jwks_uri must be an http(s) URL, got %q", jwksURI)
+				}
+				oauthEnabled = true
+			}
 		}
+	} else {
+		logger.Error("OAuth bearer auth disabled; McpAuth is not configured. Falling back to non-oauth workflow")
 	}
 
 	app := &App{
@@ -182,7 +185,7 @@ func (a *App) StartServer() {
 	if a.oauthEnabled {
 		a.logger.Info("OAuth bearer auth enabled using McpAuth.issuer")
 	} else {
-		a.logger.Error("OAuth bearer auth disabled; McpAuth.issuer is not configured or misconfigured. Falling back to non-oauth workflow")
+		a.logger.Error("OAuth bearer auth disabled. Falling back to non-oauth workflow")
 	}
 
 	server := a.createMCPServer()
@@ -444,15 +447,15 @@ func (a *App) keyFunc(token *jwt.Token) (any, error) {
 	alg, _ := token.Header["alg"].(string)
 	aud, _ := token.Claims.GetAudience()
 	if !slices.Contains(aud, a.audienceRequired) {
-		return nil, fmt.Errorf("no jwks key found for audience %q", a.audienceRequired)
+		return nil, fmt.Errorf("unexpected audience (aud) %v; expected %q", aud, a.audienceRequired)
 	}
 	if alg != a.algUsed {
-		return nil, fmt.Errorf("no jwks key found for algorithm %q", a.algUsed)
+		return nil, fmt.Errorf("unexpected token alg %q; expected %q", alg, a.algUsed)
 	}
-	return a.getAnyPublicKey(context.Background(), kid)
+	return a.getAnyPublicKey(kid)
 }
 
-func (a *App) getAnyPublicKey(ctx context.Context, kid string) (any, error) {
+func (a *App) getAnyPublicKey(kid string) (any, error) {
 	if key, ok := a.lookupCachedKey(kid); ok {
 		return key, nil
 	}
@@ -467,7 +470,7 @@ func (a *App) getAnyPublicKey(ctx context.Context, kid string) (any, error) {
 		return nil, fmt.Errorf("no jwks key found for kid %q", kid)
 	}
 
-	if err := a.refreshJWKS(ctx); err != nil {
+	if err := a.refreshJWKS(); err != nil {
 		return nil, err
 	}
 
@@ -500,8 +503,8 @@ func (a *App) lookupCachedKey(kid string) (any, bool) {
 	return nil, false
 }
 
-func (a *App) refreshJWKS(ctx context.Context) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.jwksURI, http.NoBody)
+func (a *App) refreshJWKS() error {
+	req, err := http.NewRequest(http.MethodGet, a.jwksURI, http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed to create jwks request: %w", err)
 	}
