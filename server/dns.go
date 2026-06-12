@@ -80,5 +80,6 @@ func newCreateDNS(in tool.DNSService) (ontap.DNSConfig, error) {
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Domains = in.Domains
 	out.Servers = in.Servers
+	out.SkipConfigValidation = in.SkipConfigValidation
 	return out, nil
 }
