@@ -43,9 +43,9 @@ func TestDNSService(t *testing.T) {
 		},
 		{
 			name:             "Create DNS",
-			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10, 10.10.10.20, 10.10.10.30 and disable dns config validation",
+			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10, 10.10.10.30, 10.10.10.20 and disable dns config validation",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig(1, []string{"example.com"}, []string{"10.10.10.10", "10.10.10.20", "10.10.10.30"})},
+			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig(1, []string{"example.com"}, []string{"10.10.10.30", "10.10.10.20", "10.10.10.10"})},
 		},
 		{
 			name:             "Delete DNS",
@@ -54,7 +54,7 @@ func TestDNSService(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc"), validationFunc: verifyDNSConfig(0, []string{}, []string{})},
 		},
 		{
-			name:             "Create DNS",
+			name:             "Create DNS (validation enabled)",
 			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10",
 			expectedOntapErr: "Verify that the network configuration is correct and that DNS servers are available.",
 			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig(0, []string{}, []string{})},
@@ -124,14 +124,18 @@ func verifyDNSConfig(expectedTotalRecords int, expectedDomains []string, expecte
 
 		if len(data.Records) > 0 {
 			rec := data.Records[0]
+			expDomains := slices.Clone(expectedDomains)
+			sort.Strings(expDomains)
 			sort.Strings(rec.Domains)
-			if len(rec.Domains) != len(expectedDomains) || !slices.Equal(rec.Domains, expectedDomains) {
-				t.Errorf("verifyDNSConfig: expected domains %v but got %v", expectedDomains, rec.Domains)
+			if len(rec.Domains) != len(expDomains) || !slices.Equal(rec.Domains, expDomains) {
+				t.Errorf("verifyDNSConfig: expected domains %v but got %v", expDomains, rec.Domains)
 				return false
 			}
+			expServers := slices.Clone(expectedServers)
+			sort.Strings(expServers)
 			sort.Strings(rec.Servers)
-			if len(rec.Servers) != len(expectedServers) || !slices.Equal(rec.Servers, expectedServers) {
-				t.Errorf("verifyDNSConfig: expected servers %v but got %v", expectedServers, rec.Servers)
+			if len(rec.Servers) != len(expServers) || !slices.Equal(rec.Servers, expServers) {
+				t.Errorf("verifyDNSConfig: expected servers %v but got %v", expServers, rec.Servers)
 				return false
 			}
 		}
