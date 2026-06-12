@@ -313,6 +313,37 @@ type FCPService struct {
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
 }
 
+type NFSServiceProtocol struct {
+	V3Enabled  *bool `json:"v3_enabled,omitempty"`
+	V40Enabled *bool `json:"v40_enabled,omitempty"`
+	V41Enabled *bool `json:"v41_enabled,omitempty"`
+}
+
+type NFSService struct {
+	SVM      NameAndUUID        `json:"svm,omitzero"`
+	Enabled  *bool              `json:"enabled,omitempty"`
+	Protocol NFSServiceProtocol `json:"protocol,omitzero"`
+}
+
+type CIFSServiceADDomain struct {
+	FQDN               string `json:"fqdn,omitzero"`
+	User               string `json:"user,omitzero"`
+	Password           string `json:"password,omitzero"`
+	OrganizationalUnit string `json:"organizational_unit,omitzero"`
+}
+
+type CIFSServiceBody struct {
+	SVM      NameAndUUID         `json:"svm,omitzero"`
+	Name     string              `json:"name,omitzero"`
+	ADDomain CIFSServiceADDomain `json:"ad_domain,omitzero"`
+}
+
+type DNSConfig struct {
+	SVM     NameAndUUID `json:"svm,omitzero"`
+	Domains []string    `json:"domains"`
+	Servers []string    `json:"servers"`
+}
+
 type FCInterfacePort struct {
 	Name string      `json:"name,omitzero" jsonschema:"FC port name"`
 	Node NameAndUUID `json:"node,omitzero" jsonschema:"node on which the FC port is located"`

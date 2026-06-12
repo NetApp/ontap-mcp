@@ -77,6 +77,17 @@ const CreateCIFSShare = `Create CIFS share on a cluster by cluster name.`
 const UpdateCIFSShare = `Update CIFS share on a cluster by cluster name.`
 const DeleteCIFSShare = `Delete CIFS share on a cluster by cluster name.`
 
+const CreateNFSService = `Create (enable) NFS service on an SVM. Allows configuring NFSv3, NFSv4.0, and NFSv4.1 protocol versions.`
+const UpdateNFSService = `Update NFS service on an SVM. Toggle protocol versions (NFSv3, NFSv4.0, NFSv4.1) or enable/disable the service.`
+const DeleteNFSService = `Delete (disable) NFS service on an SVM.`
+
+const CreateCIFSService = `Create (enable) CIFS/SMB service on an SVM by joining an Active Directory domain. Requires AD domain FQDN, admin credentials, and a CIFS server name (NetBIOS name).`
+const UpdateCIFSService = `Update CIFS/SMB service on an SVM. Can rename the CIFS server.`
+const DeleteCIFSService = `Delete (disable) CIFS/SMB service on an SVM. Unjoins the Active Directory domain.`
+
+const CreateDNS = `Configure DNS on an SVM. Required before joining Active Directory or resolving hostnames.`
+const DeleteDNS = `Remove DNS configuration from an SVM.`
+
 const CreateQtree = `Create Qtree on a cluster by cluster name.`
 const UpdateQtree = `Update Qtree on a cluster by cluster name.`
 const DeleteQtree = `Delete Qtree on a cluster by cluster name.`
