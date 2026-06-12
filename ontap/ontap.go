@@ -339,9 +339,10 @@ type CIFSServiceBody struct {
 }
 
 type DNSConfig struct {
-	SVM     NameAndUUID `json:"svm,omitzero"`
-	Domains []string    `json:"domains"`
-	Servers []string    `json:"servers"`
+	SVM                  NameAndUUID `json:"svm" jsonschema:"svm name"`
+	Domains              []string    `json:"domains,omitzero" jsonschema:"A list of DNS domains"`
+	Servers              []string    `json:"servers,omitzero" jsonschema:"The list of IP addresses of the DNS servers. Addresses can be either IPv4 or IPv6 addresses"`
+	SkipConfigValidation bool        `json:"skip_config_validation,omitzero" jsonschema:"Indicates whether or not the validation for the specified DNS configuration is disabled"`
 }
 
 type FCInterfacePort struct {
