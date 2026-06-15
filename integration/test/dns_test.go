@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"sort"
 	"testing"
 	"time"
 
@@ -37,25 +38,31 @@ func TestDNSService(t *testing.T) {
 		{
 			name:             "Clean DNS",
 			input:            ClusterStr + "delete DNS configuration in " + rn("dnsSvc") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "entry doesn't exist",
 			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create DNS",
-			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10",
+			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10, 10.10.10.30, 10.10.10.20 and disable dns config validation",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig},
+			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig(1, []string{"example.com"}, []string{"10.10.10.30", "10.10.10.20", "10.10.10.10"})},
 		},
 		{
 			name:             "Delete DNS",
 			input:            ClusterStr + "delete DNS configuration in " + rn("dnsSvc") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc"), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc"), validationFunc: verifyDNSConfig(0, []string{}, []string{})},
+		},
+		{
+			name:             "Create DNS (validation enabled)",
+			input:            ClusterStr + "create DNS configuration on the " + rn("dnsSvc") + " svm with domains example.com and nameservers 10.10.10.10",
+			expectedOntapErr: "Verify that the network configuration is correct and that DNS servers are available.",
+			verifyAPI:        ontapVerifier{api: "api/name-services/dns?svm.name=" + rn("dnsSvc") + "&fields=domains,servers", validationFunc: verifyDNSConfig(0, []string{}, []string{})},
 		},
 		{
 			name:             "Clean SVM",
 			input:            ClusterStr + "delete " + rn("dnsSvc") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("dnsSvc"), validationFunc: deleteObject},
 		},
 	}
@@ -88,41 +95,50 @@ func TestDNSService(t *testing.T) {
 	}
 }
 
-func verifyDNSConfig(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	type dnsRecord struct {
-		Domains []string `json:"domains"`
-		Servers []string `json:"servers"`
-	}
-	type response struct {
-		NumRecords int         `json:"num_records"`
-		Records    []dnsRecord `json:"records"`
-	}
+func verifyDNSConfig(expectedTotalRecords int, expectedDomains []string, expectedServers []string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type dnsRecord struct {
+			Domains []string `json:"domains"`
+			Servers []string `json:"servers"`
+		}
+		type response struct {
+			NumRecords int         `json:"num_records"`
+			Records    []dnsRecord `json:"records"`
+		}
 
-	var data response
-	err := requests.URL("https://"+poller.Addr+"/"+api).
-		BasicAuth(poller.Username, poller.Password).
-		Client(client).
-		ToJSON(&data).
-		Fetch(context.Background())
-	if err != nil {
-		t.Errorf("verifyDNSConfig: request failed: %v", err)
-		return false
-	}
+		var data response
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyDNSConfig: request failed: %v", err)
+			return false
+		}
 
-	if data.NumRecords != 1 {
-		t.Errorf("verifyDNSConfig: expected 1 record, got %d", data.NumRecords)
-		return false
-	}
+		if data.NumRecords != expectedTotalRecords {
+			t.Errorf("verifyDNSConfig: expected %d record but got %d", expectedTotalRecords, data.NumRecords)
+			return false
+		}
 
-	rec := data.Records[0]
-	if !slices.Contains(rec.Domains, "example.com") {
-		t.Errorf("verifyDNSConfig: expected domains to contain 'example.com', got %v", rec.Domains)
-		return false
+		if len(data.Records) > 0 {
+			rec := data.Records[0]
+			expDomains := slices.Clone(expectedDomains)
+			sort.Strings(expDomains)
+			sort.Strings(rec.Domains)
+			if len(rec.Domains) != len(expDomains) || !slices.Equal(rec.Domains, expDomains) {
+				t.Errorf("verifyDNSConfig: expected domains %v but got %v", expDomains, rec.Domains)
+				return false
+			}
+			expServers := slices.Clone(expectedServers)
+			sort.Strings(expServers)
+			sort.Strings(rec.Servers)
+			if len(rec.Servers) != len(expServers) || !slices.Equal(rec.Servers, expServers) {
+				t.Errorf("verifyDNSConfig: expected servers %v but got %v", expServers, rec.Servers)
+				return false
+			}
+		}
+		return true
 	}
-	if !slices.Contains(rec.Servers, "10.10.10.10") {
-		t.Errorf("verifyDNSConfig: expected servers to contain '10.10.10.10', got %v", rec.Servers)
-		return false
-	}
-
-	return true
 }

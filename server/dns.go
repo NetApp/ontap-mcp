@@ -10,7 +10,7 @@ import (
 	"github.com/netapp/ontap-mcp/tool"
 )
 
-func (a *App) CreateDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.DNSService) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.DNSServiceCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -38,7 +38,7 @@ func (a *App) CreateDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}, nil, nil
 }
 
-func (a *App) DeleteDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.DNSService) (*mcp.CallToolResult, any, error) {
+func (a *App) DeleteDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.DNSServiceDelete) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -65,7 +65,7 @@ func (a *App) DeleteDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}, nil, nil
 }
 
-func newCreateDNS(in tool.DNSService) (ontap.DNSConfig, error) {
+func newCreateDNS(in tool.DNSServiceCreate) (ontap.DNSConfig, error) {
 	out := ontap.DNSConfig{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -80,5 +80,6 @@ func newCreateDNS(in tool.DNSService) (ontap.DNSConfig, error) {
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Domains = in.Domains
 	out.Servers = in.Servers
+	out.SkipConfigValidation = in.SkipConfigValidation
 	return out, nil
 }

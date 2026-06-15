@@ -335,11 +335,20 @@ type CIFSService struct {
 	ADOu       string `json:"ad_ou,omitzero" jsonschema:"AD organizational unit (e.g., CN=Computers)"`
 }
 
-type DNSService struct {
-	Cluster string   `json:"cluster_name" jsonschema:"cluster name"`
-	SVM     string   `json:"svm_name" jsonschema:"SVM name"`
-	Domains []string `json:"domains" jsonschema:"list of DNS domain names (e.g., [\"example.com\"])"`
-	Servers []string `json:"servers" jsonschema:"list of DNS server IP addresses (e.g., [\"10.0.0.1\"])"`
+type DNSServiceCreate struct {
+	Cluster              string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                  string   `json:"svm_name" jsonschema:"SVM name"`
+	Domains              []string `json:"domains" jsonschema:"list of DNS domain names (e.g., [\"example.com\"])"`
+	Servers              []string `json:"servers" jsonschema:"list of DNS server IP addresses (e.g., [\"10.0.0.1\"])"`
+	SkipConfigValidation bool     `json:"skip_config_validation,omitzero" jsonschema:"Indicates whether or not the validation for the specified DNS configuration is disabled."`
+}
+
+type DNSServiceDelete struct {
+	Cluster              string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                  string   `json:"svm_name" jsonschema:"SVM name"`
+	Domains              []string `json:"domains,omitzero" jsonschema:"list of DNS domain names (e.g., [\"example.com\"])"`
+	Servers              []string `json:"servers,omitzero" jsonschema:"list of DNS server IP addresses (e.g., [\"10.0.0.1\"])"`
+	SkipConfigValidation bool     `json:"skip_config_validation,omitzero" jsonschema:"Indicates whether or not the validation for the specified DNS configuration is disabled."`
 }
 
 type SVMOperation struct {

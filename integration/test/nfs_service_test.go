@@ -36,7 +36,7 @@ func TestNFSService(t *testing.T) {
 		{
 			name:             "Clean NFS service",
 			input:            ClusterStr + "delete NFS service in " + rn("nfsSvc") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "entry doesn't exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/services?svm.name=" + rn("nfsSvc"), validationFunc: deleteObject},
 		},
 		{
@@ -60,7 +60,7 @@ func TestNFSService(t *testing.T) {
 		{
 			name:             "Clean SVM",
 			input:            ClusterStr + "delete " + rn("nfsSvc") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("nfsSvc"), validationFunc: deleteObject},
 		},
 	}

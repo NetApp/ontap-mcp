@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 
@@ -10,25 +9,22 @@ import (
 
 func (c *Client) CreateDNS(ctx context.Context, dns ontap.DNSConfig) error {
 	var (
-		buf        bytes.Buffer
 		statusCode int
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/name-services/dns`, &statusCode, responseHeaders).
-		BodyJSON(dns).
-		ToBytesBuffer(&buf)
+		BodyJSON(dns)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.checkStatus(statusCode)
 }
 
 func (c *Client) DeleteDNS(ctx context.Context, svmName string) error {
 	var (
-		buf        bytes.Buffer
 		statusCode int
 	)
 	responseHeaders := http.Header{}
@@ -39,12 +35,11 @@ func (c *Client) DeleteDNS(ctx context.Context, svmName string) error {
 	}
 
 	builder := c.baseRequestBuilder(`/api/name-services/dns/`+svmUUID, &statusCode, responseHeaders).
-		ToBytesBuffer(&buf).
 		Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.checkStatus(statusCode)
 }
