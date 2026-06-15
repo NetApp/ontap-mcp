@@ -344,7 +344,7 @@ type DNSService struct {
 
 type SVMOperation struct {
 	Cluster   string    `json:"cluster_name" jsonschema:"cluster name"`
-	Type      string    `json:"type_operation" jsonschema:"SVM operation type (e.g., create, update, delete)"`
+	Operation string    `json:"operation" jsonschema:"SVM operation type (e.g., create, update, delete)"`
 	Name      string    `json:"svm_name" jsonschema:"SVM name"`
 	SVMUpdate SVMUpdate `json:"svm_update,omitzero" jsonschema:"update SVM operation"`
 }

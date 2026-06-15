@@ -24,7 +24,7 @@ func (a *App) SVMOperation(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return nil, nil, errors.New("SVM name is required")
 	}
 
-	switch parameters.Type {
+	switch parameters.Operation {
 	case "create":
 		svmCreate := ontap.SVMCreate{Name: parameters.Name}
 		err = client.CreateSVM(ctx, svmCreate)
@@ -65,7 +65,7 @@ func (a *App) SVMOperation(ctx context.Context, _ *mcp.CallToolRequest, paramete
 			},
 		}, nil, nil
 	default:
-		return errorResult(errors.New("SVM operation type is not supported")), nil, nil
+		return errorResult(fmt.Errorf("unsupported type_operation %q; supported values: create, update, delete", parameters.Operation)), nil, nil
 	}
 }
 

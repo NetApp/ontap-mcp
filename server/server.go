@@ -656,7 +656,6 @@ var (
 	}
 	operationAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(true),
-		IdempotentHint:  true,
 	}
 )
 
