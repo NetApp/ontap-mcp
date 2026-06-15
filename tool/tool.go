@@ -342,14 +342,14 @@ type DNSService struct {
 	Servers []string `json:"servers" jsonschema:"list of DNS server IP addresses (e.g., [\"10.0.0.1\"])"`
 }
 
-type SVMCreate struct {
-	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
-	Name    string `json:"svm_name" jsonschema:"SVM name"`
+type SVMOperation struct {
+	Cluster   string    `json:"cluster_name" jsonschema:"cluster name"`
+	Type      string    `json:"type_operation" jsonschema:"SVM operation type (e.g., create, update, delete)"`
+	Name      string    `json:"svm_name" jsonschema:"SVM name"`
+	SVMUpdate SVMUpdate `json:"svm_update,omitzero" jsonschema:"update SVM operation"`
 }
 
-type SVM struct {
-	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
-	Name    string `json:"svm_name" jsonschema:"SVM name"`
+type SVMUpdate struct {
 	NewName string `json:"new_name,omitzero" jsonschema:"new name of SVM"`
 	State   string `json:"state,omitzero" jsonschema:"state of SVM (e.g., starting, running, stopping, stopped, deleting, initializing)"`
 	Comment string `json:"comment,omitzero" jsonschema:"comment"`

@@ -147,9 +147,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
 
 	// operation on SVM object
-	addTool(a, server, "create_svm", descriptions.CreateSVM, createAnnotation, a.CreateSVM)
-	addTool(a, server, "update_svm", descriptions.UpdateSVM, updateAnnotation, a.UpdateSVM)
-	addTool(a, server, "delete_svm", descriptions.DeleteSVM, deleteAnnotation, a.DeleteSVM)
+	addTool(a, server, "svm_operation", descriptions.SVMOperation, operationAnnotation, a.SVMOperation)
 	// operation on SVM peer object
 	addTool(a, server, "delete_svm_peer", descriptions.DeleteSVMPeer, deleteAnnotation, a.DeleteSVMPeer)
 
@@ -653,6 +651,10 @@ var (
 		IdempotentHint:  true,
 	}
 	deleteAnnotation = mcp.ToolAnnotations{
+		DestructiveHint: new(true),
+		IdempotentHint:  true,
+	}
+	operationAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}

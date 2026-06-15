@@ -157,9 +157,7 @@ const SearchOntapEndpoints = `Search the catalog by keyword across endpoint path
 const DescribeOntapEndpoint = `Get filterable query params for an endpoint. Call before ontap_get to learn valid filter names and which sub-objects need explicit fields (e.g. "space.*", "efficiency.*").
 Pass cluster_name to automatically filter out fields and filters not available in that cluster's ONTAP version.`
 
-const CreateSVM = `Create an SVM on a cluster by cluster name.`
-const UpdateSVM = `Update an SVM on a cluster by cluster name.`
-const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
+const SVMOperation = `Create, Update and Delete operations on SVM on a cluster by cluster name.`
 const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and local SVM name. The peer relationship UUID is looked up internally using the svm.name filter.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
