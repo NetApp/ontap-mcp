@@ -313,6 +313,38 @@ type FCPService struct {
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
 }
 
+type NFSServiceProtocol struct {
+	V3Enabled  *bool `json:"v3_enabled,omitempty"`
+	V40Enabled *bool `json:"v40_enabled,omitempty"`
+	V41Enabled *bool `json:"v41_enabled,omitempty"`
+}
+
+type NFSService struct {
+	SVM      NameAndUUID        `json:"svm,omitzero"`
+	Enabled  *bool              `json:"enabled,omitempty"`
+	Protocol NFSServiceProtocol `json:"protocol,omitzero"`
+}
+
+type CIFSServiceADDomain struct {
+	FQDN               string `json:"fqdn,omitzero"`
+	User               string `json:"user,omitzero"`
+	Password           string `json:"password,omitzero"`
+	OrganizationalUnit string `json:"organizational_unit,omitzero"`
+}
+
+type CIFSServiceBody struct {
+	SVM      NameAndUUID         `json:"svm,omitzero"`
+	Name     string              `json:"name,omitzero"`
+	ADDomain CIFSServiceADDomain `json:"ad_domain,omitzero"`
+}
+
+type DNSConfig struct {
+	SVM                  NameAndUUID `json:"svm" jsonschema:"svm name"`
+	Domains              []string    `json:"domains,omitzero" jsonschema:"A list of DNS domains"`
+	Servers              []string    `json:"servers,omitzero" jsonschema:"The list of IP addresses of the DNS servers. Addresses can be either IPv4 or IPv6 addresses"`
+	SkipConfigValidation bool        `json:"skip_config_validation,omitzero" jsonschema:"Indicates whether or not the validation for the specified DNS configuration is disabled"`
+}
+
 type FCInterfacePort struct {
 	Name string      `json:"name,omitzero" jsonschema:"FC port name"`
 	Node NameAndUUID `json:"node,omitzero" jsonschema:"node on which the FC port is located"`
