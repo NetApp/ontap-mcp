@@ -12,7 +12,7 @@ func TestApplyDefaults_FillsMissingKeys(t *testing.T) {
 	defaults := &Poller{
 		Username:       "admin",
 		Password:       "password",
-		UseInsecureTLS: true,
+		UseInsecureTLS: new(true),
 	}
 	poller := &Poller{
 		Addr: "10.0.0.1",
@@ -22,7 +22,7 @@ func TestApplyDefaults_FillsMissingKeys(t *testing.T) {
 
 	assert.Equal(t, poller.Username, "admin")
 	assert.Equal(t, poller.Password, "password")
-	assert.True(t, poller.UseInsecureTLS)
+	assert.True(t, poller.InsecureTLS())
 	assert.Equal(t, poller.Addr, "10.0.0.1")
 }
 
@@ -104,12 +104,88 @@ Pollers:
 	assert.NotNil(t, inherits)
 	assert.Equal(t, inherits.Username, "admin")
 	assert.Equal(t, inherits.Password, "password")
-	assert.True(t, inherits.UseInsecureTLS)
+	assert.True(t, inherits.InsecureTLS())
 	assert.Equal(t, inherits.Name, "inherits-all")
 
 	overrides := cfg.Pollers["overrides-user"]
 	assert.NotNil(t, overrides)
 	assert.Equal(t, overrides.Username, "operator")
 	assert.Equal(t, overrides.Password, "secret")
-	assert.True(t, overrides.UseInsecureTLS)
+	assert.True(t, overrides.InsecureTLS())
+}
+
+func TestApplyDefaults_PollerOverridesTrueDefaultWithFalse(t *testing.T) {
+	defaults := &Poller{
+		UseInsecureTLS: new(true),
+	}
+	poller := &Poller{
+		UseInsecureTLS: new(false),
+	}
+
+	assert.Nil(t, poller.applyDefaults(defaults))
+
+	assert.NotNil(t, poller.UseInsecureTLS)
+	assert.False(t, poller.InsecureTLS())
+}
+
+func TestApplyDefaults_PollerInheritsUnsetInsecureTLS(t *testing.T) {
+	defaults := &Poller{
+		UseInsecureTLS: new(true),
+	}
+	poller := &Poller{}
+
+	assert.Nil(t, poller.applyDefaults(defaults))
+
+	assert.NotNil(t, poller.UseInsecureTLS)
+	assert.True(t, poller.InsecureTLS())
+}
+
+func TestApplyDefaults_PollerKeepsTrueOverFalseDefault(t *testing.T) {
+	defaults := &Poller{
+		UseInsecureTLS: new(false),
+	}
+	poller := &Poller{
+		UseInsecureTLS: new(true),
+	}
+
+	assert.Nil(t, poller.applyDefaults(defaults))
+
+	assert.True(t, poller.InsecureTLS())
+}
+
+func TestReadConfig_PollerOverridesInsecureTLSToFalse(t *testing.T) {
+	yamlContent := `
+Defaults:
+  username: admin
+  use_insecure_tls: true
+
+Pollers:
+  inherits-tls:
+    addr: 10.0.0.1
+  secure-poller:
+    addr: 10.0.0.2
+    use_insecure_tls: false
+`
+	dir := t.TempDir()
+	path := filepath.Join(dir, "ontap.yaml")
+	if err := os.WriteFile(path, []byte(yamlContent), 0o600); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := ReadConfig(path)
+	assert.Nil(t, err)
+
+	inherits := cfg.Pollers["inherits-tls"]
+	assert.NotNil(t, inherits)
+	assert.True(t, inherits.InsecureTLS())
+
+	secure := cfg.Pollers["secure-poller"]
+	assert.NotNil(t, secure)
+	assert.False(t, secure.InsecureTLS())
+}
+
+func TestInsecureTLS_NilFieldIsFalse(t *testing.T) {
+	poller := &Poller{}
+
+	assert.False(t, poller.InsecureTLS())
 }

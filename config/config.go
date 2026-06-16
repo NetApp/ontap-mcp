@@ -51,15 +51,21 @@ func ReadConfig(path string) (*ONTAP, error) {
 // field-by-field, so a poller can override one sub-field while inheriting
 // the rest.
 //
-// Note: bool fields treat false as "unset", so a true default always
-// propagates to the poller. A poller cannot override a true default back to
-// false; omit the default if that distinction is needed.
+// Pointer fields such as UseInsecureTLS distinguish "unset" (nil) from an
+// explicit value. mergo.WithoutDereference keeps a non-nil pointer on the
+// poller intact, so a poller can override a true default back to false.
 func (p *Poller) applyDefaults(defaults *Poller) error {
 	if defaults == nil {
 		return nil
 	}
 
-	return mergo.Merge(p, *defaults)
+	return mergo.Merge(p, *defaults, mergo.WithoutDereference)
+}
+
+// InsecureTLS reports the effective use_insecure_tls value, treating an unset
+// (nil) field as false.
+func (p *Poller) InsecureTLS() bool {
+	return p.UseInsecureTLS != nil && *p.UseInsecureTLS
 }
 
 type ONTAP struct {
@@ -82,7 +88,7 @@ type Poller struct {
 	Recorder          Recorder          `yaml:"recorder,omitempty"`
 	SslCert           string            `yaml:"ssl_cert,omitempty"`
 	SslKey            string            `yaml:"ssl_key,omitempty"`
-	UseInsecureTLS    bool              `yaml:"use_insecure_tls,omitempty"`
+	UseInsecureTLS    *bool             `yaml:"use_insecure_tls,omitempty"`
 	Username          string            `yaml:"username,omitempty"`
 	Name              string
 }
