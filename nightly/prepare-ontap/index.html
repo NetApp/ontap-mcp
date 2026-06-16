@@ -786,7 +786,7 @@ If you use Harvest, this file shares the same format as the <code>harvest.yml</c
 <tr>
 <td><code>use_insecure_tls</code></td>
 <td>optional, bool</td>
-<td>Set to <code>true</code> to allow insecure TLS connections (e.g., self-signed certificates). Not recommended for production use.</td>
+<td>Set to <code>true</code> to allow insecure TLS connections (e.g., self-signed certificates). Not recommended for production use. When set in the <code>Defaults</code> section, an individual poller may override it back to <code>false</code>.</td>
 <td>false</td>
 </tr>
 <tr>
