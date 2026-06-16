@@ -111,51 +111,6 @@ docker run -d \
   start --port 8083 --host 0.0.0.0
 ```
 
-## OAuth Authentication for ONTAP MCP server
-
-If you want to configure OAuth authentication to prevent unauthorized access to your MCP server. Add `McpAuth` section in your config file based on the [ontap-example.yaml](https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml) template:
-By default, it looks for `ontap.yaml` in its working directory (`/opt/mcp` inside the container).
-
-sample contents of `ontap.yaml`
-```yaml
-McpAuth:
-  issuer: http://localhost:9090/realms/REALM
-  alg: RS256
-  audience_required: http://localhost:8080
-
-Pollers:
-  cluster1:
-    addr: 10.0.0.1
-    username: admin
-    password: password
-    use_insecure_tls: true
-```
-
-Below is a table describing the configuration options in `McpAuth` section:
-
-| Option              | Type             | Description                                                                                                                                                                                                                                                                                                                                                           | Default        |
-|---------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
-| `issuer`            | required, string | Name of the Issuer of the auth token to generate the jwks_URI to fetch public keys.                                                                                                                                                                                                                                                                                   |                |
-| `alg`               | optional, string | Algorithm used to generate the token, which would be used to validate the given Bearer token with public keys. Supported asymmetric algorithms are: <br/>RSA Digital Signatures[RS256, RS384, RS512], <br/>RSA-PSS Digital Signatures[PS256, PS384, PS512], <br/>ECDSA (Elliptic Curve) Signatures[ES256, ES384, ES512], <br/>EdDSA (Edwards-curve) Signatures[EdDSA] | RS256          |
-| `audience_required` | optional, string | Expected Audience which are allowed to access the mcp tools. Default would be the MCP server URL, http://localhost:8080                                                                                                                                                                                                                                               | MCP_SERVER_URL |
-
-To integrate the ONTAP MCP server with your MCP client (e.g., GitHub Copilot, Claude Desktop), configure your `mcp.json` file with Authentication header with bearer `AUTH_TOKEN` as below to connect to the MCP server with OAuth authentication.
-
-sample contents of `mcp.json`
-```json
-{
-  "servers": {
-    "ontap-mcp": {
-      "type": "http",
-      "url": "http://your-server-ip:8083",
-       "headers": {
-           "Authorization": "Bearer AUTH_TOKEN"
-       }
-    }
-  }
-}
-```
-
 ## Logs
 
 To view the MCP server logs:
