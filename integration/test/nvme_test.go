@@ -128,7 +128,7 @@ func TestNVMe(t *testing.T) {
 	}
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: poller.UseInsecureTLS, // #nosec G402
+			InsecureSkipVerify: poller.InsecureTLS(), // #nosec G402
 		},
 	}
 	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}

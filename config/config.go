@@ -2,9 +2,11 @@ package config
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
-	"os"
+	"github.com/netapp/ontap-mcp/third_party/mergo"
 )
 
 const (
@@ -31,12 +33,39 @@ func ReadConfig(path string) (*ONTAP, error) {
 	}
 	cfg.PollersOrdered = orderedConfig.Pollers.namesInOrder
 
-	// Set the Name field for each poller
+	// Set the Name field for each poller and apply Defaults for any
+	// key that is missing from the poller's own configuration.
 	for name, poller := range cfg.Pollers {
 		poller.Name = name
+		if err := poller.applyDefaults(cfg.Defaults); err != nil {
+			return nil, fmt.Errorf("error applying defaults to poller %q: %w", name, err)
+		}
 	}
 
 	return &cfg, nil
+}
+
+// applyDefaults fills any unset (zero-valued) field on the poller with the
+// corresponding value from defaults. A value explicitly set on the poller
+// always takes precedence over the default. Nested structs are merged
+// field-by-field, so a poller can override one sub-field while inheriting
+// the rest.
+//
+// Pointer fields such as UseInsecureTLS distinguish "unset" (nil) from an
+// explicit value. mergo.WithoutDereference keeps a non-nil pointer on the
+// poller intact, so a poller can override a true default back to false.
+func (p *Poller) applyDefaults(defaults *Poller) error {
+	if defaults == nil {
+		return nil
+	}
+
+	return mergo.Merge(p, *defaults, mergo.WithoutDereference)
+}
+
+// InsecureTLS reports the effective use_insecure_tls value, treating an unset
+// (nil) field as false.
+func (p *Poller) InsecureTLS() bool {
+	return p.UseInsecureTLS != nil && *p.UseInsecureTLS
 }
 
 type ONTAP struct {
@@ -59,7 +88,7 @@ type Poller struct {
 	Recorder          Recorder          `yaml:"recorder,omitempty"`
 	SslCert           string            `yaml:"ssl_cert,omitempty"`
 	SslKey            string            `yaml:"ssl_key,omitempty"`
-	UseInsecureTLS    bool              `yaml:"use_insecure_tls,omitempty"`
+	UseInsecureTLS    *bool             `yaml:"use_insecure_tls,omitempty"`
 	Username          string            `yaml:"username,omitempty"`
 	Name              string
 }
