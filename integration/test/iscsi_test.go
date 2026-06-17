@@ -94,7 +94,7 @@ func TestIscsiProtocol(t *testing.T) {
 		},
 		{
 			name:             "Update iSCSI service",
-			input:            ClusterStr + "disable iscsi service on the " + rn("marketing") + " svm",
+			input:            ClusterStr + "disable the admin state of the iscsi service on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
