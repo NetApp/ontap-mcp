@@ -46,7 +46,7 @@ const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster n
 const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
 const AddScheduleInSnapshotPolicy = `Add a schedule entry to an existing snapshot policy on a cluster by cluster name.`
-const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy with snapshot count, snapmirror label on a cluster by cluster name. At least one of count or snapmirror_label must be provided.`
+const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy by specifying the snapshot count or SnapMirror label on a cluster, identified by its cluster name. At least one of the following parameters—snapshot count or SnapMirror label—must be provided.`
 const RemoveScheduleInSnapshotPolicy = `Remove a schedule entry from an existing snapshot policy on a cluster by cluster name.`
 
 const ListQoSPolicies = `List QoS policies from an ONTAP cluster — includes both SVM-scoped and cluster-scoped (admin SVM) policies.
@@ -63,7 +63,7 @@ Units:
 - Fixed: *_iops fields are in IOPS; *_mbps fields are in MB/s.`
 
 const CreateQoSPolicy = `Create a QoS policy on a cluster by cluster name.`
-const UpdateQoSPolicy = `Update a QoS policy max throughput iops, min throughput iops, expected iops, peak iops and absolute min iops on a cluster by cluster name.`
+const UpdateQoSPolicy = `Update a QoS policy name, max throughput iops, min throughput iops, expected iops, peak iops and absolute min iops on a cluster by cluster name.`
 const DeleteQoSPolicy = `Delete a QoS policy on a cluster by cluster name.`
 
 const CreateNFSExportPolicy = `Create NFS Export policies on a cluster by cluster name.`
