@@ -124,16 +124,16 @@ func TestIGroupLUNMap(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/lun-maps?igroup.name=" + rn("igroupFinNew") + "&lun.name=" + "/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
-			name:             "Clean volume",
-			input:            ClusterStr + "delete volume " + rn("doc") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("doc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
-		},
-		{
 			name:             "Clean LUN",
 			input:            ClusterStr + "delete lun " + rn("lundoc") + " in volume " + rn("doc") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean volume",
+			input:            ClusterStr + "delete volume " + rn("doc") + " in " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("doc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean igroup",
@@ -155,7 +155,7 @@ func TestIGroupLUNMap(t *testing.T) {
 		},
 		{
 			name:             "Update iSCSI service",
-			input:            ClusterStr + "disabled iscsi service on the " + rn("marketing") + " svm",
+			input:            ClusterStr + "disable iscsi service on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},

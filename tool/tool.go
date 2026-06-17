@@ -39,6 +39,14 @@ type Autosize struct {
 	ShrinkThreshold string `json:"shrink_threshold,omitzero" jsonschema:"percentage of auto shrinkage"`
 }
 
+type SnapshotPolicyCreate struct {
+	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM      string `json:"svm_name" jsonschema:"SVM name"`
+	Name     string `json:"name" jsonschema:"snapshot policy name"`
+	Schedule string `json:"schedule" jsonschema:"schedule of snapshot policy"`
+	Count    int    `json:"count" jsonschema:"number of snapshots"`
+}
+
 type SnapshotPolicy struct {
 	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM      string `json:"svm_name" jsonschema:"SVM name"`
@@ -166,7 +174,7 @@ type NetworkIPInterface struct {
 	SVM             string `json:"svm_name,omitzero" jsonschema:"SVM name"`
 	IPSpace         string `json:"ipspace_name,omitzero" jsonschema:"ipspace name"`
 	Name            string `json:"name" jsonschema:"name of the interface"`
-	Scope           string `json:"scope" jsonschema:"scope of network interface(e.g., 'cluster', 'svm')"`
+	Scope           string `json:"scope,omitzero" jsonschema:"scope of network interface(e.g., 'cluster', 'svm')"`
 	IPAddress       string `json:"ip.address,omitzero" jsonschema:"IP address for the interface"`
 	IPNetmask       string `json:"ip.netmask,omitzero" jsonschema:"IP netmask of the interface"`
 	Subnet          string `json:"subnet_name,omitzero" jsonschema:"subnet name"`

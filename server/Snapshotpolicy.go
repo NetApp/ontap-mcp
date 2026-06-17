@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (a *App) CreateSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicyCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -102,7 +102,7 @@ func (a *App) DeleteSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, 
 
 // newCreateSnapshotPolicy validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateSnapshotPolicy(in tool.SnapshotPolicy) (ontap.SnapshotPolicy, error) {
+func newCreateSnapshotPolicy(in tool.SnapshotPolicyCreate) (ontap.SnapshotPolicy, error) {
 	out := ontap.SnapshotPolicy{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
