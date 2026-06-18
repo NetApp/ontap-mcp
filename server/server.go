@@ -125,29 +125,25 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 	oauthEnabled := false
 
 	if cfg.McpAuth != nil {
-		if cfg.McpAuth.Issuer == "" {
-			logger.Error("McpAuth.issuer is required to enable OAuth; falling back to non-oauth workflow")
-		} else {
-			issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
-			if cfg.McpAuth.Audience != "" {
-				audience = strings.TrimSpace(cfg.McpAuth.Audience)
-			}
-
-			if cfg.McpAuth.Alg != "" {
-				alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
-			}
-
-			if cfg.McpAuth.Scope != "" {
-				scope = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Scope))
-			}
-
-			jwksURI, err = getJwksURI(issuer, httpClient)
-			if err != nil {
-				logger.Error("Error to find jwks_uri based on issuer data. http server failed to start", slog.Any("error", err))
-				os.Exit(1)
-			}
-			oauthEnabled = true
+		issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
+		audience = strings.TrimSpace(cfg.McpAuth.Audience)
+		if issuer == "" || audience == "" {
+			logger.Error("McpAuth.issuer and McpAuth.audience both are required to enable OAuth")
+			os.Exit(1)
 		}
+		jwksURI, err = getJwksURI(issuer, httpClient)
+		if err != nil {
+			logger.Error("failed to discover jwks_uri from issuer", slog.String("issuer", issuer), slog.Any("err", err))
+			os.Exit(1)
+		}
+		if cfg.McpAuth.Alg != "" {
+			alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
+		}
+
+		if cfg.McpAuth.Scope != "" {
+			scope = strings.TrimSpace(cfg.McpAuth.Scope)
+		}
+		oauthEnabled = true
 	} else {
 		logger.Error("OAuth bearer auth disabled as McpAuth is not configured. Falling back to non-oauth workflow")
 	}
@@ -190,7 +186,7 @@ func (a *App) StartServer() {
 		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
 	if a.oauthEnabled {
-		a.logger.Info("OAuth bearer auth enabled using McpAuth.issuer")
+		a.logger.Info("OAuth bearer auth enabled using McpAuth")
 	} else {
 		a.logger.Error("OAuth bearer auth disabled. Falling back to non-oauth workflow")
 	}

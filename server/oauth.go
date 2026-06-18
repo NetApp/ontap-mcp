@@ -16,10 +16,15 @@ import (
 )
 
 func (a *App) OAuthMiddleware(next http.Handler) http.Handler {
-	opts := &auth.RequireBearerTokenOptions{Scopes: []string{a.scope}}
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		opts.ResourceMetadataURL = a.resourceMetadataURL(r)
+		var scopes []string
+		if a.scope != "" {
+			scopes = []string{a.scope}
+		}
+		opts := &auth.RequireBearerTokenOptions{
+			Scopes:              scopes,
+			ResourceMetadataURL: a.resourceMetadataURL(r),
+		}
 		auth.RequireBearerToken(a.verifyBearerToken, opts)(next).ServeHTTP(w, r)
 	})
 }
@@ -99,13 +104,15 @@ func (a *App) validateIssuer(claims jwt.MapClaims) bool {
 	if !ok {
 		return false
 	}
-	return iss == a.issuer
+	return strings.TrimSuffix(iss, "/") == strings.TrimSuffix(a.issuer, "/")
 }
 
 func (a *App) validateScope(claims jwt.MapClaims) bool {
+	if a.scope == "" {
+		return true
+	}
 	scope, _ := claims["scope"].(string)
-	s := strings.Split(scope, " ")
-	return slices.Contains(s, a.scope)
+	return slices.Contains(strings.Fields(scope), a.scope)
 }
 
 func (a *App) resourceMetadataURL(r *http.Request) string {
