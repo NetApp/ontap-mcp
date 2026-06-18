@@ -1,18 +1,22 @@
 module github.com/Netapp/ontap-mcp-automation
 
-go 1.26.1
+go 1.26.3
+
+replace github.com/netapp/ontap-mcp => ../
 
 require (
 	github.com/carlmjohnson/requests v0.25.1
+	github.com/modelcontextprotocol/go-sdk v1.6.1
+	github.com/netapp/ontap-mcp v0.0.0-20260615122109-078d56edbf94
+	github.com/openai/openai-go/v3 v3.39.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
-	github.com/modelcontextprotocol/go-sdk v1.4.0
 	github.com/netapp/ontap-mcp v0.0.0-20260310161402-013e518b9fc4
 	github.com/openai/openai-go/v3 v3.26.0
 )
 
 require (
 	github.com/goccy/go-yaml v1.19.2 // indirect
-	github.com/google/jsonschema-go v0.4.2 // indirect
+	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/encoding v0.5.4 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
@@ -20,7 +24,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
-	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 )

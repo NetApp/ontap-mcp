@@ -34,15 +34,15 @@ Pollers:
 
 Below is a table describing the configuration options:
 
-| Option               | Type              | Description                                                                                                                                                                    | Default |
-|----------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| poller-name          | required          | The IP address or hostname of the ONTAP cluster.                                                                                                                               | -       |
-| `addr`               | required          | The IPv4, IPv6 or FQDN of the ONTAP cluster.                                                                                                                                   | -       |
-| `username`           |                   | The username for authentication.                                                                                                                                               | -       |
-| `password`           |                   | The password for authentication. Not recommended for production use. Use `credentials_script` or `credentials_file` instead. See [authentication](#authentication) for details | -       |
-| `use_insecure_tls`   | optional, bool    | Set to `true` to allow insecure TLS connections (e.g., self-signed certificates). Not recommended for production use.                                                          | false   |
-| `credentials_file`   | optional, string  | Path to a yaml file that contains cluster credentials. The file should have the same shape as ontap.yaml. Path can be relative to ontap.yaml or absolute.                      |         |
-| `credentials_script` | optional, section | Section that defines how ONTAP-MCP should fetch credentials via external script. See [here](#credentials-script) for details. 	                                                |         |
+| Option               | Type              | Description                                                                                                                                                                                                     | Default |
+|----------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| poller-name          | required          | The IP address or hostname of the ONTAP cluster.                                                                                                                                                                | -       |
+| `addr`               | required          | The IPv4, IPv6 or FQDN of the ONTAP cluster.                                                                                                                                                                    | -       |
+| `username`           |                   | The username for authentication.                                                                                                                                                                                | -       |
+| `password`           |                   | The password for authentication. Not recommended for production use. Use `credentials_script` or `credentials_file` instead. See [authentication](#authentication) for details                                  | -       |
+| `use_insecure_tls`   | optional, bool    | Set to `true` to allow insecure TLS connections (e.g., self-signed certificates). Not recommended for production use. When set in the `Defaults` section, an individual poller may override it back to `false`. | false   |
+| `credentials_file`   | optional, string  | Path to a yaml file that contains cluster credentials. The file should have the same shape as ontap.yaml. Path can be relative to ontap.yaml or absolute.                                                       |         |
+| `credentials_script` | optional, section | Section that defines how ONTAP-MCP should fetch credentials via external script. See [here](#credentials-script) for details. 	                                                                                 |         |
  
 # Authentication
 

@@ -146,7 +146,7 @@ func ontapValidator(response *http.Response) error {
 func (c *Client) newClient() *http.Client {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: c.poller.UseInsecureTLS, //nolint:gosec
+			InsecureSkipVerify: c.poller.InsecureTLS(), //nolint:gosec
 		},
 	}
 	aClient := &http.Client{
