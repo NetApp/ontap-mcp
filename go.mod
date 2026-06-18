@@ -8,6 +8,7 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/modelcontextprotocol/go-sdk v1.6.1
+	golang.org/x/sync v0.21.0
 )
 
 require (

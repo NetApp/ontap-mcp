@@ -2,8 +2,11 @@ package server
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/modelcontextprotocol/go-sdk/auth"
 	"io"
 	"log/slog"
 	"net/http"
@@ -13,76 +16,60 @@ import (
 )
 
 func (a *App) OAuthMiddleware(next http.Handler) http.Handler {
+	opts := &auth.RequireBearerTokenOptions{Scopes: []string{a.scope}}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Authorization header
-		authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
-		if authHeader == "" {
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Bearer token
-		parts := strings.Fields(authHeader)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") || parts[1] == "" {
-			a.sendUnauthorized(w, r)
-			return
-		}
-		tokenString := parts[1]
-
-		// Validate JWT token
-		token, err := jwt.Parse(tokenString, a.keyFunc, jwt.WithValidMethods([]string{a.algUsed}), jwt.WithLeeway(60*time.Second))
-		if err != nil {
-			slog.Error("failed to parse token", slog.Any("err", err))
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		if !token.Valid {
-			slog.Error("token is invalid")
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Get claims
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			slog.Error("claim type invalid")
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Validate audience
-		if !a.validateAudience(claims) {
-			slog.Error("audience invalid")
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Validate issuer
-		if !a.validateIssuer(claims) {
-			slog.Error("issuer invalid")
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Validate expiration
-		// Note: jwt.Parse already validates exp by default, but we explicitly check here for clarity
-		if !a.validateExpiration(claims) {
-			slog.Error("token has been expired")
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Validate scope, TODO: scope should be expected as mcp:tools else the validation of scope would be failed ?
-		if !a.validateScope(claims) {
-			slog.Error("scope insufficient")
-			a.sendUnauthorized(w, r)
-			return
-		}
-
-		// Authorization successful
-		next.ServeHTTP(w, r)
+		opts.ResourceMetadataURL = a.resourceMetadataURL(r)
+		auth.RequireBearerToken(a.verifyBearerToken, opts)(next).ServeHTTP(w, r)
 	})
+}
+
+func (a *App) verifyBearerToken(_ context.Context, tokenString string, _ *http.Request) (*auth.TokenInfo, error) {
+	token, err := jwt.Parse(tokenString, a.keyFunc, jwt.WithValidMethods([]string{a.algUsed}), jwt.WithLeeway(60*time.Second))
+	if err != nil {
+		slog.Error("failed to parse token", slog.Any("err", err))
+		return nil, fmt.Errorf("failed to parse token: %w", errors.Join(auth.ErrInvalidToken, err))
+	}
+
+	if !token.Valid {
+		slog.Error("token is invalid")
+		return nil, auth.ErrInvalidToken
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		slog.Error("claim type invalid")
+		return nil, fmt.Errorf("claim type invalid: %w", auth.ErrInvalidToken)
+	}
+
+	if !a.validateAudience(claims) {
+		slog.Error("audience invalid")
+		return nil, fmt.Errorf("audience invalid: %w", auth.ErrInvalidToken)
+	}
+
+	if !a.validateIssuer(claims) {
+		slog.Error("issuer invalid")
+		return nil, fmt.Errorf("issuer invalid: %w", auth.ErrInvalidToken)
+	}
+
+	if !a.validateScope(claims) {
+		slog.Error("scope insufficient")
+		return nil, fmt.Errorf("scope insufficient: %w", auth.ErrInvalidToken)
+	}
+
+	exp, err := claims.GetExpirationTime()
+	if err != nil || exp == nil {
+		slog.Error("token expiration missing or invalid", slog.Any("err", err))
+		return nil, fmt.Errorf("token expiration missing or invalid: %w", auth.ErrInvalidToken)
+	}
+
+	return &auth.TokenInfo{
+		Scopes:     []string{a.scope},
+		Expiration: exp.Add(60 * time.Second),
+		Extra: map[string]any{
+			"claims": claims,
+		},
+	}, nil
 }
 
 func (a *App) validateAudience(claims jwt.MapClaims) bool {
@@ -94,10 +81,10 @@ func (a *App) validateAudience(claims jwt.MapClaims) bool {
 	// aud can be a string or array of strings
 	switch v := aud.(type) {
 	case string:
-		return v == a.audienceRequired
+		return v == a.audience
 	case []any:
 		for _, as := range v {
-			if audStr, ok := as.(string); ok && audStr == a.audienceRequired {
+			if audStr, ok := as.(string); ok && audStr == a.audience {
 				return true
 			}
 		}
@@ -115,33 +102,18 @@ func (a *App) validateIssuer(claims jwt.MapClaims) bool {
 	return iss == a.issuer
 }
 
-func (a *App) validateExpiration(claims jwt.MapClaims) bool {
-	exp, ok := claims["exp"].(float64)
-	if !ok {
-		return false
-	}
-	// Allow 60 seconds of clock skew
-	return time.Now().Unix() < int64(exp)+60
-}
-
 func (a *App) validateScope(claims jwt.MapClaims) bool {
-	scope, ok := claims["scope"].(string)
-	if !ok {
-		return false
-	}
-	// Check if "mcp:tools" is present
+	scope, _ := claims["scope"].(string)
 	s := strings.Split(scope, " ")
-	return slices.Contains(s, "mcp:tools")
+	return slices.Contains(s, a.scope)
 }
 
-func (a *App) sendUnauthorized(w http.ResponseWriter, r *http.Request) {
+func (a *App) resourceMetadataURL(r *http.Request) string {
 	metadataURL := "http://" + r.Host + "/.well-known/oauth-protected-resource"
 	if r.TLS != nil {
 		metadataURL = "https://" + r.Host + "/.well-known/oauth-protected-resource"
 	}
-	w.Header().Set("WWW-Authenticate", fmt.Sprintf(`Bearer resource_metadata=%q, scope=%q`, metadataURL, "mcp:tools"))
-
-	http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	return metadataURL
 }
 
 func LoggingMiddleware(next http.Handler) http.Handler {

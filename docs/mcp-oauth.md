@@ -17,7 +17,8 @@ Below is a sample content of the `ontap.yaml` file:
 McpAuth:
   issuer: http://localhost:9090/realms/REALM
   alg: RS256
-  audience_required: http://localhost:8080
+  audience: http://localhost:8080
+  scope: mcp:tools
 
 Pollers:
   cluster1:
@@ -29,11 +30,12 @@ Pollers:
 
 Below is a table describing the configuration options in the `McpAuth` section:
 
-| Option              | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                   | Default          |
-|---------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| `issuer`            | required, string | The name of the issuer of the authentication token, used to generate the `jwks_URI` for fetching public keys. Examples: <br/> - https://AUTH0_DOMAIN (for Auth0 configuration) <br/> - http://KEYCLOAK_URL/realms/REALM (for Keycloak configuration)                                                                                                                                          |                  |
-| `alg`               | optional, string | The algorithm used to generate the token, which will validate the given Bearer token against public keys. Supported asymmetric algorithms include: <br/> - RSA Digital Signatures: `[RS256, RS384, RS512]` <br/> - RSA-PSS Digital Signatures: `[PS256, PS384, PS512]` <br/> - ECDSA (Elliptic Curve) Signatures: `[ES256, ES384, ES512]` <br/> - EdDSA (Edwards-curve) Signatures: `[EdDSA]` | `RS256`          |
-| `audience_required` | optional, string | The expected audience allowed to access MCP tools. The default is the MCP server URL, e.g., `http://localhost:8080`                                                                                                                                                                                                                                                                           | `MCP_SERVER_URL` |
+| Option     | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                   | Default |
+|------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| `issuer`   | required, string | The name of the issuer of the authentication token, used to generate the `jwks_uri` for fetching public keys. Examples: <br/> - https://AUTH0_DOMAIN (for Auth0 configuration) <br/> - http://KEYCLOAK_URL/realms/REALM (for Keycloak configuration)                                                                                                                                          |         |
+| `alg`      | optional, string | The algorithm used to generate the token, which will validate the given Bearer token against public keys. Supported asymmetric algorithms include: <br/> - RSA Digital Signatures: `[RS256, RS384, RS512]` <br/> - RSA-PSS Digital Signatures: `[PS256, PS384, PS512]` <br/> - ECDSA (Elliptic Curve) Signatures: `[ES256, ES384, ES512]` <br/> - EdDSA (Edwards-curve) Signatures: `[EdDSA]` | `RS256` |
+| `audience` | required, string | The expected audience allowed to access MCP tools.                                                                                                                                                                                                                                                                                                                                            |         |
+| `scope`    | optional, string | The expected scope allowed to access MCP tools. The default scope is empty                                                                                                                                                                                                                                                                                                                    |         |
 
 
 ### MCP Client Integration

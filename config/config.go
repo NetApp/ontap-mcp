@@ -47,9 +47,10 @@ type ONTAP struct {
 }
 
 type OAuth struct {
-	Issuer           string `yaml:"issuer,omitempty"`
-	AudienceRequired string `yaml:"audience_required,omitempty"`
-	Alg              string `yaml:"alg,omitempty"`
+	Issuer   string `yaml:"issuer"`
+	Audience string `yaml:"audience"`
+	Alg      string `yaml:"alg,omitempty"`
+	Scope    string `yaml:"scope,omitempty"`
 }
 
 type Poller struct {

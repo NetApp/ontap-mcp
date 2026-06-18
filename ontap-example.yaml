@@ -2,7 +2,8 @@
 McpAuth:
   issuer: https://dev-auth-mcptest.us.auth0.com
   alg: RS256
-  audience_required: http://localhost:8080
+  audience: http://localhost:8080
+  scope: mcp:tools
 
 Pollers:
   u2:

@@ -11,6 +11,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/oauthex"
 	"io"
 	"log/slog"
@@ -27,7 +29,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
@@ -36,6 +37,7 @@ import (
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
 	"github.com/netapp/ontap-mcp/version"
+	"golang.org/x/sync/singleflight"
 )
 
 type Options struct {
@@ -50,22 +52,24 @@ type Options struct {
 }
 
 type App struct {
-	logger           *slog.Logger
-	cfg              *config.ONTAP
-	options          Options
-	locks            *lock.Map
-	catalog          catalog.APICatalog
-	jwksURI          string
-	algUsed          string
-	oauthEnabled     bool
-	audienceRequired string
-	issuer           string
-	jwksMu           sync.RWMutex
-	jwksKeys         map[string]any
-	jwksFetched      time.Time
-	httpClient       *http.Client
-	versionCache     sync.Map
-	clusterIndex     map[string]string // lowercase name → canonical config name
+	logger       *slog.Logger
+	cfg          *config.ONTAP
+	options      Options
+	locks        *lock.Map
+	catalog      catalog.APICatalog
+	jwksURI      string
+	algUsed      string
+	scope        string
+	oauthEnabled bool
+	audience     string
+	issuer       string
+	jwksMu       sync.RWMutex
+	jwksKeys     map[string]any
+	jwksFetched  time.Time
+	jwksRefresh  singleflight.Group
+	httpClient   *http.Client
+	versionCache sync.Map
+	clusterIndex map[string]string // lowercase name → canonical config name
 }
 
 type cachedVersion struct {
@@ -116,7 +120,8 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 	jwksURI := ""
 	issuer := ""
 	alg := "RS256" // Default algorithm would be RS256
-	audReq := "http://" + o.Host + ":" + strconv.Itoa(o.Port)
+	scope := ""
+	audience := ""
 	oauthEnabled := false
 
 	if cfg.McpAuth != nil {
@@ -124,41 +129,43 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 			logger.Error("McpAuth.issuer is required to enable OAuth; falling back to non-oauth workflow")
 		} else {
 			issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
-			if cfg.McpAuth.AudienceRequired != "" {
-				audReq = strings.TrimSpace(cfg.McpAuth.AudienceRequired)
+			if cfg.McpAuth.Audience != "" {
+				audience = strings.TrimSpace(cfg.McpAuth.Audience)
 			}
 
 			if cfg.McpAuth.Alg != "" {
 				alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
 			}
 
+			if cfg.McpAuth.Scope != "" {
+				scope = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Scope))
+			}
+
 			jwksURI, err = getJwksURI(issuer, httpClient)
 			if err != nil {
-				logger.Error("Error to find jwks_uri based on issuer data. Falling back to non-oauth workflow", slog.Any("error", err))
-			} else {
-				if u, e := url.Parse(jwksURI); e != nil || (u.Scheme != "http" && u.Scheme != "https") {
-					return nil, fmt.Errorf("jwks_uri must be an http(s) URL, got %q", jwksURI)
-				}
-				oauthEnabled = true
+				logger.Error("Error to find jwks_uri based on issuer data. http server failed to start", slog.Any("error", err))
+				os.Exit(1)
 			}
+			oauthEnabled = true
 		}
 	} else {
-		logger.Error("OAuth bearer auth disabled; McpAuth is not configured. Falling back to non-oauth workflow")
+		logger.Error("OAuth bearer auth disabled as McpAuth is not configured. Falling back to non-oauth workflow")
 	}
 
 	app := &App{
-		cfg:              cfg,
-		logger:           logger,
-		options:          o,
-		locks:            lock.New(),
-		jwksURI:          jwksURI,
-		algUsed:          alg,
-		oauthEnabled:     oauthEnabled,
-		audienceRequired: audReq,
-		issuer:           issuer,
-		jwksKeys:         make(map[string]any),
-		httpClient:       httpClient,
-		clusterIndex:     index,
+		cfg:          cfg,
+		logger:       logger,
+		options:      o,
+		locks:        lock.New(),
+		jwksURI:      jwksURI,
+		algUsed:      alg,
+		scope:        scope,
+		oauthEnabled: oauthEnabled,
+		audience:     audience,
+		issuer:       issuer,
+		jwksKeys:     make(map[string]any),
+		httpClient:   httpClient,
+		clusterIndex: index,
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -397,29 +404,17 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	})
 
 	if a.oauthEnabled {
-		mux.HandleFunc("/.well-known/oauth-protected-resource", func(w http.ResponseWriter, _ *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			metadata := oauthex.ProtectedResourceMetadata{
-				Resource:             a.audienceRequired,
-				ScopesSupported:      []string{"mcp:tools"},
-				AuthorizationServers: []string{a.issuer},
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			if err := json.NewEncoder(w).Encode(metadata); err != nil {
-				a.logger.Error("metadata encoding failed", slog.Any("error", err))
-			}
-		})
+		metadata := &oauthex.ProtectedResourceMetadata{
+			Resource:             a.audience,
+			ScopesSupported:      []string{a.scope},
+			AuthorizationServers: []string{a.issuer},
+		}
+		mux.Handle("/.well-known/oauth-protected-resource", auth.ProtectedResourceMetadataHandler(metadata))
 
 		// MCP endpoint (OAuth authorization required, with logging)
 		mux.Handle("/", LoggingMiddleware(a.OAuthMiddleware(handler)))
 	} else {
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			// Skip MCP handler for health endpoint
-			if r.URL.Path == "/health" {
-				http.DefaultServeMux.ServeHTTP(w, r)
-				return
-			}
 
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -460,8 +455,8 @@ func (a *App) keyFunc(token *jwt.Token) (any, error) {
 	kid, _ := token.Header["kid"].(string)
 	alg, _ := token.Header["alg"].(string)
 	aud, _ := token.Claims.GetAudience()
-	if !slices.Contains(aud, a.audienceRequired) {
-		return nil, fmt.Errorf("unexpected audience (aud) %v; expected %q", aud, a.audienceRequired)
+	if !slices.Contains(aud, a.audience) {
+		return nil, fmt.Errorf("unexpected audience (aud) %v; expected %q", aud, a.audience)
 	}
 	if alg != a.algUsed {
 		return nil, fmt.Errorf("unexpected token alg %q; expected %q", alg, a.algUsed)
@@ -474,9 +469,7 @@ func (a *App) getAnyPublicKey(kid string) (any, error) {
 		return key, nil
 	}
 
-	a.jwksMu.RLock()
-	cacheFresh := time.Since(a.jwksFetched) <= jwksCacheTTL && len(a.jwksKeys) > 0
-	a.jwksMu.RUnlock()
+	cacheFresh := a.isJWKSCacheFresh()
 	if cacheFresh {
 		if kid == "" {
 			return nil, errors.New("jwt header is missing kid and jwks did not provide a single unambiguous key")
@@ -518,6 +511,31 @@ func (a *App) lookupCachedKey(kid string) (any, bool) {
 }
 
 func (a *App) refreshJWKS() error {
+	if a.isJWKSCacheFresh() {
+		return nil
+	}
+
+	_, err, _ := a.jwksRefresh.Do("jwks_refresh", func() (any, error) {
+		if a.isJWKSCacheFresh() {
+			return nil, nil
+		}
+		if err := a.fetchAndCacheJWKS(); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+
+	return err
+}
+
+func (a *App) isJWKSCacheFresh() bool {
+	a.jwksMu.RLock()
+	defer a.jwksMu.RUnlock()
+
+	return time.Since(a.jwksFetched) <= jwksCacheTTL && len(a.jwksKeys) > 0
+}
+
+func (a *App) fetchAndCacheJWKS() error {
 	req, err := http.NewRequest(http.MethodGet, a.jwksURI, http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed to create jwks request: %w", err)
@@ -1183,7 +1201,7 @@ func getSigningKeyAndMethod(token *jwt.Token, algoUpper string) error {
 }
 
 func getJwksURI(issuer string, httpClient *http.Client) (string, error) {
-	discoveryEndpoint := issuer + "/.well-known/openid-configuration"
+	discoveryEndpoint := strings.TrimSuffix(issuer, "/") + "/.well-known/openid-configuration"
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, discoveryEndpoint, http.NoBody)
 	if err != nil {
 		return "", err
@@ -1204,5 +1222,10 @@ func getJwksURI(issuer string, httpClient *http.Client) (string, error) {
 		return "", err
 	}
 
-	return OIDCconfigData.JwksURI, nil
+	jwksURI := OIDCconfigData.JwksURI
+	if u, e := url.Parse(jwksURI); e != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return "", fmt.Errorf("jwks_uri must be an http(s) URL, got %q", jwksURI)
+	}
+
+	return jwksURI, nil
 }
