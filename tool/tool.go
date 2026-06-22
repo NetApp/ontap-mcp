@@ -169,7 +169,7 @@ type QoSPolicy struct {
 type QoSPolicyModify struct {
 	Cluster         string          `json:"cluster_name" jsonschema:"cluster name"`
 	Operation       string          `json:"operation" jsonschema:"QoS policy operation type (e.g., update, delete)"`
-	SVM             string          `json:"svm_name,omitzero" jsonschema:"SVM name"`
+	SVM             string          `json:"svm_name" jsonschema:"SVM name"`
 	Name            string          `json:"name" jsonschema:"QoS policy name"`
 	QoSPolicyUpdate QoSPolicyUpdate `json:"qos_policy_update,omitzero" jsonschema:"update QoS policy operation"`
 }

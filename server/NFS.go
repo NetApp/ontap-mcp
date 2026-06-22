@@ -107,7 +107,7 @@ func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: export policy name or client_match and ro_rule and rw_rule")
+		return out, errors.New("at least one updatable field must be provided: new_export_policy or (client_match, ro_rule, rw_rule)")
 	}
 
 	return out, nil
@@ -204,7 +204,17 @@ func updateNFSExportPolicyValidation(in tool.NFSExportPolicyUpdate) (ontap.Expor
 		hasUpdate = true
 	}
 
-	if in.ClientMatch != "" && in.ROrule != "" && in.RWrule != "" {
+	if in.ClientMatch != "" || in.ROrule != "" || in.RWrule != "" {
+		if in.ClientMatch == "" {
+			return out, errors.New("client_match is required")
+		}
+		if in.ROrule == "" {
+			return out, errors.New("ro_rule is required")
+		}
+		if in.RWrule == "" {
+			return out, errors.New("rw_rule is required")
+		}
+
 		out.Rules = []ontap.Rule{
 			{
 				Clients: []ontap.ClientData{
@@ -214,11 +224,12 @@ func updateNFSExportPolicyValidation(in tool.NFSExportPolicyUpdate) (ontap.Expor
 				ROrule: strings.Split(in.ROrule, ","),
 			},
 		}
+
 		hasUpdate = true
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: export policy name or client_match and ro_rule and rw_rule")
+		return out, errors.New("at least one updatable field must be provided: new_export_policy or (client_match, ro_rule, rw_rule)")
 	}
 
 	return out, nil

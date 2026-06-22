@@ -172,7 +172,7 @@ func (a *App) ModifySVM(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 			},
 		}, nil, nil
 	default:
-		return errorResult(fmt.Errorf("unsupported type_operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
 	}
 }
 

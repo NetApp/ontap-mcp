@@ -45,7 +45,7 @@ func (a *StartCmd) Run(cli *CLI) error {
 	if err != nil {
 		return fmt.Errorf("failed to read config path=%s err=%w", cli.ConfigPath, err)
 	}
-	logger.Debug("", slog.String("toll mode", cli.ToolMode))
+	logger.Debug("tool mode", slog.String("tool_mode", cli.ToolMode))
 
 	opts := server.Options{
 		Host:           cli.Start.Host,

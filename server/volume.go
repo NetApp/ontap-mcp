@@ -237,7 +237,7 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: new_name, size, state, junction path, export policy OR autosize: mode, maxsize, minsize, growthreshold, shrinkthreshold OR qos: policy name, max iops, min iops, max mbps, min mbps")
+		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps)")
 	}
 
 	return out, nil
@@ -396,7 +396,7 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: new_name, size, state, junction path, export policy OR autosize: mode, maxsize, minsize, growthreshold, shrinkthreshold OR qos: policy name, max iops, min iops, max mbps, min mbps")
+		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps)")
 	}
 
 	return out, nil

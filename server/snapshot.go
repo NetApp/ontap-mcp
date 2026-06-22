@@ -150,7 +150,7 @@ func (a *App) ModifySnapshot(ctx context.Context, _ *mcp.CallToolRequest, parame
 			},
 		}, nil, nil
 	default:
-		return errorResult(fmt.Errorf("unsupported type_operation %q; supported values: restore, delete", parameters.Operation)), nil, nil
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: restore, delete", parameters.Operation)), nil, nil
 	}
 }
 
