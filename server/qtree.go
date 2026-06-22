@@ -9,7 +9,7 @@ import (
 	"github.com/netapp/ontap-mcp/tool"
 )
 
-func (a *App) CreateQtree(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.Qtree) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateQtree(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QtreeCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -99,16 +99,64 @@ func (a *App) DeleteQtree(ctx context.Context, _ *mcp.CallToolRequest, parameter
 	}, nil, nil
 }
 
-func newCreateQtree(in tool.Qtree) (ontap.Qtree, error) {
+func (a *App) ModifyQtree(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QtreeModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if err := validateQtree(parameters.SVM, parameters.Volume, parameters.Name); err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		qtreeUpdate, err := newUpdateQtree(tool.Qtree{
+			SVM:     parameters.SVM,
+			Volume:  parameters.Volume,
+			Name:    parameters.Name,
+			NewName: parameters.QtreeUpdate.NewName,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateQtree(ctx, parameters.SVM, parameters.Volume, parameters.Name, qtreeUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Qtree updated successfully"}}}, nil, nil
+	case "delete":
+		qtreeDelete, err := newDeleteQtree(tool.Qtree{
+			SVM:    parameters.SVM,
+			Volume: parameters.Volume,
+			Name:   parameters.Name,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.DeleteQtree(ctx, qtreeDelete)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Qtree deleted successfully"}}}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
+func newCreateQtree(in tool.QtreeCreate) (ontap.Qtree, error) {
 	out := ontap.Qtree{}
-	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
-	}
-	if in.Volume == "" {
-		return out, errors.New("volume name is required")
-	}
-	if in.Name == "" {
-		return out, errors.New("qtree name is required")
+	if err := validateQtree(in.SVM, in.Volume, in.Name); err != nil {
+		return out, err
 	}
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Volume = ontap.NameAndUUID{Name: in.Volume}
@@ -118,35 +166,47 @@ func newCreateQtree(in tool.Qtree) (ontap.Qtree, error) {
 
 func newUpdateQtree(in tool.Qtree) (ontap.Qtree, error) {
 	out := ontap.Qtree{}
-	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
+	hasUpdate := false
+
+	if err := validateQtree(in.SVM, in.Volume, in.Name); err != nil {
+		return out, err
 	}
-	if in.Volume == "" {
-		return out, errors.New("volume name is required")
-	}
-	if in.Name == "" {
-		return out, errors.New("qtree name is required")
-	}
+
 	out.Name = in.Name
 	if in.NewName != "" {
 		out.Name = in.NewName
+		hasUpdate = true
 	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: new_name")
+	}
+
 	return out, nil
 }
 
 func newDeleteQtree(in tool.Qtree) (ontap.Qtree, error) {
 	out := ontap.Qtree{}
-	if in.SVM == "" {
-		return out, errors.New("SVM name is required")
+
+	if err := validateQtree(in.SVM, in.Volume, in.Name); err != nil {
+		return out, err
 	}
-	if in.Volume == "" {
-		return out, errors.New("volume name is required")
-	}
-	if in.Name == "" {
-		return out, errors.New("qtree name is required")
-	}
+
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Volume = ontap.NameAndUUID{Name: in.Volume}
 	out.Name = in.Name
 	return out, nil
+}
+
+func validateQtree(svm, volume, name string) error {
+	if svm == "" {
+		return errors.New("SVM name is required")
+	}
+	if volume == "" {
+		return errors.New("volume name is required")
+	}
+	if name == "" {
+		return errors.New("qtree name is required")
+	}
+	return nil
 }

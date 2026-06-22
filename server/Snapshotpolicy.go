@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (a *App) CreateSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicy) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicyCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -100,9 +100,85 @@ func (a *App) DeleteSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, 
 	}, nil, nil
 }
 
+func (a *App) ModifySnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicyModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+	if parameters.Name == "" {
+		return nil, nil, errors.New("snapshot policy name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		snapshotPolicyUpdate, err := updateSnapshotPolicyValidation(parameters.SnapshotPolicyUpdate)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateSnapshotPolicy(ctx, snapshotPolicyUpdate, parameters.Name, parameters.SVM)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "Snapshot policy updated successfully"},
+			},
+		}, nil, nil
+	case "delete":
+		snapshotPolicyDelete := ontap.SnapshotPolicy{
+			SVM:  ontap.NameAndUUID{Name: parameters.SVM},
+			Name: parameters.Name,
+		}
+
+		err = client.DeleteSnapshotPolicy(ctx, snapshotPolicyDelete)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "Snapshot policy deleted successfully"},
+			},
+		}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
+func updateSnapshotPolicyValidation(in tool.SnapshotPolicyUpdate) (ontap.SnapshotPolicy, error) {
+	out := ontap.SnapshotPolicy{}
+
+	hasUpdate := false
+	if in.Comment != "" {
+		out.Comment = in.Comment
+		hasUpdate = true
+	}
+	if in.Enabled != "" {
+		out.Enabled = in.Enabled
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: comment or enabled")
+	}
+
+	return out, nil
+}
+
 // newCreateSnapshotPolicy validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateSnapshotPolicy(in tool.SnapshotPolicy) (ontap.SnapshotPolicy, error) {
+func newCreateSnapshotPolicy(in tool.SnapshotPolicyCreate) (ontap.SnapshotPolicy, error) {
 	out := ontap.SnapshotPolicy{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -140,15 +216,18 @@ func newUpdateSnapshotPolicy(in tool.SnapshotPolicy) (ontap.SnapshotPolicy, erro
 		return out, errors.New("snapshot policy name is required")
 	}
 
+	hasUpdate := false
 	if in.Comment != "" {
 		out.Comment = in.Comment
+		hasUpdate = true
 	}
 	if in.Enabled != "" {
 		out.Enabled = in.Enabled
+		hasUpdate = true
 	}
 
-	if out.Enabled == "" && out.Comment == "" {
-		return out, errors.New("at least one supported update field must be provided; enabled and comment are supported for update")
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: comment or enabled")
 	}
 
 	return out, nil
@@ -373,6 +452,80 @@ func (a *App) RemoveScheduleInSnapshotPolicy(ctx context.Context, _ *mcp.CallToo
 	}, nil, nil
 }
 
+func (a *App) ModifyScheduleInSnapshotPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotPolicyScheduleModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+	if parameters.PolicyName == "" {
+		return nil, nil, errors.New("snapshot policy name is required")
+	}
+	if parameters.ScheduleName == "" {
+		return nil, nil, errors.New("schedule name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		scheduleUpdate, err := updateScheduleInSnapshotPolicyValidation(parameters.SnapshotPolicyScheduleUpdate)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateScheduleInSnapshotPolicy(ctx, parameters.PolicyName, parameters.SVM, parameters.ScheduleName, scheduleUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "Schedule updated in snapshot policy successfully"},
+			},
+		}, nil, nil
+	case "remove":
+		err = client.RemoveScheduleInSnapshotPolicy(ctx, parameters.PolicyName, parameters.SVM, parameters.ScheduleName)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "Schedule removed from snapshot policy successfully"},
+			},
+		}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, remove", parameters.Operation)), nil, nil
+	}
+}
+
+func updateScheduleInSnapshotPolicyValidation(in tool.SnapshotPolicyScheduleUpdate) (ontap.SnapshotPolicySchedule, error) {
+	out := ontap.SnapshotPolicySchedule{}
+
+	hasUpdate := false
+	if in.Count != 0 {
+		out.Count = in.Count
+		hasUpdate = true
+	}
+	if in.SnapmirrorLabel != "" {
+		out.SnapmirrorLabel = in.SnapmirrorLabel
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: count or snapmirror_label")
+	}
+
+	return out, nil
+}
+
 // newAddScheduleInSnapshotPolicy validates and converts input for adding a schedule to a snapshot policy
 func newAddScheduleInSnapshotPolicy(in tool.SnapshotPolicySchedule) (ontap.SnapshotPolicySchedule, error) {
 	out := ontap.SnapshotPolicySchedule{}
@@ -411,15 +564,19 @@ func newUpdateScheduleInSnapshotPolicy(in tool.SnapshotPolicySchedule) (ontap.Sn
 	if in.ScheduleName == "" {
 		return out, errors.New("schedule name is required")
 	}
-	if in.Count == 0 && in.SnapmirrorLabel == "" {
-		return out, errors.New("at least one supported update field must be provided; count and snapmirror_label are supported for update")
-	}
 
+	hasUpdate := false
 	if in.SnapmirrorLabel != "" {
 		out.SnapmirrorLabel = in.SnapmirrorLabel
+		hasUpdate = true
 	}
 	if in.Count > 0 {
 		out.Count = in.Count
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: count or snapmirror_label")
 	}
 
 	return out, nil

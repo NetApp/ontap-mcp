@@ -38,6 +38,7 @@ type Options struct {
 	ReadOnly       bool
 	Stateless      bool
 	JSONResponse   bool
+	ToolMode       string
 	TestHTTPClient *http.Client // Optional HTTP client for testing
 }
 
@@ -110,140 +111,124 @@ func (a *App) createMCPServer() *mcp.Server {
 	})
 
 	addTool(a, server, "list_registered_clusters", descriptions.ListClusters, readOnlyAnnotation, a.ListClusters)
+	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicies, readOnlyAnnotation, a.ListQoSPolicies)
 
 	// operation on Volume object
 	addTool(a, server, "create_volume", descriptions.CreateVolume, createAnnotation, a.CreateVolume)
-	addTool(a, server, "update_volume", descriptions.UpdateVolume, updateAnnotation, a.UpdateVolume)
-	addTool(a, server, "delete_volume", descriptions.DeleteVolume, deleteAnnotation, a.DeleteVolume)
-
-	// operation on Snapshot object
-	addTool(a, server, "create_snapshot", descriptions.CreateSnapshot, createAnnotation, a.CreateSnapshot)
-	addTool(a, server, "delete_snapshot", descriptions.DeleteSnapshot, deleteAnnotation, a.DeleteSnapshot)
-	addTool(a, server, "restore_snapshot", descriptions.RestoreSnapshot, updateAnnotation, a.RestoreSnapshot)
-
-	// operation on Snapshot Policy object
 	addTool(a, server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
-	addTool(a, server, "update_snapshot_policy", descriptions.UpdateSnapshotPolicy, updateAnnotation, a.UpdateSnapshotPolicy)
-	addTool(a, server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
 	addTool(a, server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
 	addTool(a, server, "add_schedule_in_snapshot_policy", descriptions.AddScheduleInSnapshotPolicy, createAnnotation, a.AddScheduleInSnapshotPolicy)
-	addTool(a, server, "update_schedule_in_snapshot_policy", descriptions.UpdateScheduleInSnapshotPolicy, updateAnnotation, a.UpdateScheduleInSnapshotPolicy)
-	addTool(a, server, "remove_schedule_in_snapshot_policy", descriptions.RemoveScheduleInSnapshotPolicy, deleteAnnotation, a.RemoveScheduleInSnapshotPolicy)
-
-	// operation on QoS Policy object
-	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicies, readOnlyAnnotation, a.ListQoSPolicies)
 	addTool(a, server, "create_qos_policy", descriptions.CreateQoSPolicy, createAnnotation, a.CreateQoSPolicy)
-	addTool(a, server, "update_qos_policy", descriptions.UpdateQoSPolicy, updateAnnotation, a.UpdateQosPolicy)
-	addTool(a, server, "delete_qos_policy", descriptions.DeleteQoSPolicy, deleteAnnotation, a.DeleteQoSPolicy)
-
-	// operation on NFS Export Policy object
 	addTool(a, server, "create_nfs_export_policies", descriptions.CreateNFSExportPolicy, createAnnotation, a.CreateNFSExportPolicy)
-	addTool(a, server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, updateAnnotation, a.UpdateNFSExportPolicy)
-	addTool(a, server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, deleteAnnotation, a.DeleteNFSExportPolicy)
-
-	// operation on NFS Export Policy rules object
 	addTool(a, server, "create_nfs_export_policies_rules", descriptions.CreateNFSExportPolicyRules, createAnnotation, a.CreateNFSExportPoliciesRule)
-	addTool(a, server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, updateAnnotation, a.UpdateNFSExportPoliciesRule)
-	addTool(a, server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
-
-	// operation on SVM object
 	addTool(a, server, "create_svm", descriptions.CreateSVM, createAnnotation, a.CreateSVM)
-	addTool(a, server, "update_svm", descriptions.UpdateSVM, updateAnnotation, a.UpdateSVM)
-	addTool(a, server, "delete_svm", descriptions.DeleteSVM, deleteAnnotation, a.DeleteSVM)
-	// operation on SVM peer object
+	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
+	addTool(a, server, "create_nfs_service", descriptions.CreateNFSService, createAnnotation, a.CreateNFSService)
+	addTool(a, server, "create_cifs_service", descriptions.CreateCIFSService, createAnnotation, a.CreateCIFSService)
+	addTool(a, server, "create_qtree", descriptions.CreateQtree, createAnnotation, a.CreateQtree)
+	addTool(a, server, "create_nvme_service", descriptions.CreateNVMeService, createAnnotation, a.CreateNVMeService)
+	addTool(a, server, "create_iscsi_service", descriptions.CreateIscsiService, createAnnotation, a.CreateIscsiService)
+	addTool(a, server, "create_lun", descriptions.CreateLUN, createAnnotation, a.CreateLUN)
+	addTool(a, server, "create_network_ip_interface", descriptions.CreateNetworkIPInterface, createAnnotation, a.CreateNetworkIPInterface)
+	addTool(a, server, "create_nvme_subsystem", descriptions.CreateNVMeSubsystem, createAnnotation, a.CreateNVMeSubsystem)
+	addTool(a, server, "create_nvme_namespace", descriptions.CreateNVMeNamespace, createAnnotation, a.CreateNVMeNamespace)
+	addTool(a, server, "create_fcp_service", descriptions.CreateFCPService, createAnnotation, a.CreateFCPService)
+	addTool(a, server, "create_fc_interface", descriptions.CreateFCInterface, createAnnotation, a.CreateFCInterface)
+	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
+	addTool(a, server, "create_snapmirror", descriptions.CreateSnapMirror, createAnnotation, a.CreateSnapMirror)
+	addTool(a, server, "create_snapshot", descriptions.CreateSnapshot, createAnnotation, a.CreateSnapshot)
+	addTool(a, server, "init_update_snapmirror_transfer", descriptions.InitOrUpdateSnapMirrorTransfer, createAnnotation, a.InitOrUpdateSnapMirrorTransfer)
+
 	addTool(a, server, "delete_svm_peer", descriptions.DeleteSVMPeer, deleteAnnotation, a.DeleteSVMPeer)
 
-	// operation on CIFS share object
-	addTool(a, server, "create_cifs_share", descriptions.CreateCIFSShare, createAnnotation, a.CreateCIFSShare)
-	addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
-	addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
-
-	// NFS service (enable/disable/configure NFS on an SVM)
-	addTool(a, server, "create_nfs_service", descriptions.CreateNFSService, createAnnotation, a.CreateNFSService)
-	addTool(a, server, "update_nfs_service", descriptions.UpdateNFSService, updateAnnotation, a.UpdateNFSService)
-	addTool(a, server, "delete_nfs_service", descriptions.DeleteNFSService, deleteAnnotation, a.DeleteNFSService)
-
-	// CIFS service (enable/disable CIFS/SMB on an SVM via AD join)
-	addTool(a, server, "create_cifs_service", descriptions.CreateCIFSService, createAnnotation, a.CreateCIFSService)
-	addTool(a, server, "update_cifs_service", descriptions.UpdateCIFSService, updateAnnotation, a.UpdateCIFSService)
-	addTool(a, server, "delete_cifs_service", descriptions.DeleteCIFSService, deleteAnnotation, a.DeleteCIFSService)
-
-	// DNS configuration
 	addTool(a, server, "create_dns", descriptions.CreateDNS, createAnnotation, a.CreateDNS)
 	addTool(a, server, "delete_dns", descriptions.DeleteDNS, deleteAnnotation, a.DeleteDNS)
 
-	// operation on Qtree object
-	addTool(a, server, "create_qtree", descriptions.CreateQtree, createAnnotation, a.CreateQtree)
-	addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
-	addTool(a, server, "delete_qtree", descriptions.DeleteQtree, deleteAnnotation, a.DeleteQtree)
-
-	// operation on NVMe service object
-	addTool(a, server, "create_nvme_service", descriptions.CreateNVMeService, createAnnotation, a.CreateNVMeService)
-	addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
-	addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
-
-	// operation on iSCSI service object
-	addTool(a, server, "create_iscsi_service", descriptions.CreateIscsiService, createAnnotation, a.CreateIscsiService)
-	addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
-	addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
-
-	// operation on LUN object
-	addTool(a, server, "create_lun", descriptions.CreateLUN, createAnnotation, a.CreateLUN)
-	addTool(a, server, "update_lun", descriptions.UpdateLUN, updateAnnotation, a.UpdateLUN)
-	addTool(a, server, "delete_lun", descriptions.DeleteLUN, deleteAnnotation, a.DeleteLUN)
-
-	// operation on Network Interface object
-	addTool(a, server, "create_network_ip_interface", descriptions.CreateNetworkIPInterface, createAnnotation, a.CreateNetworkIPInterface)
-	addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNetworkIPInterface)
-	addTool(a, server, "delete_network_ip_interface", descriptions.DeleteNetworkIPInterface, deleteAnnotation, a.DeleteNetworkIPInterface)
-
-	// operation on NVMe subsystem object
-	addTool(a, server, "create_nvme_subsystem", descriptions.CreateNVMeSubsystem, createAnnotation, a.CreateNVMeSubsystem)
-	addTool(a, server, "update_nvme_subsystem", descriptions.UpdateNVMeSubsystem, updateAnnotation, a.UpdateNVMeSubsystem)
-	addTool(a, server, "delete_nvme_subsystem", descriptions.DeleteNVMeSubsystem, deleteAnnotation, a.DeleteNVMeSubsystem)
-
-	// operation on NVMe subsystem host object
 	addTool(a, server, "add_nvme_subsystem_host", descriptions.AddNVMeSubsystemHost, createAnnotation, a.AddNVMeSubsystemHost)
 	addTool(a, server, "remove_nvme_subsystem_host", descriptions.RemoveNVMeSubsystemHost, deleteAnnotation, a.RemoveNVMeSubsystemHost)
 
-	// operation on NVMe namespace object
-	addTool(a, server, "create_nvme_namespace", descriptions.CreateNVMeNamespace, createAnnotation, a.CreateNVMeNamespace)
-	addTool(a, server, "update_nvme_namespace", descriptions.UpdateNVMeNamespace, updateAnnotation, a.UpdateNVMeNamespace)
-	addTool(a, server, "delete_nvme_namespace", descriptions.DeleteNVMeNamespace, deleteAnnotation, a.DeleteNVMeNamespace)
-
-	// operation on NVMe subsystem map object
 	addTool(a, server, "create_nvme_subsystem_map", descriptions.CreateNVMeSubsystemMap, createAnnotation, a.CreateNVMeSubsystemMap)
 	addTool(a, server, "delete_nvme_subsystem_map", descriptions.DeleteNVMeSubsystemMap, deleteAnnotation, a.DeleteNVMeSubsystemMap)
 
-	// operation on FCP service object
-	addTool(a, server, "create_fcp_service", descriptions.CreateFCPService, createAnnotation, a.CreateFCPService)
-	addTool(a, server, "update_fcp_service", descriptions.UpdateFCPService, updateAnnotation, a.UpdateFCPService)
-	addTool(a, server, "delete_fcp_service", descriptions.DeleteFCPService, deleteAnnotation, a.DeleteFCPService)
-
-	// operation on FC interface object
-	addTool(a, server, "create_fc_interface", descriptions.CreateFCInterface, createAnnotation, a.CreateFCInterface)
-	addTool(a, server, "update_fc_interface", descriptions.UpdateFCInterface, updateAnnotation, a.UpdateFCInterface)
-	addTool(a, server, "delete_fc_interface", descriptions.DeleteFCInterface, deleteAnnotation, a.DeleteFCInterface)
-
-	// operation on igroup object
-	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
-	addTool(a, server, "update_igroup", descriptions.UpdateIGroup, updateAnnotation, a.UpdateIGroup)
-	addTool(a, server, "delete_igroup", descriptions.DeleteIGroup, deleteAnnotation, a.DeleteIGroup)
 	addTool(a, server, "add_igroup_initiator", descriptions.AddIGroupInitiator, createAnnotation, a.AddIGroupInitiator)
 	addTool(a, server, "remove_igroup_initiator", descriptions.RemoveIGroupInitiator, deleteAnnotation, a.RemoveIGroupInitiator)
 
-	// operation on LUN map object
 	addTool(a, server, "create_lun_map", descriptions.CreateLunMap, createAnnotation, a.CreateLunMap)
 	addTool(a, server, "delete_lun_map", descriptions.DeleteLunMap, deleteAnnotation, a.DeleteLunMap)
 
-	// operation on SnapMirror relationship object
-	addTool(a, server, "create_snapmirror", descriptions.CreateSnapMirror, createAnnotation, a.CreateSnapMirror)
-	addTool(a, server, "update_snapmirror", descriptions.UpdateSnapMirror, updateAnnotation, a.UpdateSnapMirror)
-	addTool(a, server, "delete_snapmirror", descriptions.DeleteSnapMirror, deleteAnnotation, a.DeleteSnapMirror)
-	addTool(a, server, "initialize_snapmirror", descriptions.InitializeSnapMirror, updateAnnotation, a.InitializeSnapMirror)
-	addTool(a, server, "update_snapmirror_transfer", descriptions.UpdateSnapMirrorTransfer, createAnnotation, a.UpdateSnapMirrorTransfer)
-	addTool(a, server, "break_snapmirror", descriptions.BreakSnapMirror, updateAnnotation, a.BreakSnapMirror)
-	addTool(a, server, "resync_snapmirror", descriptions.ResyncSnapMirror, updateAnnotation, a.ResyncSnapMirror)
+	if a.options.ToolMode == "both" || a.options.ToolMode == "legacy" {
+		addTool(a, server, "update_volume", descriptions.UpdateVolume, updateAnnotation, a.UpdateVolume)
+		addTool(a, server, "delete_volume", descriptions.DeleteVolume, deleteAnnotation, a.DeleteVolume)
+		addTool(a, server, "update_snapshot_policy", descriptions.UpdateSnapshotPolicy, updateAnnotation, a.UpdateSnapshotPolicy)
+		addTool(a, server, "delete_snapshot_policy", descriptions.DeleteSnapshotPolicy, deleteAnnotation, a.DeleteSnapshotPolicy)
+		addTool(a, server, "update_schedule_in_snapshot_policy", descriptions.UpdateScheduleInSnapshotPolicy, updateAnnotation, a.UpdateScheduleInSnapshotPolicy)
+		addTool(a, server, "remove_schedule_in_snapshot_policy", descriptions.RemoveScheduleInSnapshotPolicy, deleteAnnotation, a.RemoveScheduleInSnapshotPolicy)
+		addTool(a, server, "update_qos_policy", descriptions.UpdateQoSPolicy, updateAnnotation, a.UpdateQosPolicy)
+		addTool(a, server, "delete_qos_policy", descriptions.DeleteQoSPolicy, deleteAnnotation, a.DeleteQoSPolicy)
+		addTool(a, server, "update_nfs_export_policies", descriptions.UpdateNFSExportPolicy, updateAnnotation, a.UpdateNFSExportPolicy)
+		addTool(a, server, "delete_nfs_export_policies", descriptions.DeleteNFSExportPolicy, deleteAnnotation, a.DeleteNFSExportPolicy)
+		addTool(a, server, "update_nfs_export_policies_rules", descriptions.UpdateNFSExportPolicyRules, updateAnnotation, a.UpdateNFSExportPoliciesRule)
+		addTool(a, server, "delete_nfs_export_policies_rules", descriptions.DeleteNFSExportPolicyRules, deleteAnnotation, a.DeleteNFSExportPoliciesRule)
+		addTool(a, server, "update_svm", descriptions.UpdateSVM, updateAnnotation, a.UpdateSVM)
+		addTool(a, server, "delete_svm", descriptions.DeleteSVM, deleteAnnotation, a.DeleteSVM)
+		addTool(a, server, "update_cifs_share", descriptions.UpdateCIFSShare, updateAnnotation, a.UpdateCIFSShare)
+		addTool(a, server, "delete_cifs_share", descriptions.DeleteCIFSShare, deleteAnnotation, a.DeleteCIFSShare)
+		addTool(a, server, "update_nfs_service", descriptions.UpdateNFSService, updateAnnotation, a.UpdateNFSService)
+		addTool(a, server, "delete_nfs_service", descriptions.DeleteNFSService, deleteAnnotation, a.DeleteNFSService)
+		addTool(a, server, "update_cifs_service", descriptions.UpdateCIFSService, updateAnnotation, a.UpdateCIFSService)
+		addTool(a, server, "delete_cifs_service", descriptions.DeleteCIFSService, deleteAnnotation, a.DeleteCIFSService)
+		addTool(a, server, "update_qtree", descriptions.UpdateQtree, updateAnnotation, a.UpdateQtree)
+		addTool(a, server, "delete_qtree", descriptions.DeleteQtree, deleteAnnotation, a.DeleteQtree)
+		addTool(a, server, "update_nvme_service", descriptions.UpdateNVMeService, updateAnnotation, a.UpdateNVMeService)
+		addTool(a, server, "delete_nvme_service", descriptions.DeleteNVMeService, deleteAnnotation, a.DeleteNVMeService)
+		addTool(a, server, "update_iscsi_service", descriptions.UpdateIscsiService, updateAnnotation, a.UpdateIscsiService)
+		addTool(a, server, "delete_iscsi_service", descriptions.DeleteIscsiService, deleteAnnotation, a.DeleteIscsiService)
+		addTool(a, server, "update_lun", descriptions.UpdateLUN, updateAnnotation, a.UpdateLUN)
+		addTool(a, server, "delete_lun", descriptions.DeleteLUN, deleteAnnotation, a.DeleteLUN)
+		addTool(a, server, "update_network_ip_interface", descriptions.UpdateNetworkIPInterface, updateAnnotation, a.UpdateNetworkIPInterface)
+		addTool(a, server, "delete_network_ip_interface", descriptions.DeleteNetworkIPInterface, deleteAnnotation, a.DeleteNetworkIPInterface)
+		addTool(a, server, "update_nvme_subsystem", descriptions.UpdateNVMeSubsystem, updateAnnotation, a.UpdateNVMeSubsystem)
+		addTool(a, server, "delete_nvme_subsystem", descriptions.DeleteNVMeSubsystem, deleteAnnotation, a.DeleteNVMeSubsystem)
+		addTool(a, server, "update_nvme_namespace", descriptions.UpdateNVMeNamespace, updateAnnotation, a.UpdateNVMeNamespace)
+		addTool(a, server, "delete_nvme_namespace", descriptions.DeleteNVMeNamespace, deleteAnnotation, a.DeleteNVMeNamespace)
+		addTool(a, server, "update_fcp_service", descriptions.UpdateFCPService, updateAnnotation, a.UpdateFCPService)
+		addTool(a, server, "delete_fcp_service", descriptions.DeleteFCPService, deleteAnnotation, a.DeleteFCPService)
+		addTool(a, server, "update_fc_interface", descriptions.UpdateFCInterface, updateAnnotation, a.UpdateFCInterface)
+		addTool(a, server, "delete_fc_interface", descriptions.DeleteFCInterface, deleteAnnotation, a.DeleteFCInterface)
+		addTool(a, server, "update_igroup", descriptions.UpdateIGroup, updateAnnotation, a.UpdateIGroup)
+		addTool(a, server, "delete_igroup", descriptions.DeleteIGroup, deleteAnnotation, a.DeleteIGroup)
+		addTool(a, server, "update_snapmirror", descriptions.UpdateSnapMirror, updateAnnotation, a.UpdateSnapMirror)
+		addTool(a, server, "delete_snapmirror", descriptions.DeleteSnapMirror, deleteAnnotation, a.DeleteSnapMirror)
+		addTool(a, server, "initialize_snapmirror", descriptions.InitializeSnapMirror, updateAnnotation, a.InitializeSnapMirror)
+		addTool(a, server, "break_snapmirror", descriptions.BreakSnapMirror, updateAnnotation, a.BreakSnapMirror)
+		addTool(a, server, "resync_snapmirror", descriptions.ResyncSnapMirror, updateAnnotation, a.ResyncSnapMirror)
+		addTool(a, server, "delete_snapshot", descriptions.DeleteSnapshot, deleteAnnotation, a.DeleteSnapshot)
+		addTool(a, server, "restore_snapshot", descriptions.RestoreSnapshot, updateAnnotation, a.RestoreSnapshot)
+	}
+	if a.options.ToolMode == "both" || a.options.ToolMode == "multiplex" {
+		addTool(a, server, "modify_volume", descriptions.ModifyVolume, modifyAnnotation, a.ModifyVolume)
+		addTool(a, server, "modify_snapshot_policy", descriptions.ModifySnapshotPolicy, modifyAnnotation, a.ModifySnapshotPolicy)
+		addTool(a, server, "modify_schedule_in_snapshot_policy", descriptions.ModifyScheduleInSnapshotPolicy, modifyAnnotation, a.ModifyScheduleInSnapshotPolicy)
+		addTool(a, server, "modify_qos_policy", descriptions.ModifyQoSPolicy, modifyAnnotation, a.ModifyQoSPolicy)
+		addTool(a, server, "modify_nfs_export_policies", descriptions.ModifyNFSExportPolicy, modifyAnnotation, a.ModifyNFSExportPolicy)
+		addTool(a, server, "modify_nfs_export_policies_rules", descriptions.ModifyNFSExportPoliciesRule, modifyAnnotation, a.ModifyNFSExportPoliciesRule)
+		addTool(a, server, "modify_svm", descriptions.ModifySVM, modifyAnnotation, a.ModifySVM)
+		addTool(a, server, "modify_cifs_share", descriptions.ModifyCIFSShare, modifyAnnotation, a.ModifyCIFSShare)
+		addTool(a, server, "modify_nfs_service", descriptions.ModifyNFSService, modifyAnnotation, a.ModifyNFSService)
+		addTool(a, server, "modify_cifs_service", descriptions.ModifyCIFSService, modifyAnnotation, a.ModifyCIFSService)
+		addTool(a, server, "modify_qtree", descriptions.ModifyQtree, modifyAnnotation, a.ModifyQtree)
+		addTool(a, server, "modify_nvme_service", descriptions.ModifyNVMeService, modifyAnnotation, a.ModifyNVMeService)
+		addTool(a, server, "modify_iscsi_service", descriptions.ModifyIscsiService, modifyAnnotation, a.ModifyIscsiService)
+		addTool(a, server, "modify_lun", descriptions.ModifyLUN, modifyAnnotation, a.ModifyLUN)
+		addTool(a, server, "modify_network_ip_interface", descriptions.ModifyNetworkIPInterface, modifyAnnotation, a.ModifyNetworkIPInterface)
+		addTool(a, server, "modify_nvme_subsystem", descriptions.ModifyNVMeSubsystem, modifyAnnotation, a.ModifyNVMeSubsystem)
+		addTool(a, server, "modify_nvme_namespace", descriptions.ModifyNVMeNamespace, modifyAnnotation, a.ModifyNVMeNamespace)
+		addTool(a, server, "modify_fcp_service", descriptions.ModifyFCPService, modifyAnnotation, a.ModifyFCPService)
+		addTool(a, server, "modify_fc_interface", descriptions.ModifyFCInterface, modifyAnnotation, a.ModifyFCInterface)
+		addTool(a, server, "modify_igroup", descriptions.ModifyIGroup, modifyAnnotation, a.ModifyIGroup)
+		addTool(a, server, "modify_snapmirror", descriptions.ModifySnapMirror, modifyAnnotation, a.ModifySnapMirror)
+		addTool(a, server, "modify_snapshot", descriptions.ModifySnapshot, modifyAnnotation, a.ModifySnapshot)
+	}
 
 	if a.catalog != nil {
 		addTool(a, server, "list_ontap_endpoints", descriptions.ListOntapEndpoints, readOnlyAnnotation, a.ListOntapEndpoints)
@@ -653,6 +638,10 @@ var (
 		IdempotentHint:  true,
 	}
 	deleteAnnotation = mcp.ToolAnnotations{
+		DestructiveHint: new(true),
+		IdempotentHint:  true,
+	}
+	modifyAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}

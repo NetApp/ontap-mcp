@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (a *App) CreateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicy) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -74,11 +74,14 @@ func (a *App) UpdateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 // the corresponding ONTAP object ready to use via the REST API
 func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, error) {
 	out := ontap.ExportPolicy{}
+
+	hasUpdate := false
 	if in.ExportPolicy == "" {
 		return out, errors.New("export policy name is required")
 	}
 	if in.NewExportPolicy != "" {
 		out.Name = in.NewExportPolicy
+		hasUpdate = true
 	}
 
 	if in.ClientMatch != "" || in.ROrule != "" || in.RWrule != "" {
@@ -100,6 +103,11 @@ func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 				ROrule: strings.Split(in.ROrule, ","),
 			},
 		}
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: export policy name or client_match and ro_rule and rw_rule")
 	}
 
 	return out, nil
@@ -135,6 +143,87 @@ func (a *App) DeleteNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 	}, nil, nil
 }
 
+func (a *App) ModifyNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.ExportPolicy == "" {
+		return nil, nil, errors.New("export policy name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		nfsExportPolicyUpdate, err := updateNFSExportPolicyValidation(parameters.NFSExportPolicyUpdate)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateNFSExportPolicy(ctx, parameters.ExportPolicy, nfsExportPolicyUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "NFS Export Policy updated successfully"},
+			},
+		}, nil, nil
+	case "delete":
+		nfsExportPolicyDelete := ontap.ExportPolicy{
+			Name: parameters.ExportPolicy,
+		}
+
+		err = client.DeleteNFSExportPolicy(ctx, nfsExportPolicyDelete)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "NFS Export Policy deleted successfully"},
+			},
+		}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
+func updateNFSExportPolicyValidation(in tool.NFSExportPolicyUpdate) (ontap.ExportPolicy, error) {
+	out := ontap.ExportPolicy{}
+
+	hasUpdate := false
+	if in.NewExportPolicy != "" {
+		out.Name = in.NewExportPolicy
+		hasUpdate = true
+	}
+
+	if in.ClientMatch != "" && in.ROrule != "" && in.RWrule != "" {
+		out.Rules = []ontap.Rule{
+			{
+				Clients: []ontap.ClientData{
+					{Match: in.ClientMatch},
+				},
+				RWrule: strings.Split(in.RWrule, ","),
+				ROrule: strings.Split(in.ROrule, ","),
+			},
+		}
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: export policy name or client_match and ro_rule and rw_rule")
+	}
+
+	return out, nil
+}
+
 // newDeleteNFSExportPolicy validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
 func newDeleteNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, error) {
@@ -148,7 +237,7 @@ func newDeleteNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 
 // newCreateNFSExportPolicy validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, error) {
+func newCreateNFSExportPolicy(in tool.NFSExportPolicyCreate) (ontap.ExportPolicy, error) {
 	out := ontap.ExportPolicy{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -182,7 +271,7 @@ func newCreateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 	return out, nil
 }
 
-func (a *App) CreateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyRules) (*mcp.CallToolResult, any, error) {
+func (a *App) CreateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyRulesCreate) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -214,7 +303,7 @@ func (a *App) CreateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 
 // newCreateNFSExportPolicyRules validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, error) {
+func newCreateNFSExportPolicyRules(in tool.NFSExportPolicyRulesCreate) (ontap.Rule, error) {
 	out := ontap.Rule{}
 	if in.ClientMatch == "" {
 		return out, errors.New("client match is required")
@@ -277,16 +366,25 @@ func newUpdateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, er
 	if in.OldClientMatch == "" && in.OldRWrule == "" && in.OldROrule == "" {
 		return out, errors.New("old client match OR ro rule OR rw rules are required")
 	}
+
+	hasUpdate := false
 	if in.ClientMatch != "" {
 		out.Clients = []ontap.ClientData{
 			{Match: in.ClientMatch},
 		}
+		hasUpdate = true
 	}
 	if in.ROrule != "" {
 		out.ROrule = strings.Split(in.ROrule, ",")
+		hasUpdate = true
 	}
 	if in.RWrule != "" {
 		out.RWrule = strings.Split(in.RWrule, ",")
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: client_match or ro_rule or rw_rule")
 	}
 
 	return out, nil
@@ -320,6 +418,112 @@ func (a *App) DeleteNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 			&mcp.TextContent{Text: responseText},
 		},
 	}, nil, nil
+}
+
+func (a *App) ModifyNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NFSExportPolicyRulesModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.ExportPolicy == "" {
+		return nil, nil, errors.New("export policy name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		nfsExportPolicyRulesUpdate, err := updateNFSExportPoliciesRuleValidation(parameters.NFSExportPolicyRulesUpdate)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		oldClientMatch := parameters.NFSExportPolicyRulesUpdate.OldClientMatch
+		oldROrule := parameters.NFSExportPolicyRulesUpdate.OldROrule
+		oldRWrule := parameters.NFSExportPolicyRulesUpdate.OldRWrule
+
+		err = client.UpdateNFSExportPolicyRules(ctx, parameters.ExportPolicy, oldClientMatch, oldROrule, oldRWrule, nfsExportPolicyRulesUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "NFS Export Policy Rule updated successfully"},
+			},
+		}, nil, nil
+	case "delete":
+		nfsExportPolicyRulesDelete, err := deleteNFSExportPoliciesRuleValidation(parameters.NFSExportPolicyRulesUpdate)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.DeleteNFSExportPolicyRules(ctx, parameters.ExportPolicy, nfsExportPolicyRulesDelete)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "NFS Export Policy Rule deleted successfully"},
+			},
+		}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
+func updateNFSExportPoliciesRuleValidation(in tool.NFSExportPolicyRulesUpdate) (ontap.Rule, error) {
+	out := ontap.Rule{}
+	if in.OldClientMatch == "" && in.OldRWrule == "" && in.OldROrule == "" {
+		return out, errors.New("old client match OR old ro rule OR old rw rules are required")
+	}
+	hasUpdate := false
+	if in.ClientMatch != "" {
+		out.Clients = []ontap.ClientData{
+			{Match: in.ClientMatch},
+		}
+		hasUpdate = true
+	}
+	if in.ROrule != "" {
+		out.ROrule = strings.Split(in.ROrule, ",")
+		hasUpdate = true
+	}
+	if in.RWrule != "" {
+		out.RWrule = strings.Split(in.RWrule, ",")
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: client_match or ro_rule or rw_rule")
+	}
+
+	return out, nil
+}
+
+func deleteNFSExportPoliciesRuleValidation(in tool.NFSExportPolicyRulesUpdate) (ontap.Rule, error) {
+	out := ontap.Rule{}
+	if in.OldClientMatch == "" && in.OldROrule == "" && in.OldRWrule == "" {
+		return out, errors.New("old client match OR old ro rule OR old rw rules are required")
+	}
+
+	if in.OldClientMatch != "" {
+		out.ClientsStr = in.OldClientMatch
+	}
+
+	if in.OldROrule != "" {
+		out.ROruleStr = in.OldROrule
+	}
+
+	if in.OldRWrule != "" {
+		out.RWruleStr = in.OldRWrule
+	}
+
+	return out, nil
 }
 
 // newDeleteNFSExportPolicyRules validates the customer provided arguments and converts them into

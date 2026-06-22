@@ -98,6 +98,46 @@ func (a *App) DeleteIscsiService(ctx context.Context, _ *mcp.CallToolRequest, pa
 	}, nil, nil
 }
 
+func (a *App) ModifyIscsiService(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.IscsiServiceModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		iscsiServiceUpdate, err := newUpdateIscsiService(tool.IscsiService{SVM: parameters.SVM, Enabled: parameters.IscsiServiceUpdate.Enabled})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateIscsiService(ctx, parameters.SVM, iscsiServiceUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "iSCSI Service updated successfully"}}}, nil, nil
+	case "delete":
+		err = client.DeleteIscsiService(ctx, parameters.SVM)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "iSCSI Service deleted successfully"}}}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
 func (a *App) CreateNetworkIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NetworkIPInterface) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
@@ -164,7 +204,7 @@ func (a *App) DeleteNetworkIPInterface(ctx context.Context, _ *mcp.CallToolReque
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if err := newDeleteNetworkIPInterface(parameters); err != nil {
+	if err := validateNwInterface(parameters.Name, parameters.Scope, parameters.SVM); err != nil {
 		return nil, nil, err
 	}
 
@@ -185,6 +225,52 @@ func (a *App) DeleteNetworkIPInterface(ctx context.Context, _ *mcp.CallToolReque
 			&mcp.TextContent{Text: responseText},
 		},
 	}, nil, nil
+}
+
+func (a *App) ModifyNetworkIPInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.NetworkIPInterfaceModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if err := validateNwInterface(parameters.Name, parameters.Scope, parameters.SVM); err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		networkIPInterfaceUpdate, err := newUpdateNetworkIPInterface(tool.NetworkIPInterface{
+			Name:          parameters.Name,
+			Scope:         parameters.Scope,
+			SVM:           parameters.SVM,
+			AutoRevert:    parameters.NetworkIPInterfaceUpdate.AutoRevert,
+			ServicePolicy: parameters.NetworkIPInterfaceUpdate.ServicePolicy,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateNetworkIPInterface(ctx, parameters.Scope, parameters.Name, parameters.SVM, networkIPInterfaceUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Network IP interface updated successfully"}}}, nil, nil
+	case "delete":
+		err = client.DeleteNetworkIPInterface(ctx, parameters.Scope, parameters.Name, parameters.SVM)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "Network IP interface deleted successfully"}}}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
 }
 
 func newCreateIscsiService(in tool.IscsiService) (ontap.IscsiService, error) {
@@ -270,14 +356,9 @@ func newCreateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 
 func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInterface, error) {
 	out := ontap.NetworkIPInterface{}
-	if in.Name == "" {
-		return out, errors.New("network interface name is required")
-	}
-	if in.Scope == "" {
-		return out, errors.New("scope is required")
-	}
-	if in.Scope == "svm" && in.SVM == "" {
-		return out, errors.New("SVM name is required")
+
+	if err := validateNwInterface(in.Name, in.Scope, in.SVM); err != nil {
+		return out, err
 	}
 
 	hasUpdates := false
@@ -296,14 +377,14 @@ func newUpdateNetworkIPInterface(in tool.NetworkIPInterface) (ontap.NetworkIPInt
 	return out, nil
 }
 
-func newDeleteNetworkIPInterface(in tool.NetworkIPInterface) error {
-	if in.Name == "" {
+func validateNwInterface(name, scope, svm string) error {
+	if name == "" {
 		return errors.New("network interface name is required")
 	}
-	if in.Scope == "" {
+	if scope == "" {
 		return errors.New("scope is required")
 	}
-	if in.Scope == "svm" && in.SVM == "" {
+	if scope == "svm" && svm == "" {
 		return errors.New("SVM name is required")
 	}
 	return nil
