@@ -83,7 +83,7 @@ func TestLUN(t *testing.T) {
 		{
 			name:             "Clean LUN",
 			input:            ClusterStr + "delete lun " + rn("lundocnew") + " in volume " + rn("doc") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocnew") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
