@@ -39,6 +39,14 @@ type Autosize struct {
 	ShrinkThreshold string `json:"shrink_threshold,omitzero" jsonschema:"percentage of auto shrinkage"`
 }
 
+type SnapshotPolicyCreate struct {
+	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM      string `json:"svm_name" jsonschema:"SVM name"`
+	Name     string `json:"name" jsonschema:"snapshot policy name"`
+	Schedule string `json:"schedule" jsonschema:"schedule of snapshot policy"`
+	Count    int    `json:"count" jsonschema:"number of snapshots"`
+}
+
 type SnapshotPolicy struct {
 	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM      string `json:"svm_name" jsonschema:"SVM name"`
