@@ -245,7 +245,7 @@ func (a *Agent) ChatWithResponse(ctx context.Context, t *testing.T, userMessage 
 				failedTool = toolName
 				argsUsed = args
 				errFound = err
-				slog.Warn("LLM will retry", slog.String("tool", toolName), slog.Any("args", args), slog.Any("input", userMessage), slog.Any("error", err))
+				slog.Warn("LLM will retry", slog.String("tool", toolName), slog.Any("args", args), slog.String("input", userMessage), slog.Any("error", err))
 
 				result = "Error: " + err.Error()
 			}

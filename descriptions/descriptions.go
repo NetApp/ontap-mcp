@@ -43,13 +43,13 @@ const RestoreSnapshot = `Restore a volume to a snapshot on a cluster by cluster 
 const ModifySnapshot = `Restore and delete a snapshot of a volume on a cluster by cluster name.`
 
 const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster name.`
-const UpdateSnapshotPolicy = `Update a snapshot policy on a cluster by cluster name.`
+const UpdateSnapshotPolicy = `Update a snapshot policy comment and enable/disable snapshot policy on a cluster by cluster name.`
 const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster name.`
 const ModifySnapshotPolicy = `Update and delete a snapshot policy on a cluster by cluster name.`
 const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
 const AddScheduleInSnapshotPolicy = `Add a schedule entry to an existing snapshot policy on a cluster by cluster name.`
-const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy on a cluster by cluster name. At least one of count or snapmirror_label must be provided.`
+const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy by specifying the snapshot count or SnapMirror label on a cluster, identified by its cluster name. At least one of the following parameters—snapshot count or SnapMirror label—must be provided.`
 const RemoveScheduleInSnapshotPolicy = `Remove a schedule entry from an existing snapshot policy on a cluster by cluster name.`
 const ModifyScheduleInSnapshotPolicy = `Update and remove a schedule entry in an existing snapshot policy on a cluster by cluster name.`
 
@@ -67,21 +67,21 @@ Units:
 - Fixed: *_iops fields are in IOPS; *_mbps fields are in MB/s.`
 
 const CreateQoSPolicy = `Create a QoS policy on a cluster by cluster name.`
-const UpdateQoSPolicy = `Update a QoS policy on a cluster by cluster name.`
+const UpdateQoSPolicy = `Update a QoS policy name, max throughput iops, min throughput iops, expected iops, peak iops and absolute min iops on a cluster by cluster name.`
 const DeleteQoSPolicy = `Delete a QoS policy on a cluster by cluster name.`
 const ModifyQoSPolicy = `Update and delete a QoS policy on a cluster by cluster name.`
 
 const CreateNFSExportPolicy = `Create NFS Export policies on a cluster by cluster name.`
-const UpdateNFSExportPolicy = `Update NFS Export policies on a cluster by cluster name.`
+const UpdateNFSExportPolicy = `Update NFS Export policies name, client match, read only rules, read write rules on a cluster by cluster name.`
 const DeleteNFSExportPolicy = `Delete NFS Export policies on a cluster by cluster name.`
 const ModifyNFSExportPolicy = `Update and delete NFS Export policies on a cluster by cluster name.`
 const CreateNFSExportPolicyRules = `Create NFS Export policies rules on a cluster by cluster name.`
-const UpdateNFSExportPolicyRules = `Update NFS Export policies rules on a cluster by cluster name.`
+const UpdateNFSExportPolicyRules = `Update NFS Export policies rules with client match, read only rules, read write rules on a cluster by cluster name.`
 const DeleteNFSExportPolicyRules = `Delete NFS Export policies rules on a cluster by cluster name.`
 const ModifyNFSExportPoliciesRule = `Update and delete NFS Export policies rules on a cluster by cluster name.`
 
 const CreateCIFSShare = `Create CIFS share on a cluster by cluster name.`
-const UpdateCIFSShare = `Update CIFS share on a cluster by cluster name.`
+const UpdateCIFSShare = `Update CIFS share path on a cluster by cluster name.`
 const DeleteCIFSShare = `Delete CIFS share on a cluster by cluster name.`
 const ModifyCIFSShare = `Update and delete a CIFS share on a cluster by cluster name.`
 
@@ -99,12 +99,12 @@ const CreateDNS = `Configure DNS on an SVM. Required before joining Active Direc
 const DeleteDNS = `Remove DNS configuration from an SVM.`
 
 const CreateQtree = `Create Qtree on a cluster by cluster name.`
-const UpdateQtree = `Update Qtree on a cluster by cluster name.`
+const UpdateQtree = `Update Qtree name on a cluster by cluster name.`
 const DeleteQtree = `Delete Qtree on a cluster by cluster name.`
 const ModifyQtree = `Update and delete Qtree on a cluster by cluster name.`
 
 const CreateNVMeService = `Create NVMe service on a cluster by cluster name.`
-const UpdateNVMeService = `Update NVMe service on a cluster by cluster name.`
+const UpdateNVMeService = `Update NVMe service admin state on a cluster by cluster name.`
 const DeleteNVMeService = `Delete NVMe service on a cluster by cluster name.`
 const ModifyNVMeService = `Update and delete NVMe service on a cluster by cluster name.`
 
@@ -114,12 +114,12 @@ const DeleteIscsiService = `Delete iSCSI service on a cluster by cluster name.`
 const ModifyIscsiService = `Update and delete iSCSI service on a cluster by cluster name.`
 
 const CreateNetworkIPInterface = `Create Network IP interface on a cluster by cluster name.`
-const UpdateNetworkIPInterface = `Update Network IP interface on a cluster by cluster name.`
+const UpdateNetworkIPInterface = `Update Network IP interface with auto revert enable/disable and service policy name on a cluster by cluster name.`
 const DeleteNetworkIPInterface = `Delete Network IP interface on a cluster by cluster name.`
 const ModifyNetworkIPInterface = `Update and delete Network IP interface on a cluster by cluster name.`
 
 const CreateNVMeSubsystem = `Create NVMe subsystem on a cluster by cluster name.`
-const UpdateNVMeSubsystem = `Update NVMe subsystem on a cluster by cluster name.`
+const UpdateNVMeSubsystem = `Update NVMe subsystem comment on a cluster by cluster name.`
 const DeleteNVMeSubsystem = `Delete NVMe subsystem on a cluster by cluster name.`
 const ModifyNVMeSubsystem = `Update and delete NVMe subsystem on a cluster by cluster name.`
 
@@ -127,7 +127,7 @@ const AddNVMeSubsystemHost = `Add a host NQN to an NVMe subsystem on a cluster b
 const RemoveNVMeSubsystemHost = `Remove a host NQN from an NVMe subsystem on a cluster by cluster name.`
 
 const CreateNVMeNamespace = `Create NVMe namespace on a cluster by cluster name.`
-const UpdateNVMeNamespace = `Update NVMe namespace on a cluster by cluster name.`
+const UpdateNVMeNamespace = `Update NVMe namespace total provisioned size on a cluster by cluster name.`
 const DeleteNVMeNamespace = `Delete NVMe namespace on a cluster by cluster name.`
 const ModifyNVMeNamespace = `Update and delete NVMe namespace on a cluster by cluster name.`
 
@@ -135,22 +135,22 @@ const CreateNVMeSubsystemMap = `Create NVMe subsystem map on a cluster by cluste
 const DeleteNVMeSubsystemMap = `Delete NVMe subsystem map on a cluster by cluster name.`
 
 const CreateLUN = `Create a LUN on a specified volume and SVM with a given size and OS type.`
-const UpdateLUN = `Update a LUN: resize, rename, or toggle enabled/disabled state (online/offline).`
+const UpdateLUN = `Update a LUN: resize, rename, or toggle enable/disable state (online/offline).`
 const DeleteLUN = `Delete a LUN from a specified volume and SVM.`
 const ModifyLUN = `Update and delete a LUN from a specified volume and SVM.`
 
 const CreateFCPService = `Create FCP service on a cluster by cluster name.`
-const UpdateFCPService = `Update FCP service on a cluster by cluster name.`
+const UpdateFCPService = `Update FCP service admin state on a cluster by cluster name.`
 const DeleteFCPService = `Delete FCP service on a cluster by cluster name.`
 const ModifyFCPService = `Update and delete FCP service on a cluster by cluster name.`
 
 const CreateFCInterface = `Create FC interface on a cluster by cluster name.`
-const UpdateFCInterface = `Update FC interface on a cluster by cluster name.`
+const UpdateFCInterface = `Update FC interface admin state, name of the FC port and node on which the FC port is located on a cluster by cluster name.`
 const DeleteFCInterface = `Delete FC interface on a cluster by cluster name.`
 const ModifyFCInterface = `Update and delete FC interface on a cluster by cluster name.`
 
 const CreateIGroup = `Create an igroup (initiator group) on a cluster by cluster name.`
-const UpdateIGroup = `Update an igroup on a cluster by cluster name.`
+const UpdateIGroup = `Update an igroup name, comment, host operating system on a cluster by cluster name.`
 const DeleteIGroup = `Delete an igroup on a cluster by cluster name.`
 const ModifyIGroup = `Update and delete an igroup on a cluster by cluster name.`
 const AddIGroupInitiator = `Add an initiator to an igroup on a cluster by cluster name.`
@@ -160,7 +160,7 @@ const CreateLunMap = `Create a LUN map on a cluster by cluster name. Maps a LUN 
 const DeleteLunMap = `Delete a LUN map on a cluster by cluster name. Removes the mapping between a LUN and an igroup.`
 
 const CreateSnapMirror = `Create a SnapMirror relationship on a cluster by cluster name.`
-const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the policy and transfer schedule of an existing relationship identified by its destination SVM and volume.`
+const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the snapmirror policy, snapmirror relationship state and transfer schedule of an existing relationship identified by its destination SVM and volume.`
 const DeleteSnapMirror = `Delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
 const ModifySnapMirror = `Update and delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
 const InitializeSnapMirror = `Initialize a SnapMirror relationship on a cluster by cluster name. Starts the baseline transfer from source to destination. Identifies the relationship by destination SVM and volume names.`
@@ -179,7 +179,7 @@ const DescribeOntapEndpoint = `Get filterable query params for an endpoint. Call
 Pass cluster_name to automatically filter out fields and filters not available in that cluster's ONTAP version.`
 
 const CreateSVM = `Create an SVM on a cluster by cluster name.`
-const UpdateSVM = `Update an SVM on a cluster by cluster name.`
+const UpdateSVM = `Update an SVM name, comment, or SVM state on a cluster by cluster name.`
 const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
 const ModifySVM = `Update and delete an SVM on a cluster by cluster name.`
 const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and local SVM name. The peer relationship UUID is looked up internally using the svm.name filter.`
