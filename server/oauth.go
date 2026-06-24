@@ -77,8 +77,12 @@ func (a *App) verifyBearerToken(_ context.Context, tokenString string, _ *http.R
 		return nil, fmt.Errorf("token expiration missing or invalid: %w", auth.ErrInvalidToken)
 	}
 
+	var scopes []string
+	if a.scope != "" {
+		scopes = []string{a.scope}
+	}
 	return &auth.TokenInfo{
-		Scopes:     []string{a.scope},
+		Scopes:     scopes,
 		Expiration: exp.Time,
 		Extra: map[string]any{
 			"claims": claims,
@@ -138,7 +142,8 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		slog.Debug("", slog.String("method", r.Method), slog.String("urlPath", r.URL.Path), slog.String("RemoteAddr", r.RemoteAddr))
 
 		if r.Method == http.MethodPost && r.Body != nil {
-			bodyBytes, err := io.ReadAll(r.Body)
+			bodyBytes, err := io.ReadAll(io.LimitReader(r.Body, 4096))
+			_ = r.Body.Close()
 			if err != nil {
 				slog.Error("Error reading body", slog.Any("err", err))
 			} else {

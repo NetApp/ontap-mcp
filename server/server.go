@@ -402,9 +402,13 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	})
 
 	if a.oauthEnabled {
+		var scopesSupported []string
+		if a.scope != "" {
+			scopesSupported = []string{a.scope}
+		}
 		metadata := &oauthex.ProtectedResourceMetadata{
 			Resource:             a.audience,
-			ScopesSupported:      []string{a.scope},
+			ScopesSupported:      scopesSupported,
 			AuthorizationServers: []string{a.issuer},
 		}
 		mux.Handle("/.well-known/oauth-protected-resource", auth.ProtectedResourceMetadataHandler(metadata))
