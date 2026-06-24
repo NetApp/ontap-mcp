@@ -510,7 +510,10 @@ func updateScheduleInSnapshotPolicyValidation(in tool.SnapshotPolicyScheduleUpda
 	out := ontap.SnapshotPolicySchedule{}
 
 	hasUpdate := false
-	if in.Count != 0 {
+	if in.Count < 0 {
+		return out, errors.New("count must be greater than 0")
+	}
+	if in.Count > 0 {
 		out.Count = in.Count
 		hasUpdate = true
 	}

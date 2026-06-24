@@ -395,7 +395,7 @@ func newUpdateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, er
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: client_match or ro_rule or rw_rule")
+		return out, errors.New("at least one updatable field must be provided: client or ro_rule or rw_rule")
 	}
 
 	return out, nil
@@ -510,7 +510,7 @@ func updateNFSExportPoliciesRuleValidation(in tool.NFSExportPolicyRulesUpdate) (
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: client_match or ro_rule or rw_rule")
+		return out, errors.New("at least one updatable field must be provided: client or ro_rule or rw_rule")
 	}
 
 	return out, nil

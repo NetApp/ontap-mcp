@@ -166,7 +166,7 @@ The ONTAP MCP server exposes mutating tools in two naming conventions, controlle
 | `multiplex` | Registers a single `modify_*` tool per resource type that handles both update and delete in one call. |
 | `both` | Registers both conventions simultaneously. This is the default. |
 
-All `create_*` tools, `delete_svm_peer`, `create_dns`, and `delete_dns` are always registered regardless of tool mode.
+Tool mode only controls whether the per-resource `update_*`/`delete_*` tools and/or the multiplexed `modify_*` tools are registered; all `create_*` tools, other mutating tools not covered by tool-mode (e.g., `add_*`/`remove_*`, `*_map`), plus `delete_svm_peer`, `create_dns`, and `delete_dns` are always registered regardless of tool mode.
 
 ### Modify tools (available in `multiplex` or `both` mode)
 

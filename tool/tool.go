@@ -13,11 +13,8 @@ type VolumeCreate struct {
 	Volume       string    `json:"volume_name" jsonschema:"volume name"`
 	Aggregate    string    `json:"aggregate_name" jsonschema:"aggregate name"`
 	JunctionPath string    `json:"nas.path,omitzero" jsonschema:"junction path"`
-	NewVolume    string    `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
 	Size         string    `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	State        string    `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
 	ExportPolicy string    `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
-	Autosize     Autosize  `json:"autosize,omitzero" jsonschema:"autosize"`
 	QoS          VolumeQoS `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
 	Type         string    `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
 }
