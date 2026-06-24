@@ -189,3 +189,59 @@ func TestInsecureTLS_NilFieldIsFalse(t *testing.T) {
 
 	assert.False(t, poller.InsecureTLS())
 }
+
+func TestReadConfig_AlgAcceptsScalar(t *testing.T) {
+	yamlContent := `
+McpAuth:
+  issuer: https://issuer.test
+  audience: mcp-aud
+  alg: RS256
+`
+	dir := t.TempDir()
+	path := filepath.Join(dir, "ontap.yaml")
+	if err := os.WriteFile(path, []byte(yamlContent), 0o600); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := ReadConfig(path)
+	assert.Nil(t, err)
+	assert.NotNil(t, cfg.McpAuth)
+	assert.Equal(t, []string(cfg.McpAuth.Alg), []string{"RS256"})
+}
+
+func TestReadConfig_AlgAcceptsList(t *testing.T) {
+	yamlContent := `
+McpAuth:
+  issuer: https://issuer.test
+  audience: mcp-aud
+  alg: [RS256, ES256]
+`
+	dir := t.TempDir()
+	path := filepath.Join(dir, "ontap.yaml")
+	if err := os.WriteFile(path, []byte(yamlContent), 0o600); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := ReadConfig(path)
+	assert.Nil(t, err)
+	assert.NotNil(t, cfg.McpAuth)
+	assert.Equal(t, []string(cfg.McpAuth.Alg), []string{"RS256", "ES256"})
+}
+
+func TestReadConfig_AlgOmittedIsEmpty(t *testing.T) {
+	yamlContent := `
+McpAuth:
+  issuer: https://issuer.test
+  audience: mcp-aud
+`
+	dir := t.TempDir()
+	path := filepath.Join(dir, "ontap.yaml")
+	if err := os.WriteFile(path, []byte(yamlContent), 0o600); err != nil {
+		t.Fatalf("write temp config: %v", err)
+	}
+
+	cfg, err := ReadConfig(path)
+	assert.Nil(t, err)
+	assert.NotNil(t, cfg.McpAuth)
+	assert.Equal(t, len(cfg.McpAuth.Alg), 0)
+}

@@ -3,20 +3,13 @@ package server
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/rsa"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/oauthex"
 	"io"
 	"log/slog"
-	"math/big"
 	"net/http"
 	"net/url"
 	"os"
@@ -58,13 +51,15 @@ type App struct {
 	locks        *lock.Map
 	catalog      catalog.APICatalog
 	jwksURI      string
-	algUsed      string
+	algOverride  []string
 	scope        string
 	oauthEnabled bool
 	audience     string
 	issuer       string
 	jwksMu       sync.RWMutex
 	jwksKeys     map[string]any
+	derivedAlgs  map[string]bool
+	keyAlg       map[string]string
 	jwksFetched  time.Time
 	jwksRefresh  singleflight.Group
 	httpClient   *http.Client
@@ -119,26 +114,22 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 
 	jwksURI := ""
 	issuer := ""
-	alg := "RS256" // Default algorithm would be RS256
 	scope := ""
 	audience := ""
 	oauthEnabled := false
+	var algOverride []string
 
 	if cfg.McpAuth != nil {
 		issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
 		audience = strings.TrimSpace(cfg.McpAuth.Audience)
 		if issuer == "" || audience == "" {
-			logger.Error("McpAuth.issuer and McpAuth.audience both are required to enable OAuth")
-			os.Exit(1)
+			return nil, errors.New("McpAuth.issuer and McpAuth.audience both are required to enable OAuth")
 		}
-		jwksURI, err = getJwksURI(issuer, httpClient)
+		jwksURI, err = getJwksURI(issuer, httpClient, logger)
 		if err != nil {
-			logger.Error("failed to discover jwks_uri from issuer", slog.String("issuer", issuer), slog.Any("err", err))
-			os.Exit(1)
+			return nil, fmt.Errorf("failed to discover jwks_uri from issuer %s, Error: %w", issuer, err)
 		}
-		if cfg.McpAuth.Alg != "" {
-			alg = strings.ToUpper(strings.TrimSpace(cfg.McpAuth.Alg))
-		}
+		algOverride = normalizeAlgs(cfg.McpAuth.Alg)
 
 		if cfg.McpAuth.Scope != "" {
 			scope = strings.TrimSpace(cfg.McpAuth.Scope)
@@ -154,14 +145,25 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		options:      o,
 		locks:        lock.New(),
 		jwksURI:      jwksURI,
-		algUsed:      alg,
+		algOverride:  algOverride,
 		scope:        scope,
 		oauthEnabled: oauthEnabled,
 		audience:     audience,
 		issuer:       issuer,
 		jwksKeys:     make(map[string]any),
+		derivedAlgs:  make(map[string]bool),
+		keyAlg:       make(map[string]string),
 		httpClient:   httpClient,
 		clusterIndex: index,
+	}
+
+	// When OAuth is enabled, pre-warm the JWKS so a misconfigured issuer fails
+	// fast at startup. With no explicit algorithm override this also derives the
+	// permitted signing algorithms from the issuer's published keys.
+	if oauthEnabled {
+		if err := app.refreshJWKS(); err != nil {
+			return nil, fmt.Errorf("failed to fetch jwks from %s: %w", jwksURI, err)
+		}
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -441,247 +443,6 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		os.Exit(1)
 	}
 	a.logger.Info("mcp server shutdown gracefully")
-}
-
-func (a *App) keyFunc(token *jwt.Token) (any, error) {
-	if err := getSigningKeyAndMethod(token, a.algUsed); err != nil {
-		return nil, err
-	}
-
-	kid, _ := token.Header["kid"].(string)
-	alg, _ := token.Header["alg"].(string)
-	aud, _ := token.Claims.GetAudience()
-	if !slices.Contains(aud, a.audience) {
-		return nil, fmt.Errorf("unexpected audience (aud) %v; expected %q", aud, a.audience)
-	}
-	if alg != a.algUsed {
-		return nil, fmt.Errorf("unexpected token alg %q; expected %q", alg, a.algUsed)
-	}
-	return a.getAnyPublicKey(kid)
-}
-
-func (a *App) getAnyPublicKey(kid string) (any, error) {
-	if key, ok := a.lookupCachedKey(kid); ok {
-		return key, nil
-	}
-
-	cacheFresh := a.isJWKSCacheFresh()
-	if cacheFresh {
-		if kid == "" {
-			return nil, errors.New("jwt header is missing kid and jwks did not provide a single unambiguous key")
-		}
-		return nil, fmt.Errorf("no jwks key found for kid %q", kid)
-	}
-
-	if err := a.refreshJWKS(); err != nil {
-		return nil, err
-	}
-
-	if key, ok := a.lookupCachedKey(kid); ok {
-		return key, nil
-	}
-
-	if kid == "" {
-		return nil, errors.New("jwt header is missing kid and jwks did not provide a single unambiguous key")
-	}
-	return nil, fmt.Errorf("no jwks key found for kid %q", kid)
-}
-
-func (a *App) lookupCachedKey(kid string) (any, bool) {
-	a.jwksMu.RLock()
-	defer a.jwksMu.RUnlock()
-
-	if time.Since(a.jwksFetched) > jwksCacheTTL || len(a.jwksKeys) == 0 {
-		return nil, false
-	}
-	if kid != "" {
-		key, ok := a.jwksKeys[kid]
-		return key, ok
-	}
-	if len(a.jwksKeys) == 1 {
-		for _, key := range a.jwksKeys {
-			return key, true
-		}
-	}
-	return nil, false
-}
-
-func (a *App) refreshJWKS() error {
-	if a.isJWKSCacheFresh() {
-		return nil
-	}
-
-	_, err, _ := a.jwksRefresh.Do("jwks_refresh", func() (any, error) {
-		if a.isJWKSCacheFresh() {
-			return nil, nil
-		}
-		if err := a.fetchAndCacheJWKS(); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	})
-
-	return err
-}
-
-func (a *App) isJWKSCacheFresh() bool {
-	a.jwksMu.RLock()
-	defer a.jwksMu.RUnlock()
-
-	return time.Since(a.jwksFetched) <= jwksCacheTTL && len(a.jwksKeys) > 0
-}
-
-func (a *App) fetchAndCacheJWKS() error {
-	req, err := http.NewRequest(http.MethodGet, a.jwksURI, http.NoBody)
-	if err != nil {
-		return fmt.Errorf("failed to create jwks request: %w", err)
-	}
-
-	resp, err := a.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to fetch jwks from %q: %w", a.jwksURI, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to fetch jwks from %q: status %d", a.jwksURI, resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read jwks response: %w", err)
-	}
-
-	var doc jwksResponse
-	if err := json.Unmarshal(body, &doc); err != nil {
-		return fmt.Errorf("failed to parse jwks response: %w", err)
-	}
-
-	keys := make(map[string]any)
-	anonymousIndex := 0
-	for _, k := range doc.Keys {
-		key, err := publicKeyFromJWK(k)
-		if err != nil {
-			a.logger.Warn("ignoring invalid jwk", slog.String("kid", k.Kid), slog.String("error", err.Error()))
-			continue
-		}
-		kid := strings.TrimSpace(k.Kid)
-		if kid == "" {
-			kid = fmt.Sprintf("__nokid_%d", anonymousIndex)
-			anonymousIndex++
-		}
-		keys[kid] = key
-	}
-
-	if len(keys) == 0 {
-		return errors.New("jwks does not contain any usable keys")
-	}
-
-	a.jwksMu.Lock()
-	a.jwksKeys = keys
-	a.jwksFetched = time.Now()
-	a.jwksMu.Unlock()
-
-	return nil
-}
-
-func publicKeyFromJWK(k jwkKey) (any, error) {
-	switch strings.ToUpper(k.Kty) {
-	case "RSA":
-		if k.N == "" || k.E == "" {
-			return nil, errors.New("RSA key missing required fields (n or e)")
-		}
-		return rsaPublicKeyFromJWK(k)
-	case "EC":
-		return ecdsaPublicKeyFromJWK(k)
-	case "OKP":
-		return edDSAPublicKeyFromJWK(k)
-	default:
-		return nil, fmt.Errorf("unsupported key type %q", k.Kty)
-	}
-}
-
-func rsaPublicKeyFromJWK(k jwkKey) (*rsa.PublicKey, error) {
-	nBytes, err := base64.RawURLEncoding.DecodeString(k.N)
-	if err != nil {
-		return nil, fmt.Errorf("invalid modulus n: %w", err)
-	}
-	eBytes, err := base64.RawURLEncoding.DecodeString(k.E)
-	if err != nil {
-		return nil, fmt.Errorf("invalid exponent e: %w", err)
-	}
-
-	if len(eBytes) == 0 {
-		return nil, errors.New("empty exponent e")
-	}
-
-	eInt := 0
-	for _, b := range eBytes {
-		eInt = (eInt << 8) | int(b)
-	}
-	if eInt <= 0 {
-		return nil, errors.New("invalid exponent e")
-	}
-
-	n := new(big.Int).SetBytes(nBytes)
-	if n.Sign() <= 0 {
-		return nil, errors.New("invalid modulus n")
-	}
-
-	return &rsa.PublicKey{N: n, E: eInt}, nil
-}
-
-func ecdsaPublicKeyFromJWK(k jwkKey) (*ecdsa.PublicKey, error) {
-	if k.X == "" || k.Y == "" {
-		return nil, errors.New("EC key missing required fields (x or y)")
-	}
-	xBytes, err := base64.RawURLEncoding.DecodeString(k.X)
-	if err != nil {
-		return nil, fmt.Errorf("invalid x coordinate: %w", err)
-	}
-	yBytes, err := base64.RawURLEncoding.DecodeString(k.Y)
-	if err != nil {
-		return nil, fmt.Errorf("invalid y coordinate: %w", err)
-	}
-
-	var curve elliptic.Curve
-	switch strings.ToUpper(k.Crv) {
-	case "P-256":
-		curve = elliptic.P256()
-	case "P-384":
-		curve = elliptic.P384()
-	case "P-521":
-		curve = elliptic.P521()
-	default:
-		return nil, fmt.Errorf("unsupported EC curve %q", k.Crv)
-	}
-
-	x := new(big.Int).SetBytes(xBytes)
-	y := new(big.Int).SetBytes(yBytes)
-	if !curve.IsOnCurve(x, y) {
-		return nil, errors.New("EC point is not on the configured curve")
-	}
-
-	return &ecdsa.PublicKey{Curve: curve, X: x, Y: y}, nil
-}
-
-func edDSAPublicKeyFromJWK(k jwkKey) (ed25519.PublicKey, error) {
-	if !strings.EqualFold(k.Crv, "Ed25519") {
-		return nil, fmt.Errorf("unsupported OKP curve %q", k.Crv)
-	}
-	if k.X == "" {
-		return nil, errors.New("OKP key missing required field x")
-	}
-
-	keyBytes, err := base64.RawURLEncoding.DecodeString(k.X)
-	if err != nil {
-		return nil, fmt.Errorf("invalid OKP x coordinate: %w", err)
-	}
-	if len(keyBytes) != ed25519.PublicKeySize {
-		return nil, fmt.Errorf("invalid Ed25519 public key size %d", len(keyBytes))
-	}
-
-	return ed25519.PublicKey(keyBytes), nil
 }
 
 type clusterInfo struct {
@@ -1131,97 +892,4 @@ func parseSize(size string) (int64, error) {
 	}
 
 	return 0, fmt.Errorf("invalid size format '%s'. Use '100MB', '2GB', '1TB', or raw bytes", size)
-}
-
-func getSigningKeyAndMethod(token *jwt.Token, algoUpper string) error {
-	var methodDetected jwt.SigningMethod
-
-	switch {
-	// --- Asymmetric RSA ---
-	case strings.HasPrefix(algoUpper, "RS"):
-		switch algoUpper {
-		case "RS256":
-			methodDetected = jwt.SigningMethodRS256
-		case "RS384":
-			methodDetected = jwt.SigningMethodRS384
-		case "RS512":
-			methodDetected = jwt.SigningMethodRS512
-		}
-
-	// --- Asymmetric RSA-PSS ---
-	case strings.HasPrefix(algoUpper, "PS"):
-		switch algoUpper {
-		case "PS256":
-			methodDetected = jwt.SigningMethodPS256
-		case "PS384":
-			methodDetected = jwt.SigningMethodPS384
-		case "PS512":
-			methodDetected = jwt.SigningMethodPS512
-		}
-
-	// --- Asymmetric Elliptic Curve (ECDSA) ---
-	case strings.HasPrefix(algoUpper, "ES"):
-		switch algoUpper {
-		case "ES256":
-			methodDetected = jwt.SigningMethodES256
-		case "ES384":
-			methodDetected = jwt.SigningMethodES384
-		case "ES512":
-			methodDetected = jwt.SigningMethodES512
-		}
-
-	// --- Asymmetric EdDSA (Edwards-curve) ---
-	case strings.HasPrefix(algoUpper, "ED"):
-		if algoUpper == "EDDSA" {
-			methodDetected = jwt.SigningMethodEdDSA
-		}
-	}
-
-	if methodDetected == nil {
-		return fmt.Errorf("unsupported signing algorithm %q", algoUpper)
-	}
-
-	if token.Method.Alg() != methodDetected.Alg() {
-		return fmt.Errorf("unexpected signing method in token header: %v, expected: %v", token.Method.Alg(), methodDetected.Alg())
-	}
-
-	if methodDetected == jwt.SigningMethodEdDSA {
-		// Detect Method Type Interface: Ensure it resolves to EdDSA's internal structure
-		_, isEdDSA := token.Method.(*jwt.SigningMethodEd25519)
-		if !isEdDSA {
-			return errors.New("token method type assertion mismatch for EdDSA")
-		}
-	}
-
-	return nil
-}
-
-func getJwksURI(issuer string, httpClient *http.Client) (string, error) {
-	discoveryEndpoint := strings.TrimSuffix(issuer, "/") + "/.well-known/openid-configuration"
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, discoveryEndpoint, http.NoBody)
-	if err != nil {
-		return "", err
-	}
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to fetch config, status: %d", resp.StatusCode)
-	}
-
-	var OIDCconfigData OIDCConfig
-	if err := json.NewDecoder(resp.Body).Decode(&OIDCconfigData); err != nil {
-		return "", err
-	}
-
-	jwksURI := OIDCconfigData.JwksURI
-	if u, e := url.Parse(jwksURI); e != nil || (u.Scheme != "http" && u.Scheme != "https") {
-		return "", fmt.Errorf("jwks_uri must be an http(s) URL, got %q", jwksURI)
-	}
-
-	return jwksURI, nil
 }

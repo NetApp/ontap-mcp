@@ -16,7 +16,7 @@ Below is a sample content of the `ontap.yaml` file:
 ```yaml
 McpAuth:
   issuer: http://localhost:9090/realms/REALM
-  alg: RS256
+  alg: [RS256, ES256] # optional; omit to derive from the issuer's JWKS
   audience: http://localhost:8080
   scope: mcp:tools
 
@@ -33,7 +33,7 @@ Below is a table describing the configuration options in the `McpAuth` section:
 | Option     | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                   | Default |
 |------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
 | `issuer`   | required, string | The name of the issuer of the authentication token, used to generate the `jwks_uri` for fetching public keys. Examples: <br/> - https://AUTH0_DOMAIN (for Auth0 configuration) <br/> - http://KEYCLOAK_URL/realms/REALM (for Keycloak configuration)                                                                                                                                          |         |
-| `alg`      | optional, string | The algorithm used to generate the token, which will validate the given Bearer token against public keys. Supported asymmetric algorithms include: <br/> - RSA Digital Signatures: `[RS256, RS384, RS512]` <br/> - RSA-PSS Digital Signatures: `[PS256, PS384, PS512]` <br/> - ECDSA (Elliptic Curve) Signatures: `[ES256, ES384, ES512]` <br/> - EdDSA (Edwards-curve) Signatures: `[EdDSA]` | `RS256` |
+| `alg`      | optional, string or list | The permitted token-signing algorithm(s) the server will accept when validating the Bearer token against the issuer's public keys. Accepts a single value (`alg: RS256`) or a list (`alg: [RS256, ES256]`). When omitted, the permitted algorithms are **derived automatically from the issuer's JWKS** (each key's `alg`, or inferred from its key type/curve; RSA keys without an explicit `alg` default to `RS256`). Set this only to override the derived set. Supported asymmetric algorithms include: <br/> - RSA Digital Signatures: `[RS256, RS384, RS512]` <br/> - RSA-PSS Digital Signatures: `[PS256, PS384, PS512]` <br/> - ECDSA (Elliptic Curve) Signatures: `[ES256, ES384, ES512]` <br/> - EdDSA (Edwards-curve) Signatures: `[EdDSA]` | derived from JWKS |
 | `audience` | required, string | The expected audience allowed to access MCP tools.                                                                                                                                                                                                                                                                                                                                            |         |
 | `scope`    | optional, string | The expected scope allowed to access MCP tools. The default scope is empty                                                                                                                                                                                                                                                                                                                    |         |
 
@@ -68,7 +68,6 @@ The ONTAP MCP server adheres to most of the mandatory requirements outlined in t
 - Token Algorithm Validation - Enforces strict security boundaries.
 - Token Scope Validation - Enforces strict security boundaries.
 - WWW-Authenticate Headers - Provides proper handling of `401 Unauthorized` responses.
-- Dynamic Client Registration - Supports RFC 7591 for seamless onboarding of MCP clients.
 
 The OAuth Discovery endpoint is available at:
 `/.well-known/oauth-protected-resource`
