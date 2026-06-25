@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -49,6 +50,8 @@ type App struct {
 	catalog      catalog.APICatalog
 	versionCache sync.Map
 	clusterIndex map[string]string // lowercase name → canonical config name
+	CertFile     string
+	KeyFile      string
 }
 
 type cachedVersion struct {
@@ -68,12 +71,23 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		index[key] = name
 	}
 
+	var certFile, keyFile string
+	if cfg.TLS != nil {
+		certFile = strings.TrimSpace(cfg.TLS.CertFile)
+		keyFile = strings.TrimSpace(cfg.TLS.KeyFile)
+		if (certFile == "") || (keyFile == "") {
+			return nil, fmt.Errorf("tls requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
+		}
+	}
+
 	app := &App{
 		cfg:          cfg,
 		logger:       logger,
 		options:      o,
 		locks:        lock.New(),
 		clusterIndex: index,
+		CertFile:     certFile,
+		KeyFile:      keyFile,
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -258,9 +272,19 @@ func (a *App) createMCPServer() *mcp.Server {
 func (a *App) runHTTPServer(server *mcp.Server) {
 	var handler http.Handler
 
-	address := a.options.Host + ":" + strconv.Itoa(a.options.Port)
-	a.logger.Info("starting MCP server over HTTP transport",
-		slog.String("address", address),
+	var urlPath, transportMethod string
+	address := net.JoinHostPort(a.options.Host, strconv.Itoa(a.options.Port))
+	if a.KeyFile != "" {
+		urlPath = fmt.Sprintf("https://%s", address) // nolint:perfsprint
+		transportMethod = "HTTPS"
+	} else {
+		urlPath = fmt.Sprintf("%s://%s", "http", address)
+		transportMethod = "HTTP"
+	}
+
+	a.logger.Info("starting MCP server over",
+		slog.String("transport", transportMethod),
+		slog.String("url", urlPath),
 		slog.String("host", a.options.Host),
 		slog.Int("port", a.options.Port))
 
@@ -316,7 +340,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	})
 
 	//goland:noinspection HttpUrlsUsage
-	a.logger.Info("MCP server endpoint available", slog.String("url", "http://"+address))
+	a.logger.Info("MCP server endpoint available", slog.String("url", urlPath))
 	a.logger.Info("Server ready to accept connections")
 
 	httpServer := &http.Server{
@@ -326,10 +350,21 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	if err := httpServer.ListenAndServe(); err != nil {
-		a.logger.Error("http server failed to start", slog.String("error", err.Error()))
-		os.Exit(1)
+	if a.KeyFile != "" {
+		if err := httpServer.ListenAndServeTLS(a.CertFile, a.KeyFile); err != nil {
+			a.logger.Error("http server failed to start", slog.String("error", err.Error()),
+				slog.String("url", urlPath),
+				slog.String("cert_file", a.CertFile),
+				slog.String("key_file", a.KeyFile))
+			os.Exit(1)
+		}
+	} else {
+		if err := httpServer.ListenAndServe(); err != nil {
+			a.logger.Error("http server failed to start", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
 	}
+
 	a.logger.Info("mcp server shutdown gracefully")
 }
 
