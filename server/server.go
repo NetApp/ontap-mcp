@@ -206,28 +206,28 @@ func (a *App) createMCPServer() *mcp.Server {
 		addTool(a, server, "restore_snapshot", descriptions.RestoreSnapshot, updateAnnotation, a.RestoreSnapshot)
 	}
 	if a.options.ToolMode == "both" || a.options.ToolMode == "multiplex" {
-		addTool(a, server, "modify_volume", descriptions.ModifyVolume, modifyAnnotation, a.ModifyVolume)
-		addTool(a, server, "modify_snapshot_policy", descriptions.ModifySnapshotPolicy, modifyAnnotation, a.ModifySnapshotPolicy)
-		addTool(a, server, "modify_schedule_in_snapshot_policy", descriptions.ModifyScheduleInSnapshotPolicy, modifyAnnotation, a.ModifyScheduleInSnapshotPolicy)
-		addTool(a, server, "modify_qos_policy", descriptions.ModifyQoSPolicy, modifyAnnotation, a.ModifyQoSPolicy)
-		addTool(a, server, "modify_nfs_export_policies", descriptions.ModifyNFSExportPolicy, modifyAnnotation, a.ModifyNFSExportPolicy)
-		addTool(a, server, "modify_nfs_export_policies_rules", descriptions.ModifyNFSExportPoliciesRule, modifyAnnotation, a.ModifyNFSExportPoliciesRule)
-		addTool(a, server, "modify_svm", descriptions.ModifySVM, modifyAnnotation, a.ModifySVM)
-		addTool(a, server, "modify_cifs_share", descriptions.ModifyCIFSShare, modifyAnnotation, a.ModifyCIFSShare)
-		addTool(a, server, "modify_nfs_service", descriptions.ModifyNFSService, modifyAnnotation, a.ModifyNFSService)
-		addTool(a, server, "modify_cifs_service", descriptions.ModifyCIFSService, modifyAnnotation, a.ModifyCIFSService)
-		addTool(a, server, "modify_qtree", descriptions.ModifyQtree, modifyAnnotation, a.ModifyQtree)
-		addTool(a, server, "modify_nvme_service", descriptions.ModifyNVMeService, modifyAnnotation, a.ModifyNVMeService)
-		addTool(a, server, "modify_iscsi_service", descriptions.ModifyIscsiService, modifyAnnotation, a.ModifyIscsiService)
-		addTool(a, server, "modify_lun", descriptions.ModifyLUN, modifyAnnotation, a.ModifyLUN)
-		addTool(a, server, "modify_network_ip_interface", descriptions.ModifyNetworkIPInterface, modifyAnnotation, a.ModifyNetworkIPInterface)
-		addTool(a, server, "modify_nvme_subsystem", descriptions.ModifyNVMeSubsystem, modifyAnnotation, a.ModifyNVMeSubsystem)
-		addTool(a, server, "modify_nvme_namespace", descriptions.ModifyNVMeNamespace, modifyAnnotation, a.ModifyNVMeNamespace)
-		addTool(a, server, "modify_fcp_service", descriptions.ModifyFCPService, modifyAnnotation, a.ModifyFCPService)
-		addTool(a, server, "modify_fc_interface", descriptions.ModifyFCInterface, modifyAnnotation, a.ModifyFCInterface)
-		addTool(a, server, "modify_igroup", descriptions.ModifyIGroup, modifyAnnotation, a.ModifyIGroup)
-		addTool(a, server, "modify_snapmirror", descriptions.ModifySnapMirror, modifyAnnotation, a.ModifySnapMirror)
-		addTool(a, server, "modify_snapshot", descriptions.ModifySnapshot, modifyAnnotation, a.ModifySnapshot)
+		addTool(a, server, "modify_volume", descriptions.ModifyVolume, updateAnnotation, a.ModifyVolume)
+		addTool(a, server, "modify_snapshot_policy", descriptions.ModifySnapshotPolicy, updateAnnotation, a.ModifySnapshotPolicy)
+		addTool(a, server, "modify_schedule_in_snapshot_policy", descriptions.ModifyScheduleInSnapshotPolicy, updateAnnotation, a.ModifyScheduleInSnapshotPolicy)
+		addTool(a, server, "modify_qos_policy", descriptions.ModifyQoSPolicy, updateAnnotation, a.ModifyQoSPolicy)
+		addTool(a, server, "modify_nfs_export_policies", descriptions.ModifyNFSExportPolicy, updateAnnotation, a.ModifyNFSExportPolicy)
+		addTool(a, server, "modify_nfs_export_policies_rules", descriptions.ModifyNFSExportPoliciesRule, updateAnnotation, a.ModifyNFSExportPoliciesRule)
+		addTool(a, server, "modify_svm", descriptions.ModifySVM, updateAnnotation, a.ModifySVM)
+		addTool(a, server, "modify_cifs_share", descriptions.ModifyCIFSShare, updateAnnotation, a.ModifyCIFSShare)
+		addTool(a, server, "modify_nfs_service", descriptions.ModifyNFSService, updateAnnotation, a.ModifyNFSService)
+		addTool(a, server, "modify_cifs_service", descriptions.ModifyCIFSService, updateAnnotation, a.ModifyCIFSService)
+		addTool(a, server, "modify_qtree", descriptions.ModifyQtree, updateAnnotation, a.ModifyQtree)
+		addTool(a, server, "modify_nvme_service", descriptions.ModifyNVMeService, updateAnnotation, a.ModifyNVMeService)
+		addTool(a, server, "modify_iscsi_service", descriptions.ModifyIscsiService, updateAnnotation, a.ModifyIscsiService)
+		addTool(a, server, "modify_lun", descriptions.ModifyLUN, updateAnnotation, a.ModifyLUN)
+		addTool(a, server, "modify_network_ip_interface", descriptions.ModifyNetworkIPInterface, updateAnnotation, a.ModifyNetworkIPInterface)
+		addTool(a, server, "modify_nvme_subsystem", descriptions.ModifyNVMeSubsystem, updateAnnotation, a.ModifyNVMeSubsystem)
+		addTool(a, server, "modify_nvme_namespace", descriptions.ModifyNVMeNamespace, updateAnnotation, a.ModifyNVMeNamespace)
+		addTool(a, server, "modify_fcp_service", descriptions.ModifyFCPService, updateAnnotation, a.ModifyFCPService)
+		addTool(a, server, "modify_fc_interface", descriptions.ModifyFCInterface, updateAnnotation, a.ModifyFCInterface)
+		addTool(a, server, "modify_igroup", descriptions.ModifyIGroup, updateAnnotation, a.ModifyIGroup)
+		addTool(a, server, "modify_snapmirror", descriptions.ModifySnapMirror, updateAnnotation, a.ModifySnapMirror)
+		addTool(a, server, "modify_snapshot", descriptions.ModifySnapshot, updateAnnotation, a.ModifySnapshot)
 	}
 
 	if a.catalog != nil {
@@ -638,10 +638,6 @@ var (
 		IdempotentHint:  true,
 	}
 	deleteAnnotation = mcp.ToolAnnotations{
-		DestructiveHint: new(true),
-		IdempotentHint:  true,
-	}
-	modifyAnnotation = mcp.ToolAnnotations{
 		DestructiveHint: new(true),
 		IdempotentHint:  true,
 	}

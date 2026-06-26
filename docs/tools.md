@@ -156,7 +156,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 - `list_registered_clusters`
 
-## Tool Mode
+# Tool Mode
 
 The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `both`; env: `TOOL_MODE`):
 
@@ -166,9 +166,9 @@ The ONTAP MCP server exposes mutating tools in two naming conventions, controlle
 | `multiplex` | Registers a single `modify_*` tool per resource type that handles both update and delete in one call. |
 | `both` | Registers both conventions simultaneously. This is the default. |
 
-Tool mode only controls whether the per-resource `update_*`/`delete_*` tools and/or the multiplexed `modify_*` tools are registered; all `create_*` tools, other mutating tools not covered by tool-mode (e.g., `add_*`/`remove_*`, `*_map`), plus `delete_svm_peer`, `create_dns`, and `delete_dns` are always registered regardless of tool mode.
+Tool mode only controls whether the per-resource `update_*`/`delete_*` tools and/or the multiplexed `modify_*` tools are registered. All `create_*` tools are registered regardless of tool mode.
 
-### Modify tools (available in `multiplex` or `both` mode)
+## Modify tools (available in `multiplex` or `both` mode)
 
 - `modify_volume`
 - `modify_snapshot_policy`
