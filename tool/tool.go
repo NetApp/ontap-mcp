@@ -593,7 +593,7 @@ type SnapMirrorUpdate struct {
 	PolicyName           string `json:"policy_name,omitzero" jsonschema:"SnapMirror policy name"`
 	TransferScheduleName string `json:"transfer_schedule_name,omitzero" jsonschema:"SnapMirror transfer schedule name"`
 	SnapMirrorOperation  string `json:"snapmirror_operation,omitzero" jsonschema:"SnapMirror relationship operations (e.g., initialize, break, resync)"`
-	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding"`
+	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding)"`
 }
 
 type OntapGetParams struct {
