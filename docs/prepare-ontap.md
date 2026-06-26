@@ -98,15 +98,16 @@ This will output pre-trusted localhost.pem and localhost-key.pem files in your c
 
 # Connect MCP Client with Self Signed certificate
 
-you can validate the running MCP server with trusted certificates by CURL command as below
+You can validate the running MCP server with a trusted certificate using curl:
 
 ```
-curl --cacert localhost.pem https://{localhost/MCP_SERVER_IP}:8080
+    curl --cacert localhost.pem https://localhost:8080
 ```
 
-You can connect your VS code MCP client to the running MCP server via this command with passing the root CA certificate in `NODE_EXTRA_CA_CERTS` environment variable.
+You can connect your VS Code MCP client to the running MCP server by passing the root CA certificate via the `NODE_EXTRA_CA_CERTS` environment variable.
+
 ```
-NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem" code .
+    NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem" code .
 ```
 
 

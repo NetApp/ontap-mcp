@@ -76,7 +76,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		certFile = strings.TrimSpace(cfg.TLS.CertFile)
 		keyFile = strings.TrimSpace(cfg.TLS.KeyFile)
 		if (certFile == "") || (keyFile == "") {
-			return nil, fmt.Errorf("tls requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
+			return nil, fmt.Errorf("section Tls requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
 		}
 	}
 
@@ -274,7 +274,8 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	var urlPath, transportMethod string
 	address := net.JoinHostPort(a.options.Host, strconv.Itoa(a.options.Port))
-	if a.KeyFile != "" {
+	tlsEnabled := a.CertFile != "" && a.KeyFile != ""
+	if tlsEnabled {
 		urlPath = "https://" + address
 		transportMethod = "HTTPS"
 	} else {
@@ -351,16 +352,18 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	}
 
 	if a.KeyFile != "" {
-		if err := httpServer.ListenAndServeTLS(a.CertFile, a.KeyFile); err != nil {
-			a.logger.Error("http server failed to start", slog.Any("error", err.Error()),
+		if err := httpServer.ListenAndServeTLS(a.CertFile, a.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			a.logger.Error("http server failed to start",
+				slog.Any("error", err),
 				slog.String("url", urlPath),
 				slog.String("cert_file", a.CertFile),
 				slog.String("key_file", a.KeyFile))
 			os.Exit(1)
 		}
 	} else {
-		if err := httpServer.ListenAndServe(); err != nil {
-			a.logger.Error("http server failed to start", slog.Any("error", err.Error()))
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			a.logger.Error("http server failed to start",
+				slog.Any("error", err.Error()))
 			os.Exit(1)
 		}
 	}
