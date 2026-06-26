@@ -46,10 +46,10 @@ Below is a table describing the configuration options:
  
 # Serving over HTTPS (TLS)
 
-By default, the ONTAP-MCP server exposes its streamable-HTTP transport over plain `http://`. To serve over `https://` instead, add a top-level `tls` block to your `ontap.yaml` that points to a PEM-encoded certificate and its matching private key:
+By default, the ONTAP-MCP server exposes its streamable-HTTP transport over plain `http://`. To serve over `https://` instead, add a top-level `Tls` block to your `ontap.yaml` that points to a PEM-encoded certificate and its matching private key:
 
 ```yaml
-tls:
+Tls:
   cert_file: /path/to/server-cert.pem
   key_file: /path/to/server-key.pem
 
@@ -61,28 +61,28 @@ Pollers:
     password: password
 ```
 
-When the `tls` block is present, the server starts with TLS enabled and advertises its endpoint as `https://<host>:<port>`. When it is omitted, the server serves over `http://`.
+When the `Tls` block is present, the server starts with TLS enabled and advertises its endpoint as `https://<host>:<port>`. When it is omitted, the server serves over `http://`.
 
-| Option      | Type             | Description                                                                                                                                        | Default |
-|-------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| `tls`       | optional, section | Top-level section that enables HTTPS for the MCP server's own transport. When present, both `cert_file` and `key_file` are required.             | -       |
-| `cert_file` | required (in `tls`) | Path to the PEM-encoded server certificate (or certificate chain) presented to MCP clients. Path may be absolute or relative to the working directory. | -       |
-| `key_file`  | required (in `tls`) | Path to the PEM-encoded private key matching `cert_file`. Path may be absolute or relative to the working directory.                            | -       |
+| Option      | Type                | Description                                                                                                                                        | Default |
+|-------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| `Tls`       | optional, section   | Top-level section that enables HTTPS for the MCP server's own transport. When present, both `cert_file` and `key_file` are required.             | -       |
+| `cert_file` | required (in `Tls`) | Path to the PEM-encoded server certificate (or certificate chain) presented to MCP clients. Path may be absolute or relative to the working directory. | -       |
+| `key_file`  | required (in `Tls`) | Path to the PEM-encoded private key matching `cert_file`. Path may be absolute or relative to the working directory.                            | -       |
 
-!!! note "`tls` vs. `use_insecure_tls`"
+!!! note "`Tls` vs. `use_insecure_tls`"
 
-    The top-level `tls` block controls TLS for connections **from MCP clients to the ONTAP-MCP server**. It is independent of the per-poller `use_insecure_tls` option, which only affects the outbound connections **from ONTAP-MCP to your ONTAP clusters**.
+    The top-level `Tls` block controls TLS for connections **from MCP clients to the ONTAP-MCP server**. It is independent of the per-poller `use_insecure_tls` option, which only affects the outbound connections **from ONTAP-MCP to your ONTAP clusters**.
 
 !!! warning "Both files are required"
 
-    If you set the `tls` block, you must provide **both** `cert_file` and `key_file`. Supplying only one (or leaving either blank) causes the server to fail at startup with a configuration error.
+    If you set the `Tls` block, you must provide **both** `cert_file` and `key_file`. Supplying only one (or leaving either blank) causes the server to fail at startup with a configuration error.
 
 
 # Example: Creating a Self-Signed Certificate
 
 For testing purposes, here's how to create a self-signed certificate:
 
-1. Generate a Self-Signed Certificate by mkcert. More details about mkcert would be available [Here](https://github.com/filosottile/mkcert).
+1. Generate a Self-Signed Certificate by mkcert. More details about mkcert would be available [Here](https://github.com/FiloSottile/mkcert).
 ```
    # Setup the local CA
    mkcert -install
