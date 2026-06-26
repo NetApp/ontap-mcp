@@ -275,10 +275,10 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	var urlPath, transportMethod string
 	address := net.JoinHostPort(a.options.Host, strconv.Itoa(a.options.Port))
 	if a.KeyFile != "" {
-		urlPath = fmt.Sprintf("https://%s", address) // nolint:perfsprint
+		urlPath = "https://" + address
 		transportMethod = "HTTPS"
 	} else {
-		urlPath = fmt.Sprintf("%s://%s", "http", address)
+		urlPath = "http://" + address
 		transportMethod = "HTTP"
 	}
 
@@ -352,7 +352,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	if a.KeyFile != "" {
 		if err := httpServer.ListenAndServeTLS(a.CertFile, a.KeyFile); err != nil {
-			a.logger.Error("http server failed to start", slog.String("error", err.Error()),
+			a.logger.Error("http server failed to start", slog.Any("error", err.Error()),
 				slog.String("url", urlPath),
 				slog.String("cert_file", a.CertFile),
 				slog.String("key_file", a.KeyFile))
@@ -360,7 +360,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		}
 	} else {
 		if err := httpServer.ListenAndServe(); err != nil {
-			a.logger.Error("http server failed to start", slog.String("error", err.Error()))
+			a.logger.Error("http server failed to start", slog.Any("error", err.Error()))
 			os.Exit(1)
 		}
 	}

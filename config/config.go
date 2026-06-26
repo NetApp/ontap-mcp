@@ -71,7 +71,7 @@ func (p *Poller) InsecureTLS() bool {
 type ONTAP struct {
 	Pollers        map[string]*Poller `yaml:"Pollers,omitempty"`
 	Defaults       *Poller            `yaml:"Defaults,omitempty"`
-	TLS            *TLS               `yaml:"tls,omitempty"`
+	TLS            *TLS               `yaml:"Tls,omitempty"`
 	PollersOrdered []string           `yaml:"-"` // poller names in same order as yaml config
 }
 

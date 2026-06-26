@@ -77,6 +77,39 @@ When the `tls` block is present, the server starts with TLS enabled and advertis
 
     If you set the `tls` block, you must provide **both** `cert_file` and `key_file`. Supplying only one (or leaving either blank) causes the server to fail at startup with a configuration error.
 
+
+# Example: Creating a Self-Signed Certificate
+
+For testing purposes, here's how to create a self-signed certificate:
+
+1. Generate a Self-Signed Certificate by mkcert. More details about mkcert would be available [Here](https://github.com/filosottile/mkcert).
+```
+   # Setup the local CA
+   mkcert -install
+   # Generate trusted certificates for localhost
+   mkcert localhost 127.0.0.1 ::1
+
+   Created a new certificate valid for the following names:
+   - "localhost"
+   - "127.0.0.1"
+   - "::1"
+```
+This will output pre-trusted localhost.pem and localhost-key.pem files in your current folder.
+
+# Connect MCP Client with Self Signed certificate
+
+you can validate the running MCP server with trusted certificates by CURL command as below
+
+```
+curl --cacert localhost.pem https://{localhost/MCP_SERVER_IP}:8080
+```
+
+You can connect your VS code MCP client to the running MCP server via this command with passing the root CA certificate in `NODE_EXTRA_CA_CERTS` environment variable.
+```
+NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem" code .
+```
+
+
 # Authentication
 
 The ONTAP-MCP server supports multiple methods for managing authentication credentials with a priority-based system. 
