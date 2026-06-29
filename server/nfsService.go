@@ -149,7 +149,7 @@ func updateNFSServiceValidation(in tool.NFSServiceUpdate) (ontap.NFSService, err
 	if in.Enabled != "" {
 		b, err := strconv.ParseBool(in.Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for enabled: %q", in.Enabled)
+			return out, fmt.Errorf("invalid value for enabled %q (must be true/false): %w", in.Enabled, err)
 		}
 		out.Enabled = &b
 		hasUpdate = true
@@ -157,7 +157,7 @@ func updateNFSServiceValidation(in tool.NFSServiceUpdate) (ontap.NFSService, err
 	if in.V3Enabled != "" {
 		b, err := strconv.ParseBool(in.V3Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v3_enabled: %q", in.V3Enabled)
+			return out, fmt.Errorf("invalid value for v3_enabled %q (must be true/false): %w", in.V3Enabled, err)
 		}
 		out.Protocol.V3Enabled = &b
 		hasUpdate = true
@@ -165,7 +165,7 @@ func updateNFSServiceValidation(in tool.NFSServiceUpdate) (ontap.NFSService, err
 	if in.V40Enabled != "" {
 		b, err := strconv.ParseBool(in.V40Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v40_enabled: %q", in.V40Enabled)
+			return out, fmt.Errorf("invalid value for v40_enabled %q (must be true/false): %w", in.V40Enabled, err)
 		}
 		out.Protocol.V40Enabled = &b
 		hasUpdate = true
@@ -173,7 +173,7 @@ func updateNFSServiceValidation(in tool.NFSServiceUpdate) (ontap.NFSService, err
 	if in.V41Enabled != "" {
 		b, err := strconv.ParseBool(in.V41Enabled)
 		if err != nil {
-			return out, fmt.Errorf("invalid value for v41_enabled: %q", in.V41Enabled)
+			return out, fmt.Errorf("invalid value for v41_enabled %q (must be true/false): %w", in.V41Enabled, err)
 		}
 		out.Protocol.V41Enabled = &b
 		hasUpdate = true
