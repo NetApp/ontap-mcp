@@ -46,7 +46,7 @@ Below is a table describing the configuration options:
  
 # Serving over HTTPS (TLS)
 
-By default, the ONTAP-MCP server exposes its streamable-HTTP transport over plain `http://`. To serve over `https://` instead, add a top-level `Tls` block to your `ontap.yaml` that points to a PEM-encoded certificate and its matching private key:
+By default, the ONTAP-MCP server exposes its streamable-HTTP transport over plain `http://`. To serve over `https://` instead, add a top-level `Tls` block (capital “T”, consistent with `Pollers` and `Defaults`) to your `ontap.yaml` that points to a PEM-encoded certificate and its matching private key:
 
 ```yaml
 Tls:
@@ -80,9 +80,9 @@ When the `Tls` block is present, the server starts with TLS enabled and advertis
 
 # Example: Creating a Self-Signed Certificate
 
-For testing purposes, here's how to create a self-signed certificate:
+For testing purposes, here's how to create a self-signed certificate (ONTAP-MCP does not currently generate certificates for you):
 
-1. Generate a Self-Signed Certificate by mkcert. More details about mkcert would be available [Here](https://github.com/FiloSottile/mkcert).
+1. Generate a Self-Signed Certificate by mkcert. More details about mkcert are available [here](https://github.com/FiloSottile/mkcert).
 ```
    # Setup the local CA
    mkcert -install
@@ -96,7 +96,7 @@ For testing purposes, here's how to create a self-signed certificate:
 ```
 This will output pre-trusted localhost.pem and localhost-key.pem files in your current folder.
 
-# Connect MCP Client with Self Signed certificate
+# Connect an MCP Client with a Self-Signed Certificate
 
 You can validate the running MCP server with a trusted certificate using curl:
 

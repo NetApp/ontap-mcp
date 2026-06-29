@@ -51,8 +51,8 @@ type App struct {
 	catalog      catalog.APICatalog
 	versionCache sync.Map
 	clusterIndex map[string]string // lowercase name → canonical config name
-	CertFile     string
-	KeyFile      string
+	certFile     string
+	keyFile      string
 }
 
 type cachedVersion struct {
@@ -77,7 +77,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		certFile = strings.TrimSpace(cfg.TLS.CertFile)
 		keyFile = strings.TrimSpace(cfg.TLS.KeyFile)
 		if (certFile == "") || (keyFile == "") {
-			return nil, fmt.Errorf("section Tls requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
+			return nil, fmt.Errorf("section `Tls` requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
 		}
 	}
 
@@ -87,8 +87,8 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		options:      o,
 		locks:        lock.New(),
 		clusterIndex: index,
-		CertFile:     certFile,
-		KeyFile:      keyFile,
+		certFile:     certFile,
+		keyFile:      keyFile,
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -275,7 +275,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 
 	var urlPath, transportMethod string
 	address := net.JoinHostPort(a.options.Host, strconv.Itoa(a.options.Port))
-	tlsEnabled := a.CertFile != "" && a.KeyFile != ""
+	tlsEnabled := a.certFile != "" && a.keyFile != ""
 	if tlsEnabled {
 		urlPath = "https://" + address
 		transportMethod = "HTTPS"
@@ -352,22 +352,22 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	if a.KeyFile != "" {
+	if tlsEnabled {
 		httpServer.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS13,
 		}
-		if err := httpServer.ListenAndServeTLS(a.CertFile, a.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := httpServer.ListenAndServeTLS(a.certFile, a.keyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			a.logger.Error("http server failed to start",
 				slog.Any("error", err),
 				slog.String("url", urlPath),
-				slog.String("cert_file", a.CertFile),
-				slog.String("key_file", a.KeyFile))
+				slog.String("cert_file", a.certFile),
+				slog.String("key_file", a.keyFile))
 			os.Exit(1)
 		}
 	} else {
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			a.logger.Error("http server failed to start",
-				slog.Any("error", err.Error()))
+				slog.Any("error", err))
 			os.Exit(1)
 		}
 	}

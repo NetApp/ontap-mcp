@@ -77,13 +77,13 @@ type ONTAP struct {
 
 // TLS configures the certificate and private key the MCP server presents to
 // its own clients, enabling HTTPS for the streamable-HTTP transport. When the
-// top-level tls block is present, the server starts with ListenAndServeTLS and
+// top-level Tls block is present, the server starts with ListenAndServeTLS and
 // serves over https://; when it is omitted, the server serves plain http://.
 //
 // This is independent of the per-poller use_insecure_tls option, which only
 // controls how ONTAP-MCP connects outbound to ONTAP clusters.
 //
-// Both CertFile and KeyFile are required when the tls block is set; supplying
+// Both CertFile and KeyFile are required when the Tls block is set; supplying
 // only one is a configuration error (see server.NewApp).
 type TLS struct {
 	// CertFile is the path to the PEM-encoded server certificate (or

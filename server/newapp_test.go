@@ -153,11 +153,11 @@ func TestNewApp_TLSValidation(t *testing.T) {
 			if app == nil {
 				t.Fatal("expected non-nil *App, got nil")
 			}
-			if app.CertFile != tt.wantCert {
-				t.Fatalf("CertFile = %q, want %q", app.CertFile, tt.wantCert)
+			if app.certFile != tt.wantCert {
+				t.Fatalf("CertFile = %q, want %q", app.certFile, tt.wantCert)
 			}
-			if app.KeyFile != tt.wantKey {
-				t.Fatalf("KeyFile = %q, want %q", app.KeyFile, tt.wantKey)
+			if app.keyFile != tt.wantKey {
+				t.Fatalf("KeyFile = %q, want %q", app.keyFile, tt.wantKey)
 			}
 		})
 	}
