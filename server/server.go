@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -352,6 +353,9 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	}
 
 	if a.KeyFile != "" {
+		httpServer.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS13,
+		}
 		if err := httpServer.ListenAndServeTLS(a.CertFile, a.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			a.logger.Error("http server failed to start",
 				slog.Any("error", err),

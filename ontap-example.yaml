@@ -1,7 +1,7 @@
 # See https://netapp.github.io/ontap-mcp/nightly/
-Tls:
-  cert_file: localhost.pem
-  key_file: localhost-key.pem
+#Tls:
+#  cert_file: localhost.pem
+#  key_file: localhost-key.pem
 
 Pollers:
   u2:
