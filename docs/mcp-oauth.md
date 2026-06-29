@@ -16,9 +16,7 @@ Below is a sample content of the `ontap.yaml` file:
 ```yaml
 McpAuth:
   issuer: http://localhost:9090/realms/REALM
-  alg: [RS256, ES256] # optional; omit to derive from the issuer's JWKS
   audience: http://localhost:8080
-  scope: mcp:tools
 
 Pollers:
   cluster1:

@@ -1,12 +1,7 @@
 # See https://netapp.github.io/ontap-mcp/nightly/
 McpAuth:
   issuer: https://dev-auth-mcptest.us.auth0.com
-  # alg is optional. When omitted, the permitted signing algorithms are derived
-  # from the issuer's JWKS. Set a single value (alg: RS256) or a list
-  # (alg: [RS256, ES256]) to override the derived set.
-  alg: RS256
   audience: http://localhost:8080
-  scope: mcp:tools
 
 Pollers:
   u2:
