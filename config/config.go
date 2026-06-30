@@ -71,11 +71,40 @@ func (p *Poller) InsecureTLS() bool {
 type ONTAP struct {
 	Pollers        map[string]*Poller `yaml:"Pollers,omitempty"`
 	Defaults       *Poller            `yaml:"Defaults,omitempty"`
+	McpAuth        *OAuth             `yaml:"McpAuth,omitempty"`
 	PollersOrdered []string           `yaml:"-"` // poller names in same order as yaml config
 }
 
+type OAuth struct {
+	Issuer   string      `yaml:"issuer"`
+	Audience string      `yaml:"audience"`
+	Alg      StringSlice `yaml:"alg,omitempty"`
+	Scope    string      `yaml:"scope,omitempty"`
+}
+
+// StringSlice accepts either a single YAML scalar (alg: RS256) or a YAML
+// sequence (alg: [RS256, ES256]) and always decodes into a slice of strings.
+type StringSlice []string
+
+// UnmarshalYAML implements the goccy/go-yaml BytesUnmarshaler interface so the
+// field can be configured as a scalar or a list.
+func (s *StringSlice) UnmarshalYAML(b []byte) error {
+	var list []string
+	if err := yaml.Unmarshal(b, &list); err == nil {
+		*s = list
+		return nil
+	}
+	var single string
+	if err := yaml.Unmarshal(b, &single); err != nil {
+		return fmt.Errorf("alg must be a string or a list of strings: %w", err)
+	}
+	*s = StringSlice{single}
+	return nil
+}
+
 type Poller struct {
-	Addr              string            `yaml:"addr,omitempty"`
+	Addr string `yaml:"addr,omitempty"`
+
 	AuthStyle         string            `yaml:"auth_style,omitempty"`
 	CaCertPath        string            `yaml:"ca_cert,omitempty"`
 	CertificateScript CertificateScript `yaml:"certificate_script,omitempty"`
