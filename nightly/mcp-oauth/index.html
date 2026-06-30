@@ -9,21 +9,25 @@
       
       
       
+        <link rel="prev" href="../prepare-ontap/">
       
       
-      <link rel="icon" href="/assets/ontap-mcp.svg">
+        <link rel="next" href="../tools/">
+      
+      
+      <link rel="icon" href="../assets/ontap-mcp.svg">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
-        <title>ONTAP-MCP</title>
+        <title>MCP OAuth - ONTAP-MCP</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -42,9 +46,9 @@
       
     
     
-      <link rel="stylesheet" href="/assets/extra.css">
+      <link rel="stylesheet" href="../assets/extra.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -69,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#oauth-for-ontap-mcp-server" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -85,9 +94,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="ONTAP-MCP" class="md-header__button md-logo" aria-label="ONTAP-MCP" data-md-component="logo">
+    <a href=".." title="ONTAP-MCP" class="md-header__button md-logo" aria-label="ONTAP-MCP" data-md-component="logo">
       
-  <img src="/assets/ontap-mcp.svg" alt="logo">
+  <img src="../assets/ontap-mcp.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -104,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              MCP OAuth
             
           </span>
         </div>
@@ -227,9 +236,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="ONTAP-MCP" class="md-nav__button md-logo" aria-label="ONTAP-MCP" data-md-component="logo">
+    <a href=".." title="ONTAP-MCP" class="md-nav__button md-logo" aria-label="ONTAP-MCP" data-md-component="logo">
       
-  <img src="/assets/ontap-mcp.svg" alt="logo">
+  <img src="../assets/ontap-mcp.svg" alt="logo">
 
     </a>
     ONTAP-MCP
@@ -256,7 +265,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -276,7 +285,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/install/" class="md-nav__link">
+      <a href="../install/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -296,7 +305,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/prepare-ontap/" class="md-nav__link">
+      <a href="../prepare-ontap/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -313,10 +322,28 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/mcp-oauth/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    MCP OAuth
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -325,6 +352,90 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#oauth-for-ontap-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      OAuth for ONTAP MCP server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OAuth for ONTAP MCP server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-client-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP Client Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-specification-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP Specification Compliance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCP Specification Compliance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unique-key-offerings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unique key offerings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -336,7 +447,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tools/" class="md-nav__link">
+      <a href="../tools/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -356,7 +467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/" class="md-nav__link">
+      <a href="../examples/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -413,7 +524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/license/" class="md-nav__link">
+      <a href="../license/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -434,7 +545,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/release-notes/" class="md-nav__link">
+      <a href="../release-notes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -473,6 +584,80 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#oauth-for-ontap-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      OAuth for ONTAP MCP server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OAuth for ONTAP MCP server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-client-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP Client Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-specification-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP Specification Compliance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCP Specification Compliance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unique-key-offerings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unique key offerings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -483,8 +668,110 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+  <h1>MCP OAuth</h1>
+
+<h2 id="oauth-for-ontap-mcp-server">OAuth for ONTAP MCP server<a class="headerlink" href="#oauth-for-ontap-mcp-server" title="Permanent link">&para;</a></h2>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Issuer: Defined in the <code>McpAuth</code> section of the <code>ontap.yaml</code> <a href="#configuration-file">Configuration File</a>.</li>
+<li>Auth Token: Either provided in the <code>mcp.json</code> file for <a href="#mcp-client-integration">MCP Client Integration</a> or included in any HTTP/HTTPS request using the <code>Authorization</code> header.</li>
+</ul>
+<h3 id="configuration-file">Configuration File<a class="headerlink" href="#configuration-file" title="Permanent link">&para;</a></h3>
+<p>To configure OAuth authentication and restrict unauthorized access to your MCP server, add the <code>McpAuth</code> section to your configuration file. Use the <a href="https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml">ontap-example.yaml</a> template as a reference.</p>
+<p>By default, the system looks for the <code>ontap.yaml</code> file in its working directory (<code>/opt/mcp</code> inside the container).</p>
+<p>Below is a sample content of the <code>ontap.yaml</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">McpAuth</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:9090/realms/REALM</span>
+<span class="w">  </span><span class="nt">audience</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:8080</span>
+
+<span class="nt">Pollers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cluster1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.0.1</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password</span>
+<span class="w">    </span><span class="nt">use_insecure_tls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Below is a table describing the configuration options in the <code>McpAuth</code> section:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>issuer</code></td>
+<td>required, string</td>
+<td>The name of the issuer of the authentication token, used to generate the <code>jwks_uri</code> for fetching public keys. Examples: <br/> - https://AUTH0_DOMAIN (for Auth0 configuration) <br/> - http://KEYCLOAK_URL/realms/REALM (for Keycloak configuration)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>alg</code></td>
+<td>optional, string or list</td>
+<td>The permitted token-signing algorithm(s) the server will accept when validating the Bearer token against the issuer's public keys. Accepts a single value (<code>alg: RS256</code>) or a list (<code>alg: [RS256, ES256]</code>). When omitted, the permitted algorithms are <strong>derived automatically from the issuer's JWKS</strong> (each key's <code>alg</code>, or inferred from its key type/curve; RSA keys without an explicit <code>alg</code> default to <code>RS256</code>). Set this only to override the derived set. Supported asymmetric algorithms include: <br/> - RSA Digital Signatures: <code>[RS256, RS384, RS512]</code> <br/> - RSA-PSS Digital Signatures: <code>[PS256, PS384, PS512]</code> <br/> - ECDSA (Elliptic Curve) Signatures: <code>[ES256, ES384, ES512]</code> <br/> - EdDSA (Edwards-curve) Signatures: <code>[EdDSA]</code></td>
+<td>derived from JWKS</td>
+</tr>
+<tr>
+<td><code>audience</code></td>
+<td>required, string</td>
+<td>The expected audience allowed to access MCP tools.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>scope</code></td>
+<td>optional, string</td>
+<td>The expected scope allowed to access MCP tools. The default scope is empty</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="mcp-client-integration">MCP Client Integration<a class="headerlink" href="#mcp-client-integration" title="Permanent link">&para;</a></h3>
+<p>To integrate the ONTAP MCP server with your MCP client (e.g., GitHub Copilot, Claude Desktop), configure the <code>mcp.json</code> file with the <code>Authorization</code> header containing the Bearer <code>AUTH_TOKEN</code>. This enables the MCP client to connect to the MCP server using OAuth authentication.</p>
+<p>Below is a sample content for the <code>mcp.json</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ontap-mcp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://your-mcp-server-ip:8080&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="nt">&quot;Authorization&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer AUTH_TOKEN&quot;</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="mcp-specification-compliance">MCP Specification Compliance<a class="headerlink" href="#mcp-specification-compliance" title="Permanent link">&para;</a></h3>
+<p>The ONTAP MCP server adheres to most of the mandatory requirements outlined in the MCP Authorization Specification.</p>
+<h4 id="unique-key-offerings">Unique key offerings<a class="headerlink" href="#unique-key-offerings" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Discovery Endpoints - Fully compliant with RFC 9728 implementation.</li>
+<li>Token Audience Validation - Enforces strict security boundaries.</li>
+<li>Token Algorithm Validation - Enforces strict security boundaries.</li>
+<li>Token Scope Validation - Enforces strict security boundaries.</li>
+<li>WWW-Authenticate Headers - Provides proper handling of <code>401 Unauthorized</code> responses.</li>
+</ul>
+<p>The OAuth Discovery endpoint is available at:
+<code>/.well-known/oauth-protected-resource</code></p>
+<p>This endpoint provides Protected Resource Metadata for OAuth compliance.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -548,10 +835,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": [], "search": "/assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.e1c3ead8.min.js"></script>
+      <script src="../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
     
   </body>
