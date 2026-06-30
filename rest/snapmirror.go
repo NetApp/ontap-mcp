@@ -97,7 +97,7 @@ func (c *Client) DeleteSnapMirror(ctx context.Context, destSVM, destVolume strin
 	return c.handleJob(ctx, statusCode, buf)
 }
 
-func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destSVM, destVolume string) error {
+func (c *Client) InitOrUpdateSnapMirrorTransfer(ctx context.Context, destSVM, destVolume string) error {
 	var (
 		statusCode int
 	)

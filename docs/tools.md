@@ -44,6 +44,18 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_cifs_share`
 - `delete_cifs_share`
 
+## CIFS Service Management
+
+- `create_cifs_service`
+- `update_cifs_service`
+- `delete_cifs_service`
+
+## NFS Service Management
+
+- `create_nfs_service`
+- `update_nfs_service`
+- `delete_nfs_service`
+
 ## NFS Export Policy Management
 
 - `create_nfs_export_policies`
@@ -65,7 +77,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_snapmirror`
 - `delete_snapmirror`
 - `initialize_snapmirror`
-- `update_snapmirror_transfer`
+- `init_update_snapmirror_transfer`
 - `break_snapmirror`
 - `resync_snapmirror`
 
@@ -74,6 +86,15 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `create_svm`
 - `update_svm`
 - `delete_svm`
+
+## SVM Peer Management
+
+- `delete_svm_peer`
+
+## DNS Management
+
+- `create_dns`
+- `delete_dns`
 
 ## Qtree Management
 
@@ -134,3 +155,40 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 ## Multi-Cluster Management
 
 - `list_registered_clusters`
+
+# Tool Mode
+
+The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `both`; env: `TOOL_MODE`):
+
+| Mode | Description |
+|---|---|
+| `legacy` | Registers separate `update_*` and `delete_*` tools for each resource type. |
+| `multiplex` | Registers a single `modify_*` tool per resource type that handles both update and delete in one call. |
+| `both` | Registers both conventions simultaneously. This is the default. |
+
+Tool mode only controls whether the per-resource `update_*`/`delete_*` tools and/or the multiplexed `modify_*` tools are registered. All `create_*` tools are registered regardless of tool mode.
+
+## Modify tools (available in `multiplex` or `both` mode)
+
+- `modify_volume`
+- `modify_snapshot_policy`
+- `modify_schedule_in_snapshot_policy`
+- `modify_qos_policy`
+- `modify_nfs_export_policies`
+- `modify_nfs_export_policies_rules`
+- `modify_svm`
+- `modify_cifs_share`
+- `modify_nfs_service`
+- `modify_cifs_service`
+- `modify_qtree`
+- `modify_nvme_service`
+- `modify_iscsi_service`
+- `modify_lun`
+- `modify_network_ip_interface`
+- `modify_nvme_subsystem`
+- `modify_nvme_namespace`
+- `modify_fcp_service`
+- `modify_fc_interface`
+- `modify_igroup`
+- `modify_snapmirror`
+- `modify_snapshot`

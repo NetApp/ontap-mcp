@@ -17,6 +17,7 @@ var logger = setupLogger()
 type Globals struct {
 	LogLevel   string `enum:"debug,info,warn,error" default:"info" env:"LOG_LEVEL" help:"Log level, one of: ${enum}"`
 	ConfigPath string `name:"config" default:"ontap.yaml" env:"ONTAP_MCP_CONFIG" help:"ONTAP-MCP config path"`
+	ToolMode   string `enum:"legacy,multiplex,both" default:"both" env:"TOOL_MODE" help:"ONTAP-MCP tool mode, one of: ${enum}"`
 }
 
 type CLI struct {
@@ -44,6 +45,7 @@ func (a *StartCmd) Run(cli *CLI) error {
 	if err != nil {
 		return fmt.Errorf("failed to read config path=%s err=%w", cli.ConfigPath, err)
 	}
+	logger.Debug("tool mode", slog.String("tool_mode", cli.ToolMode))
 
 	opts := server.Options{
 		Host:           cli.Start.Host,
@@ -52,6 +54,7 @@ func (a *StartCmd) Run(cli *CLI) error {
 		ReadOnly:       cli.Start.ReadOnly,
 		Stateless:      cli.Start.Stateless,
 		JSONResponse:   cli.Start.JSONResponse,
+		ToolMode:       cli.ToolMode,
 	}
 
 	app, err := server.NewApp(cfg, opts, logger)

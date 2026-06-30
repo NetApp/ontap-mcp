@@ -99,6 +99,119 @@ func (a *App) DeleteQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, param
 	}, nil, nil
 }
 
+func (a *App) ModifyQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicyModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+	if parameters.Name == "" {
+		return nil, nil, errors.New("QoS policy name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		qosPolicyUpdate, err := updateQoSPolicyValidation(parameters.QoSPolicyUpdate)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateQoSPolicy(ctx, qosPolicyUpdate, parameters.Name, parameters.SVM)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "QoS policy updated successfully"},
+			},
+		}, nil, nil
+	case "delete":
+		qosPolicyDelete := ontap.QoSPolicy{
+			SVM:  ontap.NameAndUUID{Name: parameters.SVM},
+			Name: parameters.Name,
+		}
+
+		err = client.DeleteQoSPolicy(ctx, qosPolicyDelete)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "QoS policy deleted successfully"},
+			},
+		}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
+func updateQoSPolicyValidation(in tool.QoSPolicyUpdate) (ontap.QoSPolicy, error) {
+	out := ontap.QoSPolicy{}
+
+	hasUpdate := false
+	if in.NewName != "" {
+		out.Name = in.NewName
+		hasUpdate = true
+	}
+
+	if in.MaxThIOPS != "" || in.MinThIOPS != "" {
+		if in.MaxThIOPS == "" || in.MinThIOPS == "" {
+			return out, errors.New("both max_throughput_iops and min_throughput_iops must be provided for fixed QoS policy")
+		}
+		maxiops, err := parseSize(in.MaxThIOPS)
+		if err != nil {
+			return out, fmt.Errorf("invalid max_throughput_iops: %w", err)
+		}
+		miniops, err := parseSize(in.MinThIOPS)
+		if err != nil {
+			return out, fmt.Errorf("invalid min_throughput_iops: %w", err)
+		}
+		out.Fixed = ontap.QoSFixed{
+			MaxThIOPS: maxiops,
+			MinThIOPS: miniops,
+		}
+		hasUpdate = true
+	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" {
+		if in.ExpectedIOPS == "" || in.PeakIOPS == "" || in.AbsoluteMinIOPS == "" {
+			return out, errors.New("all of expected_iops, peak_iops, and absolute_min_iops must be provided for adaptive QoS policy")
+		}
+		expectediops, err := parseSize(in.ExpectedIOPS)
+		if err != nil {
+			return out, fmt.Errorf("invalid expected_iops: %w", err)
+		}
+		peakiops, err := parseSize(in.PeakIOPS)
+		if err != nil {
+			return out, fmt.Errorf("invalid peak_iops: %w", err)
+		}
+		absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
+		if err != nil {
+			return out, fmt.Errorf("invalid absolute_min_iops: %w", err)
+		}
+		out.Adaptive = ontap.QoSAdaptive{
+			ExpectedIOPS:    expectediops,
+			PeakIOPS:        peakiops,
+			AbsoluteMinIOPS: absoluteMiniops,
+		}
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops or expected_iops & peak_iops & absolute_min_iops")
+	}
+
+	return out, nil
+}
+
 // newCreateQoSPolicy validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
 func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
@@ -172,8 +285,10 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 		return out, errors.New("qos policy name is required")
 	}
 
+	hasUpdate := false
 	if in.NewName != "" {
 		out.Name = in.NewName
+		hasUpdate = true
 	}
 
 	if in.MaxThIOPS != "" || in.MinThIOPS != "" {
@@ -196,6 +311,7 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 			MaxThIOPS: maxiops,
 			MinThIOPS: miniops,
 		}
+		hasUpdate = true
 	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" {
 		if in.ExpectedIOPS == "" {
 			return out, errors.New("expected iops is required")
@@ -224,6 +340,10 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 			PeakIOPS:        peakiops,
 			AbsoluteMinIOPS: absoluteMiniops,
 		}
+		hasUpdate = true
+	}
+	if !hasUpdate {
+		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops or expected_iops & peak_iops & absolute_min_iops")
 	}
 
 	return out, nil

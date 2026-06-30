@@ -33,21 +33,25 @@ const ListClusters = `List all ONTAP clusters registered in the server configura
 USE THIS FIRST: Always call this before any other tool to discover valid cluster names.`
 
 const CreateVolume = `Create a volume on a cluster by cluster name.`
-const DeleteVolume = `Delete a volume on a cluster by cluster name.`
 const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
+const DeleteVolume = `Delete a volume on a cluster by cluster name.`
+const ModifyVolume = `Update or delete a volume on a cluster by cluster name.`
 
 const CreateSnapshot = `Create a snapshot of a volume on a cluster by cluster name.`
 const DeleteSnapshot = `Delete a snapshot of a volume on a cluster by cluster name.`
 const RestoreSnapshot = `Restore a volume to a snapshot on a cluster by cluster name.`
+const ModifySnapshot = `Restore or delete a snapshot of a volume on a cluster by cluster name.`
 
 const CreateSnapshotPolicy = `Create a snapshot policy on a cluster by cluster name.`
 const UpdateSnapshotPolicy = `Update a snapshot policy comment and enable/disable snapshot policy on a cluster by cluster name.`
 const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster name.`
+const ModifySnapshotPolicy = `Update or delete a snapshot policy on a cluster by cluster name.`
 const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
 const AddScheduleInSnapshotPolicy = `Add a schedule entry to an existing snapshot policy on a cluster by cluster name.`
 const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy by specifying the snapshot count or SnapMirror label on a cluster, identified by its cluster name. At least one of the following parameters—snapshot count or SnapMirror label—must be provided.`
 const RemoveScheduleInSnapshotPolicy = `Remove a schedule entry from an existing snapshot policy on a cluster by cluster name.`
+const ModifyScheduleInSnapshotPolicy = `Update or remove a schedule entry in an existing snapshot policy on a cluster by cluster name.`
 
 const ListQoSPolicies = `List QoS policies from an ONTAP cluster — includes both SVM-scoped and cluster-scoped (admin SVM) policies.
 
@@ -65,25 +69,31 @@ Units:
 const CreateQoSPolicy = `Create a QoS policy on a cluster by cluster name.`
 const UpdateQoSPolicy = `Update a QoS policy name, max throughput iops, min throughput iops, expected iops, peak iops and absolute min iops on a cluster by cluster name.`
 const DeleteQoSPolicy = `Delete a QoS policy on a cluster by cluster name.`
+const ModifyQoSPolicy = `Update or delete a QoS policy on a cluster by cluster name.`
 
 const CreateNFSExportPolicy = `Create NFS Export policies on a cluster by cluster name.`
 const UpdateNFSExportPolicy = `Update NFS Export policies name, client match, read only rules, read write rules on a cluster by cluster name.`
 const DeleteNFSExportPolicy = `Delete NFS Export policies on a cluster by cluster name.`
+const ModifyNFSExportPolicy = `Update or delete NFS Export policies on a cluster by cluster name.`
 const CreateNFSExportPolicyRules = `Create NFS Export policies rules on a cluster by cluster name.`
 const UpdateNFSExportPolicyRules = `Update NFS Export policies rules with client match, read only rules, read write rules on a cluster by cluster name.`
 const DeleteNFSExportPolicyRules = `Delete NFS Export policies rules on a cluster by cluster name.`
+const ModifyNFSExportPoliciesRule = `Update or delete NFS Export policies rules on a cluster by cluster name.`
 
 const CreateCIFSShare = `Create CIFS share on a cluster by cluster name.`
 const UpdateCIFSShare = `Update CIFS share path on a cluster by cluster name.`
 const DeleteCIFSShare = `Delete CIFS share on a cluster by cluster name.`
+const ModifyCIFSShare = `Update or delete a CIFS share on a cluster by cluster name.`
 
 const CreateNFSService = `Create (enable) NFS service on an SVM. Allows configuring NFSv3, NFSv4.0, and NFSv4.1 protocol versions.`
 const UpdateNFSService = `Update NFS service on an SVM. Toggle protocol versions (NFSv3, NFSv4.0, NFSv4.1) or enable/disable the service.`
 const DeleteNFSService = `Delete (disable) NFS service on an SVM.`
+const ModifyNFSService = `Update or delete NFS service on an SVM.`
 
 const CreateCIFSService = `Create (enable) CIFS/SMB service on an SVM by joining an Active Directory domain. Requires AD domain FQDN, admin credentials, and a CIFS server name (NetBIOS name).`
 const UpdateCIFSService = `Update CIFS/SMB service on an SVM. Can rename the CIFS server.`
 const DeleteCIFSService = `Delete (disable) CIFS/SMB service on an SVM. Unjoins the Active Directory domain.`
+const ModifyCIFSService = `Update or delete CIFS/SMB service on an SVM.`
 
 const CreateDNS = `Configure DNS on an SVM. Required before joining Active Directory or resolving hostnames.`
 const DeleteDNS = `Remove DNS configuration from an SVM.`
@@ -91,22 +101,27 @@ const DeleteDNS = `Remove DNS configuration from an SVM.`
 const CreateQtree = `Create Qtree on a cluster by cluster name.`
 const UpdateQtree = `Update Qtree name on a cluster by cluster name.`
 const DeleteQtree = `Delete Qtree on a cluster by cluster name.`
+const ModifyQtree = `Update or delete Qtree on a cluster by cluster name.`
 
 const CreateNVMeService = `Create NVMe service on a cluster by cluster name.`
 const UpdateNVMeService = `Update NVMe service admin state on a cluster by cluster name.`
 const DeleteNVMeService = `Delete NVMe service on a cluster by cluster name.`
+const ModifyNVMeService = `Update or delete NVMe service on a cluster by cluster name.`
 
 const CreateIscsiService = `Create iSCSI service on a cluster by cluster name.`
 const UpdateIscsiService = `Update iSCSI service admin state on a cluster by cluster name.`
 const DeleteIscsiService = `Delete iSCSI service on a cluster by cluster name.`
+const ModifyIscsiService = `Update or delete iSCSI service on a cluster by cluster name.`
 
 const CreateNetworkIPInterface = `Create Network IP interface on a cluster by cluster name.`
 const UpdateNetworkIPInterface = `Update Network IP interface with auto revert enable/disable and service policy name on a cluster by cluster name.`
 const DeleteNetworkIPInterface = `Delete Network IP interface on a cluster by cluster name.`
+const ModifyNetworkIPInterface = `Update or delete Network IP interface on a cluster by cluster name.`
 
 const CreateNVMeSubsystem = `Create NVMe subsystem on a cluster by cluster name.`
 const UpdateNVMeSubsystem = `Update NVMe subsystem comment on a cluster by cluster name.`
 const DeleteNVMeSubsystem = `Delete NVMe subsystem on a cluster by cluster name.`
+const ModifyNVMeSubsystem = `Update or delete NVMe subsystem on a cluster by cluster name.`
 
 const AddNVMeSubsystemHost = `Add a host NQN to an NVMe subsystem on a cluster by cluster name.`
 const RemoveNVMeSubsystemHost = `Remove a host NQN from an NVMe subsystem on a cluster by cluster name.`
@@ -114,6 +129,7 @@ const RemoveNVMeSubsystemHost = `Remove a host NQN from an NVMe subsystem on a c
 const CreateNVMeNamespace = `Create NVMe namespace on a cluster by cluster name.`
 const UpdateNVMeNamespace = `Update NVMe namespace total provisioned size on a cluster by cluster name.`
 const DeleteNVMeNamespace = `Delete NVMe namespace on a cluster by cluster name.`
+const ModifyNVMeNamespace = `Update or delete NVMe namespace on a cluster by cluster name.`
 
 const CreateNVMeSubsystemMap = `Create NVMe subsystem map on a cluster by cluster name.`
 const DeleteNVMeSubsystemMap = `Delete NVMe subsystem map on a cluster by cluster name.`
@@ -121,18 +137,22 @@ const DeleteNVMeSubsystemMap = `Delete NVMe subsystem map on a cluster by cluste
 const CreateLUN = `Create a LUN on a specified volume and SVM with a given size and OS type.`
 const UpdateLUN = `Update a LUN: resize, rename, or toggle enable/disable state (online/offline).`
 const DeleteLUN = `Delete a LUN from a specified volume and SVM.`
+const ModifyLUN = `Update or delete a LUN from a specified volume and SVM.`
 
 const CreateFCPService = `Create FCP service on a cluster by cluster name.`
 const UpdateFCPService = `Update FCP service admin state on a cluster by cluster name.`
 const DeleteFCPService = `Delete FCP service on a cluster by cluster name.`
+const ModifyFCPService = `Update or delete FCP service on a cluster by cluster name.`
 
 const CreateFCInterface = `Create FC interface on a cluster by cluster name.`
 const UpdateFCInterface = `Update FC interface admin state, name of the FC port and node on which the FC port is located on a cluster by cluster name.`
 const DeleteFCInterface = `Delete FC interface on a cluster by cluster name.`
+const ModifyFCInterface = `Update or delete FC interface on a cluster by cluster name.`
 
 const CreateIGroup = `Create an igroup (initiator group) on a cluster by cluster name.`
 const UpdateIGroup = `Update an igroup name, comment, host operating system on a cluster by cluster name.`
 const DeleteIGroup = `Delete an igroup on a cluster by cluster name.`
+const ModifyIGroup = `Update or delete an igroup on a cluster by cluster name.`
 const AddIGroupInitiator = `Add an initiator to an igroup on a cluster by cluster name.`
 const RemoveIGroupInitiator = `Remove an initiator from an igroup on a cluster by cluster name.`
 
@@ -142,8 +162,9 @@ const DeleteLunMap = `Delete a LUN map on a cluster by cluster name. Removes the
 const CreateSnapMirror = `Create a SnapMirror relationship on a cluster by cluster name.`
 const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the snapmirror policy, snapmirror relationship state and transfer schedule of an existing relationship identified by its destination SVM and volume.`
 const DeleteSnapMirror = `Delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
+const ModifySnapMirror = `Update or delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
 const InitializeSnapMirror = `Initialize a SnapMirror relationship on a cluster by cluster name. Starts the baseline transfer from source to destination. Identifies the relationship by destination SVM and volume names.`
-const UpdateSnapMirrorTransfer = `Trigger a SnapMirror update transfer on a cluster by cluster name. Transfers new data from source to destination to bring the relationship up to date. Identifies the relationship by destination SVM and volume names.`
+const InitOrUpdateSnapMirrorTransfer = `Trigger a SnapMirror transfer initialize or update on a cluster by cluster name. Transfers new data from source to destination to bring the relationship up to date. Identifies the relationship by destination SVM and volume names.`
 const BreakSnapMirror = `Break a SnapMirror relationship on a cluster by cluster name. Sets the relationship state to broken_off, making the destination volume read-write. Identifies the relationship by destination SVM and volume names.`
 const ResyncSnapMirror = `Resync a SnapMirror relationship on a cluster by cluster name. Re-establishes replication by setting the state back to snapmirrored. Identifies the relationship by destination SVM and volume names.`
 
@@ -160,6 +181,7 @@ Pass cluster_name to automatically filter out fields and filters not available i
 const CreateSVM = `Create an SVM on a cluster by cluster name.`
 const UpdateSVM = `Update an SVM name, comment, or SVM state on a cluster by cluster name.`
 const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
+const ModifySVM = `Update or delete an SVM on a cluster by cluster name.`
 const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and local SVM name. The peer relationship UUID is looked up internally using the svm.name filter.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.

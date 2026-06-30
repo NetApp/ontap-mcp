@@ -131,12 +131,13 @@ This displays all available environment variables with descriptions, authenticat
 
 Some commonly used flags:
 
-| Flag | Description |
-|---|---|
-| `--read-only` | Disable all mutating operations. Only read-only tools are registered. |
-| `--stateless` | Disable mcp-session-id header validation. Required when deploying behind proxies or gateways that do not preserve session headers, e.g. on-premises data gateways. |
-| `--json-response` | Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. on-premises data gateways. |
-| `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging. |
+| Flag                | Description                                                                                                                                                                                                                                                                                                                                            |
+|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--read-only`       | Disable all mutating operations. Only read-only tools are registered.                                                                                                                                                                                                                                                                                  |
+| `--stateless`       | Disable mcp-session-id header validation. Required when deploying behind proxies or gateways that do not preserve session headers, e.g. on-premises data gateways.                                                                                                                                                                                     |
+| `--json-response`   | Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. on-premises data gateways.                                                                                                                                                                |
+| `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging.                                                                                                                                                                                                                                                                                            |
+| `--tool-mode`       | Control which mutating tool naming convention is exposed. One of `legacy` (separate `update_*`/`delete_*` tools), `multiplex` (combined `modify_*` tools), or `both` (default — registers both conventions). Can also be set via the `TOOL_MODE` environment variable. <br/>  **Note:** `tool-mode` with value `multiplex` would reduce MCP tool count |
 
 ## Next Steps
 
