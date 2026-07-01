@@ -6,6 +6,7 @@ replace github.com/netapp/ontap-mcp => ../
 
 require (
 	github.com/carlmjohnson/requests v0.25.1
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/netapp/ontap-mcp v0.0.0-20260615122109-078d56edbf94
 	github.com/openai/openai-go/v3 v3.39.0
