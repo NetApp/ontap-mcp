@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/alecthomas/kong"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/server"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/alecthomas/kong"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/server"
 )
 
 var logger = setupLogger()

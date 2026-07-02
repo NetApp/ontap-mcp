@@ -44,6 +44,73 @@ Below is a table describing the configuration options:
 | `credentials_file`   | optional, string  | Path to a yaml file that contains cluster credentials. The file should have the same shape as ontap.yaml. Path can be relative to ontap.yaml or absolute.                                                       |         |
 | `credentials_script` | optional, section | Section that defines how ONTAP-MCP should fetch credentials via external script. See [here](#credentials-script) for details. 	                                                                                 |         |
  
+# Serving over HTTPS (TLS)
+
+By default, the ONTAP-MCP server exposes its streamable-HTTP transport over plain `http://`. To serve over `https://` instead, add a top-level `Tls` block (capital “T”, consistent with `Pollers` and `Defaults`) to your `ontap.yaml` that points to a PEM-encoded certificate and its matching private key:
+
+```yaml
+Tls:
+  cert_file: /path/to/server-cert.pem
+  key_file: /path/to/server-key.pem
+
+Pollers:
+  sar:
+    addr: 10.193.48.11
+    use_insecure_tls: true
+    username: admin
+    password: password
+```
+
+When the `Tls` block is present, the server starts with TLS enabled and advertises its endpoint as `https://<host>:<port>`. When it is omitted, the server serves over `http://`.
+
+| Option      | Type                | Description                                                                                                                                        | Default |
+|-------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| `Tls`       | optional, section   | Top-level section that enables HTTPS for the MCP server's own transport. When present, both `cert_file` and `key_file` are required.             | -       |
+| `cert_file` | required (in `Tls`) | Path to the PEM-encoded server certificate (or certificate chain) presented to MCP clients. Path may be absolute or relative to the working directory. | -       |
+| `key_file`  | required (in `Tls`) | Path to the PEM-encoded private key matching `cert_file`. Path may be absolute or relative to the working directory.                            | -       |
+
+!!! note "`Tls` vs. `use_insecure_tls`"
+
+    The top-level `Tls` block controls TLS for connections **from MCP clients to the ONTAP-MCP server**. It is independent of the per-poller `use_insecure_tls` option, which only affects the outbound connections **from ONTAP-MCP to your ONTAP clusters**.
+
+!!! warning "Both files are required"
+
+    If you set the `Tls` block, you must provide **both** `cert_file` and `key_file`. Supplying only one (or leaving either blank) causes the server to fail at startup with a configuration error.
+
+
+# Example: Creating a Self-Signed Certificate
+
+For testing purposes, here's how to create a self-signed certificate (ONTAP-MCP does not currently generate certificates for you):
+
+1. Generate a Self-Signed Certificate by mkcert. More details about mkcert are available [here](https://github.com/FiloSottile/mkcert).
+```
+   # Setup the local CA
+   mkcert -install
+   # Generate trusted certificates for localhost
+   mkcert localhost 127.0.0.1 ::1
+
+   Created a new certificate valid for the following names:
+   - "localhost"
+   - "127.0.0.1"
+   - "::1"
+```
+This will output pre-trusted localhost.pem and localhost-key.pem files in your current folder.
+
+# Connect an MCP Client with a Self-Signed Certificate
+
+You can validate the running MCP server with a trusted certificate using curl:
+
+```
+    curl --cacert localhost.pem https://localhost:8080
+```
+
+You can connect your VS Code MCP client to the running MCP server by passing the root CA certificate via the `NODE_EXTRA_CA_CERTS` environment variable.
+
+```
+    NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem" code .
+```
+
+
 # Authentication
 
 The ONTAP-MCP server supports multiple methods for managing authentication credentials with a priority-based system. 

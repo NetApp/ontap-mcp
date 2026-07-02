@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/oauthex"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -65,6 +67,8 @@ type App struct {
 	httpClient   *http.Client
 	versionCache sync.Map
 	clusterIndex map[string]string // lowercase name → canonical config name
+	certFile     string
+	keyFile      string
 }
 
 type cachedVersion struct {
@@ -105,6 +109,15 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 			return nil, fmt.Errorf("poller names %q and %q differ only by case; rename one to avoid ambiguity", existing, name)
 		}
 		index[key] = name
+	}
+
+	var certFile, keyFile string
+	if cfg.TLS != nil {
+		certFile = strings.TrimSpace(cfg.TLS.CertFile)
+		keyFile = strings.TrimSpace(cfg.TLS.KeyFile)
+		if (certFile == "") || (keyFile == "") {
+			return nil, fmt.Errorf("section `Tls` requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
+		}
 	}
 
 	httpClient := o.TestHTTPClient
@@ -155,6 +168,8 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		keyAlg:       make(map[string]string),
 		httpClient:   httpClient,
 		clusterIndex: index,
+		certFile:     certFile,
+		keyFile:      keyFile,
 	}
 
 	// When OAuth is enabled, pre-warm the JWKS so a misconfigured issuer fails
@@ -354,9 +369,20 @@ func (a *App) createMCPServer() *mcp.Server {
 func (a *App) runHTTPServer(server *mcp.Server) {
 	var handler http.Handler
 
-	address := a.options.Host + ":" + strconv.Itoa(a.options.Port)
-	a.logger.Info("starting MCP server over HTTP transport",
-		slog.String("address", address),
+	var urlPath, transportMethod string
+	address := net.JoinHostPort(a.options.Host, strconv.Itoa(a.options.Port))
+	tlsEnabled := a.certFile != "" && a.keyFile != ""
+	if tlsEnabled {
+		urlPath = "https://" + address
+		transportMethod = "HTTPS"
+	} else {
+		urlPath = "http://" + address
+		transportMethod = "HTTP"
+	}
+
+	a.logger.Info("starting MCP server over",
+		slog.String("transport", transportMethod),
+		slog.String("url", urlPath),
 		slog.String("host", a.options.Host),
 		slog.Int("port", a.options.Port))
 
@@ -432,7 +458,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 	}
 
 	//goland:noinspection HttpUrlsUsage
-	a.logger.Info("MCP server endpoint available", slog.String("url", "http://"+address))
+	a.logger.Info("MCP server endpoint available", slog.String("url", urlPath))
 	a.logger.Info("Server ready to accept connections")
 
 	httpServer := &http.Server{
@@ -442,10 +468,26 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	if err := httpServer.ListenAndServe(); err != nil {
-		a.logger.Error("http server failed to start", slog.String("error", err.Error()))
-		os.Exit(1)
+	if tlsEnabled {
+		httpServer.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS13,
+		}
+		if err := httpServer.ListenAndServeTLS(a.certFile, a.keyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			a.logger.Error("http server failed to start",
+				slog.Any("error", err),
+				slog.String("url", urlPath),
+				slog.String("cert_file", a.certFile),
+				slog.String("key_file", a.keyFile))
+			os.Exit(1)
+		}
+	} else {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			a.logger.Error("http server failed to start",
+				slog.Any("error", err))
+			os.Exit(1)
+		}
 	}
+
 	a.logger.Info("mcp server shutdown gracefully")
 }
 
