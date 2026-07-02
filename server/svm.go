@@ -134,13 +134,13 @@ func (a *App) ModifySVM(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
+	if parameters.Name == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
-	}
-
-	if parameters.Name == "" {
-		return nil, nil, errors.New("SVM name is required")
 	}
 
 	switch parameters.Operation {

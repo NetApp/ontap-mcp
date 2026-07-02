@@ -17,7 +17,7 @@ var logger = setupLogger()
 type Globals struct {
 	LogLevel   string `enum:"debug,info,warn,error" default:"info" env:"LOG_LEVEL" help:"Log level, one of: ${enum}"`
 	ConfigPath string `name:"config" default:"ontap.yaml" env:"ONTAP_MCP_CONFIG" help:"ONTAP-MCP config path"`
-	ToolMode   string `enum:"legacy,multiplex,both" default:"both" env:"TOOL_MODE" help:"ONTAP-MCP tool mode, one of: ${enum}"`
+	ToolMode   string `enum:"legacy,multiplex,both" default:"legacy" env:"TOOL_MODE" help:"ONTAP-MCP tool mode, one of: ${enum}"`
 }
 
 type CLI struct {

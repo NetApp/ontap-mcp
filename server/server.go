@@ -137,7 +137,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
 	addTool(a, server, "create_snapmirror", descriptions.CreateSnapMirror, createAnnotation, a.CreateSnapMirror)
 	addTool(a, server, "create_snapshot", descriptions.CreateSnapshot, createAnnotation, a.CreateSnapshot)
-	addTool(a, server, "init_update_snapmirror_transfer", descriptions.InitOrUpdateSnapMirrorTransfer, createAnnotation, a.InitOrUpdateSnapMirrorTransfer)
+	addTool(a, server, "update_snapmirror_transfer", descriptions.UpdateSnapMirrorTransfer, createAnnotation, a.UpdateSnapMirrorTransfer)
 
 	addTool(a, server, "delete_svm_peer", descriptions.DeleteSVMPeer, deleteAnnotation, a.DeleteSVMPeer)
 

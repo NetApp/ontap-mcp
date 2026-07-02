@@ -77,7 +77,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_snapmirror`
 - `delete_snapmirror`
 - `initialize_snapmirror`
-- `init_update_snapmirror_transfer`
+- `update_snapmirror_transfer`
 - `break_snapmirror`
 - `resync_snapmirror`
 

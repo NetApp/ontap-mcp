@@ -24,12 +24,12 @@ func (a *App) CreateNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.CreateNFSService(ctx, nfsService)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -52,12 +52,12 @@ func (a *App) UpdateNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.UpdateNFSService(ctx, parameters.SVM, nfsService)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -79,12 +79,12 @@ func (a *App) DeleteNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.DeleteNFSService(ctx, parameters.SVM)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -106,7 +106,7 @@ func (a *App) ModifyNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	switch parameters.Operation {
@@ -118,7 +118,7 @@ func (a *App) ModifyNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 		err = client.UpdateNFSService(ctx, parameters.SVM, nfsService)
 		if err != nil {
-			return errorResult(err), nil, nil
+			return errorResult(err), nil, err
 		}
 
 		return &mcp.CallToolResult{
@@ -129,7 +129,7 @@ func (a *App) ModifyNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 	case "delete":
 		err = client.DeleteNFSService(ctx, parameters.SVM)
 		if err != nil {
-			return errorResult(err), nil, nil
+			return errorResult(err), nil, err
 		}
 
 		return &mcp.CallToolResult{

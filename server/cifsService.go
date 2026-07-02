@@ -23,12 +23,12 @@ func (a *App) CreateCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.CreateCIFSService(ctx, cifsService)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -51,12 +51,12 @@ func (a *App) UpdateCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.UpdateCIFSService(ctx, parameters.SVM, cifsService)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -82,12 +82,12 @@ func (a *App) DeleteCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.DeleteCIFSService(ctx, parameters.SVM, parameters.ADUser, parameters.ADPassword)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -109,7 +109,7 @@ func (a *App) ModifyCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	switch parameters.Operation {
@@ -121,7 +121,7 @@ func (a *App) ModifyCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 		err = client.UpdateCIFSService(ctx, parameters.SVM, cifsService)
 		if err != nil {
-			return errorResult(err), nil, nil
+			return errorResult(err), nil, err
 		}
 
 		return &mcp.CallToolResult{
@@ -136,7 +136,7 @@ func (a *App) ModifyCIFSService(ctx context.Context, _ *mcp.CallToolRequest, par
 
 		err = client.DeleteCIFSService(ctx, parameters.SVM, parameters.ADUser, parameters.ADPassword)
 		if err != nil {
-			return errorResult(err), nil, nil
+			return errorResult(err), nil, err
 		}
 
 		return &mcp.CallToolResult{

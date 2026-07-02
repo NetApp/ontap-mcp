@@ -23,12 +23,12 @@ func (a *App) CreateDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.CreateDNS(ctx, dns)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{
@@ -50,12 +50,12 @@ func (a *App) DeleteDNS(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	err = client.DeleteDNS(ctx, parameters.SVM)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return errorResult(err), nil, err
 	}
 
 	return &mcp.CallToolResult{

@@ -154,7 +154,7 @@ func (a *App) InitializeSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, 
 	return a.updateSnapMirrorState(ctx, client, parameters.DestinationSVM, parameters.DestinationVolume, rel, "SnapMirror relationship initialized successfully")
 }
 
-func (a *App) InitOrUpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapMirror) (*mcp.CallToolResult, any, error) {
+func (a *App) UpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapMirror) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -169,7 +169,7 @@ func (a *App) InitOrUpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToo
 		return errorResult(err), nil, err
 	}
 
-	if err := client.InitOrUpdateSnapMirrorTransfer(ctx, parameters.DestinationSVM, parameters.DestinationVolume); err != nil {
+	if err := client.UpdateSnapMirrorTransfer(ctx, parameters.DestinationSVM, parameters.DestinationVolume); err != nil {
 		return errorResult(err), nil, err
 	}
 
