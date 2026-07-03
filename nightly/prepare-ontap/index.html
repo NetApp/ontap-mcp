@@ -365,6 +365,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#serving-over-https-tls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serving over HTTPS (TLS)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-creating-a-self-signed-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Creating a Self-Signed Certificate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-an-mcp-client-with-a-self-signed-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connect an MCP Client with a Self-Signed Certificate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       Authentication
@@ -645,6 +672,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#serving-over-https-tls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serving over HTTPS (TLS)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-creating-a-self-signed-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Creating a Self-Signed Certificate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-an-mcp-client-with-a-self-signed-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connect an MCP Client with a Self-Signed Certificate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       Authentication
@@ -823,6 +877,81 @@ If you use Harvest, this file shares the same format as the <code>harvest.yml</c
 </tr>
 </tbody>
 </table>
+<h1 id="serving-over-https-tls">Serving over HTTPS (TLS)<a class="headerlink" href="#serving-over-https-tls" title="Permanent link">&para;</a></h1>
+<p>By default, the ONTAP-MCP server exposes its streamable-HTTP transport over plain <code>http://</code>. To serve over <code>https://</code> instead, add a top-level <code>Tls</code> block (capital “T”, consistent with <code>Pollers</code> and <code>Defaults</code>) to your <code>ontap.yaml</code> that points to a PEM-encoded certificate and its matching private key:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Tls</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cert_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/server-cert.pem</span>
+<span class="w">  </span><span class="nt">key_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/server-key.pem</span>
+
+<span class="nt">Pollers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sar</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.193.48.11</span>
+<span class="w">    </span><span class="nt">use_insecure_tls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password</span>
+</code></pre></div>
+<p>When the <code>Tls</code> block is present, the server starts with TLS enabled and advertises its endpoint as <code>https://&lt;host&gt;:&lt;port&gt;</code>. When it is omitted, the server serves over <code>http://</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Tls</code></td>
+<td>optional, section</td>
+<td>Top-level section that enables HTTPS for the MCP server's own transport. When present, both <code>cert_file</code> and <code>key_file</code> are required.</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>cert_file</code></td>
+<td>required (in <code>Tls</code>)</td>
+<td>Path to the PEM-encoded server certificate (or certificate chain) presented to MCP clients. Path may be absolute or relative to the working directory.</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>key_file</code></td>
+<td>required (in <code>Tls</code>)</td>
+<td>Path to the PEM-encoded private key matching <code>cert_file</code>. Path may be absolute or relative to the working directory.</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title"><code>Tls</code> vs. <code>use_insecure_tls</code></p>
+<p>The top-level <code>Tls</code> block controls TLS for connections <strong>from MCP clients to the ONTAP-MCP server</strong>. It is independent of the per-poller <code>use_insecure_tls</code> option, which only affects the outbound connections <strong>from ONTAP-MCP to your ONTAP clusters</strong>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Both files are required</p>
+<p>If you set the <code>Tls</code> block, you must provide <strong>both</strong> <code>cert_file</code> and <code>key_file</code>. Supplying only one (or leaving either blank) causes the server to fail at startup with a configuration error.</p>
+</div>
+<h1 id="example-creating-a-self-signed-certificate">Example: Creating a Self-Signed Certificate<a class="headerlink" href="#example-creating-a-self-signed-certificate" title="Permanent link">&para;</a></h1>
+<p>For testing purposes, here's how to create a self-signed certificate (ONTAP-MCP does not currently generate certificates for you):</p>
+<ol>
+<li>Generate a Self-Signed Certificate by mkcert. More details about mkcert are available <a href="https://github.com/FiloSottile/mkcert">here</a>.
+<div class="highlight"><pre><span></span><code>   # Setup the local CA
+   mkcert -install
+   # Generate trusted certificates for localhost
+   mkcert localhost 127.0.0.1 ::1
+
+   Created a new certificate valid for the following names:
+   - &quot;localhost&quot;
+   - &quot;127.0.0.1&quot;
+   - &quot;::1&quot;
+</code></pre></div>
+This will output pre-trusted localhost.pem and localhost-key.pem files in your current folder.</li>
+</ol>
+<h1 id="connect-an-mcp-client-with-a-self-signed-certificate">Connect an MCP Client with a Self-Signed Certificate<a class="headerlink" href="#connect-an-mcp-client-with-a-self-signed-certificate" title="Permanent link">&para;</a></h1>
+<p>You can validate the running MCP server with a trusted certificate using curl:</p>
+<div class="highlight"><pre><span></span><code>    curl --cacert localhost.pem https://localhost:8080
+</code></pre></div>
+<p>You can connect your VS Code MCP client to the running MCP server by passing the root CA certificate via the <code>NODE_EXTRA_CA_CERTS</code> environment variable.</p>
+<div class="highlight"><pre><span></span><code>    NODE_EXTRA_CA_CERTS=&quot;$(mkcert -CAROOT)/rootCA.pem&quot; code .
+</code></pre></div>
 <h1 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h1>
 <p>The ONTAP-MCP server supports multiple methods for managing authentication credentials with a priority-based system. 
 This allows you to choose the best approach for your security requirements.</p>
