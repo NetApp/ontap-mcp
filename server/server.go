@@ -193,6 +193,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 }
 
 func (a *App) StartServer() {
+	a.logger.Info(version.String())
 	if a.options.ReadOnly {
 		a.logger.Info("MCP server is running in read-only mode; mutating operations are disabled")
 	}

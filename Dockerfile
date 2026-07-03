@@ -7,6 +7,7 @@ SHELL ["/bin/bash", "-c"]
 ARG INSTALL_DIR=/opt/mcp
 ARG BUILD_DIR=/opt/home
 ARG VERSION=1.0.0
+ARG RELEASE=1
 ARG JUST_VERSION=1.42.4
 ARG JUST_URL=${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz
 
@@ -20,7 +21,7 @@ COPY . .
 RUN wget -O - "https://github.com/casey/just/releases/download/${JUST_URL}" \
   | tar -xz -C /usr/local/bin just
 
-RUN VERSION=$VERSION just build
+RUN just VERSION=$VERSION RELEASE=$RELEASE build
 
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
 RUN cp -a $BUILD_DIR/conf $INSTALL_DIR/
