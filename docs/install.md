@@ -138,6 +138,18 @@ Some commonly used flags:
 | `--json-response` | Respond with application/json instead of text/event-stream. Required when deploying behind proxies or gateways that do not relay SSE/chunked responses, e.g. on-premises data gateways. |
 | `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging. |
 
+## Checking the Version
+
+```bash
+docker run --rm ghcr.io/netapp/ontap-mcp:latest --version
+```
+
+Or if the container is already running:
+
+```bash
+docker logs ontap-mcp-server 2>&1 | grep "ontap-mcp version"
+```
+
 ## Next Steps
 
 - Explore [Prepare ONTAP](prepare-ontap.md)
