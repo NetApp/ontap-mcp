@@ -158,13 +158,13 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 # Tool Mode
 
-The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `both`; env: `TOOL_MODE`):
+The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `legacy`; env: `TOOL_MODE`):
 
-| Mode | Description |
-|---|---|
-| `legacy` | Registers separate `update_*` and `delete_*` tools for each resource type. |
+| Mode        | Description                                                                                           |
+|-------------|-------------------------------------------------------------------------------------------------------|
+| `legacy`    | Registers separate `update_*` and `delete_*` tools for each resource type. This is the default.       |
 | `multiplex` | Registers a single `modify_*` tool per resource type that handles both update and delete in one call. |
-| `both` | Registers both conventions simultaneously. This is the default. |
+| `both`      | Registers both conventions simultaneously.                                                            |
 
 Tool mode only controls whether the per-resource `update_*`/`delete_*` tools and/or the multiplexed `modify_*` tools are registered. All `create_*` tools are registered regardless of tool mode.
 
