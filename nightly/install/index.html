@@ -427,6 +427,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#checking-the-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checking the Version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next Steps
@@ -732,6 +741,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#checking-the-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checking the Version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next Steps
@@ -881,6 +899,12 @@ By default, it looks for <code>ontap.yaml</code> in its working directory (<code
 </tr>
 </tbody>
 </table>
+<h2 id="checking-the-version">Checking the Version<a class="headerlink" href="#checking-the-version" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>ghcr.io/netapp/ontap-mcp:latest<span class="w"> </span>--version
+</code></pre></div>
+<p>Or if the container is already running:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>ontap-mcp-server<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;ontap-mcp version&quot;</span>
+</code></pre></div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Explore <a href="../prepare-ontap/">Prepare ONTAP</a></li>
