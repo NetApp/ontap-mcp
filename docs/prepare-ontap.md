@@ -4,6 +4,10 @@ ONTAP-MCP requires login credentials to access monitored hosts. An admin account
 
 If you want to limit the ONTAP-MCP's access to specific SVMs or read-only action, you can create a role with the appropriate permissions and assign it to the user.
 
+!!! note "User Permission Requirements for the ONTAP Cluster"
+
+    The ONTAP-MCP uses the REST API to connect with ONTAP clusters. It requires user permission of the HTTP application type, which can be set via the `-application` field with the value `http`.
+
 
 ## ontap.yaml configuration
 
