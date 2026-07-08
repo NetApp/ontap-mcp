@@ -1,0 +1,25 @@
+ONTAP MCP Server has been deployed.
+
+{{- if and (not .Values.ontapConfig.existingSecret) (not .Values.ontapConfig.data) }}
+
+WARNING: no ONTAP clusters are configured (ontapConfig.data is empty and
+ontapConfig.existingSecret is not set). The server will start but has
+nothing to poll. Set one of the two -- see values.yaml for the schema, or
+https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml.
+{{- end }}
+
+Get the application URL by running these commands:
+
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ (first $host.paths).path }}
+{{- end }}
+{{- else if .Values.httpRoute.enabled }}
+{{- range .Values.httpRoute.hostnames }}
+  http://{{ . }}
+{{- end }}
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "ontap-mcp.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.service.port }}
+  echo "Visit http://127.0.0.1:8080/health to check the server is up."
+{{- end }}
