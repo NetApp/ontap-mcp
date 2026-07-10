@@ -4,9 +4,47 @@ ONTAP-MCP requires login credentials to access monitored hosts. An admin account
 
 If you want to limit the ONTAP-MCP's access to specific SVMs or read-only action, you can create a role with the appropriate permissions and assign it to the user.
 
-!!! note "User Permission Requirements for the ONTAP Cluster"
+## User Permission Requirements for the ONTAP Cluster
 
-    The ONTAP-MCP uses the REST API to connect with ONTAP clusters. It requires user permission of the HTTP application type, which can be set via the `-application` field with the value `http`.
+The ONTAP-MCP utilizes the REST API to connect with ONTAP clusters. It requires an admin account with user permissions of the HTTP application type, which can be configured using the `-application` field with the value `http`.
+
+1. Verify that the user has the necessary permissions for the relevant authentication method associated with the admin role.
+
+`security login show -vserver ROOT_VSERVER -user-or-group-name admin -application http`
+
+```bash
+umeng-aff300-05-06::> security login show -vserver umeng-aff300-05-06 -user-or-group-name admin -application http
+
+Vserver: umeng-aff300-05-06
+                                                                 Second
+User/Group                 Authentication                 Acct   Authentication
+Name           Application Method        Role Name        Locked Method
+-------------- ----------- ------------- ---------------- ------ --------------
+admin          http        password      admin            no     none
+```
+
+2. Verify that the user has `all` permissions to the API for the admin role.
+
+`security login role show -vserver ROOT_VSERVER -role admin`
+
+```bash
+umeng-aff300-05-06::> security login role show -vserver umeng-aff300-05-06 -role admin
+           Role          Command/                                      Access
+Vserver    Name          Directory                               Query Level
+---------- ------------- --------- ----------------------------------- --------
+umeng-aff300-05-06
+           admin         DEFAULT                                       all
+```
+
+3. If the required role does not exist, create a role with `all` permissions for the API.
+
+`security login role create -role admin -cmddirname DEFAULT -access all`
+
+4. If the required user does not exist, create a user with the appropriate permissions for the relevant authentication method associated with the admin role.
+
+`security login create -user-or-group-name admin -application http -role admin -authentication-method password`
+
+`security login create -user-or-group-name mcp -application http -role mcp-role -authentication-method cert`
 
 
 ## ontap.yaml configuration
