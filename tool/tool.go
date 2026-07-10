@@ -296,7 +296,7 @@ type SnapMirror struct {
 	DestinationPath      string `json:"destination.path" jsonschema:"destination path of snapmirror. Ex: destination_svm:destination_volume"`
 	PolicyName           string `json:"policy_name,omitzero" jsonschema:"SnapMirror policy name"`
 	TransferScheduleName string `json:"transfer_schedule.name,omitzero" jsonschema:"SnapMirror transfer schedule name"`
-	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding"`
+	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding)"`
 }
 
 type OntapGetParams struct {

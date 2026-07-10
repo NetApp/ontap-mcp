@@ -51,8 +51,8 @@ func (a *App) DeleteSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if parameters.DestinationPath == "" {
-		return nil, nil, errors.New("destination path is required")
+	if err := validateDestination(parameters); err != nil {
+		return nil, nil, err
 	}
 
 	client, err := a.getClient(parameters.Cluster)
@@ -86,8 +86,8 @@ func (a *App) UpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolReque
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if parameters.DestinationPath == "" {
-		return nil, nil, errors.New("destination path is required")
+	if err := validateDestination(parameters); err != nil {
+		return nil, nil, err
 	}
 
 	client, err := a.getClient(parameters.Cluster)
