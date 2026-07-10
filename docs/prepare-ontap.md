@@ -6,16 +6,16 @@ If you want to limit the ONTAP-MCP's access to specific SVMs or read-only action
 
 ## User Permission Requirements for the ONTAP Cluster
 
-The ONTAP-MCP utilizes the REST API to connect with ONTAP clusters. It requires an admin account with user permissions of the HTTP application type, which can be configured using the `-application` field with the value `http`.
+The ONTAP-MCP utilizes the REST API to connect with ONTAP clusters. It requires a user account that can authenticate for the HTTP application type (set `-application http`) and has a role with the required permissions (admin or a least-privilege custom role).
 
 1. Verify that the user has the necessary permissions for the relevant authentication method associated with the admin role.
 
-`security login show -vserver ROOT_VSERVER -user-or-group-name admin -application http`
+`security login show -vserver <cluster_name> -user-or-group-name <ontap_mcp_user> -application http`
 
-```bash
-umeng-aff300-05-06::> security login show -vserver umeng-aff300-05-06 -user-or-group-name admin -application http
+```text
+<cluster>::> security login show -vserver <cluster> -user-or-group-name <username> -application http
 
-Vserver: umeng-aff300-05-06
+Vserver: <cluster>
                                                                  Second
 User/Group                 Authentication                 Acct   Authentication
 Name           Application Method        Role Name        Locked Method
@@ -23,28 +23,28 @@ Name           Application Method        Role Name        Locked Method
 admin          http        password      admin            no     none
 ```
 
-2. Verify that the user has `all` permissions to the API for the admin role.
+2. Verify that the role used for ONTAP-MCP has `all` access to the required command directory (for example, `DEFAULT`) on the cluster admin vserver.
 
-`security login role show -vserver ROOT_VSERVER -role admin`
+`security login role show -vserver <cluster> -role <role>`
 
-```bash
-umeng-aff300-05-06::> security login role show -vserver umeng-aff300-05-06 -role admin
+```text
+<cluster>::> security login role show -vserver <cluster> -role <role>
            Role          Command/                                      Access
 Vserver    Name          Directory                               Query Level
 ---------- ------------- --------- ----------------------------------- --------
-umeng-aff300-05-06
+ <cluster>
            admin         DEFAULT                                       all
 ```
 
-3. If the required role does not exist, create a role with `all` permissions for the API.
+3. If the required role does not exist, create a role (use a dedicated name to avoid colliding with built-in roles).
 
-`security login role create -role admin -cmddirname DEFAULT -access all`
+`security login role create -vserver <cluster_name> -role <ontap_mcp_role> -cmddirname DEFAULT -access all`
 
-4. If the required user does not exist, create a user with the appropriate permissions for the relevant authentication method associated with the admin role.
+4. If the required user does not exist, create a user with the appropriate permissions for the relevant authentication method associated with the role.
 
-`security login create -user-or-group-name admin -application http -role admin -authentication-method password`
+`security login create -vserver <cluster_name> -user-or-group-name <ontap_mcp_user> -application http -role <ontap_mcp_role> -authentication-method password`
 
-`security login create -user-or-group-name admin -application http -role admin -authentication-method cert`
+`security login create -vserver <cluster_name> -user-or-group-name <ontap_mcp_user> -application http -role <ontap_mcp_role> -authentication-method cert`
 
 
 ## ontap.yaml configuration
