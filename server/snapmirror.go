@@ -51,11 +51,8 @@ func (a *App) DeleteSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if parameters.DestinationSVM == "" {
-		return nil, nil, errors.New("destination SVM name is required")
-	}
-	if parameters.DestinationVolume == "" {
-		return nil, nil, errors.New("destination volume name is required")
+	if parameters.DestinationPath == "" {
+		return nil, nil, errors.New("destination path is required")
 	}
 
 	client, err := a.getClient(parameters.Cluster)
@@ -63,7 +60,7 @@ func (a *App) DeleteSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 		return errorResult(err), nil, err
 	}
 
-	if err := client.DeleteSnapMirror(ctx, parameters.DestinationSVM, parameters.DestinationVolume); err != nil {
+	if err := client.DeleteSnapMirror(ctx, parameters.DestinationPath); err != nil {
 		return errorResult(err), nil, err
 	}
 
@@ -89,11 +86,8 @@ func (a *App) UpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolReque
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if parameters.DestinationSVM == "" {
-		return nil, nil, errors.New("destination SVM name is required")
-	}
-	if parameters.DestinationVolume == "" {
-		return nil, nil, errors.New("destination volume name is required")
+	if parameters.DestinationPath == "" {
+		return nil, nil, errors.New("destination path is required")
 	}
 
 	client, err := a.getClient(parameters.Cluster)
@@ -101,7 +95,7 @@ func (a *App) UpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolReque
 		return errorResult(err), nil, err
 	}
 
-	if err := client.UpdateSnapMirrorTransfer(ctx, parameters.DestinationSVM, parameters.DestinationVolume); err != nil {
+	if err := client.UpdateSnapMirrorTransfer(ctx, parameters.DestinationPath); err != nil {
 		return errorResult(err), nil, err
 	}
 
@@ -131,25 +125,19 @@ func (a *App) ResyncSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 }
 
 func newCreateSnapMirror(in tool.SnapMirrorCreate) (ontap.SnapMirrorRelationship, error) {
-	if in.SourceSVM == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("source SVM name is required")
+	if in.SourcePath == "" {
+		return ontap.SnapMirrorRelationship{}, errors.New("source path is required")
 	}
-	if in.SourceVolume == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("source volume name is required")
-	}
-	if in.DestinationSVM == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("destination SVM name is required")
-	}
-	if in.DestinationVolume == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("destination volume name is required")
+	if in.DestinationPath == "" {
+		return ontap.SnapMirrorRelationship{}, errors.New("destination path is required")
 	}
 	if in.PolicyName == "" {
 		return ontap.SnapMirrorRelationship{}, errors.New("policy name is required")
 	}
 
 	return ontap.SnapMirrorRelationship{
-		Source:      ontap.SnapMirrorEndpoint{Path: fmt.Sprintf("%s:%s", in.SourceSVM, in.SourceVolume)},
-		Destination: ontap.SnapMirrorEndpoint{Path: fmt.Sprintf("%s:%s", in.DestinationSVM, in.DestinationVolume)},
+		Source:      ontap.SnapMirrorEndpoint{Path: in.SourcePath},
+		Destination: ontap.SnapMirrorEndpoint{Path: in.DestinationPath},
 		Policy:      ontap.NameAndUUID{Name: in.PolicyName},
 	}, nil
 }
@@ -180,11 +168,8 @@ func newUpdateSnapMirror(in tool.SnapMirror) (ontap.SnapMirrorRelationship, erro
 }
 
 func validateDestination(in tool.SnapMirror) error {
-	if in.DestinationSVM == "" {
-		return errors.New("destination SVM name is required")
-	}
-	if in.DestinationVolume == "" {
-		return errors.New("destination volume name is required")
+	if in.DestinationPath == "" {
+		return errors.New("destination path is required")
 	}
 	return nil
 }
@@ -200,7 +185,7 @@ func (a *App) updateSnapMirrorState(ctx context.Context, parameters tool.SnapMir
 		return errorResult(err), nil, err
 	}
 
-	if err := client.UpdateSnapMirror(ctx, parameters.DestinationSVM, parameters.DestinationVolume, rel); err != nil {
+	if err := client.UpdateSnapMirror(ctx, parameters.DestinationPath, rel); err != nil {
 		return errorResult(err), nil, err
 	}
 
