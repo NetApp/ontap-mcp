@@ -44,7 +44,7 @@ umeng-aff300-05-06
 
 `security login create -user-or-group-name admin -application http -role admin -authentication-method password`
 
-`security login create -user-or-group-name mcp -application http -role mcp-role -authentication-method cert`
+`security login create -user-or-group-name admin -application http -role admin -authentication-method cert`
 
 
 ## ontap.yaml configuration
