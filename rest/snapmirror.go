@@ -26,10 +26,10 @@ func (c *Client) getSnapMirrorUUID(ctx context.Context, destPath string) (string
 	}
 
 	if data.NumRecords == 0 {
-		return "", fmt.Errorf("SnapMirror relationship with destination %s not found", destPath)
+		return "", fmt.Errorf("SnapMirror relationship with destination %q not found", destPath)
 	}
 	if data.NumRecords != 1 {
-		return "", fmt.Errorf("found %d SnapMirror relationships with destination %s, expected 1", data.NumRecords, destPath)
+		return "", fmt.Errorf("found %d SnapMirror relationships with destination %q, expected 1", data.NumRecords, destPath)
 	}
 
 	return data.Records[0].UUID, nil

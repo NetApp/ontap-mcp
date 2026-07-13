@@ -126,13 +126,13 @@ func (a *App) ResyncSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 
 func newCreateSnapMirror(in tool.SnapMirrorCreate) (ontap.SnapMirrorRelationship, error) {
 	if in.SourcePath == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("source path is required")
+		return ontap.SnapMirrorRelationship{}, errors.New("source.path is required")
 	}
 	if in.DestinationPath == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("destination path is required")
+		return ontap.SnapMirrorRelationship{}, errors.New("destination.path is required")
 	}
 	if in.PolicyName == "" {
-		return ontap.SnapMirrorRelationship{}, errors.New("policy name is required")
+		return ontap.SnapMirrorRelationship{}, errors.New("policy_name is required")
 	}
 
 	return ontap.SnapMirrorRelationship{
@@ -169,7 +169,7 @@ func newUpdateSnapMirror(in tool.SnapMirror) (ontap.SnapMirrorRelationship, erro
 
 func validateDestination(in tool.SnapMirror) error {
 	if in.DestinationPath == "" {
-		return errors.New("destination path is required")
+		return errors.New("destination.path is required")
 	}
 	return nil
 }

@@ -287,13 +287,13 @@ type LunMap struct {
 
 type SnapMirrorCreate struct {
 	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
-	SourcePath      string `json:"source.path" jsonschema:"source path of snapmirror. Ex: source_svm:source_volume"`
-	DestinationPath string `json:"destination.path" jsonschema:"destination path of snapmirror. Ex: destination_svm:destination_volume"`
+	SourcePath      string `json:"source.path" jsonschema:"SnapMirror source endpoint path (format: <svm>:<volume>, e.g. vs1:vol1)"`
+	DestinationPath string `json:"destination.path" jsonschema:"SnapMirror destination endpoint path (format: <svm>:<volume>, e.g. vs2:vol2)"`
 	PolicyName      string `json:"policy_name" jsonschema:"SnapMirror policy name"`
 }
 type SnapMirror struct {
 	Cluster              string `json:"cluster_name" jsonschema:"cluster name"`
-	DestinationPath      string `json:"destination.path" jsonschema:"destination path of snapmirror. Ex: destination_svm:destination_volume"`
+	DestinationPath      string `json:"destination.path" jsonschema:"SnapMirror destination endpoint path (format: <svm>:<volume>, e.g. vs2:vol2)"`
 	PolicyName           string `json:"policy_name,omitzero" jsonschema:"SnapMirror policy name"`
 	TransferScheduleName string `json:"transfer_schedule.name,omitzero" jsonschema:"SnapMirror transfer schedule name"`
 	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding)"`
