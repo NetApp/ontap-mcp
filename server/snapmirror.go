@@ -162,7 +162,7 @@ func newUpdateSnapMirror(in tool.SnapMirror) (ontap.SnapMirrorRelationship, erro
 		hasUpdate = true
 	}
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: policy_name, transfer_schedule_name or state")
+		return out, errors.New("at least one updatable field must be provided: policy_name, transfer_schedule.name or state")
 	}
 	return out, nil
 }
