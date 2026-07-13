@@ -10,10 +10,10 @@ The ONTAP-MCP utilizes the REST API to connect with ONTAP clusters. It requires 
 
 1. Verify that the user has the necessary permissions for the relevant authentication method associated with the admin role.
 
-`security login show -vserver <cluster_name> -user-or-group-name <ontap_mcp_user> -application http`
+`security login show -vserver <cluster> -user-or-group-name <username> -application http`
 
 ```text
-<cluster>::> security login show -vserver <cluster> -user-or-group-name <username> -application http
+security login show -vserver <cluster> -user-or-group-name <username> -application http
 
 Vserver: <cluster>
                                                                  Second
@@ -28,7 +28,7 @@ admin          http        password      admin            no     none
 `security login role show -vserver <cluster> -role <role>`
 
 ```text
-<cluster>::> security login role show -vserver <cluster> -role <role>
+security login role show -vserver <cluster> -role <role>
            Role          Command/                                      Access
 Vserver    Name          Directory                               Query Level
 ---------- ------------- --------- ----------------------------------- --------
@@ -38,13 +38,13 @@ Vserver    Name          Directory                               Query Level
 
 3. If the required role does not exist, create a role (use a dedicated name to avoid colliding with built-in roles).
 
-`security login role create -vserver <cluster_name> -role <ontap_mcp_role> -cmddirname DEFAULT -access all`
+`security login role create -vserver <cluster> -role <role> -cmddirname DEFAULT -access all`
 
 4. If the required user does not exist, create a user with the appropriate permissions for the relevant authentication method associated with the role.
 
-`security login create -vserver <cluster_name> -user-or-group-name <ontap_mcp_user> -application http -role <ontap_mcp_role> -authentication-method password`
+`security login create -vserver <cluster> -user-or-group-name <username> -application http -role <role> -authentication-method password`
 
-`security login create -vserver <cluster_name> -user-or-group-name <ontap_mcp_user> -application http -role <ontap_mcp_role> -authentication-method cert`
+`security login create -vserver <cluster> -user-or-group-name <username> -application http -role <role> -authentication-method cert`
 
 
 ## ontap.yaml configuration
