@@ -3,11 +3,15 @@ package server
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/modelcontextprotocol/go-sdk/auth"
+	"github.com/modelcontextprotocol/go-sdk/oauthex"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -28,6 +32,7 @@ import (
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
 	"github.com/netapp/ontap-mcp/version"
+	"golang.org/x/sync/singleflight"
 )
 
 type Options struct {
@@ -48,8 +53,23 @@ type App struct {
 	options      Options
 	locks        *lock.Map
 	catalog      catalog.APICatalog
+	jwksURI      string
+	algOverride  []string
+	scope        string
+	oauthEnabled bool
+	audience     string
+	issuer       string
+	jwksMu       sync.RWMutex
+	jwksKeys     map[string]any
+	derivedAlgs  map[string]bool
+	keyAlg       map[string]string
+	jwksFetched  time.Time
+	jwksRefresh  singleflight.Group
+	httpClient   *http.Client
 	versionCache sync.Map
 	clusterIndex map[string]string // lowercase name → canonical config name
+	certFile     string
+	keyFile      string
 }
 
 type cachedVersion struct {
@@ -58,8 +78,31 @@ type cachedVersion struct {
 }
 
 const versionCacheTTL = 24 * time.Hour
+const jwksCacheTTL = 5 * time.Minute
+
+type jwksResponse struct {
+	Keys []jwkKey `json:"keys"`
+}
+
+type OIDCConfig struct {
+	Issuer  string `json:"issuer"`
+	JwksURI string `json:"jwks_uri"`
+}
+
+type jwkKey struct {
+	Kty string `json:"kty"`
+	Kid string `json:"kid"`
+	Use string `json:"use"`
+	Alg string `json:"alg"`
+	Crv string `json:"crv"`
+	N   string `json:"n"`
+	E   string `json:"e"`
+	X   string `json:"x"`
+	Y   string `json:"y"`
+}
 
 func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
+	var err error
 	index := make(map[string]string, len(cfg.Pollers))
 	for name := range cfg.Pollers {
 		key := strings.ToLower(name)
@@ -69,12 +112,74 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 		index[key] = name
 	}
 
+	var certFile, keyFile string
+	if cfg.TLS != nil {
+		certFile = strings.TrimSpace(cfg.TLS.CertFile)
+		keyFile = strings.TrimSpace(cfg.TLS.KeyFile)
+		if (certFile == "") || (keyFile == "") {
+			return nil, fmt.Errorf("section `Tls` requires both cert_file and key_file to be set; got cert_file=%q key_file=%q", certFile, keyFile)
+		}
+	}
+
+	httpClient := o.TestHTTPClient
+	if httpClient == nil {
+		httpClient = &http.Client{Timeout: 10 * time.Second}
+	}
+
+	jwksURI := ""
+	issuer := ""
+	scope := ""
+	audience := ""
+	oauthEnabled := false
+	var algOverride []string
+
+	if cfg.McpAuth != nil {
+		issuer = strings.TrimSpace(cfg.McpAuth.Issuer)
+		audience = strings.TrimSpace(cfg.McpAuth.Audience)
+		if issuer == "" || audience == "" {
+			return nil, errors.New("McpAuth.issuer and McpAuth.audience both are required to enable OAuth")
+		}
+		jwksURI, err = getJwksURI(issuer, httpClient, logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to discover jwks_uri from issuer %s, Error: %w", issuer, err)
+		}
+		algOverride = normalizeAlgs(cfg.McpAuth.Alg)
+
+		if cfg.McpAuth.Scope != "" {
+			scope = strings.TrimSpace(cfg.McpAuth.Scope)
+		}
+		oauthEnabled = true
+	} else {
+		logger.Error("OAuth bearer auth disabled as McpAuth is not configured. Falling back to non-oauth workflow")
+	}
+
 	app := &App{
 		cfg:          cfg,
 		logger:       logger,
 		options:      o,
 		locks:        lock.New(),
+		jwksURI:      jwksURI,
+		algOverride:  algOverride,
+		scope:        scope,
+		oauthEnabled: oauthEnabled,
+		audience:     audience,
+		issuer:       issuer,
+		jwksKeys:     make(map[string]any),
+		derivedAlgs:  make(map[string]bool),
+		keyAlg:       make(map[string]string),
+		httpClient:   httpClient,
 		clusterIndex: index,
+		certFile:     certFile,
+		keyFile:      keyFile,
+	}
+
+	// When OAuth is enabled, pre-warm the JWKS so a misconfigured issuer fails
+	// fast at startup. With no explicit algorithm override this also derives the
+	// permitted signing algorithms from the issuer's published keys.
+	if oauthEnabled {
+		if err := app.refreshJWKS(); err != nil {
+			return nil, fmt.Errorf("failed to fetch jwks from %s: %w", jwksURI, err)
+		}
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
@@ -89,6 +194,7 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 }
 
 func (a *App) StartServer() {
+	a.logger.Info(version.String())
 	if a.options.ReadOnly {
 		a.logger.Info("MCP server is running in read-only mode; mutating operations are disabled")
 	}
@@ -98,6 +204,12 @@ func (a *App) StartServer() {
 	if a.options.JSONResponse {
 		a.logger.Info("MCP server is responding with application/json instead of text/event-stream")
 	}
+	if a.oauthEnabled {
+		a.logger.Info("OAuth bearer auth enabled using McpAuth")
+	} else {
+		a.logger.Error("OAuth bearer auth disabled. Falling back to non-oauth workflow")
+	}
+
 	server := a.createMCPServer()
 	a.runHTTPServer(server)
 }
@@ -243,9 +355,20 @@ func (a *App) createMCPServer() *mcp.Server {
 func (a *App) runHTTPServer(server *mcp.Server) {
 	var handler http.Handler
 
-	address := a.options.Host + ":" + strconv.Itoa(a.options.Port)
-	a.logger.Info("starting MCP server over HTTP transport",
-		slog.String("address", address),
+	var urlPath, transportMethod string
+	address := net.JoinHostPort(a.options.Host, strconv.Itoa(a.options.Port))
+	tlsEnabled := a.certFile != "" && a.keyFile != ""
+	if tlsEnabled {
+		urlPath = "https://" + address
+		transportMethod = "HTTPS"
+	} else {
+		urlPath = "http://" + address
+		transportMethod = "HTTP"
+	}
+
+	a.logger.Info("starting MCP server over",
+		slog.String("transport", transportMethod),
+		slog.String("url", urlPath),
 		slog.String("host", a.options.Host),
 		slog.Int("port", a.options.Port))
 
@@ -281,40 +404,76 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 		handler = loggingHandler
 	}
 
-	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Skip MCP handler for health endpoint
-		if r.URL.Path == "/health" {
-			http.DefaultServeMux.ServeHTTP(w, r)
-			return
-		}
+	// Setup routing
+	mux := http.NewServeMux()
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Mcp-Protocol-Version, Mcp-Session-Id")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		handler.ServeHTTP(w, r)
+	// Health check endpoint
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
 	})
 
+	if a.oauthEnabled {
+		var scopesSupported []string
+		if a.scope != "" {
+			scopesSupported = []string{a.scope}
+		}
+		metadata := &oauthex.ProtectedResourceMetadata{
+			Resource:             a.audience,
+			ScopesSupported:      scopesSupported,
+			AuthorizationServers: []string{a.issuer},
+		}
+		mux.Handle("/.well-known/oauth-protected-resource", auth.ProtectedResourceMetadataHandler(metadata))
+
+		// MCP endpoint (OAuth authorization required, with logging)
+		mux.Handle("/", LoggingMiddleware(a.OAuthMiddleware(handler)))
+	} else {
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Mcp-Protocol-Version, Mcp-Session-Id")
+
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			handler.ServeHTTP(w, r)
+		})
+	}
+
 	//goland:noinspection HttpUrlsUsage
-	a.logger.Info("MCP server endpoint available", slog.String("url", "http://"+address))
+	a.logger.Info("MCP server endpoint available", slog.String("url", urlPath))
 	a.logger.Info("Server ready to accept connections")
 
 	httpServer := &http.Server{
 		Addr:              address,
-		Handler:           wrappedHandler,
+		Handler:           mux,
 		ReadHeaderTimeout: 60 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
 
-	if err := httpServer.ListenAndServe(); err != nil {
-		a.logger.Error("http server failed to start", slog.String("error", err.Error()))
-		os.Exit(1)
+	if tlsEnabled {
+		httpServer.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS13,
+		}
+		if err := httpServer.ListenAndServeTLS(a.certFile, a.keyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			a.logger.Error("http server failed to start",
+				slog.Any("error", err),
+				slog.String("url", urlPath),
+				slog.String("cert_file", a.certFile),
+				slog.String("key_file", a.keyFile))
+			os.Exit(1)
+		}
+	} else {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			a.logger.Error("http server failed to start",
+				slog.Any("error", err))
+			os.Exit(1)
+		}
 	}
+
 	a.logger.Info("mcp server shutdown gracefully")
 }
 

@@ -71,11 +71,63 @@ func (p *Poller) InsecureTLS() bool {
 type ONTAP struct {
 	Pollers        map[string]*Poller `yaml:"Pollers,omitempty"`
 	Defaults       *Poller            `yaml:"Defaults,omitempty"`
+	McpAuth        *OAuth             `yaml:"McpAuth,omitempty"`
+	TLS            *TLS               `yaml:"Tls,omitempty"`
 	PollersOrdered []string           `yaml:"-"` // poller names in same order as yaml config
 }
 
+type OAuth struct {
+	Issuer   string      `yaml:"issuer"`
+	Audience string      `yaml:"audience"`
+	Alg      StringSlice `yaml:"alg,omitempty"`
+	Scope    string      `yaml:"scope,omitempty"`
+}
+
+// StringSlice accepts either a single YAML scalar (alg: RS256) or a YAML
+// sequence (alg: [RS256, ES256]) and always decodes into a slice of strings.
+type StringSlice []string
+
+// UnmarshalYAML implements the goccy/go-yaml BytesUnmarshaler interface so the
+// field can be configured as a scalar or a list.
+func (s *StringSlice) UnmarshalYAML(b []byte) error {
+	var list []string
+	if err := yaml.Unmarshal(b, &list); err == nil {
+		*s = list
+		return nil
+	}
+	var single string
+	if err := yaml.Unmarshal(b, &single); err != nil {
+		return fmt.Errorf("alg must be a string or a list of strings: %w", err)
+	}
+	*s = StringSlice{single}
+	return nil
+}
+
+// TLS configures the certificate and private key the MCP server presents to
+// its own clients, enabling HTTPS for the streamable-HTTP transport. When the
+// top-level Tls block is present, the server starts with ListenAndServeTLS and
+// serves over https://; when it is omitted, the server serves plain http://.
+//
+// This is independent of the per-poller use_insecure_tls option, which only
+// controls how ONTAP-MCP connects outbound to ONTAP clusters.
+//
+// Both CertFile and KeyFile are required when the Tls block is set; supplying
+// only one is a configuration error (see server.NewApp).
+type TLS struct {
+	// CertFile is the path to the PEM-encoded server certificate (or
+	// certificate chain) the MCP server presents to clients. Required when
+	// the tls block is set. Path may be absolute or relative to the working
+	// directory.
+	CertFile string `yaml:"cert_file,omitempty"`
+	// KeyFile is the path to the PEM-encoded private key matching CertFile.
+	// Required when the tls block is set. Path may be absolute or relative to
+	// the working directory.
+	KeyFile string `yaml:"key_file,omitempty"`
+}
+
 type Poller struct {
-	Addr              string            `yaml:"addr,omitempty"`
+	Addr string `yaml:"addr,omitempty"`
+
 	AuthStyle         string            `yaml:"auth_style,omitempty"`
 	CaCertPath        string            `yaml:"ca_cert,omitempty"`
 	CertificateScript CertificateScript `yaml:"certificate_script,omitempty"`

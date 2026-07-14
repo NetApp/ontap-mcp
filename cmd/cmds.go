@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/alecthomas/kong"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/server"
+	"github.com/netapp/ontap-mcp/version"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/alecthomas/kong"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/server"
 )
 
 var logger = setupLogger()
@@ -22,8 +22,9 @@ type Globals struct {
 
 type CLI struct {
 	Globals
-	Start    StartCmd    `cmd:"" help:"Start ONTAP MCP server"`
-	Generate GenerateCmd `cmd:"" help:"Generate ONTAP MCP artifacts"`
+	Version  kong.VersionFlag `name:"version" short:"v" help:"Print version and exit"`
+	Start    StartCmd         `cmd:"" help:"Start ONTAP MCP server"`
+	Generate GenerateCmd      `cmd:"" help:"Generate ONTAP MCP artifacts"`
 }
 
 type StartCmd struct {
@@ -74,6 +75,7 @@ func Parse() {
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
 		}),
+		kong.Vars{"version": version.String()},
 	)
 	err := ctx.Run(aCli)
 	ctx.FatalIfErrorf(err)

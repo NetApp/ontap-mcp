@@ -139,6 +139,18 @@ Some commonly used flags:
 | `--inspect-traffic` | Log all MCP HTTP request and response bodies for debugging.                                                                                                                                                                                                                                                                                            |
 | `--tool-mode`       | Control which mutating tool naming convention is exposed. One of `legacy` (default - separate `update_*`/`delete_*` tools), `multiplex` (combined `modify_*` tools), or `both` (registers both conventions). Can also be set via the `TOOL_MODE` environment variable. <br/>  **Note:** `tool-mode` with value `multiplex` would reduce MCP tool count |
 
+## Checking the Version
+
+```bash
+docker run --rm ghcr.io/netapp/ontap-mcp:latest --version
+```
+
+Or if the container is already running:
+
+```bash
+docker logs ontap-mcp-server 2>&1 | grep "ontap-mcp version"
+```
+
 ## Next Steps
 
 - Explore [Prepare ONTAP](prepare-ontap.md)

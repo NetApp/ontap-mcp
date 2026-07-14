@@ -1,4 +1,12 @@
 # See https://netapp.github.io/ontap-mcp/nightly/
+McpAuth:
+  issuer: https://dev-auth-mcptest.us.auth0.com
+  audience: http://localhost:8080
+
+# Tls:
+#   cert_file: localhost.pem
+#   key_file: localhost-key.pem
+
 Pollers:
   u2:
     addr: 10.193.48.11
