@@ -95,6 +95,65 @@ func (a *App) RestoreSnapshot(ctx context.Context, _ *mcp.CallToolRequest, param
 	}, nil, nil
 }
 
+func (a *App) ModifySnapshot(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapshotModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+	if parameters.Volume == "" {
+		return nil, nil, errors.New("volume name is required")
+	}
+	if parameters.Name == "" {
+		return nil, nil, errors.New("snapshot name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	snapshot := tool.Snapshot{
+		Cluster: parameters.Cluster,
+		SVM:     parameters.SVM,
+		Volume:  parameters.Volume,
+		Name:    parameters.Name,
+	}
+
+	switch parameters.Operation {
+	case "restore":
+		snapshotRestore, err := newRestoreSnapshot(snapshot)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if err := client.RestoreSnapshot(ctx, parameters.Volume, parameters.SVM, snapshotRestore); err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "Snapshot restored successfully"},
+			},
+		}, nil, nil
+	case "delete":
+		if err := client.DeleteSnapshot(ctx, parameters.Volume, parameters.SVM, parameters.Name); err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "Snapshot deleted successfully"},
+			},
+		}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: restore, delete", parameters.Operation)), nil, nil
+	}
+}
+
 func newCreateSnapshot(in tool.Snapshot) (ontap.Snapshot, error) {
 	out := ontap.Snapshot{}
 	if in.SVM == "" {

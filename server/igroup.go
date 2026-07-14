@@ -94,6 +94,60 @@ func (a *App) DeleteIGroup(ctx context.Context, _ *mcp.CallToolRequest, paramete
 	}, nil, nil
 }
 
+func (a *App) ModifyIGroup(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.IGroupModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+	if parameters.Name == "" {
+		return nil, nil, errors.New("igroup name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		rawUpdate, err := newUpdateIGroup(tool.IGroup{
+			SVM:     parameters.SVM,
+			Name:    parameters.Name,
+			NewName: parameters.IGroupUpdate.NewName,
+			Comment: parameters.IGroupUpdate.Comment,
+			OSType:  parameters.IGroupUpdate.OSType,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateIGroup(ctx, rawUpdate, parameters.Name, parameters.SVM)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "igroup updated successfully"}}}, nil, nil
+	case "delete":
+		rawDelete, err := newDeleteIGroup(tool.IGroup{SVM: parameters.SVM, Name: parameters.Name})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.DeleteIGroup(ctx, rawDelete, parameters.AllowDeleteWhileMapped)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "igroup deleted successfully"}}}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
 func (a *App) AddIGroupInitiator(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.IGroupInitiator) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil

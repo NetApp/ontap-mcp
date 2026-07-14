@@ -38,7 +38,7 @@ func (a *App) CreateFCPService(ctx context.Context, _ *mcp.CallToolRequest, para
 	}, nil, nil
 }
 
-func (a *App) UpdateFCPService(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCPServiceUpdate) (*mcp.CallToolResult, any, error) {
+func (a *App) UpdateFCPService(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCPService) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -93,6 +93,46 @@ func (a *App) DeleteFCPService(ctx context.Context, _ *mcp.CallToolRequest, para
 	}, nil, nil
 }
 
+func (a *App) ModifyFCPService(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCPServiceModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		fcpServiceUpdate, err := newUpdateFCPService(tool.FCPService{SVM: parameters.SVM, Enabled: parameters.FCPServiceUpdate.Enabled})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateFCPService(ctx, parameters.SVM, fcpServiceUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "FCP service updated successfully"}}}, nil, nil
+	case "delete":
+		err = client.DeleteFCPService(ctx, parameters.SVM)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "FCP service deleted successfully"}}}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
+}
+
 func newCreateFCPService(in tool.FCPService) (ontap.FCPService, error) {
 	out := ontap.FCPService{}
 	if in.SVM == "" {
@@ -106,7 +146,7 @@ func newCreateFCPService(in tool.FCPService) (ontap.FCPService, error) {
 	return out, nil
 }
 
-func newUpdateFCPService(in tool.FCPServiceUpdate) (ontap.FCPService, error) {
+func newUpdateFCPService(in tool.FCPService) (ontap.FCPService, error) {
 	out := ontap.FCPService{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -206,6 +246,55 @@ func (a *App) DeleteFCInterface(ctx context.Context, _ *mcp.CallToolRequest, par
 			&mcp.TextContent{Text: "FC interface deleted successfully"},
 		},
 	}, nil, nil
+}
+
+func (a *App) ModifyFCInterface(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.FCInterfaceModify) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
+	if parameters.Name == "" {
+		return nil, nil, errors.New("FC interface name is required")
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	switch parameters.Operation {
+	case "update":
+		fcInterfaceUpdate, err := newUpdateFCInterface(tool.FCInterface{
+			SVM:          parameters.SVM,
+			Name:         parameters.Name,
+			Enabled:      parameters.FCInterfaceUpdate.Enabled,
+			HomeNodeName: parameters.FCInterfaceUpdate.HomeNodeName,
+			HomePortName: parameters.FCInterfaceUpdate.HomePortName,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = client.UpdateFCInterface(ctx, parameters.SVM, parameters.Name, fcInterfaceUpdate)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "FC interface updated successfully"}}}, nil, nil
+	case "delete":
+		err = client.DeleteFCInterface(ctx, parameters.SVM, parameters.Name)
+		if err != nil {
+			return errorResult(err), nil, err
+		}
+
+		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "FC interface deleted successfully"}}}, nil, nil
+	default:
+		return errorResult(fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)), nil, nil
+	}
 }
 
 func newCreateFCInterface(in tool.FCInterfaceCreate) (ontap.FCInterface, error) {
