@@ -286,20 +286,17 @@ type LunMap struct {
 }
 
 type SnapMirrorCreate struct {
-	Cluster           string `json:"cluster_name" jsonschema:"cluster name"`
-	SourceSVM         string `json:"source_svm" jsonschema:"source SVM name"`
-	SourceVolume      string `json:"source_volume" jsonschema:"source volume name"`
-	DestinationSVM    string `json:"destination_svm" jsonschema:"destination SVM name"`
-	DestinationVolume string `json:"destination_volume" jsonschema:"destination volume name"`
-	PolicyName        string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
+	SourcePath      string `json:"source.path" jsonschema:"SnapMirror source endpoint path (format: <svm>:<volume>, e.g. vs1:vol1)"`
+	DestinationPath string `json:"destination.path" jsonschema:"SnapMirror destination endpoint path (format: <svm>:<volume>, e.g. vs2:vol2)"`
+	PolicyName      string `json:"policy_name" jsonschema:"SnapMirror policy name"`
 }
 type SnapMirror struct {
 	Cluster              string `json:"cluster_name" jsonschema:"cluster name"`
-	DestinationSVM       string `json:"destination_svm" jsonschema:"destination SVM name"`
-	DestinationVolume    string `json:"destination_volume" jsonschema:"destination volume name"`
+	DestinationPath      string `json:"destination.path" jsonschema:"SnapMirror destination endpoint path (format: <svm>:<volume>, e.g. vs2:vol2)"`
 	PolicyName           string `json:"policy_name,omitzero" jsonschema:"SnapMirror policy name"`
-	TransferScheduleName string `json:"transfer_schedule_name,omitzero" jsonschema:"SnapMirror transfer schedule name"`
-	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding"`
+	TransferScheduleName string `json:"transfer_schedule.name,omitzero" jsonschema:"SnapMirror transfer schedule name"`
+	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding)"`
 }
 
 type OntapGetParams struct {
