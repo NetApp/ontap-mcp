@@ -4,6 +4,48 @@ ONTAP-MCP requires login credentials to access monitored hosts. An admin account
 
 If you want to limit the ONTAP-MCP's access to specific SVMs or read-only action, you can create a role with the appropriate permissions and assign it to the user.
 
+## User Permission Requirements for the ONTAP Cluster
+
+The ONTAP-MCP utilizes the REST API to connect with ONTAP clusters. It requires a user account that can authenticate for the HTTP application type (set `-application http`) and has a role with the required permissions (admin or a least-privilege custom role).
+
+1. Verify that the user has the necessary permissions for the relevant authentication method associated with the admin role.
+
+`security login show -vserver <cluster> -user-or-group-name <username> -application http`
+
+```text
+security login show -vserver <cluster> -user-or-group-name <username> -application http
+
+Vserver: <cluster>
+                                                                 Second
+User/Group                 Authentication                 Acct   Authentication
+Name           Application Method        Role Name        Locked Method
+-------------- ----------- ------------- ---------------- ------ --------------
+admin          http        password      admin            no     none
+```
+
+2. Verify that the role used for ONTAP-MCP has `all` access to the required command directory (for example, `DEFAULT`) on the cluster admin vserver.
+
+`security login role show -vserver <cluster> -role <role>`
+
+```text
+security login role show -vserver <cluster> -role <role>
+           Role          Command/                                      Access
+Vserver    Name          Directory                               Query Level
+---------- ------------- --------- ----------------------------------- --------
+ <cluster>
+           admin         DEFAULT                                       all
+```
+
+3. If the required role does not exist, create a role (use a dedicated name to avoid colliding with built-in roles).
+
+`security login role create -vserver <cluster> -role <role> -cmddirname DEFAULT -access all`
+
+4. If the required user does not exist, create a user with the appropriate permissions for the relevant authentication method associated with the role.
+
+`security login create -vserver <cluster> -user-or-group-name <username> -application http -role <role> -authentication-method password`
+
+`security login create -vserver <cluster> -user-or-group-name <username> -application http -role <role> -authentication-method cert`
+
 
 ## ontap.yaml configuration
 
