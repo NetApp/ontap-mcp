@@ -26,6 +26,13 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      # Kubernetes injects one <SVCNAME>_PORT-style env var per Service visible
+      # to the pod. If the release is named e.g. "ontap-mcp", that's literally
+      # ONTAP_MCP_PORT -- colliding with the server's own port env var and
+      # breaking startup. The server doesn't use service-discovery env vars
+      # (its port comes from --port, ONTAP config from a mounted secret), so
+      # there's nothing to lose by turning this off.
+      enableServiceLinks: false
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
