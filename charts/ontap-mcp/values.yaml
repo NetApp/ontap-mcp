@@ -1,0 +1,167 @@
+# Default values for ontap-mcp.
+# See https://github.com/NetApp/ontap-mcp/blob/main/docs/install.md for
+# background on the server's runtime flags and configuration file.
+
+replicaCount: 1
+# -- The MCP server keeps per-session state in-process. Running more than one
+# replica requires the server-side session-affinity relaxation the binary
+# already ships for exactly this case: add `--stateless` via `extraArgs`
+# below, and put a Service/Ingress in front that doesn't need sticky sessions.
+
+image:
+  repository: ghcr.io/netapp/ontap-mcp
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag; defaults to the chart's appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Specifies whether a ServiceAccount should be created.
+  create: true
+  # -- The server never calls the Kubernetes API, so it doesn't need its
+  # ServiceAccount token mounted.
+  automount: false
+  annotations: {}
+  # -- The name of the ServiceAccount to use. If not set and `create` is
+  # true, a name is generated using the fullname template.
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+service:
+  type: ClusterIP
+  # -- Matches the binary's own default (`--port`, see `cmd/cmds.go`). The
+  # chart always also passes `--host 0.0.0.0`, since the binary's own default
+  # host (`localhost`) is unreachable from outside the pod.
+  port: 8080
+
+# -- Extra CLI flags appended after `start --port <port> --host 0.0.0.0`, e.g.
+# `--read-only`, `--stateless`, `--json-response`, `--inspect-traffic`,
+# `--log-level debug`. See `docs/install.md` for what each flag does.
+extraArgs: []
+
+# -- Extra environment variables for the container, in the plain
+# `[{name, value}, ...]` or `[{name, valueFrom}, ...]` Kubernetes form.
+extraEnv: []
+
+# -- The config file the server reads at startup (`ontap.yaml`, mounted at
+# `/opt/mcp/ontap.yaml`). It carries ONTAP cluster credentials, so it's
+# always sourced from a Secret -- never from a ConfigMap or baked into the
+# image.
+ontapConfig:
+  # -- Name of a Secret you manage yourself (e.g. via an External Secrets
+  # Operator, a CSI secrets-store driver, or your own pipeline), containing a
+  # key named `ontap.yaml` with the full config file as its value. When set,
+  # `ontapConfig.data` below is ignored and the chart creates no Secret of
+  # its own.
+  existingSecret: ""
+  # -- Full contents of ontap.yaml, in its native schema. Left empty by
+  # default -- the server will start but have no ONTAP clusters to talk to
+  # until this (or `existingSecret`) is set. See
+  # https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml for the
+  # complete schema (Pollers/Defaults/McpAuth/Tls). Example:
+  #
+  # data:
+  #   Pollers:
+  #     cluster1:
+  #       addr: 10.0.0.1
+  #       username: admin
+  #       password: changeme
+  #       use_insecure_tls: false
+  data: {}
+
+resources:
+  limits:
+    cpu: 1
+    memory: 2Gi
+  requests:
+    cpu: 10m
+    memory: 128Mi
+
+# -- `/health` is plain HTTP unless ontap.yaml's `Tls` block is set, in which
+# case the whole server (including `/health`) switches to HTTPS -- set
+# `scheme: HTTPS` on both probes below if you enable it.
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+# -- Additional volumes on the Deployment, beyond the ontap.yaml config
+# mount the chart always adds itself.
+extraVolumes: []
+# -- Additional volumeMounts on the container, beyond the ontap.yaml config
+# mount the chart always adds itself.
+extraVolumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -- Plain Kubernetes Ingress. Off by default; the most common way to expose
+# the service on clusters without the Gateway API installed.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# -- Expose the service via the Gateway API's HTTPRoute. Off by default --
+# most clusters don't have the Gateway API installed; enable only if you
+# already have a Gateway (or ListenerSet, below) to attach to.
+httpRoute:
+  enabled: false
+  annotations: {}
+  hostnames:
+    - chart-example.local
+  # -- Where this route attaches. Defaults to a plain Gateway; point at a
+  # ListenerSet instead (`kind: ListenerSet`) if you enable the one below.
+  parentRefs:
+    - kind: Gateway
+      name: my-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# -- Gateway API ListenerSet (requires Gateway API >= 1.5, standard channel).
+# Off by default; only relevant if you're attaching `httpRoute` to a
+# ListenerSet rather than directly to a Gateway.
+listenerSet:
+  enabled: false
+  annotations: {}
+  parentRef:
+    name: my-gateway
+  hostname: chart-example.local
+  tlsSecretName: ""

@@ -1,0 +1,19 @@
+apiVersion: v2
+name: ontap-mcp
+description: A Helm chart for deploying the ONTAP MCP Server on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "26.04.0-1"
+home: https://github.com/NetApp/ontap-mcp
+sources:
+  - https://github.com/NetApp/ontap-mcp
+icon: https://raw.githubusercontent.com/NetApp/ontap-mcp/main/docs/assets/ontap-mcp.svg
+keywords:
+  - netapp
+  - ontap
+  - mcp
+  - model-context-protocol
+  - storage
+maintainers:
+  - name: NetApp
+    url: https://github.com/NetApp
