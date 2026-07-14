@@ -579,11 +579,10 @@ type SnapMirror struct {
 }
 
 type SnapMirrorModify struct {
-	Cluster           string           `json:"cluster_name" jsonschema:"cluster name"`
-	Operation         string           `json:"operation" jsonschema:"SnapMirror operation type (e.g., update, delete)"`
-	DestinationSVM    string           `json:"destination_svm" jsonschema:"destination SVM name"`
-	DestinationVolume string           `json:"destination_volume" jsonschema:"destination volume name"`
-	SnapMirrorUpdate  SnapMirrorUpdate `json:"snapmirror_update,omitzero" jsonschema:"update SnapMirror relationship operation"`
+	Cluster          string           `json:"cluster_name" jsonschema:"cluster name"`
+	Operation        string           `json:"operation" jsonschema:"SnapMirror operation type (e.g., update, delete)"`
+	DestinationPath  string           `json:"destination.path" jsonschema:"SnapMirror destination endpoint path (format: <svm>:<volume>, e.g. vs2:vol2)"`
+	SnapMirrorUpdate SnapMirrorUpdate `json:"snapmirror_update,omitzero" jsonschema:"update SnapMirror relationship operation"`
 }
 
 type SnapMirrorUpdate struct {
