@@ -80,7 +80,7 @@ func (c *Client) CreateSnapshot(ctx context.Context, snapshot ontap.Snapshot, vo
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteSnapshot(ctx context.Context, volumeName, svmName, snapshotName string) error {
@@ -108,7 +108,7 @@ func (c *Client) DeleteSnapshot(ctx context.Context, volumeName, svmName, snapsh
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) RestoreSnapshot(ctx context.Context, volumeName, svmName string, snapshotRestore ontap.SnapshotRestore) error {
@@ -132,5 +132,5 @@ func (c *Client) RestoreSnapshot(ctx context.Context, volumeName, svmName string
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }

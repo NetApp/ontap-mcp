@@ -25,7 +25,7 @@ func (c *Client) CreateLunMap(ctx context.Context, lunMap ontap.LunMap) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteLunMap(ctx context.Context, svmName, lunName, igroupName string) error {
