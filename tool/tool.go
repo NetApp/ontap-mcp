@@ -303,12 +303,13 @@ type QtreeUpdate struct {
 }
 
 type LUNCreate struct {
-	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM     string `json:"svm_name" jsonschema:"SVM name"`
-	Volume  string `json:"volume_name" jsonschema:"volume name where the LUN resides"`
-	Name    string `json:"lun_name" jsonschema:"LUN name"`
-	Size    string `json:"size" jsonschema:"size of the LUN (e.g., '10GB', '1TB')"`
-	OsType  string `json:"os_type" jsonschema:"OS type (e.g., linux, windows, windows_2008, windows_gpt, aix, esxi, hyper_v, solaris, vmware, xen)"`
+	Cluster                 string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                     string `json:"svm_name" jsonschema:"SVM name"`
+	Volume                  string `json:"volume_name" jsonschema:"volume name where the LUN resides"`
+	Name                    string `json:"lun_name" jsonschema:"LUN name"`
+	Size                    string `json:"size" jsonschema:"size of the LUN (e.g., '10GB', '1TB')"`
+	OsType                  string `json:"os_type" jsonschema:"OS type (e.g., linux, windows, windows_2008, windows_gpt, aix, esxi, hyper_v, solaris, vmware, xen)"`
+	SpaceGuaranteeRequested bool   `json:"space.guarantee.requested,omitzero" jsonschema:"set to true to request thick provisioning (space guarantee) for the LUN"`
 }
 
 type LUN struct {

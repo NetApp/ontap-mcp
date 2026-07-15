@@ -170,6 +170,10 @@ func newCreateLUN(in tool.LUNCreate) (ontap.LUN, error) {
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = lunPath(in.Volume, in.Name)
 	out.Space = ontap.LUNSpace{Size: size}
+	if in.SpaceGuaranteeRequested {
+		t := true
+		out.Space.Guarantee = ontap.LUNSpaceGuarantee{Requested: &t}
+	}
 	out.OsType = in.OsType
 	return out, nil
 }

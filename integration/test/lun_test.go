@@ -63,6 +63,18 @@ func TestLUN(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
+			name:             "Create thick-provisioned LUN",
+			input:            ClusterStr + "create a 10MB thick-provisioned lun named " + rn("lundocthick") + " with space guarantee in volume " + rn("doc") + " on the " + rn("marketing") + " svm with os type linux",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocthick") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
+			name:             "Clean thick LUN",
+			input:            ClusterStr + "delete lun " + rn("lundocthick") + " in volume " + rn("doc") + " in " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocthick") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
 			name:             "Update lun size",
 			input:            ClusterStr + "update lun " + rn("lundoc") + " size to 50mb in volume " + rn("doc") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
