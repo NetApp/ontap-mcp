@@ -232,7 +232,7 @@ func updateQoSPolicyValidation(in tool.QoSPolicyUpdate) (ontap.QoSPolicy, error)
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops or expected_iops & peak_iops & absolute_min_iops")
+		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops, expected_iops & peak_iops & absolute_min_iops, or expected_iops_allocation/peak_iops_allocation/block_size")
 	}
 
 	return out, nil
@@ -384,7 +384,7 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 		hasUpdate = true
 	}
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops or expected_iops & peak_iops & absolute_min_iops")
+		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops, expected_iops & peak_iops & absolute_min_iops, or expected_iops_allocation/peak_iops_allocation/block_size")
 	}
 
 	return out, nil
