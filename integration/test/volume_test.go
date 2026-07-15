@@ -113,7 +113,7 @@ func TestVolume(t *testing.T) {
 		{
 			name:             "Clean thick volume",
 			input:            ClusterStr + "delete volume " + rn("thick") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("thick") + "&svm=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{

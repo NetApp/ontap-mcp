@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/netapp/ontap-mcp/ontap"
 )
 
 func (c *Client) CreateLUN(ctx context.Context, lun ontap.LUN) error {
@@ -25,7 +26,7 @@ func (c *Client) CreateLUN(ctx context.Context, lun ontap.LUN) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateLUN(ctx context.Context, svmName, lunPath string, lun ontap.LUN) error {

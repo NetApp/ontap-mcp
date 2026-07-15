@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
-	"strconv"
-	"strings"
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.VolumeCreate) (*mcp.CallToolResult, any, error) {
@@ -245,6 +246,9 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 		hasUpdate = true
 	}
 	if in.SnapshotReservePercent != nil {
+		if *in.SnapshotReservePercent < 0 || *in.SnapshotReservePercent > 100 {
+			return out, errors.New("snapshot_reserve_percent must be between 0 and 100")
+		}
 		out.Space.Snapshot.ReservePercent = in.SnapshotReservePercent
 		hasUpdate = true
 	}
@@ -306,6 +310,9 @@ func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
 		out.SnapshotPolicy.Name = in.SnapshotPolicyName
 	}
 	if in.SnapshotReservePercent != nil {
+		if *in.SnapshotReservePercent < 0 || *in.SnapshotReservePercent > 100 {
+			return out, errors.New("snapshot_reserve_percent must be between 0 and 100")
+		}
 		out.Space.Snapshot.ReservePercent = in.SnapshotReservePercent
 	}
 	if in.Efficiency.Dedupe != "" {
@@ -433,6 +440,9 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		hasUpdate = true
 	}
 	if in.SnapshotReservePercent != nil {
+		if *in.SnapshotReservePercent < 0 || *in.SnapshotReservePercent > 100 {
+			return out, errors.New("snapshot_reserve_percent must be between 0 and 100")
+		}
 		out.Space.Snapshot.ReservePercent = in.SnapshotReservePercent
 		hasUpdate = true
 	}

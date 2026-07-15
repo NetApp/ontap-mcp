@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/netapp/ontap-mcp/ontap"
 )
 
 func (c *Client) CreateNVMeService(ctx context.Context, nvmeService ontap.NVMeService) error {
@@ -297,7 +298,7 @@ func (c *Client) CreateNVMeNamespace(ctx context.Context, nvmeNamespace ontap.NV
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name string, nvmeNamespace ontap.NVMeNamespace) error {
@@ -402,7 +403,7 @@ func (c *Client) CreateNVMeSubsystemMap(ctx context.Context, nvmeSubsystemMap on
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteNVMeSubsystemMap(ctx context.Context, svmName string, subsystemName string, namespaceName string) error {

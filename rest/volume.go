@@ -56,7 +56,7 @@ func (c *Client) CreateVolume(ctx context.Context, volume ontap.Volume) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateVolume(ctx context.Context, volume ontap.Volume, oldVolumeName string, svmName string) error {
@@ -101,7 +101,7 @@ func (c *Client) UpdateVolume(ctx context.Context, volume ontap.Volume, oldVolum
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteVolume(ctx context.Context, volume ontap.Volume) error {
@@ -145,7 +145,7 @@ func (c *Client) DeleteVolume(ctx context.Context, volume ontap.Volume) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) CreateExportPolicy(ctx context.Context, volume ontap.Volume) error {
