@@ -7,6 +7,7 @@ edit_uri: ""
 nav:
   - Overview: 'index.md'
   - Installation: 'install.md'
+  - Kubernetes (Helm): 'helm.md'
   - Prepare ONTAP: 'prepare-ontap.md'
   - MCP OAuth: 'mcp-oauth.md'
   - MCP Tools: 'tools.md'

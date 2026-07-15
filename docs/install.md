@@ -2,6 +2,8 @@
 
 The ONTAP MCP Server is distributed as a Docker container image, or you can build it from source.
 
+For Kubernetes deployments, use the official Helm chart documented in [Deploy on Kubernetes with Helm](helm.md).
+
 ## Container Images
 
 ONTAP MCP Server is available as pre-built container images:
