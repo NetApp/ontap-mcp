@@ -192,9 +192,12 @@ type QoSFixed struct {
 }
 
 type QoSAdaptive struct {
-	ExpectedIOPS    int64 `json:"expected_iops"`
-	PeakIOPS        int64 `json:"peak_iops"`
-	AbsoluteMinIOPS int64 `json:"absolute_min_iops"`
+	ExpectedIOPS           int64  `json:"expected_iops,omitzero"`
+	PeakIOPS               int64  `json:"peak_iops,omitzero"`
+	AbsoluteMinIOPS        int64  `json:"absolute_min_iops,omitzero"`
+	ExpectedIOPSAllocation string `json:"expected_iops_allocation,omitzero"`
+	PeakIOPSAllocation     string `json:"peak_iops_allocation,omitzero"`
+	BlockSize              string `json:"block_size,omitzero"`
 }
 
 type ExportPolicy struct {

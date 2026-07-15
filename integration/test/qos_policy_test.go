@@ -68,6 +68,24 @@ func TestQoSPolicy(t *testing.T) {
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("payroll"), validationFunc: deleteObject},
 		},
+		{
+			name:             "Create adaptive QoS policy with allocation mode",
+			input:            ClusterStr + "create an adaptive QoS policy named " + rn("alloc") + " on the marketing svm with expected iops 1000 peak iops 3000 absolute min iops 50 expected iops allocation allocated_space peak iops allocation used_space block size any",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: createObject},
+		},
+		{
+			name:             "Update adaptive QoS policy allocation mode only",
+			input:            ClusterStr + "update the " + rn("alloc") + " QoS policy on the marketing svm to use allocated_space for both expected and peak IOPS allocation",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "Clean adaptive allocation QoS policy",
+			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
+		},
 	}
 
 	cfg, err := config.ReadConfig(ConfigFile)
