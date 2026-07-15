@@ -93,6 +93,30 @@ func TestVolume(t *testing.T) {
 			verifyAPI:        ontapVerifier{},
 		},
 		{
+			name:             "Create thick-provisioned volume",
+			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate with space guarantee type volume and snapshot reserve 5 percent",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("thick") + "&svm=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
+			name:             "Update volume snapshot policy",
+			input:            ClusterStr + "set the snapshot policy of the " + rn("thick") + " volume on the " + rn("marketing") + " svm to none",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "Update volume efficiency",
+			input:            ClusterStr + "disable compression and deduplication on the " + rn("thick") + " volume on the " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{},
+		},
+		{
+			name:             "Clean thick volume",
+			input:            ClusterStr + "delete volume " + rn("thick") + " in " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("thick") + "&svm=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
 			name:             "Clean volume",
 			input:            ClusterStr + "delete volume " + rn("docs") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",

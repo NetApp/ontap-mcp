@@ -95,6 +95,28 @@ type Autosize struct {
 	ShrinkThreshold string `json:"shrink_threshold,omitzero"`
 }
 
+type VolumeGuarantee struct {
+	Type string `json:"type,omitzero"`
+}
+
+type VolumeSnapshotPolicy struct {
+	Name string `json:"name,omitzero"`
+}
+
+type VolumeSnapshotSpace struct {
+	ReservePercent *int `json:"reserve_percent,omitzero"`
+}
+
+type VolumeSpace struct {
+	Snapshot VolumeSnapshotSpace `json:"snapshot,omitzero"`
+}
+
+type VolumeEfficiency struct {
+	Dedupe            string `json:"dedupe,omitzero"`
+	CrossVolumeDedupe string `json:"cross_volume_dedupe,omitzero"`
+	Compression       string `json:"compression,omitzero"`
+}
+
 type VolumeQoSPolicy struct {
 	Name           string `json:"name,omitzero"`
 	MaxThroughIOPS *int   `json:"max_throughput_iops,omitzero"`
@@ -108,16 +130,20 @@ type VolumeQoS struct {
 }
 
 type Volume struct {
-	SVM        NameAndUUID   `json:"svm,omitzero"`
-	Name       string        `json:"name,omitzero"`
-	Aggregates []NameAndUUID `json:"aggregates,omitzero"`
-	State      string        `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
-	Style      string        `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
-	Size       int64         `json:"size,omitempty"`
-	Nas        NAS           `json:"nas,omitzero"`
-	Autosize   Autosize      `json:"autosize,omitzero"`
-	QoS        VolumeQoS     `json:"qos,omitzero"`
-	Type       string        `json:"type,omitzero"` // enum: rw, dp, ls
+	SVM            NameAndUUID          `json:"svm,omitzero"`
+	Name           string               `json:"name,omitzero"`
+	Aggregates     []NameAndUUID        `json:"aggregates,omitzero"`
+	State          string               `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
+	Style          string               `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
+	Size           int64                `json:"size,omitempty"`
+	Nas            NAS                  `json:"nas,omitzero"`
+	Autosize       Autosize             `json:"autosize,omitzero"`
+	Guarantee      VolumeGuarantee      `json:"guarantee,omitzero"`
+	SnapshotPolicy VolumeSnapshotPolicy `json:"snapshot_policy,omitzero"`
+	Space          VolumeSpace          `json:"space,omitzero"`
+	Efficiency     VolumeEfficiency     `json:"efficiency,omitzero"`
+	QoS            VolumeQoS            `json:"qos,omitzero"`
+	Type           string               `json:"type,omitzero"` // enum: rw, dp, ls
 }
 
 type NameAndUUID struct {

@@ -8,30 +8,44 @@ type ListVolume struct {
 type ListClusterParams struct{}
 
 type VolumeCreate struct {
-	Cluster      string    `json:"cluster_name" jsonschema:"cluster name"`
-	SVM          string    `json:"svm_name" jsonschema:"SVM name"`
-	Volume       string    `json:"volume_name" jsonschema:"volume name"`
-	Aggregate    string    `json:"aggregate_name" jsonschema:"aggregate name"`
-	JunctionPath string    `json:"nas.path,omitzero" jsonschema:"junction path"`
-	Size         string    `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	ExportPolicy string    `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
-	QoS          VolumeQoS `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
-	Type         string    `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
+	Cluster                string           `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string           `json:"svm_name" jsonschema:"SVM name"`
+	Volume                 string           `json:"volume_name" jsonschema:"volume name"`
+	Aggregate              string           `json:"aggregate_name" jsonschema:"aggregate name"`
+	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
+	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	QoS                    VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
+	Type                   string           `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
+	GuaranteeType          string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
+	SnapshotPolicyName     string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
+	SnapshotReservePercent *int             `json:"space.snapshot.reserve_percent,omitzero" jsonschema:"percentage of volume space reserved for snapshots (e.g., 5)"`
+	Efficiency             VolumeEfficiency `json:"efficiency,omitzero" jsonschema:"volume storage efficiency settings"`
 }
 
 type Volume struct {
-	Cluster      string    `json:"cluster_name" jsonschema:"cluster name"`
-	SVM          string    `json:"svm_name" jsonschema:"SVM name"`
-	Volume       string    `json:"volume_name" jsonschema:"volume name"`
-	Aggregate    string    `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
-	JunctionPath string    `json:"nas.path,omitzero" jsonschema:"junction path"`
-	NewVolume    string    `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
-	Size         string    `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	State        string    `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
-	ExportPolicy string    `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
-	Autosize     Autosize  `json:"autosize,omitzero" jsonschema:"autosize"`
-	QoS          VolumeQoS `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
-	Type         string    `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
+	Cluster                string           `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string           `json:"svm_name" jsonschema:"SVM name"`
+	Volume                 string           `json:"volume_name" jsonschema:"volume name"`
+	Aggregate              string           `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
+	GuaranteeType          string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
+	SnapshotPolicyName     string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
+	SnapshotReservePercent *int             `json:"space.snapshot.reserve_percent,omitzero" jsonschema:"percentage of volume space reserved for snapshots (e.g., 5)"`
+	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
+	NewVolume              string           `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
+	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	State                  string           `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
+	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	Autosize               Autosize         `json:"autosize,omitzero" jsonschema:"autosize"`
+	Efficiency             VolumeEfficiency `json:"efficiency,omitzero" jsonschema:"volume storage efficiency settings"`
+	QoS                    VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
+	Type                   string           `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
+}
+
+type VolumeEfficiency struct {
+	Dedupe            string `json:"dedupe,omitzero" jsonschema:"deduplication setting (e.g., 'none')"`
+	CrossVolumeDedupe string `json:"cross_volume_dedupe,omitzero" jsonschema:"cross-volume deduplication setting (e.g., 'none')"`
+	Compression       string `json:"compression,omitzero" jsonschema:"compression setting (e.g., 'none')"`
 }
 
 type VolumeModify struct {
@@ -43,13 +57,17 @@ type VolumeModify struct {
 }
 
 type VolumeUpdate struct {
-	NewVolume    string    `json:"new_volume_name,omitzero" jsonschema:"new volume name for rename operation"`
-	Size         string    `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	State        string    `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
-	JunctionPath string    `json:"nas.path,omitzero" jsonschema:"junction path"`
-	ExportPolicy string    `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name"`
-	Autosize     Autosize  `json:"autosize,omitzero" jsonschema:"autosize"`
-	QoS          VolumeQoS `json:"qos,omitzero" jsonschema:"QoS settings"`
+	NewVolume              string           `json:"new_volume_name,omitzero" jsonschema:"new volume name for rename operation"`
+	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	State                  string           `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
+	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
+	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name"`
+	Autosize               Autosize         `json:"autosize,omitzero" jsonschema:"autosize"`
+	QoS                    VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings"`
+	GuaranteeType          string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
+	SnapshotPolicyName     string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
+	SnapshotReservePercent *int             `json:"space.snapshot.reserve_percent,omitzero" jsonschema:"percentage of volume space reserved for snapshots (e.g., 5)"`
+	Efficiency             VolumeEfficiency `json:"efficiency,omitzero" jsonschema:"volume storage efficiency settings"`
 }
 
 type VolumeQoS struct {

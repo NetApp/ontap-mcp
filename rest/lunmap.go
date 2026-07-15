@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -10,17 +11,21 @@ import (
 )
 
 func (c *Client) CreateLunMap(ctx context.Context, lunMap ontap.LunMap) error {
-	var statusCode int
+	var (
+		statusCode int
+		buf        bytes.Buffer
+	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/protocols/san/lun-maps`, &statusCode, responseHeaders).
-		BodyJSON(lunMap)
+		BodyJSON(lunMap).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, buf)
 }
 
 func (c *Client) DeleteLunMap(ctx context.Context, svmName, lunName, igroupName string) error {
