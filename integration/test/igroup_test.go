@@ -76,10 +76,16 @@ func TestIGroupLUNMap(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
-			name:             "Create igroup",
-			input:            ClusterStr + "create an igroup named " + rn("igroupFin") + " with OS type linux and protocol iscsi on the " + rn("marketing") + " svm",
+			name:             "Create igroup with initiators atomically",
+			input:            ClusterStr + "create an igroup named " + rn("igroupFin") + " with OS type linux and protocol iscsi on the " + rn("marketing") + " svm with initiator iqn.2021-01.com.example:test",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(true, "iqn.2021-01.com.example:test")},
+		},
+		{
+			name:             "Remove initiator from igroup",
+			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFin") + " on the " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(false, "iqn.2021-01.com.example:test")},
 		},
 		{
 			name:             "Add initiator to igroup",

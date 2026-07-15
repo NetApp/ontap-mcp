@@ -515,12 +515,13 @@ type FCInterfaceUpdate struct {
 }
 
 type IGroupCreate struct {
-	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM      string `json:"svm_name" jsonschema:"SVM name"`
-	Name     string `json:"name" jsonschema:"igroup name"`
-	OSType   string `json:"os_type" jsonschema:"OS type (aix, hpux, hyper_v, linux, netware, openvms, solaris, vmware, windows, xen)"`
-	Protocol string `json:"protocol" jsonschema:"protocol (fcp, iscsi, mixed)"`
-	Comment  string `json:"comment,omitzero" jsonschema:"comment"`
+	Cluster    string   `json:"cluster_name" jsonschema:"cluster name"`
+	SVM        string   `json:"svm_name" jsonschema:"SVM name"`
+	Name       string   `json:"name" jsonschema:"igroup name"`
+	OSType     string   `json:"os_type" jsonschema:"OS type (aix, hpux, hyper_v, linux, netware, openvms, solaris, vmware, windows, xen)"`
+	Protocol   string   `json:"protocol" jsonschema:"protocol (fcp, iscsi, mixed)"`
+	Comment    string   `json:"comment,omitzero" jsonschema:"comment"`
+	Initiators []string `json:"initiators,omitzero" jsonschema:"complete array of FC WWPN, iSCSI IQN, or iSCSI EUI initiators to create with the igroup"`
 }
 type IGroup struct {
 	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
