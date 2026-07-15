@@ -216,18 +216,19 @@ func newCreateIGroup(in tool.IGroupCreate) (ontap.IGroup, error) {
 	if in.OSType == "" {
 		return out, errors.New("OS type is required")
 	}
+	protocol := strings.ToLower(strings.TrimSpace(in.Protocol))
 	validProtocols := map[string]bool{"fcp": true, "iscsi": true, "mixed": true}
 	switch {
-	case in.Protocol == "":
+	case protocol == "":
 		return out, errors.New("protocol is required; valid values are fcp, iscsi, mixed")
-	case !validProtocols[strings.ToLower(in.Protocol)]:
+	case !validProtocols[protocol]:
 		return out, fmt.Errorf("unsupported igroup protocol %q; valid values are fcp, iscsi, mixed", in.Protocol)
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.Name
 	out.OSType = in.OSType
-	out.Protocol = strings.ToLower(in.Protocol)
+	out.Protocol = protocol
 	if in.Comment != "" {
 		out.Comment = in.Comment
 	}
