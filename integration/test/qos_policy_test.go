@@ -59,13 +59,13 @@ func TestQoSPolicy(t *testing.T) {
 		{
 			name:             "Clean QoS policy",
 			input:            ClusterStr + "delete " + rn("silver") + " QoS policy in marketing svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("silver"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
 			input:            ClusterStr + "delete " + rn("payroll") + " QoS policy in marketing svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("payroll"), validationFunc: deleteObject},
 		},
 		{
@@ -83,7 +83,7 @@ func TestQoSPolicy(t *testing.T) {
 		{
 			name:             "Clean adaptive allocation QoS policy",
 			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
-			expectedOntapErr: "because it does not exist",
+			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
 		},
 	}
