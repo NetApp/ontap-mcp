@@ -25,7 +25,7 @@ func (c *Client) CreateQtree(ctx context.Context, qtree ontap.Qtree) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateQtree(ctx context.Context, svmName, volumeName, qtreeName string, qtree ontap.Qtree) error {
@@ -66,7 +66,7 @@ func (c *Client) UpdateQtree(ctx context.Context, svmName, volumeName, qtreeName
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteQtree(ctx context.Context, qtree ontap.Qtree) error {
@@ -106,5 +106,5 @@ func (c *Client) DeleteQtree(ctx context.Context, qtree ontap.Qtree) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }

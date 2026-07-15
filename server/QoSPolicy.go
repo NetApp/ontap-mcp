@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
@@ -287,6 +288,9 @@ func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 		}
 		absoluteMiniops, err := parseSizeEmptyAllowed(in.AbsoluteMinIOPS)
 		if err != nil {
+			return out, err
+		}
+		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
 			return out, err
 		}
 		out.Adaptive = ontap.QoSAdaptive{

@@ -49,7 +49,7 @@ func (c *Client) CreateSnapMirror(ctx context.Context, rel ontap.SnapMirrorRelat
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateSnapMirror(ctx context.Context, destPath string, rel ontap.SnapMirrorRelationship) error {
@@ -72,7 +72,7 @@ func (c *Client) UpdateSnapMirror(ctx context.Context, destPath string, rel onta
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteSnapMirror(ctx context.Context, destPath string) error {
@@ -94,7 +94,7 @@ func (c *Client) DeleteSnapMirror(ctx context.Context, destPath string) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destPath string) error {
