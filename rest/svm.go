@@ -24,7 +24,7 @@ func (c *Client) CreateSVM(ctx context.Context, svm ontap.SVMCreate) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateSVM(ctx context.Context, svm ontap.SVM, svmName string) error {
@@ -64,7 +64,7 @@ func (c *Client) UpdateSVM(ctx context.Context, svm ontap.SVM, svmName string) e
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteSVM(ctx context.Context, svmName string) error {
@@ -103,7 +103,7 @@ func (c *Client) DeleteSVM(ctx context.Context, svmName string) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
@@ -142,7 +142,7 @@ func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 // getSVMUUID looks up the UUID of an SVM by name.

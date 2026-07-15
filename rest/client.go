@@ -41,7 +41,7 @@ type credentials struct {
 	AuthToken string
 }
 
-func (c *Client) handleJob(ctx context.Context, statusCode int, buf bytes.Buffer) error {
+func (c *Client) handleJob(ctx context.Context, statusCode int, buf *bytes.Buffer) error {
 	if err := c.checkStatus(statusCode); err != nil {
 		return err
 	}

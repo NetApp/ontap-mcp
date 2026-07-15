@@ -26,7 +26,7 @@ func (c *Client) CreateIGroup(ctx context.Context, igroup ontap.IGroup) error {
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateIGroup(ctx context.Context, igroup ontap.IGroup, igroupName, svmName string) error {
