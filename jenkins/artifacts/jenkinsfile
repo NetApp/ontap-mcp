@@ -2,21 +2,18 @@ pipeline {
     agent {label 'buildserver'}
 
     parameters {
-        string(name: 'VERSION', defaultValue: '', description: '[Optional] Version. If not filled default is YY.mm.ddHH.')
-        string(name: 'RELEASE', defaultValue: 'nightly', description: '[Optional] Example: nightly (default)')
+        string(name: 'VERSION', defaultValue: 'nightly', description: '[Optional] "nightly" for nightly builds (default), or an explicit version (e.g. 26.4.0) for a real release. Used as-is for the docker tag.')
         string(name: 'BRANCH', defaultValue: 'main', description: '[Optional] Branch name to clone. Default (main) ')
         string(name: 'DOCKER_PUBLISH', defaultValue: 'false', description: 'true to publish to ghcr.io')
         string(name: 'RUN_TEST', defaultValue: 'true', description: 'false to skip test')
         string(name: 'OVERWRITE_DOCKER_LATEST_TAG', defaultValue: 'false', description: 'true to overwrite latest tag at ghcr.io. Works only if DOCKER_PUBLISH is true')
+        string(name: 'CHART_PUBLISH', defaultValue: 'false', description: 'true to publish the Helm chart to oci://ghcr.io/netapp/charts for a real release (chart version/appVersion set to the VERSION param). Nightly (VERSION=nightly) always publishes/overwrites a fixed 1.0.0-nightly chart version with appVersion=nightly.')
     }
 
     environment {
         GIT_ONTAP_MCP_TOKEN = credentials('GIT_ONTAP_MCP_TOKEN')
         VERSION = sh (returnStdout: true, script: """
-        [ -n \"${params.VERSION}\" ] && echo \"${params.VERSION}\" || date +%Y.%m.%d | cut -c 3-
-        """).trim()
-        RELEASE = sh (returnStdout: true, script: """
-        echo \"${params.RELEASE}\"
+        echo \"${params.VERSION}\"
         """).trim()
         BRANCH = getBranchName(env.CHANGE_BRANCH, params.BRANCH)
         DOCKER_PUBLISH = sh (returnStdout: true, script: """
@@ -25,9 +22,13 @@ pipeline {
         OVERWRITE_DOCKER_LATEST_TAG = sh (returnStdout: true, script: """
         echo \"${params.OVERWRITE_DOCKER_LATEST_TAG}\"
         """).trim()
+        CHART_PUBLISH = sh (returnStdout: true, script: """
+        echo \"${params.CHART_PUBLISH}\"
+        """).trim()
         targetParentLocation = "/opt/home/nightly/"
         ontapMcpPath = "ontap-mcp"
         ghcrOntapMcpImage = "ghcr.io/netapp/ontap-mcp"
+        ghcrOntapMcpChartRepo = "oci://ghcr.io/netapp/charts"
         USERNAME = "hardikl"
         COMMIT_ID = sh(returnStdout: true, script: 'git rev-parse HEAD')
     }
@@ -94,9 +95,9 @@ pipeline {
 
                         sh '''
                         set -e
-                        targetLocation=$targetParentLocation$VERSION-$RELEASE-$BRANCH
+                        docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} --build-arg VERSION=$VERSION -t ${ghcrOntapMcpImage}:latest -t ${ghcrOntapMcpImage}:$VERSION . --no-cache
+                        targetLocation=$targetParentLocation$VERSION-$BRANCH
                         mkdir -p $targetLocation
-                        docker build -f Dockerfile --build-arg GO_VERSION=${GO_VERSION} --build-arg VERSION=$VERSION --build-arg RELEASE=$RELEASE -t ${ghcrOntapMcpImage}:latest -t ${ghcrOntapMcpImage}:$VERSION-$RELEASE . --no-cache
                         docker save -o ${targetLocation}/docker_ontap_mcp.tar ${ghcrOntapMcpImage}:latest
                         '''
                     }
@@ -109,7 +110,7 @@ pipeline {
                 script {
                     currentStage = 'Publish builds locally'
                 }
-                dir("$targetParentLocation$VERSION-$RELEASE-$BRANCH") {
+                dir("$targetParentLocation${env.VERSION}-$BRANCH") {
                     archiveArtifacts artifacts: '**', fingerprint: true
                 }
             }
@@ -144,7 +145,9 @@ pipeline {
                     }
                     sh '''
                     echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
-                    docker push ${ghcrOntapMcpImage}:$VERSION-$RELEASE
+                    if [ "$VERSION" != "nightly" ]; then
+                        docker push ${ghcrOntapMcpImage}:$VERSION
+                    fi
                     '''
                     script {
                         if (env.OVERWRITE_DOCKER_LATEST_TAG == 'true') {
@@ -157,10 +160,32 @@ pipeline {
             }
         }
 
+        stage('Package & Publish Helm Chart') {
+            when {
+                expression {
+                    return env.CHART_PUBLISH == 'true' && env.VERSION != 'nightly'
+                }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'GIT_ONTAP_MCP_TOKEN', variable: 'GIT_ONTAP_MCP_TOKEN')]) {
+                    script {
+                        currentStage = 'Package & Publish Helm Chart'
+                    }
+                    sh '''
+                    set -e
+                    rm -f ontap-mcp-*.tgz
+                    helm package charts/ontap-mcp --version "$VERSION" --app-version "$VERSION"
+                    echo $GIT_ONTAP_MCP_TOKEN | helm registry login ghcr.io -u $USERNAME --password-stdin
+                    helm push ontap-mcp-"$VERSION".tgz ${ghcrOntapMcpChartRepo}
+                    '''
+                }
+            }
+        }
+
         stage('Publish Nightly to GitHub') {
             when {
                 expression {
-                    return params.RELEASE == 'nightly' && env.BRANCH == 'main'
+                    return params.VERSION == 'nightly' && env.BRANCH == 'main'
                 }
             }
             steps {
@@ -175,10 +200,15 @@ pipeline {
                         if [ $(git tag -l nightly) ]; then
                             git push https://$GIT_ONTAP_MCP_TOKEN@github.com/NetApp/ontap-mcp.git --delete nightly
                         fi
-                        # Reuse already built ONTAP MCP Docker image and tag them with 'nightly'
-                        docker tag ${ghcrOntapMcpImage}:latest ${ghcrOntapMcpImage}:nightly
+                        # Image is already built and tagged :nightly directly (VERSION=nightly), just push it.
                         echo $GIT_ONTAP_MCP_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
                         docker push ${ghcrOntapMcpImage}:nightly
+                        # Package and publish the nightly Helm chart too, ungated by CHART_PUBLISH --
+                        # mirrors the docker :nightly push above.
+                        rm -f ontap-mcp-*.tgz
+                        helm package charts/ontap-mcp --version "1.0.0-nightly" --app-version "nightly"
+                        echo $GIT_ONTAP_MCP_TOKEN | helm registry login ghcr.io -u $USERNAME --password-stdin
+                        helm push ontap-mcp-1.0.0-nightly.tgz ${ghcrOntapMcpChartRepo}
                          # Add a dummy user/email for mike deploy to work
                         git config user.name ontap-mcp
                         git config user.email ontap-mcp

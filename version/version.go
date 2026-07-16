@@ -7,16 +7,14 @@ import (
 
 var (
 	VERSION   = "1.0.0"
-	Release   = "1"
 	Commit    = "HEAD"
 	BuildDate = "undefined"
 )
 
 // String returns the full version string
 func String() string {
-	return fmt.Sprintf("ontap-mcp version %s-%s (commit %s) (build date %s) %s/%s",
+	return fmt.Sprintf("ontap-mcp version %s (commit %s) (build date %s) %s/%s",
 		VERSION,
-		Release,
 		Commit,
 		BuildDate,
 		runtime.GOOS,
@@ -24,7 +22,7 @@ func String() string {
 	)
 }
 
-// Info returns the version-release string
+// Info returns the version string
 func Info() string {
-	return fmt.Sprintf("%s-%s", VERSION, Release)
+	return VERSION
 }
