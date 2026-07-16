@@ -2,8 +2,8 @@ apiVersion: v2
 name: ontap-mcp
 description: A Helm chart for deploying the ONTAP MCP Server on Kubernetes
 type: application
-version: 0.1.0
-appVersion: "26.04.0-1"
+version: 1.0.0
+appVersion: "nightly"
 home: https://github.com/NetApp/ontap-mcp
 sources:
   - https://github.com/NetApp/ontap-mcp

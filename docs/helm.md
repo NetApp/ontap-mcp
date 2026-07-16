@@ -11,6 +11,17 @@ ONTAP-MCP includes an official Helm chart in this repository at `charts/ontap-mc
 ## Installing
 
 ```bash
+helm install my-release oci://ghcr.io/netapp/charts/ontap-mcp --version <chart-version>
+```
+
+See the [package page](https://github.com/orgs/NetApp/packages/container/package/charts%2Fontap-mcp)
+for available versions. Nightly builds are published as `1.0.0-nightly`
+(overwritten on each nightly run); releases are published under the app's own
+version, e.g. `26.4.0`.
+
+Or, from a local clone of this repository:
+
+```bash
 helm install my-release ./charts/ontap-mcp
 ```
 
@@ -77,7 +88,13 @@ your `Service` or `Ingress` does not rely on sticky sessions.
 ## Upgrade
 
 ```bash
-helm upgrade my-release ./charts/ontap-mcp
+helm upgrade --install my-release ./charts/ontap-mcp
+```
+
+Or, for a release installed from the OCI chart:
+
+```bash
+helm upgrade --install my-release oci://ghcr.io/netapp/charts/ontap-mcp --version <chart-version>
 ```
 
 ## Uninstall

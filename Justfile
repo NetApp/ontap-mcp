@@ -1,6 +1,5 @@
 #!/usr/bin/env just --justfile
 
-RELEASE      := "1"
 VERSION      := `date +%Y.%m.%d | cut -c 3-`
 COMMIT       := `git rev-parse --short HEAD`
 BUILD_DATE   := `date +%FT%T%z`
@@ -36,7 +35,7 @@ checks: license-check lint test
 
 build: lint ## Build the ONTAP MCP server binary with development checks
 	@echo "Building ONTAP MCP server..."
-	@GOOS={{GOOS}} GOARCH={{GOARCH}} CGO_ENABLED=0 go build -trimpath -ldflags="-X 'github.com/netapp/ontap-mcp/version.VERSION={{VERSION}}' -X 'github.com/netapp/ontap-mcp/version.Release={{RELEASE}}' -X 'github.com/netapp/ontap-mcp/version.Commit={{COMMIT}}' -X 'github.com/netapp/ontap-mcp/version.BuildDate={{BUILD_DATE}}'" -o {{BINARY_NAME}} .
+	@GOOS={{GOOS}} GOARCH={{GOARCH}} CGO_ENABLED=0 go build -trimpath -ldflags="-X 'github.com/netapp/ontap-mcp/version.VERSION={{VERSION}}' -X 'github.com/netapp/ontap-mcp/version.Commit={{COMMIT}}' -X 'github.com/netapp/ontap-mcp/version.BuildDate={{BUILD_DATE}}'" -o {{BINARY_NAME}} .
 	@echo "✅ Build complete: {{BINARY_NAME}}"
 
 docker-build: ## Build Docker image (use DOCKER_TAG to customize tag, e.g., just docker-build DOCKER_TAG=ontap-mcp:dev)

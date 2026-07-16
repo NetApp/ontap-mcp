@@ -5,6 +5,15 @@ A Helm chart for deploying the [ONTAP MCP Server](https://github.com/NetApp/onta
 ## Installing
 
 ```bash
+helm install my-release oci://ghcr.io/netapp/charts/ontap-mcp --version <chart-version>
+```
+
+See the [package page](https://github.com/orgs/NetApp/packages/container/package/charts%2Fontap-mcp)
+for available versions.
+
+Or, from a local clone of this repository:
+
+```bash
 helm install my-release ./charts/ontap-mcp
 ```
 
