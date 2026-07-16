@@ -207,7 +207,7 @@ pipeline {
                         # mirrors the docker :nightly push above.
                         rm -f ontap-mcp-*.tgz
                         helm package charts/ontap-mcp --version "1.0.0-nightly" --app-version "nightly"
-                        helm registry login ghcr.io -u $USERNAME --password-stdin <<< "$GIT_ONTAP_MCP_TOKEN"
+                        echo $GIT_ONTAP_MCP_TOKEN | helm registry login ghcr.io -u $USERNAME --password-stdin
                         helm push ontap-mcp-1.0.0-nightly.tgz ${ghcrOntapMcpChartRepo}
                          # Add a dummy user/email for mike deploy to work
                         git config user.name ontap-mcp
