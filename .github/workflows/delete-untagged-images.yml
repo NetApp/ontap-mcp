@@ -27,3 +27,10 @@ jobs:
           untagged_only: true
           owner_type: user
 
+      - name: Delete all Helm chart containers from repository without tags
+        uses: step-security/delete-untagged-ghcr-action@bd5a3175057390795ee3d9bac9554f014365fa54 # v6.1.2
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          package_name: "charts/ontap-mcp"
+          untagged_only: true
+          owner_type: user
