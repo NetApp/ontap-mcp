@@ -9,8 +9,10 @@
       
       
       
-        <link rel="prev" href="../license/">
+        <link rel="prev" href="../install/">
       
+      
+        <link rel="next" href="../prepare-ontap/">
       
       
       <link rel="icon" href="../assets/ontap-mcp.svg">
@@ -18,7 +20,7 @@
     
     
       
-        <title>Release Notes - ONTAP-MCP</title>
+        <title>Kubernetes (Helm) - ONTAP-MCP</title>
       
     
     
@@ -71,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#deploy-on-kubernetes-with-helm" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -106,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Release Notes
+              Kubernetes (Helm)
             
           </span>
         </div>
@@ -295,10 +302,30 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../helm/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Kubernetes (Helm)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -307,6 +334,98 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exposing-the-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exposing the service
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-replicas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple replicas
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uninstall
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k3d-smoke-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      k3d smoke test
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -395,21 +514,19 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -423,7 +540,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             About
@@ -455,17 +572,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -474,7 +584,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -504,6 +613,88 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exposing-the-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exposing the service
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-replicas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple replicas
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uninstall
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k3d-smoke-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      k3d smoke test
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -518,12 +709,100 @@
                   
 
 
-  <h1>Release Notes</h1>
-
+<h1 id="deploy-on-kubernetes-with-helm">Deploy on Kubernetes with Helm<a class="headerlink" href="#deploy-on-kubernetes-with-helm" title="Permanent link">&para;</a></h1>
+<p>ONTAP-MCP includes an official Helm chart in this repository at <code>charts/ontap-mcp</code>.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://github.com/NetApp/ontap-mcp/blob/main/CHANGELOG.md">Changelog</a></li>
-<li><a href="https://github.com/NetApp/ontap-mcp/releases">Releases</a></li>
+<li>Kubernetes 1.27+</li>
+<li>Helm 3.12+</li>
+<li>Network connectivity from the ONTAP-MCP pod to your ONTAP clusters</li>
 </ul>
+<h2 id="installing">Installing<a class="headerlink" href="#installing" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>my-release<span class="w"> </span>oci://ghcr.io/netapp/charts/ontap-mcp<span class="w"> </span>--version<span class="w"> </span>&lt;chart-version&gt;
+</code></pre></div>
+<p>See the <a href="https://github.com/orgs/NetApp/packages/container/package/charts%2Fontap-mcp">package page</a>
+for available versions. Nightly builds are published as <code>1.0.0-nightly</code>
+(overwritten on each nightly run); releases are published under the app's own
+version, e.g. <code>26.4.0</code>.</p>
+<p>Or, from a local clone of this repository:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>my-release<span class="w"> </span>./charts/ontap-mcp
+</code></pre></div>
+<p>This works out of the box with no ONTAP clusters configured yet. The server
+starts but has nothing to poll, and the post-install notes say so. Provide
+<code>ontapConfig.data</code> or <code>ontapConfig.existingSecret</code> via a values file to
+configure real clusters.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>The server needs a config file, <code>ontap.yaml</code>, describing which ONTAP clusters
+to connect to. The chart always sources that file from a Kubernetes <code>Secret</code>
+mounted at <code>/opt/mcp/ontap.yaml</code>.</p>
+<p>You can provide it in one of two ways:</p>
+<ol>
+<li>Let the chart create the <code>Secret</code> by setting <code>ontapConfig.data</code> to the full
+   contents of <code>ontap.yaml</code>, in its native schema:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">ontapConfig</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Pollers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.0.1</span>
+<span class="w">        </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">changeme</span>
+<span class="w">        </span><span class="nt">use_insecure_tls</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<p>See <a href="https://github.com/NetApp/ontap-mcp/blob/main/ontap-example.yaml"><code>ontap-example.yaml</code></a>
+   for the complete schema (<code>Pollers</code>, <code>Defaults</code>, <code>McpAuth</code>, <code>Tls</code>).</p>
+<ol>
+<li>Bring your own <code>Secret</code>. This is recommended for anything beyond local
+   testing. Source it from an external secrets manager through the CSI
+   secrets-store driver or the External Secrets Operator instead of putting
+   credentials in a values file.</li>
+</ol>
+<p>Create a <code>Secret</code> with a key named <code>ontap.yaml</code>, then set
+   <code>ontapConfig.existingSecret</code> to its name. When this is set,
+   <code>ontapConfig.data</code> is ignored.</p>
+<p>If neither option is set, the server still starts with no configured clusters.</p>
+<h2 id="exposing-the-service">Exposing the service<a class="headerlink" href="#exposing-the-service" title="Permanent link">&para;</a></h2>
+<p>By default the chart only creates a <code>ClusterIP</code> <code>Service</code>. Three exposure modes
+are available, all disabled by default:</p>
+<ul>
+<li><code>ingress.enabled: true</code> creates a plain Kubernetes <code>Ingress</code>.</li>
+<li><code>httpRoute.enabled: true</code> creates a Gateway API <code>HTTPRoute</code>. This requires
+  the Gateway API to be installed and a <code>Gateway</code> to attach to via
+  <code>httpRoute.parentRefs</code>.</li>
+<li><code>listenerSet.enabled: true</code> creates a Gateway API <code>ListenerSet</code>. This
+  requires Gateway API 1.5 or newer and is useful when <code>httpRoute</code> should
+  attach to a shared per-app listener instead of directly to a <code>Gateway</code>.</li>
+</ul>
+<h2 id="multiple-replicas">Multiple replicas<a class="headerlink" href="#multiple-replicas" title="Permanent link">&para;</a></h2>
+<p>The server keeps per-session MCP state in-process. If you scale
+<code>replicaCount</code> above <code>1</code>, also add <code>--stateless</code> to <code>extraArgs</code> and make sure
+your <code>Service</code> or <code>Ingress</code> does not rely on sticky sessions.</p>
+<h2 id="upgrade">Upgrade<a class="headerlink" href="#upgrade" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>my-release<span class="w"> </span>./charts/ontap-mcp
+</code></pre></div>
+<p>Or, for a release installed from the OCI chart:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>my-release<span class="w"> </span>oci://ghcr.io/netapp/charts/ontap-mcp<span class="w"> </span>--version<span class="w"> </span>&lt;chart-version&gt;
+</code></pre></div>
+<h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>uninstall<span class="w"> </span>my-release
+</code></pre></div>
+<h2 id="k3d-smoke-test">k3d smoke test<a class="headerlink" href="#k3d-smoke-test" title="Permanent link">&para;</a></h2>
+<p>Use this to verify the chart behavior in a local k3d cluster:</p>
+<div class="highlight"><pre><span></span><code>k3d<span class="w"> </span>cluster<span class="w"> </span>create<span class="w"> </span>ontap-mcp-smoke
+helm<span class="w"> </span>lint<span class="w"> </span>./charts/ontap-mcp
+helm<span class="w"> </span>install<span class="w"> </span>ontap-mcp<span class="w"> </span>./charts/ontap-mcp
+kubectl<span class="w"> </span>rollout<span class="w"> </span>status<span class="w"> </span>deployment/ontap-mcp<span class="w"> </span>--timeout<span class="o">=</span>120s
+kubectl<span class="w"> </span>port-forward<span class="w"> </span>service/ontap-mcp<span class="w"> </span><span class="m">8080</span>:8080
+curl<span class="w"> </span>-i<span class="w"> </span>http://127.0.0.1:8080/health
+</code></pre></div>
+<p>Expected response:</p>
+<ul>
+<li>HTTP status <code>200 OK</code></li>
+<li>Body <code>OK</code></li>
+</ul>
+<p>Delete the local test cluster when done:</p>
+<div class="highlight"><pre><span></span><code>k3d<span class="w"> </span>cluster<span class="w"> </span>delete<span class="w"> </span>ontap-mcp-smoke
+</code></pre></div>
 
 
 

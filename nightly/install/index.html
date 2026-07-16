@@ -12,7 +12,7 @@
         <link rel="prev" href="..">
       
       
-        <link rel="next" href="../prepare-ontap/">
+        <link rel="next" href="../helm/">
       
       
       <link rel="icon" href="../assets/ontap-mcp.svg">
@@ -459,6 +459,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../helm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kubernetes (Helm)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../prepare-ontap/" class="md-nav__link">
         
   
@@ -548,10 +568,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -562,8 +582,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             About
           </label>
@@ -775,6 +795,7 @@
 
 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
 <p>The ONTAP MCP Server is distributed as a Docker container image, or you can build it from source.</p>
+<p>For Kubernetes deployments, use the official Helm chart documented in <a href="../helm/">Deploy on Kubernetes with Helm</a>.</p>
 <h2 id="container-images">Container Images<a class="headerlink" href="#container-images" title="Permanent link">&para;</a></h2>
 <p>ONTAP MCP Server is available as pre-built container images:</p>
 <table>
@@ -896,6 +917,10 @@ By default, it looks for <code>ontap.yaml</code> in its working directory (<code
 <tr>
 <td><code>--inspect-traffic</code></td>
 <td>Log all MCP HTTP request and response bodies for debugging.</td>
+</tr>
+<tr>
+<td><code>--tool-mode</code></td>
+<td>Control which mutating tool naming convention is exposed. One of <code>legacy</code> (default - separate <code>update_*</code>/<code>delete_*</code> tools), <code>multiplex</code> (combined <code>modify_*</code> tools), or <code>both</code> (registers both conventions). Can also be set via the <code>TOOL_MODE</code> environment variable. <br/>  <strong>Note:</strong> <code>tool-mode</code> with value <code>multiplex</code> would reduce MCP tool count</td>
 </tr>
 </tbody>
 </table>

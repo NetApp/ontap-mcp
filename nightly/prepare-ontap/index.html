@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../install/">
+        <link rel="prev" href="../helm/">
       
       
         <link rel="next" href="../mcp-oauth/">
@@ -302,6 +302,26 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kubernetes (Helm)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -350,6 +370,15 @@
   <a href="#prepare-ontap-cdot-clusters-for-ontap-mcp" class="md-nav__link">
     <span class="md-ellipsis">
       Prepare ONTAP cDot clusters for ONTAP-MCP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-permission-requirements-for-the-ontap-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Permission Requirements for the ONTAP Cluster
     </span>
   </a>
   
@@ -559,10 +588,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -573,8 +602,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             About
           </label>
@@ -657,6 +686,15 @@
   <a href="#prepare-ontap-cdot-clusters-for-ontap-mcp" class="md-nav__link">
     <span class="md-ellipsis">
       Prepare ONTAP cDot clusters for ONTAP-MCP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-permission-requirements-for-the-ontap-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Permission Requirements for the ONTAP Cluster
     </span>
   </a>
   
@@ -800,6 +838,41 @@
 <h2 id="prepare-ontap-cdot-clusters-for-ontap-mcp">Prepare ONTAP cDot clusters for ONTAP-MCP<a class="headerlink" href="#prepare-ontap-cdot-clusters-for-ontap-mcp" title="Permanent link">&para;</a></h2>
 <p>ONTAP-MCP requires login credentials to access monitored hosts. An admin account is needed to create, update, and delete cluster resources. If you don't want to use the default admin account, please create a generic admin account to be used by the ONTAP-MCP.</p>
 <p>If you want to limit the ONTAP-MCP's access to specific SVMs or read-only action, you can create a role with the appropriate permissions and assign it to the user.</p>
+<h2 id="user-permission-requirements-for-the-ontap-cluster">User Permission Requirements for the ONTAP Cluster<a class="headerlink" href="#user-permission-requirements-for-the-ontap-cluster" title="Permanent link">&para;</a></h2>
+<p>The ONTAP-MCP utilizes the REST API to connect with ONTAP clusters. It requires a user account that can authenticate for the HTTP application type (set <code>-application http</code>) and has a role with the required permissions (admin or a least-privilege custom role).</p>
+<ol>
+<li>Verify that the user has the necessary permissions for the relevant authentication method associated with the admin role.</li>
+</ol>
+<p><code>security login show -vserver &lt;cluster&gt; -user-or-group-name &lt;username&gt; -application http</code></p>
+<div class="highlight"><pre><span></span><code>security login show -vserver &lt;cluster&gt; -user-or-group-name &lt;username&gt; -application http
+
+Vserver: &lt;cluster&gt;
+                                                                 Second
+User/Group                 Authentication                 Acct   Authentication
+Name           Application Method        Role Name        Locked Method
+-------------- ----------- ------------- ---------------- ------ --------------
+admin          http        password      admin            no     none
+</code></pre></div>
+<ol>
+<li>Verify that the role used for ONTAP-MCP has <code>all</code> access to the required command directory (for example, <code>DEFAULT</code>) on the cluster admin vserver.</li>
+</ol>
+<p><code>security login role show -vserver &lt;cluster&gt; -role &lt;role&gt;</code></p>
+<div class="highlight"><pre><span></span><code>security login role show -vserver &lt;cluster&gt; -role &lt;role&gt;
+           Role          Command/                                      Access
+Vserver    Name          Directory                               Query Level
+---------- ------------- --------- ----------------------------------- --------
+ &lt;cluster&gt;
+           admin         DEFAULT                                       all
+</code></pre></div>
+<ol>
+<li>If the required role does not exist, create a role (use a dedicated name to avoid colliding with built-in roles).</li>
+</ol>
+<p><code>security login role create -vserver &lt;cluster&gt; -role &lt;role&gt; -cmddirname DEFAULT -access all</code></p>
+<ol>
+<li>If the required user does not exist, create a user with the appropriate permissions for the relevant authentication method associated with the role.</li>
+</ol>
+<p><code>security login create -vserver &lt;cluster&gt; -user-or-group-name &lt;username&gt; -application http -role &lt;role&gt; -authentication-method password</code></p>
+<p><code>security login create -vserver &lt;cluster&gt; -user-or-group-name &lt;username&gt; -application http -role &lt;role&gt; -authentication-method cert</code></p>
 <h2 id="ontapyaml-configuration">ontap.yaml configuration<a class="headerlink" href="#ontapyaml-configuration" title="Permanent link">&para;</a></h2>
 <p>The ONTAP-MCP server uses a configuration file to store cluster connection details.</p>
 <div class="admonition note">
