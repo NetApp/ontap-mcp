@@ -165,3 +165,9 @@ listenerSet:
     name: my-gateway
   hostname: chart-example.local
   tlsSecretName: ""
+  # -- Plain-HTTP listener on this ListenerSet, e.g. for ACME HTTP-01 challenge
+  # solving via the Gateway API. Not needed for DNS-01 or if challenges are
+  # solved elsewhere, so it's off by default like the rest of this block.
+  http:
+    enabled: false
+    port: 80

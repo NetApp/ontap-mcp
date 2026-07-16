@@ -12,6 +12,12 @@ metadata:
   {{- end }}
 spec:
   listeners:
+    {{- if .Values.listenerSet.http.enabled }}
+    - name: http
+      hostname: {{ .Values.listenerSet.hostname }}
+      port: {{ .Values.listenerSet.http.port }}
+      protocol: HTTP
+    {{- end }}
     - name: https
       hostname: {{ .Values.listenerSet.hostname }}
       port: 443
