@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
 )
 
@@ -61,6 +62,18 @@ func TestLUN(t *testing.T) {
 			input:            ClusterStr + "create a 20MB lun named " + rn("lundoc") + " in volume " + rn("doc") + " on the " + rn("marketing") + " svm with os type linux",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundoc") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
+			name:             "Create thick-provisioned LUN",
+			input:            ClusterStr + "create a 10MB thick-provisioned lun named " + rn("lundocthick") + " with space guarantee in volume " + rn("doc") + " on the " + rn("marketing") + " svm with os type linux",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocthick") + "&svm.name=" + rn("marketing") + "&fields=space.guarantee", validationFunc: verifyLUNSpaceGuarantee(true)},
+		},
+		{
+			name:             "Clean thick LUN",
+			input:            ClusterStr + "delete lun " + rn("lundocthick") + " in volume " + rn("doc") + " in " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/storage/luns?name=/vol/" + rn("doc") + "/" + rn("lundocthick") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Update lun size",
@@ -125,5 +138,47 @@ func TestLUN(t *testing.T) {
 				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 		})
+	}
+}
+
+// verifyLUNSpaceGuarantee returns a verifier that GETs the LUN with
+// space.guarantee fields and asserts that space.guarantee.requested
+// matches the expected value.
+func verifyLUNSpaceGuarantee(wantRequested bool) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type spaceGuarantee struct {
+			Requested bool `json:"requested"`
+		}
+		type lunSpace struct {
+			Guarantee spaceGuarantee `json:"guarantee"`
+		}
+		type lunRecord struct {
+			Space lunSpace `json:"space"`
+		}
+		type response struct {
+			NumRecords int         `json:"num_records"`
+			Records    []lunRecord `json:"records"`
+		}
+
+		var data response
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyLUNSpaceGuarantee: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyLUNSpaceGuarantee: expected 1 record but got %d", data.NumRecords)
+			return false
+		}
+		got := data.Records[0].Space.Guarantee.Requested
+		if got != wantRequested {
+			t.Errorf("verifyLUNSpaceGuarantee: space.guarantee.requested: want %v, got %v", wantRequested, got)
+			return false
+		}
+		return true
 	}
 }

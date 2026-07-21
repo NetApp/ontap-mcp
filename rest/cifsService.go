@@ -23,7 +23,7 @@ func (c *Client) CreateCIFSService(ctx context.Context, cifsService ontap.CIFSSe
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateCIFSService(ctx context.Context, svmName string, cifsService ontap.CIFSServiceBody) error {
@@ -47,7 +47,7 @@ func (c *Client) UpdateCIFSService(ctx context.Context, svmName string, cifsServ
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteCIFSService(ctx context.Context, svmName, adUser, adPassword string) error {
@@ -88,5 +88,5 @@ func (c *Client) DeleteCIFSService(ctx context.Context, svmName, adUser, adPassw
 		return err
 	}
 
-	return c.handleJob(ctx, statusCode, buf)
+	return c.handleJob(ctx, statusCode, &buf)
 }

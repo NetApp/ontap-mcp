@@ -1,28 +1,32 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/netapp/ontap-mcp/ontap"
 )
 
 func (c *Client) CreateLUN(ctx context.Context, lun ontap.LUN) error {
 	var (
 		statusCode int
+		buf        bytes.Buffer
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/storage/luns`, &statusCode, responseHeaders).
-		BodyJSON(lun)
+		BodyJSON(lun).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateLUN(ctx context.Context, svmName, lunPath string, lun ontap.LUN) error {

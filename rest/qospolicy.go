@@ -234,7 +234,7 @@ func (c *Client) CreateQoSPolicy(ctx context.Context, qosPolicy ontap.QoSPolicy)
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateQoSPolicy(ctx context.Context, qosPolicy ontap.QoSPolicy, oldQosPolicyName string, svmName string) error {
@@ -309,5 +309,5 @@ func (c *Client) DeleteQoSPolicy(ctx context.Context, qosPolicy ontap.QoSPolicy)
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }

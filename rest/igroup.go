@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -13,17 +14,19 @@ import (
 func (c *Client) CreateIGroup(ctx context.Context, igroup ontap.IGroup) error {
 	var (
 		statusCode int
+		buf        bytes.Buffer
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/protocols/san/igroups`, &statusCode, responseHeaders).
-		BodyJSON(igroup)
+		BodyJSON(igroup).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateIGroup(ctx context.Context, igroup ontap.IGroup, igroupName, svmName string) error {

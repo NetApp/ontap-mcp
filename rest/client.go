@@ -26,11 +26,12 @@ import (
 )
 
 type Client struct {
-	poller     *config.Poller
-	httpClient *http.Client
-	credCache  credentialsCache
-	remote     ontap.Remote
-	initOnce   sync.Once
+	poller          *config.Poller
+	httpClient      *http.Client
+	credCache       credentialsCache
+	remote          ontap.Remote
+	initOnce        sync.Once
+	jobPollInterval time.Duration
 }
 
 // credentials holds authentication information
@@ -40,29 +41,33 @@ type credentials struct {
 	AuthToken string
 }
 
-func (c *Client) handleJob(ctx context.Context, statusCode int, buf bytes.Buffer) error {
-	if statusCode == http.StatusCreated || statusCode == http.StatusAccepted {
-		var pj ontap.PostJob
-		err := json.Unmarshal(buf.Bytes(), &pj)
-		if err != nil {
-			return err
-		}
-
-		err = c.waitForJob(ctx, `/api/cluster/jobs/`+pj.Job.UUID, 3*time.Minute)
-		if err != nil {
-			return err
-		}
+func (c *Client) handleJob(ctx context.Context, statusCode int, buf *bytes.Buffer) error {
+	if err := c.checkStatus(statusCode); err != nil {
+		return err
+	}
+	if statusCode != http.StatusAccepted {
+		return nil
 	}
 
-	return nil
+	var pj ontap.PostJob
+	if err := json.Unmarshal(buf.Bytes(), &pj); err != nil {
+		return fmt.Errorf("failed to decode async job response: %w", err)
+	}
+	if strings.TrimSpace(pj.Job.UUID) == "" {
+		return fmt.Errorf("async job response is missing job UUID")
+	}
+
+	return c.waitForJob(ctx, `/api/cluster/jobs/`+pj.Job.UUID, 3*time.Minute)
 }
 
 //nolint:unparam
 func (c *Client) waitForJob(ctx context.Context, jobLocation string, duration time.Duration) error {
 	var jr ontap.JobResponse
 
-	// Poll every pollInterval seconds, up to duration
-	const pollInterval = 2 * time.Second
+	pollInterval := c.jobPollInterval
+	if pollInterval <= 0 {
+		pollInterval = 2 * time.Second
+	}
 	ctx, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 

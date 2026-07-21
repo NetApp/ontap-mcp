@@ -232,7 +232,12 @@ type SVM struct {
 }
 
 type LUNSpace struct {
-	Size int64 `json:"size,omitempty" jsonschema:"size of the LUN"`
+	Size      int64             `json:"size,omitempty" jsonschema:"size of the LUN"`
+	Guarantee LUNSpaceGuarantee `json:"guarantee,omitzero"`
+}
+
+type LUNSpaceGuarantee struct {
+	Requested *bool `json:"requested,omitzero"`
 }
 
 type LUN struct {

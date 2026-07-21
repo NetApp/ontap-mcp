@@ -1,12 +1,14 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/netapp/ontap-mcp/ontap"
 )
 
 func (c *Client) CreateNVMeService(ctx context.Context, nvmeService ontap.NVMeService) error {
@@ -284,17 +286,19 @@ func (c *Client) RemoveNVMeSubsystemHost(ctx context.Context, svmName string, na
 func (c *Client) CreateNVMeNamespace(ctx context.Context, nvmeNamespace ontap.NVMeNamespace) error {
 	var (
 		statusCode int
+		buf        bytes.Buffer
 	)
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/storage/namespaces`, &statusCode, responseHeaders).
-		BodyJSON(nvmeNamespace)
+		BodyJSON(nvmeNamespace).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name string, nvmeNamespace ontap.NVMeNamespace) error {
@@ -386,18 +390,20 @@ func (c *Client) DeleteNVMeNamespace(ctx context.Context, svmName string, name s
 func (c *Client) CreateNVMeSubsystemMap(ctx context.Context, nvmeSubsystemMap ontap.NVMeSubsystemMap) error {
 	var (
 		statusCode int
+		buf        bytes.Buffer
 	)
 
 	responseHeaders := http.Header{}
 
 	builder := c.baseRequestBuilder(`/api/protocols/nvme/subsystem-maps`, &statusCode, responseHeaders).
-		BodyJSON(nvmeSubsystemMap)
+		BodyJSON(nvmeSubsystemMap).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteNVMeSubsystemMap(ctx context.Context, svmName string, subsystemName string, namespaceName string) error {
