@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -54,7 +55,7 @@ func (c *Client) handleJob(ctx context.Context, statusCode int, buf *bytes.Buffe
 		return fmt.Errorf("failed to decode async job response: %w", err)
 	}
 	if strings.TrimSpace(pj.Job.UUID) == "" {
-		return fmt.Errorf("async job response is missing job UUID")
+		return errors.New("async job response is missing job UUID")
 	}
 
 	return c.waitForJob(ctx, `/api/cluster/jobs/`+pj.Job.UUID, 3*time.Minute)
