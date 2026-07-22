@@ -4,10 +4,27 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
 )
+
+var validIOPSAllocations = map[string]bool{"allocated_space": true, "used_space": true}
+var validBlockSizes = map[string]bool{"any": true, "512": true, "1024": true, "4096": true}
+
+func validateAdaptiveAllocationFields(expectedAlloc, peakAlloc, blockSize string) error {
+	if expectedAlloc != "" && !validIOPSAllocations[expectedAlloc] {
+		return fmt.Errorf("invalid expected_iops_allocation %q; valid values are allocated_space, used_space", expectedAlloc)
+	}
+	if peakAlloc != "" && !validIOPSAllocations[peakAlloc] {
+		return fmt.Errorf("invalid peak_iops_allocation %q; valid values are allocated_space, used_space", peakAlloc)
+	}
+	if blockSize != "" && !validBlockSizes[blockSize] {
+		return fmt.Errorf("invalid block_size %q; valid values are any, 512, 1024, 4096", blockSize)
+	}
+	return nil
+}
 
 func (a *App) CreateQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.QoSPolicy) (*mcp.CallToolResult, any, error) {
 	if !a.locks.TryLock(parameters.Cluster) {
@@ -181,32 +198,41 @@ func updateQoSPolicyValidation(in tool.QoSPolicyUpdate) (ontap.QoSPolicy, error)
 			MinThIOPS: miniops,
 		}
 		hasUpdate = true
-	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" {
-		if in.ExpectedIOPS == "" || in.PeakIOPS == "" || in.AbsoluteMinIOPS == "" {
-			return out, errors.New("all of expected_iops, peak_iops, and absolute_min_iops must be provided for adaptive QoS policy")
+	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" ||
+		in.ExpectedIOPSAllocation != "" || in.PeakIOPSAllocation != "" || in.BlockSize != "" {
+		// IOPS fields are all-or-nothing; allocation/block_size may be updated independently.
+		hasIOPS := in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != ""
+		if hasIOPS {
+			if in.ExpectedIOPS == "" || in.PeakIOPS == "" || in.AbsoluteMinIOPS == "" {
+				return out, errors.New("all of expected_iops, peak_iops, and absolute_min_iops must be provided for adaptive QoS policy")
+			}
+			expectediops, err := parseSize(in.ExpectedIOPS)
+			if err != nil {
+				return out, fmt.Errorf("invalid expected_iops: %w", err)
+			}
+			peakiops, err := parseSize(in.PeakIOPS)
+			if err != nil {
+				return out, fmt.Errorf("invalid peak_iops: %w", err)
+			}
+			absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
+			if err != nil {
+				return out, fmt.Errorf("invalid absolute_min_iops: %w", err)
+			}
+			out.Adaptive.ExpectedIOPS = expectediops
+			out.Adaptive.PeakIOPS = peakiops
+			out.Adaptive.AbsoluteMinIOPS = absoluteMiniops
 		}
-		expectediops, err := parseSize(in.ExpectedIOPS)
-		if err != nil {
-			return out, fmt.Errorf("invalid expected_iops: %w", err)
+		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
+			return out, err
 		}
-		peakiops, err := parseSize(in.PeakIOPS)
-		if err != nil {
-			return out, fmt.Errorf("invalid peak_iops: %w", err)
-		}
-		absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
-		if err != nil {
-			return out, fmt.Errorf("invalid absolute_min_iops: %w", err)
-		}
-		out.Adaptive = ontap.QoSAdaptive{
-			ExpectedIOPS:    expectediops,
-			PeakIOPS:        peakiops,
-			AbsoluteMinIOPS: absoluteMiniops,
-		}
+		out.Adaptive.ExpectedIOPSAllocation = in.ExpectedIOPSAllocation
+		out.Adaptive.PeakIOPSAllocation = in.PeakIOPSAllocation
+		out.Adaptive.BlockSize = in.BlockSize
 		hasUpdate = true
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops or expected_iops & peak_iops & absolute_min_iops")
+		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops, expected_iops & peak_iops & absolute_min_iops, or expected_iops_allocation/peak_iops_allocation/block_size")
 	}
 
 	return out, nil
@@ -264,10 +290,16 @@ func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 		if err != nil {
 			return out, err
 		}
+		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
+			return out, err
+		}
 		out.Adaptive = ontap.QoSAdaptive{
-			ExpectedIOPS:    expectediops,
-			PeakIOPS:        peakiops,
-			AbsoluteMinIOPS: absoluteMiniops,
+			ExpectedIOPS:           expectediops,
+			PeakIOPS:               peakiops,
+			AbsoluteMinIOPS:        absoluteMiniops,
+			ExpectedIOPSAllocation: in.ExpectedIOPSAllocation,
+			PeakIOPSAllocation:     in.PeakIOPSAllocation,
+			BlockSize:              in.BlockSize,
 		}
 	}
 
@@ -312,38 +344,47 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 			MinThIOPS: miniops,
 		}
 		hasUpdate = true
-	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" {
-		if in.ExpectedIOPS == "" {
-			return out, errors.New("expected iops is required")
-		}
-		if in.PeakIOPS == "" {
-			return out, errors.New("peak iops is required")
-		}
-		if in.AbsoluteMinIOPS == "" {
-			return out, errors.New("absolute min iops is required")
-		}
+	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" ||
+		in.ExpectedIOPSAllocation != "" || in.PeakIOPSAllocation != "" || in.BlockSize != "" {
+		// IOPS fields are all-or-nothing; allocation/block_size may be updated independently.
+		hasIOPS := in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != ""
+		if hasIOPS {
+			if in.ExpectedIOPS == "" {
+				return out, errors.New("expected iops is required")
+			}
+			if in.PeakIOPS == "" {
+				return out, errors.New("peak iops is required")
+			}
+			if in.AbsoluteMinIOPS == "" {
+				return out, errors.New("absolute min iops is required")
+			}
 
-		expectediops, err := parseSize(in.ExpectedIOPS)
-		if err != nil {
+			expectediops, err := parseSize(in.ExpectedIOPS)
+			if err != nil {
+				return out, err
+			}
+			peakiops, err := parseSize(in.PeakIOPS)
+			if err != nil {
+				return out, err
+			}
+			absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
+			if err != nil {
+				return out, err
+			}
+			out.Adaptive.ExpectedIOPS = expectediops
+			out.Adaptive.PeakIOPS = peakiops
+			out.Adaptive.AbsoluteMinIOPS = absoluteMiniops
+		}
+		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
 			return out, err
 		}
-		peakiops, err := parseSize(in.PeakIOPS)
-		if err != nil {
-			return out, err
-		}
-		absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
-		if err != nil {
-			return out, err
-		}
-		out.Adaptive = ontap.QoSAdaptive{
-			ExpectedIOPS:    expectediops,
-			PeakIOPS:        peakiops,
-			AbsoluteMinIOPS: absoluteMiniops,
-		}
+		out.Adaptive.ExpectedIOPSAllocation = in.ExpectedIOPSAllocation
+		out.Adaptive.PeakIOPSAllocation = in.PeakIOPSAllocation
+		out.Adaptive.BlockSize = in.BlockSize
 		hasUpdate = true
 	}
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops or expected_iops & peak_iops & absolute_min_iops")
+		return out, errors.New("at least one updatable field must be provided: new_name, max_throughput_iops & min_throughput_iops, expected_iops & peak_iops & absolute_min_iops, or expected_iops_allocation/peak_iops_allocation/block_size")
 	}
 
 	return out, nil

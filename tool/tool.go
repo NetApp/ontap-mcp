@@ -151,16 +151,19 @@ type Cron struct {
 }
 
 type QoSPolicy struct {
-	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM             string `json:"svm_name" jsonschema:"SVM name"`
-	Name            string `json:"name" jsonschema:"qos policy name"`
-	NewName         string `json:"new_name,omitzero" jsonschema:"new qos policy name"`
-	MaxThIOPS       string `json:"max_throughput_iops,omitzero" jsonschema:"max throughput of fixed qos policy"`
-	MinThIOPS       string `json:"min_throughput_iops,omitzero" jsonschema:"min throughput of fixed qos policy"`
-	ExpectedIOPS    string `json:"expected_iops,omitzero" jsonschema:"expected iops of adaptive qos policy"`
-	PeakIOPS        string `json:"peak_iops,omitzero" jsonschema:"peak iops of adaptive qos policy"`
-	AbsoluteMinIOPS string `json:"absolute_min_iops,omitzero" jsonschema:"absolute min iops of adaptive qos policy"`
-	CapacityShared  bool   `json:"capacity_shared,omitzero" jsonschema:"whether the capacities are shared across all objects that use this QoS policy-group. Default is false."`
+	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                    string `json:"svm_name" jsonschema:"SVM name"`
+	Name                   string `json:"name" jsonschema:"qos policy name"`
+	NewName                string `json:"new_name,omitzero" jsonschema:"new qos policy name"`
+	MaxThIOPS              string `json:"max_throughput_iops,omitzero" jsonschema:"max throughput of fixed qos policy"`
+	MinThIOPS              string `json:"min_throughput_iops,omitzero" jsonschema:"min throughput of fixed qos policy"`
+	ExpectedIOPS           string `json:"expected_iops,omitzero" jsonschema:"expected iops of adaptive qos policy"`
+	PeakIOPS               string `json:"peak_iops,omitzero" jsonschema:"peak iops of adaptive qos policy"`
+	AbsoluteMinIOPS        string `json:"absolute_min_iops,omitzero" jsonschema:"absolute min iops of adaptive qos policy"`
+	ExpectedIOPSAllocation string `json:"expected_iops_allocation,omitzero" jsonschema:"adaptive QoS expected IOPS allocation mode (e.g., 'allocated_space')"`
+	PeakIOPSAllocation     string `json:"peak_iops_allocation,omitzero" jsonschema:"adaptive QoS peak IOPS allocation mode (e.g., 'allocated_space')"`
+	BlockSize              string `json:"block_size,omitzero" jsonschema:"adaptive QoS block size (e.g., 'any')"`
+	CapacityShared         bool   `json:"capacity_shared,omitzero" jsonschema:"whether the capacities are shared across all objects that use this QoS policy-group. Default is false."`
 }
 
 type QoSPolicyModify struct {
@@ -172,12 +175,15 @@ type QoSPolicyModify struct {
 }
 
 type QoSPolicyUpdate struct {
-	NewName         string `json:"new_name,omitzero" jsonschema:"new QoS policy name"`
-	MaxThIOPS       string `json:"max_throughput_iops,omitzero" jsonschema:"max throughput of fixed QoS policy"`
-	MinThIOPS       string `json:"min_throughput_iops,omitzero" jsonschema:"min throughput of fixed QoS policy"`
-	ExpectedIOPS    string `json:"expected_iops,omitzero" jsonschema:"expected iops of adaptive QoS policy"`
-	PeakIOPS        string `json:"peak_iops,omitzero" jsonschema:"peak iops of adaptive QoS policy"`
-	AbsoluteMinIOPS string `json:"absolute_min_iops,omitzero" jsonschema:"absolute min iops of adaptive QoS policy"`
+	NewName                string `json:"new_name,omitzero" jsonschema:"new QoS policy name"`
+	MaxThIOPS              string `json:"max_throughput_iops,omitzero" jsonschema:"max throughput of fixed QoS policy"`
+	MinThIOPS              string `json:"min_throughput_iops,omitzero" jsonschema:"min throughput of fixed QoS policy"`
+	ExpectedIOPS           string `json:"expected_iops,omitzero" jsonschema:"expected iops of adaptive QoS policy"`
+	PeakIOPS               string `json:"peak_iops,omitzero" jsonschema:"peak iops of adaptive QoS policy"`
+	AbsoluteMinIOPS        string `json:"absolute_min_iops,omitzero" jsonschema:"absolute min iops of adaptive QoS policy"`
+	ExpectedIOPSAllocation string `json:"expected_iops_allocation,omitzero" jsonschema:"adaptive QoS expected IOPS allocation mode (e.g., 'allocated_space')"`
+	PeakIOPSAllocation     string `json:"peak_iops_allocation,omitzero" jsonschema:"adaptive QoS peak IOPS allocation mode (e.g., 'allocated_space')"`
+	BlockSize              string `json:"block_size,omitzero" jsonschema:"adaptive QoS block size (e.g., 'any')"`
 }
 
 type NFSExportPolicyCreate struct {
