@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/config"
 )
 
@@ -69,24 +68,32 @@ func TestQoSPolicy(t *testing.T) {
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("payroll"), validationFunc: deleteObject},
 		},
-		{
-			name:             "Create adaptive QoS policy with allocation mode",
-			input:            ClusterStr + "create an adaptive QoS policy named " + rn("alloc") + " on the marketing svm with expected iops 1000 peak iops 3000 absolute min iops 50 expected iops allocation allocated_space peak iops allocation used_space block size any",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc") + "&fields=adaptive", validationFunc: verifyQoSAdaptiveFields("allocated_space", "used_space", "any")},
-		},
-		{
-			name:             "Update adaptive QoS policy allocation mode only",
-			input:            ClusterStr + "update the " + rn("alloc") + " QoS policy on the marketing svm to use allocated_space for both expected and peak IOPS allocation",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc") + "&fields=adaptive", validationFunc: verifyQoSAdaptiveFields("allocated_space", "allocated_space", "any")},
-		},
-		{
-			name:             "Clean adaptive allocation QoS policy",
-			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
-			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
-		},
+		//nolint:gocritic
+		// These tests are only supported 9.10 onwards, umeng cluster is at 9.9
+		//{
+		//	name:             "Clean adaptive allocation QoS policy",
+		//	input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
+		//	expectedOntapErr: "",
+		//	verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
+		//},
+		//{
+		//	name:             "Create adaptive QoS policy with allocation mode",
+		//	input:            ClusterStr + "create an adaptive QoS policy named " + rn("alloc") + " on the marketing svm with expected iops 1000 peak iops 3000 absolute min iops 50 expected iops allocation allocated_space peak iops allocation used_space block size any",
+		//	expectedOntapErr: "",
+		//	verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc") + "&fields=adaptive", validationFunc: verifyQoSAdaptiveFields("allocated_space", "used_space", "any")},
+		//},
+		//{
+		//	name:             "Update adaptive QoS policy allocation mode only",
+		//	input:            ClusterStr + "update the " + rn("alloc") + " QoS policy on the marketing svm to use allocated_space for both expected and peak IOPS allocation",
+		//	expectedOntapErr: "",
+		//	verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc") + "&fields=adaptive", validationFunc: verifyQoSAdaptiveFields("allocated_space", "allocated_space", "any")},
+		//},
+		//{
+		//	name:             "Clean adaptive allocation QoS policy",
+		//	input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
+		//	expectedOntapErr: "",
+		//	verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
+		//},
 	}
 
 	cfg, err := config.ReadConfig(ConfigFile)
@@ -117,51 +124,52 @@ func TestQoSPolicy(t *testing.T) {
 	}
 }
 
+//nolint:gocritic
 // verifyQoSAdaptiveFields returns a verifier that GETs the QoS policy with
 // adaptive fields and asserts that the expected_iops_allocation,
 // peak_iops_allocation, and block_size values match.
-func verifyQoSAdaptiveFields(expectedIOPSAlloc, peakIOPSAlloc, blockSize string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-		type adaptiveFields struct {
-			ExpectedIOPSAllocation string `json:"expected_iops_allocation"`
-			PeakIOPSAllocation     string `json:"peak_iops_allocation"`
-			BlockSize              string `json:"block_size"`
-		}
-		type qosRecord struct {
-			Adaptive adaptiveFields `json:"adaptive"`
-		}
-		type response struct {
-			NumRecords int         `json:"num_records"`
-			Records    []qosRecord `json:"records"`
-		}
-
-		var data response
-		err := requests.URL("https://"+poller.Addr+"/"+api).
-			BasicAuth(poller.Username, poller.Password).
-			Client(client).
-			ToJSON(&data).
-			Fetch(context.Background())
-		if err != nil {
-			t.Errorf("verifyQoSAdaptiveFields: request failed: %v", err)
-			return false
-		}
-		if data.NumRecords != 1 {
-			t.Errorf("verifyQoSAdaptiveFields: expected 1 record but got %d", data.NumRecords)
-			return false
-		}
-		got := data.Records[0].Adaptive
-		if got.ExpectedIOPSAllocation != expectedIOPSAlloc {
-			t.Errorf("verifyQoSAdaptiveFields: expected_iops_allocation: want %q, got %q", expectedIOPSAlloc, got.ExpectedIOPSAllocation)
-			return false
-		}
-		if got.PeakIOPSAllocation != peakIOPSAlloc {
-			t.Errorf("verifyQoSAdaptiveFields: peak_iops_allocation: want %q, got %q", peakIOPSAlloc, got.PeakIOPSAllocation)
-			return false
-		}
-		if got.BlockSize != blockSize {
-			t.Errorf("verifyQoSAdaptiveFields: block_size: want %q, got %q", blockSize, got.BlockSize)
-			return false
-		}
-		return true
-	}
-}
+//func verifyQoSAdaptiveFields(expectedIOPSAlloc, peakIOPSAlloc, blockSize string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+//	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+//		type adaptiveFields struct {
+//			ExpectedIOPSAllocation string `json:"expected_iops_allocation"`
+//			PeakIOPSAllocation     string `json:"peak_iops_allocation"`
+//			BlockSize              string `json:"block_size"`
+//		}
+//		type qosRecord struct {
+//			Adaptive adaptiveFields `json:"adaptive"`
+//		}
+//		type response struct {
+//			NumRecords int         `json:"num_records"`
+//			Records    []qosRecord `json:"records"`
+//		}
+//
+//		var data response
+//		err := requests.URL("https://"+poller.Addr+"/"+api).
+//			BasicAuth(poller.Username, poller.Password).
+//			Client(client).
+//			ToJSON(&data).
+//			Fetch(context.Background())
+//		if err != nil {
+//			t.Errorf("verifyQoSAdaptiveFields: request failed: %v", err)
+//			return false
+//		}
+//		if data.NumRecords != 1 {
+//			t.Errorf("verifyQoSAdaptiveFields: expected 1 record but got %d", data.NumRecords)
+//			return false
+//		}
+//		got := data.Records[0].Adaptive
+//		if got.ExpectedIOPSAllocation != expectedIOPSAlloc {
+//			t.Errorf("verifyQoSAdaptiveFields: expected_iops_allocation: want %q, got %q", expectedIOPSAlloc, got.ExpectedIOPSAllocation)
+//			return false
+//		}
+//		if got.PeakIOPSAllocation != peakIOPSAlloc {
+//			t.Errorf("verifyQoSAdaptiveFields: peak_iops_allocation: want %q, got %q", peakIOPSAlloc, got.PeakIOPSAllocation)
+//			return false
+//		}
+//		if got.BlockSize != blockSize {
+//			t.Errorf("verifyQoSAdaptiveFields: block_size: want %q, got %q", blockSize, got.BlockSize)
+//			return false
+//		}
+//		return true
+//	}
+//}
