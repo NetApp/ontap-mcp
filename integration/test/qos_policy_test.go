@@ -130,7 +130,7 @@ func TestQoSPolicy(t *testing.T) {
 func verifyQoSAdaptiveFields(skipTesting bool, expectedIOPSAlloc, peakIOPSAlloc, blockSize string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 		if skipTesting {
-			t.Log("The cluster do not support this operation")
+			t.Skip("cluster does not support this operation (requires ONTAP 9.10+)")
 			return true
 		}
 		type adaptiveFields struct {
