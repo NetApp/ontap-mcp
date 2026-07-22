@@ -85,7 +85,7 @@ func TestIGroupLUNMap(t *testing.T) {
 			name:             "Remove initiator from igroup",
 			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFin") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(false, "iqn.2021-01.com.example:test")},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(false, "")},
 		},
 		{
 			name:             "Add initiator to igroup",
@@ -97,7 +97,7 @@ func TestIGroupLUNMap(t *testing.T) {
 			name:             "Remove initiator from igroup",
 			input:            ClusterStr + "remove initiator iqn.2021-01.com.example:test from igroup " + rn("igroupFin") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(false, "iqn.2021-01.com.example:test")},
+			verifyAPI:        ontapVerifier{api: "api/protocols/san/igroups?name=" + rn("igroupFin") + "&svm.name=" + rn("marketing") + "&fields=initiators", validationFunc: verifyInitiator(false, "")},
 		},
 		{
 			name:             "Rename igroup",
