@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -215,16 +216,28 @@ func newCreateIGroup(in tool.IGroupCreate) (ontap.IGroup, error) {
 	if in.OSType == "" {
 		return out, errors.New("OS type is required")
 	}
-	if in.Protocol == "" {
-		return out, errors.New("protocol is required")
+	protocol := strings.ToLower(strings.TrimSpace(in.Protocol))
+	validProtocols := map[string]bool{"fcp": true, "iscsi": true, "mixed": true}
+	switch {
+	case protocol == "":
+		return out, errors.New("protocol is required; valid values are fcp, iscsi, mixed")
+	case !validProtocols[protocol]:
+		return out, fmt.Errorf("unsupported igroup protocol %q; valid values are fcp, iscsi, mixed", in.Protocol)
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.Name
 	out.OSType = in.OSType
-	out.Protocol = in.Protocol
+	out.Protocol = protocol
 	if in.Comment != "" {
 		out.Comment = in.Comment
+	}
+	for _, initiator := range in.Initiators {
+		trimmed := strings.TrimSpace(initiator)
+		if trimmed == "" {
+			return out, errors.New("all initiators must be non-empty and non-whitespace")
+		}
+		out.Initiators = append(out.Initiators, ontap.InitiatorName{Name: trimmed})
 	}
 	return out, nil
 }

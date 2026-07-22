@@ -407,11 +407,12 @@ type IGroupInitiator struct {
 }
 
 type IGroup struct {
-	SVM      NameAndUUID `json:"svm,omitzero"`
-	Name     string      `json:"name,omitzero"`
-	OSType   string      `json:"os_type,omitzero"`
-	Protocol string      `json:"protocol,omitzero"`
-	Comment  string      `json:"comment,omitzero"`
+	SVM        NameAndUUID     `json:"svm,omitzero"`
+	Name       string          `json:"name,omitzero"`
+	OSType     string          `json:"os_type,omitzero"`
+	Protocol   string          `json:"protocol,omitzero"`
+	Comment    string          `json:"comment,omitzero"`
+	Initiators []InitiatorName `json:"initiators,omitzero"`
 }
 
 type LunMap struct {
