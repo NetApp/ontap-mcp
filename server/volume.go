@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
-	"strconv"
-	"strings"
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.VolumeCreate) (*mcp.CallToolResult, any, error) {
@@ -236,8 +237,36 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 		}
 	}
 
+	if in.GuaranteeType != "" {
+		out.Guarantee.Type = in.GuaranteeType
+		hasUpdate = true
+	}
+	if in.SnapshotPolicyName != "" {
+		out.SnapshotPolicy.Name = in.SnapshotPolicyName
+		hasUpdate = true
+	}
+	if in.SnapshotReservePercent != nil {
+		if *in.SnapshotReservePercent < 0 || *in.SnapshotReservePercent > 100 {
+			return out, errors.New("snapshot_reserve_percent must be between 0 and 100")
+		}
+		out.Space.Snapshot.ReservePercent = in.SnapshotReservePercent
+		hasUpdate = true
+	}
+	if in.Efficiency.Dedupe != "" {
+		out.Efficiency.Dedupe = in.Efficiency.Dedupe
+		hasUpdate = true
+	}
+	if in.Efficiency.CrossVolumeDedupe != "" {
+		out.Efficiency.CrossVolumeDedupe = in.Efficiency.CrossVolumeDedupe
+		hasUpdate = true
+	}
+	if in.Efficiency.Compression != "" {
+		out.Efficiency.Compression = in.Efficiency.Compression
+		hasUpdate = true
+	}
+
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps)")
+		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps, guarantee.type, snapshot_policy.name, space.snapshot.reserve_percent, efficiency)")
 	}
 
 	return out, nil
@@ -273,6 +302,27 @@ func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
 
 	if in.Type != "" {
 		out.Type = in.Type
+	}
+	if in.GuaranteeType != "" {
+		out.Guarantee.Type = in.GuaranteeType
+	}
+	if in.SnapshotPolicyName != "" {
+		out.SnapshotPolicy.Name = in.SnapshotPolicyName
+	}
+	if in.SnapshotReservePercent != nil {
+		if *in.SnapshotReservePercent < 0 || *in.SnapshotReservePercent > 100 {
+			return out, errors.New("snapshot_reserve_percent must be between 0 and 100")
+		}
+		out.Space.Snapshot.ReservePercent = in.SnapshotReservePercent
+	}
+	if in.Efficiency.Dedupe != "" {
+		out.Efficiency.Dedupe = in.Efficiency.Dedupe
+	}
+	if in.Efficiency.CrossVolumeDedupe != "" {
+		out.Efficiency.CrossVolumeDedupe = in.Efficiency.CrossVolumeDedupe
+	}
+	if in.Efficiency.Compression != "" {
+		out.Efficiency.Compression = in.Efficiency.Compression
 	}
 
 	if in.ExportPolicy != "" || in.JunctionPath != "" {
@@ -368,6 +418,34 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		out.Autosize.ShrinkThreshold = in.Autosize.ShrinkThreshold
 		hasUpdate = true
 	}
+	if in.Efficiency.Dedupe != "" {
+		out.Efficiency.Dedupe = in.Efficiency.Dedupe
+		hasUpdate = true
+	}
+	if in.Efficiency.CrossVolumeDedupe != "" {
+		out.Efficiency.CrossVolumeDedupe = in.Efficiency.CrossVolumeDedupe
+		hasUpdate = true
+	}
+	if in.Efficiency.Compression != "" {
+		out.Efficiency.Compression = in.Efficiency.Compression
+		hasUpdate = true
+	}
+
+	if in.GuaranteeType != "" {
+		out.Guarantee.Type = in.GuaranteeType
+		hasUpdate = true
+	}
+	if in.SnapshotPolicyName != "" {
+		out.SnapshotPolicy.Name = in.SnapshotPolicyName
+		hasUpdate = true
+	}
+	if in.SnapshotReservePercent != nil {
+		if *in.SnapshotReservePercent < 0 || *in.SnapshotReservePercent > 100 {
+			return out, errors.New("snapshot_reserve_percent must be between 0 and 100")
+		}
+		out.Space.Snapshot.ReservePercent = in.SnapshotReservePercent
+		hasUpdate = true
+	}
 
 	switch {
 	case in.QoS.RemovePolicy:
@@ -396,7 +474,7 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps)")
+		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps, guarantee.type, snapshot_policy.name, space.snapshot.reserve_percent, efficiency)")
 	}
 
 	return out, nil
