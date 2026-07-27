@@ -13,13 +13,13 @@ The ONTAP-MCP team is happy to announce that we've released the 26.07.0 version 
 
 - :tophat: The ONTAP-MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag. **Note:** `--tool-mode` with value `multiplex` reduces the MCP tool count. Details: https://netapp.github.io/ontap-mcp/26.07/tools/#tool-mode
 
-- The ONTAP-MCP server includes `--json-response` CLI flag. It's required when MCP server deploying behind proxies or gateways that do not relay SSE/chunked responses. Thanks @zlucas-netapp for contributing.
+- The ONTAP-MCP server includes `--json-response` CLI flag. It's required when the MCP server is deployed behind proxies or gateways that do not relay SSE/chunked responses. Thanks @zlucas-netapp for contributing.
 
 - :gem: **Tools enhancements** — couple of existing tools include new fields. Thanks @dbtinsley for contributing.
     - **LUN: create**: new space.guarantee.requested field in create, which enables thick provisioning at the LUN level.
     - **QoS policy: create, update, modify**: new expected_iops_allocation, peak_iops_allocation and block_size fields on adaptive QoS policies.
     - **Volume: create, update, modify**: new guarantee, snapshot policy, snapshot reserve and efficiency fields in volume.
-    - **IGroup: create**: new initiators field in IGroup
+    - **IGroup: create**: new initiators field in igroup
 
 - Join [Discord and GitHub discussions](https://github.com/NetApp/ontap-mcp/blob/main/SUPPORT.md) to participate in the conversation, ask questions, and share your feedback.
 
