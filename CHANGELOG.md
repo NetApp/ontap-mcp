@@ -9,7 +9,7 @@ The ONTAP-MCP team is happy to announce that we've released the 26.07.0 version 
 
 - :medal_sports: The ONTAP-MCP server supports serving over HTTPS (TLS) for remote connections to your MCP server. Thanks @werenzo for raising. Configuration details: https://netapp.github.io/ontap-mcp/26.07/prepare-ontap/#serving-over-https-tls
 
-- :medal_sports: The ONTAP-MCP server includes an Helm chart. Thanks @ReBaunana for contributing. Deployment details: https://netapp.github.io/ontap-mcp/26.07/helm/. Helm chart page: https://github.com/NetApp/ontap-mcp/blob/main/charts/ontap-mcp/Chart.yaml.
+- :medal_sports: The ONTAP-MCP server includes a Helm chart. Thanks @ReBaunana for contributing. Deployment details: https://netapp.github.io/ontap-mcp/26.07/helm/. Helm chart page: https://github.com/NetApp/ontap-mcp/blob/main/charts/ontap-mcp/Chart.yaml.
 
 - :tophat: The ONTAP-MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag. **Note:** `--tool-mode` with value `multiplex` reduces the MCP tool count. Details: https://netapp.github.io/ontap-mcp/26.07/tools/#tool-mode
 
