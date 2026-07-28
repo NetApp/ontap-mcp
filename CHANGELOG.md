@@ -11,7 +11,7 @@ The ONTAP-MCP team is happy to announce that we've released the 26.07.0 version 
 
 - :medal_sports: The ONTAP-MCP server includes a Helm chart. Thanks @ReBaunana for contributing. Deployment details: https://netapp.github.io/ontap-mcp/26.07/helm/. Helm chart page: https://github.com/NetApp/ontap-mcp/blob/main/charts/ontap-mcp/Chart.yaml.
 
-- :tophat: The ONTAP-MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag. **Note:** `--tool-mode` with value `multiplex` reduces the MCP tool count. Details: https://netapp.github.io/ontap-mcp/26.07/tools/#tool-mode
+- :tophat: The ONTAP-MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag. The default value in the current release is `legacy`. From future releases onwards, only the `multiplex` value will be supported.  **Note:** `--tool-mode` with value `multiplex` reduces the MCP tool count. Details: https://netapp.github.io/ontap-mcp/26.07/tools/#tool-mode
 
 - The ONTAP-MCP server includes `--json-response` CLI flag. It's required when the MCP server is deployed behind proxies or gateways that do not relay SSE/chunked responses. Thanks @zlucas-netapp for contributing.
 
