@@ -1,6 +1,126 @@
 # Change Log
 ## [Repository](https://github.com/NetApp/ontap-mcp)
 
+## 26.07.0 / 2026-07-28 Release
+
+The ONTAP-MCP team is happy to announce that we've released the 26.07.0 version of ONTAP-MCP. 🤘
+
+- :medal_sports: The ONTAP-MCP server now supports OAuth authentication to restrict any unauthorized access to your MCP server. Thanks @jbnetapp for raising. Configuration details:  https://netapp.github.io/ontap-mcp/26.07/mcp-oauth/
+
+- :medal_sports: The ONTAP-MCP server supports serving over HTTPS (TLS) for remote connections to your MCP server. Thanks @werenzo for raising. Configuration details: https://netapp.github.io/ontap-mcp/26.07/prepare-ontap/#serving-over-https-tls
+
+- :medal_sports: The ONTAP-MCP server includes a Helm chart. Thanks @ReBaunana for contributing. Deployment details: https://netapp.github.io/ontap-mcp/26.07/helm/. Helm chart page: https://github.com/NetApp/ontap-mcp/blob/main/charts/ontap-mcp/Chart.yaml.
+
+- :tophat: The ONTAP-MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag. The default value in the current release is `legacy`. From future releases onwards, only the `multiplex` value will be supported.  **Note:** `--tool-mode` with value `multiplex` reduces the MCP tool count. Details: https://netapp.github.io/ontap-mcp/26.07/tools/#tool-mode
+
+- The ONTAP-MCP server includes `--json-response` CLI flag. It's required when the MCP server is deployed behind proxies or gateways that do not relay SSE/chunked responses. Thanks @zlucas-netapp for contributing.
+
+- :gem: **Tools enhancements** — couple of existing tools include new fields. Thanks @dbtinsley for contributing.
+    - **LUN: create**: new space.guarantee.requested field in create, which enables thick provisioning at the LUN level.
+    - **QoS policy: create, update, modify**: new expected_iops_allocation, peak_iops_allocation and block_size fields on adaptive QoS policies.
+    - **Volume: create, update, modify**: new guarantee, snapshot policy, snapshot reserve and efficiency fields in volume.
+    - **IGroup: create**: new initiators field in igroup
+
+- Join [Discord and GitHub discussions](https://github.com/NetApp/ontap-mcp/blob/main/SUPPORT.md) to participate in the conversation, ask questions, and share your feedback.
+
+- :closed_book: Documentation is available at https://netapp.github.io/ontap-mcp/26.07/ and full list of tools is available at https://netapp.github.io/ontap-mcp/26.07/tools/.
+
+- :closed_book: Added documentation regarding user permission requirements for the cluster. Thanks @Cool-hand-Kyle for raising.
+
+Examples showing how you can manage ONTAP: https://netapp.github.io/ontap-mcp/26.07/examples/
+
+## Thanks to all the awesome contributors
+
+:metal: Thanks to all the people who've opened issues, asked questions on Discord, and contributed code for this release:
+
+@werenzo, @zlucas-netapp, @jbnetapp, @ReBaunana, @dbtinsley, @tasosnetapp, @calvinwonghk, @Cool-hand-Kyle, @rahulguptajss, @cgrinds, @Hardikl
+
+:seedling: This release includes 17 feature commits, 5 fixes, 3 documentation updates, 14 CI changes, 8 refactoring commits, and 11 miscellaneous merge commits.
+
+<details>
+
+<summary>Expand for full list of changes</summary>
+
+### :rocket: Features
+- Add initiators field to create_igroup for atomic create-with-membership (#178) ([1c0cb03](https://github.com/NetApp/ontap-mcp/commit/1c0cb03982fad8993ca6101c6d42c7c4b11f45f9))
+- Add volume guarantee, snapshot policy, snapshot reserve, and efficiency fields (#179) ([f2d87ee](https://github.com/NetApp/ontap-mcp/commit/f2d87ee7b6f57df3fc241e7f9fd9ab1ad4e77a5c))
+- Add expected_iops_allocation, peak_iops_allocation, and block_size to adaptive QoS (#180) ([511ebf4](https://github.com/NetApp/ontap-mcp/commit/511ebf46c2286b6e6192f4c6f894164717a392d9))
+- Add space_guarantee_requested field to create_lun (#181) ([3bc75e3](https://github.com/NetApp/ontap-mcp/commit/3bc75e3f39f82d69479c6f27a254afd03bf8b692))
+- Add optional HTTP listener to ListenerSet for ACME HTTP-01 (#187) ([cf96463](https://github.com/NetApp/ontap-mcp/commit/cf96463b38adca06d9867a5c1c0c547be9f0dc5f))
+- Publish helm charts (#184) ([7283728](https://github.com/NetApp/ontap-mcp/commit/7283728287a52d99b9de993818897c734e4a47db))
+- Merge tools with tool_mode flag (#157) ([404da86](https://github.com/NetApp/ontap-mcp/commit/404da86e52e69443b68c787a554f7cf021b62181))
+- Add Helm chart for Kubernetes deployment (#168) ([ee93184](https://github.com/NetApp/ontap-mcp/commit/ee931846d09d70851234b60d45878e5197f18c59))
+- Add version info to build (#162) ([5c56567](https://github.com/NetApp/ontap-mcp/commit/5c565676432064a99ef8d13025a2323cec2f6cab))
+- Add top level tls section for https support (#158) ([e93aee7](https://github.com/NetApp/ontap-mcp/commit/e93aee776e86d44067ca855c05445bd2c810a863))
+- Add oauth support (#144) ([f44c2d5](https://github.com/NetApp/ontap-mcp/commit/f44c2d5e706c2fd0e2d7fef770fa9e51887494e1))
+- Config defaults work with poller key/values (#152) ([c126db2](https://github.com/NetApp/ontap-mcp/commit/c126db21f08abe8acc14c1ed0425e178dc5cd41f))
+- Handled copilot comments ([1c4a718](https://github.com/NetApp/ontap-mcp/commit/1c4a718cdd1ff6732a722a91155943b8b5db657b))
+- Handled dns test with skip validation ([6c67cdf](https://github.com/NetApp/ontap-mcp/commit/6c67cdf492e4323b0d663d8c1504d28cf1be076d))
+- Add NFS service, CIFS service, and DNS tools ([147cf67](https://github.com/NetApp/ontap-mcp/commit/147cf67d45baed7712153b208f2550e9847ad99e))
+- Implement case-insensitive cluster name handling (#136) ([64702eb](https://github.com/NetApp/ontap-mcp/commit/64702eb5e93bec1ed3b4307df9b61ecb70bf130f))
+- Add --json-response CLI flag ([aad8d14](https://github.com/NetApp/ontap-mcp/commit/aad8d148088e561d557cd53baa525be1efd14e6d))
+
+
+### :bug: Bug Fixes
+- Handled lint issue (#191) ([47334df](https://github.com/NetApp/ontap-mcp/commit/47334dfae49a836feb2217fdf419cf7892c38a41))
+- Add handleJob to DNS delete, add NFS update verification ([7c2d562](https://github.com/NetApp/ontap-mcp/commit/7c2d56262955bb85917e2e8014a80c131dc49053))
+- Remove start-ontap-mcp.bat from tracking, validate AD credential pair ([eebdf1b](https://github.com/NetApp/ontap-mcp/commit/eebdf1b461f55e5163a010d87a51c7ad104d2c34))
+- Format rest/svm.go, add job link support to DNS create ([a517da1](https://github.com/NetApp/ontap-mcp/commit/a517da1ea712dd6c8cb705dda6b03ed5da6d863f))
+- Address PR review comments ([708f59b](https://github.com/NetApp/ontap-mcp/commit/708f59b5e0c4750604802922ebb09a7a4cd13c3c))
+
+
+### :closed_book: Documentation
+- Add Helm docs (#183) ([2ed8357](https://github.com/NetApp/ontap-mcp/commit/2ed8357ca8e3f867fa6f2204590af27cb1a40210))
+- User permission for clusters in ontap mcp (#165) ([652cde8](https://github.com/NetApp/ontap-mcp/commit/652cde8bd7e9dd94b485901975e91aa1b82f4b63))
+- Add version doc (#163) ([d01ed2e](https://github.com/NetApp/ontap-mcp/commit/d01ed2e2b8849bcc96e3f18c22411235b9c7e5af))
+
+
+### :hammer: CI / Testing
+- Remove untagged charts (#185) ([6b2c741](https://github.com/NetApp/ontap-mcp/commit/6b2c741457be554fefcfd10e574f35012a07575a))
+- Dbtinsley has signed the CCLA ([4794a10](https://github.com/NetApp/ontap-mcp/commit/4794a1001b7d538688b29d9eabcb84d5da76c48b))
+- ReBaunana has signed the CCLA ([deab6e9](https://github.com/NetApp/ontap-mcp/commit/deab6e9b50038fe81f00e706039d8347cf6a8d2b))
+- Bump go (#166) ([dc55f43](https://github.com/NetApp/ontap-mcp/commit/dc55f431c421c7d5dc85471f2a4e7c75d4892ed9))
+- Merge branch 'tasosnetapp-feature/nfs-cifs-service-tools' ([8037444](https://github.com/NetApp/ontap-mcp/commit/8037444adeb4ab85e89e6f06eaeb404efbb15bad))
+- Bump go (#147) ([febd116](https://github.com/NetApp/ontap-mcp/commit/febd116974fc966bf974325d0e2b577d6d0b65bd))
+- Tasosnetapp can contribute code (#146) ([2d04a2e](https://github.com/NetApp/ontap-mcp/commit/2d04a2ee406ad4d3ab6f35d9ce29a89a9b4ba0ec))
+- Add DNS field validation in integration test ([942fbda](https://github.com/NetApp/ontap-mcp/commit/942fbdafdac0b9b7d49c54816dc2f726c6798090))
+- Bump go (#147) ([bb3496f](https://github.com/NetApp/ontap-mcp/commit/bb3496f776190f95b8d361bcbf245bff3c3b0602))
+- Tasosnetapp can contribute code (#146) ([fb25395](https://github.com/NetApp/ontap-mcp/commit/fb25395c0b2d7480137986f6a002c4889888c295))
+- Bump modelcontextprotocol/go-sdk (#134) ([b55afbb](https://github.com/NetApp/ontap-mcp/commit/b55afbbb35d164617986002a5c287ba3d0ea2005))
+- Bump go (#133) ([36f1106](https://github.com/NetApp/ontap-mcp/commit/36f11069b0fbf1e4f6082addf7f70d22808cdd49))
+- Bump go-sdk to v1.6.0-pre.1 to address https://github.com/NetApp/ontap-mcp/discussions/126 ([06a3289](https://github.com/NetApp/ontap-mcp/commit/06a32898a28f8f2d292db3fdb9594a445faf6ccd))
+- Zlucas-netapp can contribute code ([acee956](https://github.com/NetApp/ontap-mcp/commit/acee95647d3071ec11258ee18954c3624d52cc1d))
+
+
+### Refactoring
+- Handled copilot comments ([ae744f6](https://github.com/NetApp/ontap-mcp/commit/ae744f656fecda2b999b0ca1aae371644c8fe479))
+- Handled review comments ([a447690](https://github.com/NetApp/ontap-mcp/commit/a447690bf2078c87e5dd10faa4c18c870e87de68))
+- Handled copilot comments ([6be7e45](https://github.com/NetApp/ontap-mcp/commit/6be7e45385e05964bff608281d0191138a2ffc2a))
+- Handled snapmirror tool path ([7286abf](https://github.com/NetApp/ontap-mcp/commit/7286abfb1b237463b2ebe3e68f73afff1abdbe5e))
+- Update description of update tools (#155) ([54dd997](https://github.com/NetApp/ontap-mcp/commit/54dd997b149f92f3ee0deb06d9c57972393afb58))
+- Adapt tests to use InsecureTLS() ([fd2592c](https://github.com/NetApp/ontap-mcp/commit/fd2592c3e87a9cbaa132120a8e1d8b4a79aceafe))
+- Extract getSVMUUID helper, fix integration tests ([0f54214](https://github.com/NetApp/ontap-mcp/commit/0f54214a5def54043fff2e87b3b508a80bff7c5a))
+- Disable nvme tools in ci (#139) ([0e4cc7a](https://github.com/NetApp/ontap-mcp/commit/0e4cc7a4e9de3672e8d31126049307b9d8b6206d))
+
+
+### Miscellaneous
+- Update all dependencies (#192) ([31a5236](https://github.com/NetApp/ontap-mcp/commit/31a5236306d7b8f9036ab5ce4ab2876470f898c7))
+- Update all dependencies ([37852c8](https://github.com/NetApp/ontap-mcp/commit/37852c8013e7c8b3c8739d7d960a828ca569c010))
+- Update actions/setup-go action to v6.5.0 (#164) ([0aa18d0](https://github.com/NetApp/ontap-mcp/commit/0aa18d078f9c36fb4dcbeafefb166d0cc44972a1))
+- Update actions/checkout action to v7 ([1e08024](https://github.com/NetApp/ontap-mcp/commit/1e080240eee7de6d6b75aac44667da79bbb92757))
+- Update all dependencies to v6.1.2 ([57bb911](https://github.com/NetApp/ontap-mcp/commit/57bb911ced40e802f022b08defc51e20a4b40e50))
+- Update all dependencies ([a9d18b7](https://github.com/NetApp/ontap-mcp/commit/a9d18b7059388f8456e3fde2f8a5227873f0939c))
+- Remove convenience scripts from repo, add integration tests ([7505745](https://github.com/NetApp/ontap-mcp/commit/750574593a3b9652b874dcfea5d107a57d884f28))
+- Update all dependencies (#143) ([bc7ed9b](https://github.com/NetApp/ontap-mcp/commit/bc7ed9b2d624b9ecd99adbfe3c70e7d580a3eba6))
+- Update all dependencies (#142) ([99332e8](https://github.com/NetApp/ontap-mcp/commit/99332e88883c0ad7a841c4809860fc93fdc16dd8))
+- Update github/codeql-action action to v4.35.4 (#140) ([e0ebb84](https://github.com/NetApp/ontap-mcp/commit/e0ebb84bd2cf13d0a96b396e6dc4bc8757f0c53a))
+- Update all dependencies (#135) ([b590d70](https://github.com/NetApp/ontap-mcp/commit/b590d702fea2aae952eac0e1d1569d0711e82dad))
+
+</details>
+
+
+---
+
 ## 26.04.0 / 2026-04-30 Release
 
 The ONTAP-MCP team is happy to announce that we've released the 26.04.0 version of ONTAP-MCP. 🤘
