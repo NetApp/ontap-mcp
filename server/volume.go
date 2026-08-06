@@ -18,15 +18,21 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	volumeCreate, err := newCreateVolume(parameters)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
+
+	remote, err := client.GetClusterInfo(ctx)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	volumeCreate, err := newCreateVolume(parameters, remote.Model)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	err = client.CreateVolume(ctx, volumeCreate)
 
 	if err != nil {
@@ -274,7 +280,7 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 
 // newCreateVolume validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
+func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 	out := ontap.Volume{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -282,14 +288,20 @@ func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
 	}
-	if in.Aggregate == "" {
+	if model == ontap.CDOT && in.Aggregate == "" {
 		return out, errors.New("aggregate name is required")
+	}
+	if model == ontap.AFX && in.Aggregate != "" {
+		return out, errors.New("aggregate name should not required")
+	}
+
+	if in.Aggregate != "" {
+		out.Aggregates = []ontap.NameAndUUID{
+			{Name: in.Aggregate},
+		}
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	out.Aggregates = []ontap.NameAndUUID{
-		{Name: in.Aggregate},
-	}
 	out.Name = in.Volume
 
 	if in.Size != "" {
