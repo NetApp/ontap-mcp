@@ -292,7 +292,7 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 		return out, errors.New("aggregate name is required")
 	}
 	if model == ontap.AFX && in.Aggregate != "" {
-		return out, errors.New("aggregate name should not required")
+		return out, errors.New("aggregate name must not be provided for AFX clusters")
 	}
 
 	if in.Aggregate != "" {

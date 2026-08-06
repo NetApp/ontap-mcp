@@ -1,14 +1,15 @@
 package server
 
 import (
-	"github.com/netapp/ontap-mcp/ontap"
-	"github.com/netapp/ontap-mcp/tool"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/netapp/ontap-mcp/ontap"
+	"github.com/netapp/ontap-mcp/tool"
 )
 
-func TestVolume(t *testing.T) {
+func TestNewCreateVolume(t *testing.T) {
 	tests := []struct {
 		name            string
 		volume          string
@@ -61,7 +62,7 @@ func TestVolume(t *testing.T) {
 			model:           ontap.AFX,
 			size:            "100mb",
 			path:            "/volume4",
-			expectedErr:     "aggregate name should not required",
+			expectedErr:     "aggregate name must not be provided for AFX clusters",
 			expectedVolJSON: ontap.Volume{},
 		},
 	}
@@ -69,8 +70,17 @@ func TestVolume(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			createdVolJSON, err := newCreateVolume(tool.VolumeCreate{SVM: tt.svm, Aggregate: tt.aggregate, Volume: tt.volume, Size: tt.size, JunctionPath: tt.path}, tt.model)
-			if err != nil && !strings.Contains(err.Error(), tt.expectedErr) {
-				t.Errorf("Error should be %s but got: %s", tt.expectedErr, err.Error())
+			if tt.expectedErr == "" {
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+			} else {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got nil", tt.expectedErr)
+				}
+				if !strings.Contains(err.Error(), tt.expectedErr) {
+					t.Fatalf("expected error containing %q, got: %v", tt.expectedErr, err)
+				}
 			}
 
 			if !reflect.DeepEqual(createdVolJSON, tt.expectedVolJSON) {
