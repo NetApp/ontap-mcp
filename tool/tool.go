@@ -11,7 +11,7 @@ type VolumeCreate struct {
 	Cluster                string           `json:"cluster_name" jsonschema:"cluster name"`
 	SVM                    string           `json:"svm_name" jsonschema:"SVM name"`
 	Volume                 string           `json:"volume_name" jsonschema:"volume name"`
-	Aggregate              string           `json:"aggregate_name,omitzero" jsonschema:"aggregate name"`
+	Aggregate              string           `json:"aggregate_name,omitzero" jsonschema:"aggregate name. required for CDOT cluster, must be omitted for AFX cluster"`
 	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
 	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
