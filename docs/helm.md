@@ -7,6 +7,10 @@ ONTAP-MCP includes an official Helm chart in this repository at `charts/ontap-mc
 - Kubernetes 1.27+
 - Helm 3.12+
 - Network connectivity from the ONTAP-MCP pod to your ONTAP clusters
+- If using `externalSecret.enabled` (see [Configuration](#configuration)):
+  the [External Secrets Operator](https://external-secrets.io) CRDs and a
+  `SecretStore`/`ClusterSecretStore` already installed in the cluster. The
+  chart only renders the `ExternalSecret`, not the operator or the store.
 
 ## Installing
 
@@ -122,6 +126,13 @@ You can provide it in one of three ways:
    is the default. Set `externalSecret.apiVersion` to
    `external-secrets.io/v1beta1` if your cluster's ESO hasn't been upgraded
    yet.
+
+   The chart mounts `ontap.yaml` via `subPath`, so kubelet does not
+   propagate an in-place Secret update into the running container. When ESO
+   refreshes the Secret on `refreshInterval`, roll the deployment yourself
+   to pick up the change, e.g. `kubectl rollout restart deployment`. This
+   also applies to `ontapConfig.existingSecret`; only `ontapConfig.data`
+   triggers an automatic rollout, via a checksum pod annotation.
 
 If none of these are set, the server still starts with no configured clusters.
 
