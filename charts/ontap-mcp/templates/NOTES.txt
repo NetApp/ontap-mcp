@@ -1,6 +1,6 @@
 ONTAP MCP Server has been deployed.
 
-{{- if and (not .Values.ontapConfig.existingSecret) (not .Values.ontapConfig.data) }}
+{{- if and (not .Values.ontapConfig.existingSecret) (not .Values.ontapConfig.data) (not .Values.externalSecret.enabled) }}
 
 WARNING: no ONTAP clusters are configured (ontapConfig.data is empty and
 ontapConfig.existingSecret is not set). The server will start but has

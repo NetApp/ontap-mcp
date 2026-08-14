@@ -62,9 +62,16 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Name of the Secret that carries ontap.yaml -- either the caller-supplied
-existingSecret, or the one this chart creates itself.
+Name of the Secret that carries ontap.yaml -- the caller-supplied
+existingSecret, the name ESO's ExternalSecret creates, or the one this
+chart creates itself, in that order of precedence.
 */}}
 {{- define "ontap-mcp.configSecretName" -}}
-{{- default (printf "%s-config" (include "ontap-mcp.fullname" .)) .Values.ontapConfig.existingSecret }}
+{{- if .Values.ontapConfig.existingSecret }}
+{{- .Values.ontapConfig.existingSecret }}
+{{- else if .Values.externalSecret.enabled }}
+{{- default (printf "%s-config" (include "ontap-mcp.fullname" .)) .Values.externalSecret.target.name }}
+{{- else }}
+{{- printf "%s-config" (include "ontap-mcp.fullname" .) }}
+{{- end }}
 {{- end }}

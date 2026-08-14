@@ -92,6 +92,49 @@ ontapConfig:
   #       use_insecure_tls: false
   data: {}
 
+# -- Source the ontap.yaml config Secret from an External Secrets Operator
+# (https://external-secrets.io) ExternalSecret instead of setting it inline
+# via `ontapConfig.data` or pointing at a Secret you manage yourself via
+# `ontapConfig.existingSecret`. Off by default; when enabled, the chart
+# creates the ExternalSecret and skips creating a plain Secret of its own --
+# `ontapConfig.data` is ignored, same as with `ontapConfig.existingSecret`.
+externalSecret:
+  enabled: false
+  # -- API version of the ExternalSecret CRD. Most current ESO installs are
+  # on `external-secrets.io/v1`; some clusters are still on the deprecated
+  # `external-secrets.io/v1beta1`.
+  apiVersion: external-secrets.io/v1
+  # -- How often ESO re-syncs the Secret from the external store.
+  refreshInterval: 1h
+  # -- The (Cluster)SecretStore holding the ONTAP credentials. `name` is
+  # required when `enabled` is true.
+  secretStoreRef:
+    name: ""
+    kind: ClusterSecretStore
+  # -- Name of the Kubernetes Secret ESO creates. Defaults to the same name
+  # the chart's own Secret would otherwise use.
+  target:
+    name: ""
+  annotations: {}
+  labels: {}
+  # -- Individual keys to fetch, in ESO's own `spec.data` form. The default
+  # here expects a single remote key holding the complete ontap.yaml content
+  # already, mapped to the `ontap.yaml` key the server reads. Example:
+  #
+  # data:
+  #   - secretKey: ontap.yaml
+  #     remoteRef:
+  #       key: secret/ontap-mcp-config
+  data: []
+  # -- Alternative to `data`: pull every key/value from one remote secret in
+  # bulk, in ESO's own `spec.dataFrom` form. Mutually exclusive with `data`
+  # in ESO's schema -- leave `data` empty (`[]`) if you use this.
+  dataFrom: []
+  # -- Optional ESO `spec.target.template` block, e.g. to compose ontap.yaml
+  # from several remote keys. See
+  # https://external-secrets.io/latest/guides/templating/
+  template: {}
+
 resources:
   limits:
     cpu: 1
