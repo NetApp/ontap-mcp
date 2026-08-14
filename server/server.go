@@ -74,6 +74,7 @@ type App struct {
 
 type cachedVersion struct {
 	version string
+	model   string
 	fetched time.Time
 }
 
@@ -497,7 +498,7 @@ func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, st
 	if cached, ok := a.versionCache.Load(canonical); ok {
 		cv := cached.(cachedVersion)
 		if time.Since(cv.fetched) < versionCacheTTL {
-			return cv.version, "", nil
+			return cv.version, cv.model, nil
 		}
 	}
 
@@ -510,8 +511,9 @@ func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, st
 		return "", "", err
 	}
 	ver := fmt.Sprintf("%d.%d", remote.Version.Generation, remote.Version.Major)
-	a.versionCache.Store(canonical, cachedVersion{version: ver, fetched: time.Now()})
-	return ver, remote.Model, nil
+	model := remote.Model
+	a.versionCache.Store(canonical, cachedVersion{version: ver, model: model, fetched: time.Now()})
+	return ver, model, nil
 }
 
 func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.ListClusterParams) (*mcp.CallToolResult, any, error) {
