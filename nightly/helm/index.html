@@ -716,6 +716,10 @@
 <li>Kubernetes 1.27+</li>
 <li>Helm 3.12+</li>
 <li>Network connectivity from the ONTAP-MCP pod to your ONTAP clusters</li>
+<li>If using <code>externalSecret.enabled</code> (see <a href="#configuration">Configuration</a>):
+  the <a href="https://external-secrets.io">External Secrets Operator</a> CRDs and a
+  <code>SecretStore</code>/<code>ClusterSecretStore</code> already installed in the cluster. The
+  chart only renders the <code>ExternalSecret</code>, not the operator or the store.</li>
 </ul>
 <h2 id="installing">Installing<a class="headerlink" href="#installing" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>my-release<span class="w"> </span>oci://ghcr.io/netapp/charts/ontap-mcp<span class="w"> </span>--version<span class="w"> </span>&lt;chart-version&gt;
@@ -735,7 +739,7 @@ configure real clusters.</p>
 <p>The server needs a config file, <code>ontap.yaml</code>, describing which ONTAP clusters
 to connect to. The chart always sources that file from a Kubernetes <code>Secret</code>
 mounted at <code>/opt/mcp/ontap.yaml</code>.</p>
-<p>You can provide it in one of two ways:</p>
+<p>You can provide it in one of three ways:</p>
 <ol>
 <li>Let the chart create the <code>Secret</code> by setting <code>ontapConfig.data</code> to the full
    contents of <code>ontap.yaml</code>, in its native schema:</li>
@@ -760,7 +764,66 @@ mounted at <code>/opt/mcp/ontap.yaml</code>.</p>
 <p>Create a <code>Secret</code> with a key named <code>ontap.yaml</code>, then set
    <code>ontapConfig.existingSecret</code> to its name. When this is set,
    <code>ontapConfig.data</code> is ignored.</p>
-<p>If neither option is set, the server still starts with no configured clusters.</p>
+<ol>
+<li>Let the chart create and manage an
+   <a href="https://external-secrets.io"><code>ExternalSecret</code></a> for you, by setting
+   <code>externalSecret.enabled</code> to <code>true</code>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">externalSecret</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">secretStoreRef</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-secret-store</span>
+<span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ontap.yaml</span>
+<span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret/ontap-mcp-config</span>
+</code></pre></div>
+<p><code>secretStoreRef</code>, <code>refreshInterval</code>, <code>data</code>/<code>dataFrom</code>, and <code>template</code> map
+   directly onto the External Secrets Operator's own <code>ExternalSecret</code> spec --
+   see its <a href="https://external-secrets.io/latest/guides/templating/">templating guide</a>
+   for composing <code>ontap.yaml</code> from more than one remote key. When this is
+   set, the chart does not render its own <code>Secret</code> and <code>ontapConfig.data</code> is
+   ignored, same as with <code>ontapConfig.existingSecret</code>.</p>
+<p>If the credentials live as separate keys in the secret backend rather
+   than one ready-made <code>ontap.yaml</code> blob, use <code>template</code> to compose them:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">externalSecret</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">secretStoreRef</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-secret-store</span>
+<span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1_addr</span>
+<span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ontap-cluster1-addr</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1_user</span>
+<span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ontap-cluster1-user</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1_password</span>
+<span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ontap-cluster1-password</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">engineVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+<span class="w">    </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ontap.yaml</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">Pollers:</span>
+<span class="w">          </span><span class="no">cluster1:</span>
+<span class="w">            </span><span class="no">addr: {{ .cluster1_addr }}</span>
+<span class="w">            </span><span class="no">username: {{ .cluster1_user }}</span>
+<span class="w">            </span><span class="no">password: {{ .cluster1_password }}</span>
+<span class="w">            </span><span class="no">use_insecure_tls: false</span>
+</code></pre></div>
+<p>Most current ESO installs are on the <code>external-secrets.io/v1</code> API, which
+   is the default. Set <code>externalSecret.apiVersion</code> to
+   <code>external-secrets.io/v1beta1</code> if your cluster's ESO hasn't been upgraded
+   yet.</p>
+<p>The chart mounts <code>ontap.yaml</code> via <code>subPath</code>, so kubelet does not
+   propagate an in-place Secret update into the running container. When ESO
+   refreshes the Secret on <code>refreshInterval</code>, roll the deployment yourself
+   to pick up the change, e.g. <code>kubectl rollout restart deployment</code>. This
+   also applies to <code>ontapConfig.existingSecret</code>; only <code>ontapConfig.data</code>
+   triggers an automatic rollout, via a checksum pod annotation.</p>
+<p>If none of these are set, the server still starts with no configured clusters.</p>
 <h2 id="exposing-the-service">Exposing the service<a class="headerlink" href="#exposing-the-service" title="Permanent link">&para;</a></h2>
 <p>By default the chart only creates a <code>ClusterIP</code> <code>Service</code>. Three exposure modes
 are available, all disabled by default:</p>
