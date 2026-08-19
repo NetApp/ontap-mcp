@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"crypto/ecdh"
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/elliptic"
@@ -478,23 +479,36 @@ func ecdsaPublicKeyFromJWK(k jwkKey) (*ecdsa.PublicKey, error) {
 		return nil, fmt.Errorf("invalid y coordinate: %w", err)
 	}
 
-	var curve elliptic.Curve
+	var (
+		curve     elliptic.Curve
+		ecdhCurve ecdh.Curve
+	)
 	switch strings.ToUpper(k.Crv) {
 	case "P-256":
-		curve = elliptic.P256()
+		curve, ecdhCurve = elliptic.P256(), ecdh.P256()
 	case "P-384":
-		curve = elliptic.P384()
+		curve, ecdhCurve = elliptic.P384(), ecdh.P384()
 	case "P-521":
-		curve = elliptic.P521()
+		curve, ecdhCurve = elliptic.P521(), ecdh.P521()
 	default:
 		return nil, fmt.Errorf("unsupported EC curve %q", k.Crv)
 	}
 
+	byteLen := (curve.Params().BitSize + 7) / 8
+	if len(xBytes) != byteLen || len(yBytes) != byteLen {
+		return nil, fmt.Errorf("EC coordinates must each be %d bytes for curve %s", byteLen, k.Crv)
+	}
+
+	point := make([]byte, 0, 1+2*byteLen)
+	point = append(point, 4)
+	point = append(point, xBytes...)
+	point = append(point, yBytes...)
+	if _, err := ecdhCurve.NewPublicKey(point); err != nil {
+		return nil, fmt.Errorf("EC point is not on the configured curve: %w", err)
+	}
+
 	x := new(big.Int).SetBytes(xBytes)
 	y := new(big.Int).SetBytes(yBytes)
-	if !curve.IsOnCurve(x, y) {
-		return nil, errors.New("EC point is not on the configured curve")
-	}
 
 	return &ecdsa.PublicKey{Curve: curve, X: x, Y: y}, nil
 }
