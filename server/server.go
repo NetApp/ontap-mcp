@@ -817,7 +817,7 @@ func addTool[In, Out any](a *App, server *mcp.Server, name string, description s
 	// Workaround for https://github.com/modelcontextprotocol/go-sdk/issues/693
 	typeFor := reflect.TypeFor[In]()
 
-	if typeFor.Kind() == reflect.Ptr {
+	if typeFor.Kind() == reflect.Pointer {
 		typeFor = typeFor.Elem()
 	}
 

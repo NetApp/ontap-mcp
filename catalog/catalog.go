@@ -129,8 +129,9 @@ func (ep APIEndpoint) FilterByVersion(ontapVersion string) APIEndpoint {
 		Tags:       ep.Tags,
 		Introduced: ep.Introduced,
 		PathParams: ep.PathParams,
+		Filters:    make(map[string]FilterInfo, len(ep.Filters)),
+		Fields:     make(map[string]FieldInfo, len(ep.Fields)),
 	}
-	out.Filters = make(map[string]FilterInfo, len(ep.Filters))
 	for k, v := range ep.Filters {
 		since := v.Since
 		if since == "" {
@@ -140,7 +141,6 @@ func (ep APIEndpoint) FilterByVersion(ontapVersion string) APIEndpoint {
 			out.Filters[k] = v
 		}
 	}
-	out.Fields = make(map[string]FieldInfo, len(ep.Fields))
 	for k, v := range ep.Fields {
 		since := v.Since
 		if since == "" {

@@ -1,6 +1,6 @@
 module github.com/Netapp/ontap-mcp-automation
 
-go 1.26
+go 1.27
 
 replace github.com/netapp/ontap-mcp => ../
 
