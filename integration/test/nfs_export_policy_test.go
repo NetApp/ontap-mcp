@@ -21,6 +21,18 @@ func TestNFSExportPolicy(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Create SVM",
+			input:            ClusterStr + "create " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
 			name:             "Clean NFS export policy",
 			input:            ClusterStr + "delete " + rn("nfsEngPolicy") + " NFS export policy",
 			expectedOntapErr: "because it does not exist",
@@ -34,39 +46,45 @@ func TestNFSExportPolicy(t *testing.T) {
 		},
 		{
 			name:             "Create NFS export policy",
-			input:            ClusterStr + "create an NFS export policy name " + rn("nfsEngPolicy") + " on the marketing svm",
+			input:            ClusterStr + "create an NFS export policy name " + rn("nfsEngPolicy") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy"), validationFunc: createObject},
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the marketing svm and the harvest_vc_aggr aggregate",
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
 			name:             "Attach NFS export policy to volume",
-			input:            ClusterStr + "apply " + rn("nfsEngPolicy") + " NFS export policy to the " + rn("docs") + " volume in the marketing svm",
+			input:            ClusterStr + "apply " + rn("nfsEngPolicy") + " NFS export policy to the " + rn("docs") + " volume in the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{},
 		},
 		{
 			name:             "Rename NFS export policy",
-			input:            ClusterStr + "rename the NFS export policy from " + rn("nfsEngPolicy") + " to " + rn("nfsMgrPolicy") + " on the marketing svm",
+			input:            ClusterStr + "rename the NFS export policy from " + rn("nfsEngPolicy") + " to " + rn("nfsMgrPolicy") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: createObject},
 		},
 		{
 			name:             "Clean volume",
-			input:            ClusterStr + "delete volume " + rn("docs") + " in marketing svm",
+			input:            ClusterStr + "delete volume " + rn("docs") + " in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=marketing", validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NFS export policy",
 			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
 

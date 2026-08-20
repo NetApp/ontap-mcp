@@ -22,77 +22,95 @@ func TestQoSPolicy(t *testing.T) {
 		verifyAPI        ontapVerifier
 	}{
 		{
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Create SVM",
+			input:            ClusterStr + "create " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: createObject},
+		},
+		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete " + rn("gold") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("gold") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("gold"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete " + rn("silver") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("silver") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("silver"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete " + rn("payroll") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("payroll") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("payroll"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create fixed QoS policy",
-			input:            ClusterStr + "create a fixed QoS policy named " + rn("gold") + " on the marketing svm with a max throughput of 5000 iops",
+			input:            ClusterStr + "create a fixed QoS policy named " + rn("gold") + " on the " + rn("marketing") + " svm with a max throughput of 5000 iops",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("gold"), validationFunc: createObject},
 		},
 		{
 			name:             "Create adaptive QoS policy",
-			input:            ClusterStr + "create a adaptive QoS policy named " + rn("payroll") + " on the marketing svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10",
+			input:            ClusterStr + "create a adaptive QoS policy named " + rn("payroll") + " on the " + rn("marketing") + " svm with a expected iops as 2000 peak iops as 5000 and absolute min iops is 10",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("payroll"), validationFunc: createObject},
 		},
 		{
 			name:             "Rename QoS policy",
-			input:            ClusterStr + "rename the QoS policy from " + rn("gold") + " to " + rn("silver") + " on the marketing svm",
+			input:            ClusterStr + "rename the QoS policy from " + rn("gold") + " to " + rn("silver") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("silver"), validationFunc: createObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete " + rn("silver") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("silver") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("silver"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean QoS policy",
-			input:            ClusterStr + "delete " + rn("payroll") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("payroll") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("payroll"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean adaptive allocation QoS policy",
-			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
 		},
 		//nolint:gocritic These tests are available 9.10 onwards, current cluster is at 9.9, so skipping these tests in CI for now
 		{
 			name:             "Create adaptive QoS policy with allocation mode",
-			input:            ClusterStr + "create an adaptive QoS policy named " + rn("alloc") + " on the marketing svm with expected iops 1000 peak iops 3000 absolute min iops 50 expected iops allocation allocated_space peak iops allocation used_space block size any",
+			input:            ClusterStr + "create an adaptive QoS policy named " + rn("alloc") + " on the " + rn("marketing") + " svm with expected iops 1000 peak iops 3000 absolute min iops 50 expected iops allocation allocated_space peak iops allocation used_space block size any",
 			expectedOntapErr: "Unexpected argument",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc") + "&fields=adaptive", validationFunc: verifyQoSAdaptiveFields(true, "allocated_space", "used_space", "any")},
 		},
 		{
 			name:             "Update adaptive QoS policy allocation mode only",
-			input:            ClusterStr + "update the " + rn("alloc") + " QoS policy on the marketing svm to use allocated_space for both expected and peak IOPS allocation",
+			input:            ClusterStr + "update the " + rn("alloc") + " QoS policy on the " + rn("marketing") + " svm to use allocated_space for both expected and peak IOPS allocation",
 			expectedOntapErr: "because it does not exist",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc") + "&fields=adaptive", validationFunc: verifyQoSAdaptiveFields(true, "allocated_space", "allocated_space", "any")},
 		},
 		{
 			name:             "Clean adaptive allocation QoS policy",
-			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in marketing svm",
+			input:            ClusterStr + "delete " + rn("alloc") + " QoS policy in " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/qos/policies?name=" + rn("alloc"), validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean SVM",
+			input:            ClusterStr + "delete " + rn("marketing") + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 	}
 

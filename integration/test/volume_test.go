@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"log/slog"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,6 +18,7 @@ func TestVolume(t *testing.T) {
 	tests := []struct {
 		name             string
 		input            string
+		afxInput         string
 		expectedOntapErr string
 		verifyAPI        ontapVerifier
 	}{
@@ -46,7 +48,7 @@ func TestVolume(t *testing.T) {
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate",
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: createObject},
 		},
@@ -94,7 +96,8 @@ func TestVolume(t *testing.T) {
 		},
 		{
 			name:             "Create thick-provisioned volume",
-			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate with space guarantee type volume and snapshot reserve 5 percent",
+			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required with space guarantee type volume and snapshot reserve 5 percent",
+			afxInput:         ClusterStr + "create a 50MB volume named " + rn("thick") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required with snapshot reserve 5 percent",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("thick") + "&svm=" + rn("marketing"), validationFunc: createObject},
 		},
@@ -151,6 +154,10 @@ func TestVolume(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Special check: use afxInput prompt only when AFX cluster added with named as oem in config
+			if strings.Contains(Cluster, "oem") && tt.afxInput != "" {
+				tt.input = tt.afxInput
+			}
 			slog.Debug("", slog.String("Input", tt.input))
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
