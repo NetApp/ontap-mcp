@@ -340,6 +340,8 @@ func (a *App) createMCPServer() *mcp.Server {
 		addTool(a, server, "modify_igroup", descriptions.ModifyIGroup, updateAnnotation, a.ModifyIGroup)
 		addTool(a, server, "modify_snapmirror", descriptions.ModifySnapMirror, updateAnnotation, a.ModifySnapMirror)
 		addTool(a, server, "modify_snapshot", descriptions.ModifySnapshot, updateAnnotation, a.ModifySnapshot)
+		addTool(a, server, "abort_snapmirror_transfer", descriptions.AbortSnapMirrorTransfer, updateAnnotation, a.AbortSnapMirrorTransfer)
+
 	}
 
 	if a.catalog != nil {
