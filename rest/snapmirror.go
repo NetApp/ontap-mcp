@@ -3,6 +3,7 @@ package rest
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -30,6 +31,32 @@ func (c *Client) getSnapMirrorUUID(ctx context.Context, destPath string) (string
 	}
 	if data.NumRecords != 1 {
 		return "", fmt.Errorf("found %d SnapMirror relationships with destination %q, expected 1", data.NumRecords, destPath)
+	}
+
+	return data.Records[0].UUID, nil
+}
+
+// getSnapMirrorTransferUUID returns the UUID of a SnapMirror relationship identified by its destination path.
+func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) (string, error) {
+	var data ontap.GetData
+
+	params := url.Values{}
+	params.Set("state", "transferring")
+	params.Set("fields", "uuid")
+
+	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers`, nil, nil).
+		Params(params).
+		ToJSON(&data)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return "", err
+	}
+
+	if data.NumRecords == 0 {
+		return "", errors.New("SnapMirror relationship with state transfer transferring not found")
+	}
+	if data.NumRecords != 1 {
+		return "", fmt.Errorf("found %d SnapMirror relationships transfers with snapmirror uuid %s, expected 1", data.NumRecords, uuid)
 	}
 
 	return data.Records[0].UUID, nil
@@ -115,4 +142,32 @@ func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destPath string) 
 	}
 
 	return c.checkStatus(statusCode)
+}
+
+func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, rel ontap.SnapMirrorRelationship) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
+
+	uuid, err := c.getSnapMirrorUUID(ctx, destPath)
+	if err != nil {
+		return err
+	}
+
+	transferUUID, err := c.getSnapMirrorTransferUUID(ctx, uuid)
+	if err != nil {
+		return err
+	}
+
+	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers/`+transferUUID, &statusCode, nil).
+		Patch().
+		BodyJSON(rel).
+		ToBytesBuffer(&buf)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	return c.handleJob(ctx, statusCode, &buf)
 }
