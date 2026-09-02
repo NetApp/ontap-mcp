@@ -7,6 +7,10 @@ ONTAP-MCP includes an official Helm chart in this repository at `charts/ontap-mc
 - Kubernetes 1.27+
 - Helm 3.12+
 - Network connectivity from the ONTAP-MCP pod to your ONTAP clusters
+- If using `externalSecret.enabled` (see [Configuration](#configuration)):
+  the [External Secrets Operator](https://external-secrets.io) CRDs and a
+  `SecretStore`/`ClusterSecretStore` already installed in the cluster. The
+  chart only renders the `ExternalSecret`, not the operator or the store.
 
 ## Installing
 
@@ -36,7 +40,7 @@ The server needs a config file, `ontap.yaml`, describing which ONTAP clusters
 to connect to. The chart always sources that file from a Kubernetes `Secret`
 mounted at `/opt/mcp/ontap.yaml`.
 
-You can provide it in one of two ways:
+You can provide it in one of three ways:
 
 1. Let the chart create the `Secret` by setting `ontapConfig.data` to the full
    contents of `ontap.yaml`, in its native schema:
@@ -64,7 +68,73 @@ You can provide it in one of two ways:
    `ontapConfig.existingSecret` to its name. When this is set,
    `ontapConfig.data` is ignored.
 
-If neither option is set, the server still starts with no configured clusters.
+3. Let the chart create and manage an
+   [`ExternalSecret`](https://external-secrets.io) for you, by setting
+   `externalSecret.enabled` to `true`:
+
+   ```yaml
+   externalSecret:
+     enabled: true
+     secretStoreRef:
+       name: my-secret-store
+       kind: ClusterSecretStore
+     data:
+       - secretKey: ontap.yaml
+         remoteRef:
+           key: secret/ontap-mcp-config
+   ```
+
+   `secretStoreRef`, `refreshInterval`, `data`/`dataFrom`, and `template` map
+   directly onto the External Secrets Operator's own `ExternalSecret` spec --
+   see its [templating guide](https://external-secrets.io/latest/guides/templating/)
+   for composing `ontap.yaml` from more than one remote key. When this is
+   set, the chart does not render its own `Secret` and `ontapConfig.data` is
+   ignored, same as with `ontapConfig.existingSecret`.
+
+   If the credentials live as separate keys in the secret backend rather
+   than one ready-made `ontap.yaml` blob, use `template` to compose them:
+
+   ```yaml
+   externalSecret:
+     enabled: true
+     secretStoreRef:
+       name: my-secret-store
+       kind: ClusterSecretStore
+     data:
+       - secretKey: cluster1_addr
+         remoteRef:
+           key: ontap-cluster1-addr
+       - secretKey: cluster1_user
+         remoteRef:
+           key: ontap-cluster1-user
+       - secretKey: cluster1_password
+         remoteRef:
+           key: ontap-cluster1-password
+     template:
+       engineVersion: v2
+       data:
+         ontap.yaml: |
+           Pollers:
+             cluster1:
+               addr: {{ .cluster1_addr }}
+               username: {{ .cluster1_user }}
+               password: {{ .cluster1_password }}
+               use_insecure_tls: false
+   ```
+
+   Most current ESO installs are on the `external-secrets.io/v1` API, which
+   is the default. Set `externalSecret.apiVersion` to
+   `external-secrets.io/v1beta1` if your cluster's ESO hasn't been upgraded
+   yet.
+
+   The chart mounts `ontap.yaml` via `subPath`, so kubelet does not
+   propagate an in-place Secret update into the running container. When ESO
+   refreshes the Secret on `refreshInterval`, roll the deployment yourself
+   to pick up the change, e.g. `kubectl rollout restart deployment`. This
+   also applies to `ontapConfig.existingSecret`; only `ontapConfig.data`
+   triggers an automatic rollout, via a checksum pod annotation.
+
+If none of these are set, the server still starts with no configured clusters.
 
 ## Exposing the service
 

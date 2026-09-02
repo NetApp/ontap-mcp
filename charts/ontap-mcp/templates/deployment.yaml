@@ -11,9 +11,9 @@ spec:
       {{- include "ontap-mcp.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- if or (not .Values.ontapConfig.existingSecret) .Values.podAnnotations }}
+      {{- if or (and (not .Values.ontapConfig.existingSecret) (not .Values.externalSecret.enabled)) .Values.podAnnotations }}
       annotations:
-        {{- if not .Values.ontapConfig.existingSecret }}
+        {{- if and (not .Values.ontapConfig.existingSecret) (not .Values.externalSecret.enabled) }}
         checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.podAnnotations }}

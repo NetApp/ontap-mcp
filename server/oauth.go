@@ -490,13 +490,22 @@ func ecdsaPublicKeyFromJWK(k jwkKey) (*ecdsa.PublicKey, error) {
 		return nil, fmt.Errorf("unsupported EC curve %q", k.Crv)
 	}
 
-	x := new(big.Int).SetBytes(xBytes)
-	y := new(big.Int).SetBytes(yBytes)
-	if !curve.IsOnCurve(x, y) {
-		return nil, errors.New("EC point is not on the configured curve")
+	byteLen := (curve.Params().BitSize + 7) / 8
+	if len(xBytes) != byteLen || len(yBytes) != byteLen {
+		return nil, fmt.Errorf("EC coordinates must each be %d bytes for curve %s", byteLen, k.Crv)
 	}
 
-	return &ecdsa.PublicKey{Curve: curve, X: x, Y: y}, nil
+	point := make([]byte, 0, 1+2*byteLen)
+	point = append(point, 4)
+	point = append(point, xBytes...)
+	point = append(point, yBytes...)
+
+	pub, err := ecdsa.ParseUncompressedPublicKey(curve, point)
+	if err != nil {
+		return nil, fmt.Errorf("EC point is not on the configured curve: %w", err)
+	}
+
+	return pub, nil
 }
 
 func edDSAPublicKeyFromJWK(k jwkKey) (ed25519.PublicKey, error) {
