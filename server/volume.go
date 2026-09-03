@@ -23,12 +23,12 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	remote, err := client.GetClusterInfo(ctx)
+	_, model, err := a.getClusterVersion(ctx, parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
 
-	volumeCreate, err := newCreateVolume(parameters, remote.Model)
+	volumeCreate, err := newCreateVolume(parameters, model)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -288,11 +288,13 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
 	}
-	if model == ontap.CDOT && in.Aggregate == "" {
-		return out, errors.New("aggregate name is required")
-	}
-	if model == ontap.AFX && in.Aggregate != "" {
+	switch {
+	case model == ontap.ASAr2:
+		return out, errors.New("POST is not supported on ASAr2 platform")
+	case model == ontap.AFX && in.Aggregate != "":
 		return out, errors.New("aggregate name must not be provided for AFX clusters")
+	case model == ontap.CDOT && in.Aggregate == "":
+		return out, errors.New("aggregate name is required")
 	}
 
 	if in.Aggregate != "" {
