@@ -151,7 +151,7 @@ func TestVolume(t *testing.T) {
 		},
 	}
 	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
-	model := fetchModel(t, "api/cluster?fields=san_optimized,disaggregated", poller, client)
+	model := fetchModel("api/cluster?fields=san_optimized,disaggregated", poller, client)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -171,7 +171,7 @@ func TestVolume(t *testing.T) {
 	}
 }
 
-func fetchModel(t *testing.T, api string, poller *config.Poller, client *http.Client) string {
+func fetchModel(api string, poller *config.Poller, client *http.Client) string {
 	type response struct {
 		Name          string `json:"name"`
 		SanOptimized  bool   `json:"san_optimized"`
