@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
 	"net/http"
-	"strings"
 	"testing"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 
 func TestVolume(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
-
 	tests := []struct {
 		name             string
 		input            string
@@ -151,11 +151,11 @@ func TestVolume(t *testing.T) {
 		},
 	}
 	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
+	model := fetchModel(t, "api/cluster?fields=san_optimized,disaggregated", poller, client)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Special check: use afxInput prompt only when AFX cluster added with named as oem in config
-			if strings.Contains(Cluster, "oem") && tt.afxInput != "" {
+			if model == ontap.AFX && tt.afxInput != "" {
 				tt.input = tt.afxInput
 			}
 			slog.Debug("", slog.String("Input", tt.input))
@@ -168,5 +168,33 @@ func TestVolume(t *testing.T) {
 				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 		})
+	}
+}
+
+func fetchModel(t *testing.T, api string, poller *config.Poller, client *http.Client) string {
+	type response struct {
+		Name          string `json:"name"`
+		SanOptimized  bool   `json:"san_optimized"`
+		Disaggregated bool   `json:"disaggregated"`
+	}
+
+	var data response
+	err := requests.URL("https://"+poller.Addr+"/"+api).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		slog.Debug("verifyModel: request failed: %v", slog.String("err", err.Error()))
+		return ontap.CDOT
+	}
+
+	switch {
+	case data.Disaggregated && data.SanOptimized:
+		return ontap.ASAr2
+	case data.Disaggregated && !data.SanOptimized:
+		return ontap.AFX
+	default:
+		return ontap.CDOT
 	}
 }

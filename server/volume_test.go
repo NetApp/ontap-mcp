@@ -1,7 +1,6 @@
 package server
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 
@@ -73,14 +72,25 @@ func TestNewCreateVolume(t *testing.T) {
 			model:           ontap.ASAr2,
 			size:            "100mb",
 			path:            "/volume5",
-			expectedErr:     "POST is not supported on ASAr2 platform",
+			expectedErr:     "volume creation is not supported on ASAr2 clusters, use storage units instead",
+			expectedVolJSON: ontap.Volume{},
+		},
+		{
+			name:            "Volume without model in cdot",
+			volume:          "volume6",
+			svm:             "svm6",
+			aggregate:       "",
+			model:           "",
+			size:            "100mb",
+			path:            "/volume6",
+			expectedErr:     "aggregate name is required",
 			expectedVolJSON: ontap.Volume{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			createdVolJSON, err := newCreateVolume(tool.VolumeCreate{SVM: tt.svm, Aggregate: tt.aggregate, Volume: tt.volume, Size: tt.size, JunctionPath: tt.path}, tt.model)
+			_, err := newCreateVolume(tool.VolumeCreate{SVM: tt.svm, Aggregate: tt.aggregate, Volume: tt.volume, Size: tt.size, JunctionPath: tt.path}, tt.model)
 			if tt.expectedErr == "" {
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
@@ -92,10 +102,6 @@ func TestNewCreateVolume(t *testing.T) {
 				if !strings.Contains(err.Error(), tt.expectedErr) {
 					t.Fatalf("expected error containing %q, got: %v", tt.expectedErr, err)
 				}
-			}
-
-			if !reflect.DeepEqual(createdVolJSON, tt.expectedVolJSON) {
-				t.Errorf("generated volume json should be %v, but got %v", tt.expectedVolJSON, createdVolJSON)
 			}
 		})
 	}

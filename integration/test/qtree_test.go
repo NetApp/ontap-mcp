@@ -36,24 +36,6 @@ func TestQtree(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
-			name:             "Clean qtree staff",
-			input:            ClusterStr + "delete " + rn("staff") + " qtree in " + rn("docs") + " volume in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("staff"), validationFunc: deleteObject},
-		},
-		{
-			name:             "Clean qtree pay",
-			input:            ClusterStr + "Delete " + rn("pay") + " qtree in " + rn("docs") + " volume in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/qtrees?name=" + rn("pay"), validationFunc: deleteObject},
-		},
-		{
-			name:             "Clean volume",
-			input:            ClusterStr + "delete volume " + rn("docs") + " in " + rn("marketing") + " svm",
-			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: deleteObject},
-		},
-		{
 			name:             "Create volume",
 			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required",
 			expectedOntapErr: "",

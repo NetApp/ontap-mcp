@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -25,12 +26,13 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 
 	_, model, err := a.getClusterVersion(ctx, parameters.Cluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		a.logger.Warn("failed to fetch cluster info, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
+		model = ontap.CDOT
 	}
 
 	volumeCreate, err := newCreateVolume(parameters, model)
 	if err != nil {
-		return nil, nil, err
+		return errorResult(err), nil, err
 	}
 
 	err = client.CreateVolume(ctx, volumeCreate)
@@ -288,18 +290,22 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
 	}
-	switch {
-	case model == ontap.ASAr2:
-		return out, errors.New("POST is not supported on ASAr2 platform")
-	case model == ontap.AFX && in.Aggregate != "":
-		return out, errors.New("aggregate name must not be provided for AFX clusters")
-	case model == ontap.CDOT && in.Aggregate == "":
-		return out, errors.New("aggregate name is required")
-	}
-
-	if in.Aggregate != "" {
+	switch model {
+	case ontap.ASAr2:
+		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
+	case ontap.AFX:
+		if in.Aggregate != "" {
+			return out, errors.New("aggregate name must not be provided for AFX clusters")
+		}
+	default:
+		if in.Aggregate == "" {
+			return out, errors.New("aggregate name is required")
+		}
 		out.Aggregates = []ontap.NameAndUUID{
 			{Name: in.Aggregate},
+		}
+		if in.GuaranteeType != "" {
+			out.Guarantee.Type = in.GuaranteeType
 		}
 	}
 
@@ -316,9 +322,6 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 
 	if in.Type != "" {
 		out.Type = in.Type
-	}
-	if in.GuaranteeType != "" {
-		out.Guarantee.Type = in.GuaranteeType
 	}
 	if in.SnapshotPolicyName != "" {
 		out.SnapshotPolicy.Name = in.SnapshotPolicyName
