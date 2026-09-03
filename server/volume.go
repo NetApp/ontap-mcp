@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -18,15 +19,22 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	volumeCreate, err := newCreateVolume(parameters)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
+
+	_, model, err := a.getClusterVersion(ctx, parameters.Cluster)
+	if err != nil {
+		a.logger.Warn("failed to fetch cluster info, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
+		model = ontap.CDOT
+	}
+
+	volumeCreate, err := newCreateVolume(parameters, model)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
 	err = client.CreateVolume(ctx, volumeCreate)
 
 	if err != nil {
@@ -274,7 +282,7 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 
 // newCreateVolume validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
+func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 	out := ontap.Volume{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -282,14 +290,26 @@ func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
 	}
-	if in.Aggregate == "" {
-		return out, errors.New("aggregate name is required")
+	switch model {
+	case ontap.ASAr2:
+		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
+	case ontap.AFX:
+		if in.Aggregate != "" {
+			return out, errors.New("aggregate name must not be provided for AFX clusters")
+		}
+	default:
+		if in.Aggregate == "" {
+			return out, errors.New("aggregate name is required")
+		}
+		out.Aggregates = []ontap.NameAndUUID{
+			{Name: in.Aggregate},
+		}
+		if in.GuaranteeType != "" {
+			out.Guarantee.Type = in.GuaranteeType
+		}
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	out.Aggregates = []ontap.NameAndUUID{
-		{Name: in.Aggregate},
-	}
 	out.Name = in.Volume
 
 	if in.Size != "" {
@@ -302,9 +322,6 @@ func newCreateVolume(in tool.VolumeCreate) (ontap.Volume, error) {
 
 	if in.Type != "" {
 		out.Type = in.Type
-	}
-	if in.GuaranteeType != "" {
-		out.Guarantee.Type = in.GuaranteeType
 	}
 	if in.SnapshotPolicyName != "" {
 		out.SnapshotPolicy.Name = in.SnapshotPolicyName

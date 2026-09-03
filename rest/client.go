@@ -229,6 +229,8 @@ func (c *Client) GetClusterInfo(ctx context.Context) (ontap.Remote, error) {
 
 	if r.IsDisaggregated && r.IsSanOptimized {
 		r.Model = ontap.ASAr2
+	} else if r.IsDisaggregated && !r.IsSanOptimized {
+		r.Model = ontap.AFX
 	}
 
 	return r, nil

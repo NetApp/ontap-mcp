@@ -44,7 +44,7 @@ func TestSnapshot(t *testing.T) {
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate",
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: createObject},
 		},

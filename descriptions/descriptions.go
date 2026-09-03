@@ -29,7 +29,7 @@ Use the swagger-catalog tools + ontap_get for any listing or read request:
 Create/update/delete operations remain as dedicated typed tools
 `
 
-const ListClusters = `List all ONTAP clusters registered in the server configuration.
+const ListClusters = `List all ONTAP clusters registered in the server configuration. Returns cluster names with ONTAP version and model (e.g. cdot, asar2, afx).
 USE THIS FIRST: Always call this before any other tool to discover valid cluster names.`
 
 const CreateVolume = `Create a volume on a cluster by cluster name.`
