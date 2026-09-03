@@ -65,6 +65,17 @@ func TestNewCreateVolume(t *testing.T) {
 			expectedErr:     "aggregate name must not be provided for AFX clusters",
 			expectedVolJSON: ontap.Volume{},
 		},
+		{
+			name:            "Volume with error in asar2",
+			volume:          "volume5",
+			svm:             "svm5",
+			aggregate:       "aggr5",
+			model:           ontap.ASAr2,
+			size:            "100mb",
+			path:            "/volume5",
+			expectedErr:     "POST is not supported on ASAr2 platform",
+			expectedVolJSON: ontap.Volume{},
+		},
 	}
 
 	for _, tt := range tests {
