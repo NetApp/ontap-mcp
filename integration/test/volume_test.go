@@ -185,7 +185,7 @@ func fetchModel(api string, poller *config.Poller, client *http.Client) string {
 		ToJSON(&data).
 		Fetch(context.Background())
 	if err != nil {
-		slog.Debug("verifyModel: request failed: %v", slog.String("err", err.Error()))
+		slog.Warn("fetchModel: request failed", slog.String("err", err.Error()))
 		return ontap.CDOT
 	}
 

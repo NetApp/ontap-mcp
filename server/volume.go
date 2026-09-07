@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
-	"strconv"
-	"strings"
-
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
+	"log/slog"
+	"strconv"
+	"strings"
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.VolumeCreate) (*mcp.CallToolResult, any, error) {
+	model := ontap.CDOT
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -24,10 +24,15 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	_, model, err := a.getClusterVersion(ctx, parameters.Cluster)
-	if err != nil {
-		a.logger.Warn("failed to fetch cluster info, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
-		model = ontap.CDOT
+	if canonical, ok := a.resolveCluster(parameters.Cluster); ok {
+		if cached, ok := a.versionCache.Load(canonical); ok {
+			cv := cached.(cachedVersion)
+			model = cv.model
+		} else {
+			a.logger.Warn("cluster not found, choosing default model as CDOT", slog.String("cluster", parameters.Cluster))
+		}
+	} else {
+		a.logger.Warn("cluster not found, choosing default model as CDOT", slog.String("cluster", parameters.Cluster))
 	}
 
 	volumeCreate, err := newCreateVolume(parameters, model)
@@ -297,15 +302,15 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 		if in.Aggregate != "" {
 			return out, errors.New("aggregate name must not be provided for AFX clusters")
 		}
+		if in.GuaranteeType != "" {
+			return out, errors.New("space guarantee type must not be provided for AFX clusters")
+		}
 	default:
 		if in.Aggregate == "" {
 			return out, errors.New("aggregate name is required")
 		}
 		out.Aggregates = []ontap.NameAndUUID{
 			{Name: in.Aggregate},
-		}
-		if in.GuaranteeType != "" {
-			out.Guarantee.Type = in.GuaranteeType
 		}
 	}
 
@@ -322,6 +327,9 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 
 	if in.Type != "" {
 		out.Type = in.Type
+	}
+	if in.GuaranteeType != "" {
+		out.Guarantee.Type = in.GuaranteeType
 	}
 	if in.SnapshotPolicyName != "" {
 		out.SnapshotPolicy.Name = in.SnapshotPolicyName
