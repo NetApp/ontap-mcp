@@ -24,15 +24,10 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	if canonical, ok := a.resolveCluster(parameters.Cluster); ok {
-		if cached, ok := a.versionCache.Load(canonical); ok {
-			cv := cached.(cachedVersion)
-			model = cv.model
-		} else {
-			a.logger.Warn("cluster not found, choosing default model as CDOT", slog.String("cluster", parameters.Cluster))
-		}
+	if _, m, err := a.getClusterVersion(ctx, parameters.Cluster); err == nil {
+		model = m
 	} else {
-		a.logger.Warn("cluster not found, choosing default model as CDOT", slog.String("cluster", parameters.Cluster))
+		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
 	}
 
 	volumeCreate, err := newCreateVolume(parameters, model)
