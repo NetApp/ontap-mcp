@@ -190,7 +190,10 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 		hasUpdate = true
 	}
 
-	if in.FilesMaximum != nil && *in.FilesMaximum != 0 {
+	if in.FilesMaximum != nil {
+		if *in.FilesMaximum <= 0 {
+			return out, errors.New("files.maximum must be a positive integer")
+		}
 		out.Files.Maximum = in.FilesMaximum
 		hasUpdate = true
 	}
