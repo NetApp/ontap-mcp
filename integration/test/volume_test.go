@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/assert"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -93,6 +95,13 @@ func TestVolume(t *testing.T) {
 			verifyAPI:        ontapVerifier{},
 		},
 		{
+			name:             "Update volume files maximum",
+			input:            ClusterStr + "increase maximum number of files to 2000 on the " + rn("docsnew") + " volume on the " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			// Maximum number of files would not be increase exactly same as requested, the discrepancy happens due to how ONTAP calculates and allocates internal file structures (inodes).
+			verifyAPI: ontapVerifier{api: "api/storage/volumes?name=" + rn("docsnew") + "&fields=files.maximum", validationFunc: verifyFilesMax(1995)},
+		},
+		{
 			name:             "Create thick-provisioned volume",
 			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate with space guarantee type volume and snapshot reserve 5 percent",
 			expectedOntapErr: "",
@@ -161,5 +170,40 @@ func TestVolume(t *testing.T) {
 				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 		})
+	}
+}
+
+func verifyFilesMax(expectedFilesMax int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type Files struct {
+			Maximum *int `json:"maximum,omitzero"`
+		}
+		type Volume struct {
+			Files Files `json:"files,omitzero"`
+		}
+		type response struct {
+			NumRecords int      `json:"num_records"`
+			Records    []Volume `json:"records"`
+		}
+
+		var data response
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyFilesMax: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyFilesMax: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+
+		gotVolume := data.Records[0]
+		assert.NotNil(t, gotVolume.Files.Maximum)
+		assert.Equal(t, *gotVolume.Files.Maximum, expectedFilesMax)
+		return true
 	}
 }
