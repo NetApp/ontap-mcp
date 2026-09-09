@@ -158,7 +158,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 # Tool Mode
 
-The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `legacy`; env: `TOOL_MODE`):
+The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `multiplex`; env: `TOOL_MODE`):
 
 | Mode        | Description                                                                                                                |
 |-------------|----------------------------------------------------------------------------------------------------------------------------|
