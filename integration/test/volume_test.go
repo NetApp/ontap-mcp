@@ -207,8 +207,8 @@ func verifyFilesMax(expectedFilesMax int) func(t *testing.T, api string, poller 
 			return false
 		}
 
-		if *gotVolume.Files.Maximum < (expectedFilesMax-possibleVariation) && *gotVolume.Files.Maximum >= expectedFilesMax {
-			t.Errorf("verifyFilesMax: files.maximum value is not in range %d - %d, got %d", expectedFilesMax-possibleVariation, expectedFilesMax, *gotVolume.Files.Maximum)
+		if v := *gotVolume.Files.Maximum; v < (expectedFilesMax-possibleVariation) || v >= expectedFilesMax {
+			t.Errorf("verifyFilesMax: files.maximum value is not in range %d - %d, got %d", expectedFilesMax-possibleVariation, expectedFilesMax, v)
 			return false
 		}
 		return true
