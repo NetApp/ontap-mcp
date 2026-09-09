@@ -74,6 +74,7 @@ type App struct {
 
 type cachedVersion struct {
 	version string
+	model   string
 	fetched time.Time
 }
 
@@ -480,6 +481,7 @@ func (a *App) runHTTPServer(server *mcp.Server) {
 type clusterInfo struct {
 	Name         string `json:"name"`
 	ONTAPVersion string `json:"ontap_version"`
+	Model        string `json:"model"`
 }
 
 func (a *App) resolveCluster(input string) (string, bool) {
@@ -487,30 +489,31 @@ func (a *App) resolveCluster(input string) (string, bool) {
 	return canonical, ok
 }
 
-func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, error) {
+func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, string, error) {
 	canonical, ok := a.resolveCluster(cluster)
 	if !ok {
-		return "", fmt.Errorf("cluster %s not found", cluster)
+		return "", "", fmt.Errorf("cluster %s not found", cluster)
 	}
 
 	if cached, ok := a.versionCache.Load(canonical); ok {
 		cv := cached.(cachedVersion)
 		if time.Since(cv.fetched) < versionCacheTTL {
-			return cv.version, nil
+			return cv.version, cv.model, nil
 		}
 	}
 
 	client, err := a.getClient(cluster)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	remote, err := client.GetClusterInfo(ctx)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	ver := fmt.Sprintf("%d.%d", remote.Version.Generation, remote.Version.Major)
-	a.versionCache.Store(canonical, cachedVersion{version: ver, fetched: time.Now()})
-	return ver, nil
+	model := remote.Model
+	a.versionCache.Store(canonical, cachedVersion{version: ver, model: model, fetched: time.Now()})
+	return ver, model, nil
 }
 
 func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.ListClusterParams) (*mcp.CallToolResult, any, error) {
@@ -519,13 +522,13 @@ func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.L
 
 	infos := make([]clusterInfo, 0, len(clusters))
 	for _, name := range clusters {
-		ver, err := a.getClusterVersion(ctx, name)
+		ver, model, err := a.getClusterVersion(ctx, name)
 		if err != nil {
 			a.logger.Warn("failed to fetch cluster info", slog.String("cluster", name), slog.String("error", err.Error()))
 			infos = append(infos, clusterInfo{Name: name})
 			continue
 		}
-		infos = append(infos, clusterInfo{Name: name, ONTAPVersion: ver})
+		infos = append(infos, clusterInfo{Name: name, ONTAPVersion: ver, Model: model})
 	}
 
 	data, err := json.Marshal(infos)
@@ -591,7 +594,7 @@ func (a *App) DescribeOntapEndpoint(ctx context.Context, _ *mcp.CallToolRequest,
 
 	var versionNote string
 	if p.Cluster != "" {
-		if ontapVer, err := a.getClusterVersion(ctx, p.Cluster); err == nil {
+		if ontapVer, _, err := a.getClusterVersion(ctx, p.Cluster); err == nil {
 			ep = ep.FilterByVersion(ontapVer)
 			versionNote = ", filtered for ONTAP " + ontapVer
 		}
@@ -715,7 +718,7 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 		params.Set("max_records", strconv.Itoa(p.MaxRecords))
 	}
 	// ignore_unknown_fields was introduced in ONTAP 9.11. skip for older clusters.
-	if ver, err := a.getClusterVersion(ctx, p.Cluster); err != nil || catalog.CompareVersions(ver, "9.11") >= 0 {
+	if ver, _, err := a.getClusterVersion(ctx, p.Cluster); err != nil || catalog.CompareVersions(ver, "9.11") >= 0 {
 		params.Set("ignore_unknown_fields", "true")
 	}
 
