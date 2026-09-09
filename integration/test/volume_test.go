@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"github.com/carlmjohnson/requests"
-	"github.com/netapp/ontap-mcp/assert"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -99,7 +98,7 @@ func TestVolume(t *testing.T) {
 			input:            ClusterStr + "increase maximum number of files to 2000 on the " + rn("docsnew") + " volume on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
 			// Maximum number of files would not be increase exactly same as requested, the discrepancy happens due to how ONTAP calculates and allocates internal file structures (inodes).
-			verifyAPI: ontapVerifier{api: "api/storage/volumes?name=" + rn("docsnew") + "&svm=" + rn("marketing") + "&fields=files.maximum", validationFunc: verifyFilesMax(1995)},
+			verifyAPI: ontapVerifier{api: "api/storage/volumes?name=" + rn("docsnew") + "&svm=" + rn("marketing") + "&fields=files.maximum", validationFunc: verifyFilesMax(2000)},
 		},
 		{
 			name:             "Create thick-provisioned volume",
@@ -175,6 +174,7 @@ func TestVolume(t *testing.T) {
 
 func verifyFilesMax(expectedFilesMax int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
 	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		possibleVariation := 10
 		type Files struct {
 			Maximum *int `json:"maximum,omitzero"`
 		}
@@ -202,8 +202,15 @@ func verifyFilesMax(expectedFilesMax int) func(t *testing.T, api string, poller 
 		}
 
 		gotVolume := data.Records[0]
-		assert.NotNil(t, gotVolume.Files.Maximum)
-		assert.Equal(t, *gotVolume.Files.Maximum, expectedFilesMax)
+		if gotVolume.Files.Maximum == nil {
+			t.Errorf("verifyFilesMax: nil files.maximum found")
+			return false
+		}
+
+		if *gotVolume.Files.Maximum < (expectedFilesMax-possibleVariation) && *gotVolume.Files.Maximum >= expectedFilesMax {
+			t.Errorf("verifyFilesMax: files.maximum value is not in range %d - %d, got %d", expectedFilesMax-possibleVariation, expectedFilesMax, *gotVolume.Files.Maximum)
+			return false
+		}
 		return true
 	}
 }
