@@ -440,6 +440,7 @@ type SnapMirrorRelationship struct {
 
 const (
 	ASAr2 = "asar2"
+	AFX   = "afx"
 	CDOT  = "cdot"
 )
 
@@ -474,16 +475,4 @@ type Remote struct {
 
 func (r Remote) IsZero() bool {
 	return r.Name == "" && r.Model == "" && r.UUID == ""
-}
-
-func (r Remote) IsKeyPerf() bool {
-	return r.IsDisaggregated
-}
-
-func (r Remote) IsAFX() bool {
-	return r.IsDisaggregated && !r.IsSanOptimized
-}
-
-func (r Remote) IsASAr2() bool {
-	return r.Model == ASAr2
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -14,10 +15,10 @@ import (
 
 func TestVolume(t *testing.T) {
 	SkipIfMissing(t, CheckTools)
-
 	tests := []struct {
 		name             string
 		input            string
+		afxInput         string
 		expectedOntapErr string
 		verifyAPI        ontapVerifier
 	}{
@@ -47,7 +48,7 @@ func TestVolume(t *testing.T) {
 		},
 		{
 			name:             "Create volume",
-			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate",
+			input:            ClusterStr + "create a 20MB volume named " + rn("docs") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("docs") + "&svm=" + rn("marketing"), validationFunc: createObject},
 		},
@@ -102,7 +103,8 @@ func TestVolume(t *testing.T) {
 		},
 		{
 			name:             "Create thick-provisioned volume",
-			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and the harvest_vc_aggr aggregate with space guarantee type volume and snapshot reserve 5 percent",
+			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required with space guarantee type volume and snapshot reserve 5 percent",
+			afxInput:         ClusterStr + "create a 50MB volume named " + rn("thick") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required with snapshot reserve 5 percent",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/volumes?name=" + rn("thick") + "&svm=" + rn("marketing"), validationFunc: createObject},
 		},
@@ -156,9 +158,13 @@ func TestVolume(t *testing.T) {
 		},
 	}
 	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
+	model := fetchModel("api/cluster?fields=san_optimized,disaggregated", poller, client)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if model == ontap.AFX && tt.afxInput != "" {
+				tt.input = tt.afxInput
+			}
 			slog.Debug("", slog.String("Input", tt.input))
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
@@ -169,6 +175,34 @@ func TestVolume(t *testing.T) {
 				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 		})
+	}
+}
+
+func fetchModel(api string, poller *config.Poller, client *http.Client) string {
+	type response struct {
+		Name          string `json:"name"`
+		SanOptimized  bool   `json:"san_optimized"`
+		Disaggregated bool   `json:"disaggregated"`
+	}
+
+	var data response
+	err := requests.URL("https://"+poller.Addr+"/"+api).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		slog.Warn("fetchModel: request failed", slog.String("err", err.Error()))
+		return ontap.CDOT
+	}
+
+	switch {
+	case data.Disaggregated && data.SanOptimized:
+		return ontap.ASAr2
+	case data.Disaggregated && !data.SanOptimized:
+		return ontap.AFX
+	default:
+		return ontap.CDOT
 	}
 }
 
