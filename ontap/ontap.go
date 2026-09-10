@@ -59,6 +59,7 @@ type GetData struct {
 		Schedule NameAndUUID  `json:"schedule,omitzero"`
 		Lun      NameAndUUID  `json:"lun,omitzero"`
 		IGroup   NameAndUUID  `json:"igroup,omitzero"`
+		IP       IP           `json:"ip,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -431,6 +432,19 @@ type SnapMirrorRelationship struct {
 	Policy           NameAndUUID        `json:"policy,omitzero"`
 	TransferSchedule NameAndUUID        `json:"transfer_schedule,omitzero"`
 	State            string             `json:"state,omitzero"` // enum: broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding
+}
+
+type ClusterPeer struct {
+	RemotePeer     RemotePeer     `json:"remote" jsonschema:"remote cluster peer lifs detail"`
+	Authentication Authentication `json:"authentication" jsonschema:"authentication"`
+}
+
+type RemotePeer struct {
+	IPaddresses []string `json:"ip_addresses" jsonschema:"inter remote cluster LIFs addresses for cluster peer"`
+}
+
+type Authentication struct {
+	Passphrase string `json:"passphrase" jsonschema:"passphrase"`
 }
 
 const (
