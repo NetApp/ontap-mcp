@@ -95,6 +95,13 @@ func TestVolume(t *testing.T) {
 			verifyAPI:        ontapVerifier{},
 		},
 		{
+			name:             "Update volume files maximum",
+			input:            ClusterStr + "increase maximum number of files to 2000 on the " + rn("docsnew") + " volume on the " + rn("marketing") + " svm",
+			expectedOntapErr: "",
+			// Maximum number of files would not be increase exactly same as requested, the discrepancy happens due to how ONTAP calculates and allocates internal file structures (inodes).
+			verifyAPI: ontapVerifier{api: "api/storage/volumes?name=" + rn("docsnew") + "&svm=" + rn("marketing") + "&fields=files.maximum", validationFunc: verifyFilesMax(2000)},
+		},
+		{
 			name:             "Create thick-provisioned volume",
 			input:            ClusterStr + "create a 50MB thick-provisioned volume named " + rn("thick") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required with space guarantee type volume and snapshot reserve 5 percent",
 			afxInput:         ClusterStr + "create a 50MB volume named " + rn("thick") + " on the " + rn("marketing") + " svm and use harvest_vc_aggr aggregate if required with snapshot reserve 5 percent",
@@ -196,5 +203,48 @@ func fetchModel(api string, poller *config.Poller, client *http.Client) string {
 		return ontap.AFX
 	default:
 		return ontap.CDOT
+	}
+}
+
+func verifyFilesMax(expectedFilesMax int) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		possibleVariation := 10
+		type Files struct {
+			Maximum *int `json:"maximum,omitzero"`
+		}
+		type Volume struct {
+			Files Files `json:"files,omitzero"`
+		}
+		type response struct {
+			NumRecords int      `json:"num_records"`
+			Records    []Volume `json:"records"`
+		}
+
+		var data response
+		err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background())
+		if err != nil {
+			t.Errorf("verifyFilesMax: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyFilesMax: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+
+		gotVolume := data.Records[0]
+		if gotVolume.Files.Maximum == nil {
+			t.Errorf("verifyFilesMax: nil files.maximum found")
+			return false
+		}
+
+		if v := *gotVolume.Files.Maximum; v < (expectedFilesMax-possibleVariation) || v >= expectedFilesMax {
+			t.Errorf("verifyFilesMax: files.maximum value is not in range %d - %d, got %d", expectedFilesMax-possibleVariation, expectedFilesMax, v)
+			return false
+		}
+		return true
 	}
 }

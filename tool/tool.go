@@ -63,6 +63,7 @@ type VolumeUpdate struct {
 	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name"`
 	Autosize               Autosize         `json:"autosize,omitzero" jsonschema:"autosize"`
+	FilesMaximum           *int             `json:"files.maximum,omitzero" jsonschema:"maximum number of files (inodes) for user-visible data allowed on the volume"`
 	QoS                    VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings"`
 	GuaranteeType          string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
 	SnapshotPolicyName     string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
