@@ -1060,7 +1060,7 @@
 <li><code>list_registered_clusters</code></li>
 </ul>
 <h1 id="tool-mode">Tool Mode<a class="headerlink" href="#tool-mode" title="Permanent link">&para;</a></h1>
-<p>The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the <code>--tool-mode</code> flag (default: <code>legacy</code>; env: <code>TOOL_MODE</code>):</p>
+<p>The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the <code>--tool-mode</code> flag (default: <code>multiplex</code>; env: <code>TOOL_MODE</code>):</p>
 <table>
 <thead>
 <tr>
@@ -1071,11 +1071,11 @@
 <tbody>
 <tr>
 <td><code>legacy</code></td>
-<td>Registers separate <code>update_*</code> and <code>delete_*</code> tools for each resource type. This is the default.</td>
+<td>Registers separate <code>update_*</code> and <code>delete_*</code> tools for each resource type.</td>
 </tr>
 <tr>
 <td><code>multiplex</code></td>
-<td>Registers a single <code>modify_*</code> tool per resource type that handles both update and delete in one call.</td>
+<td>Registers a single <code>modify_*</code> tool per resource type that handles both update and delete in one call. This is the default.</td>
 </tr>
 <tr>
 <td><code>both</code></td>
