@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/tool"
+	"strings"
 )
 
 func (a *App) CreateClusterPeer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.ClusterPeer) (*mcp.CallToolResult, any, error) {
@@ -29,7 +30,14 @@ func (a *App) CreateClusterPeer(ctx context.Context, _ *mcp.CallToolRequest, par
 
 	err = sourceClient.CreateClusterPeer(ctx, destinationClient, parameters.SourceCluster, parameters.DestinationCluster)
 	if err != nil {
-		return errorResult(err), nil, err
+		if !strings.Contains(err.Error(), "code: 4653075") {
+			return errorResult(err), nil, err
+		}
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: "cluster peer relationship already exists"},
+			},
+		}, nil, nil
 	}
 
 	return &mcp.CallToolResult{

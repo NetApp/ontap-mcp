@@ -5,10 +5,9 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
-
-	"github.com/netapp/ontap-mcp/ontap"
 )
 
 func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Client, sourceCluster, destinationCluster string) error {
@@ -79,7 +78,8 @@ func (c *Client) managePassphrase(ctx context.Context, clusterPeer ontap.Cluster
 	)
 	responseHeaders := http.Header{}
 	builder := c.baseRequestBuilder(`/api/cluster/peers`, &statusCode, responseHeaders).
-		BodyJSON(clusterPeer)
+		BodyJSON(clusterPeer).
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
@@ -113,6 +113,7 @@ func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Clien
 func (c *Client) removeClusterPeer(ctx context.Context, remoteClusterName string) error {
 	var (
 		statusCode int
+		buf        bytes.Buffer
 		cp         ontap.GetData
 	)
 	responseHeaders := http.Header{}
@@ -137,13 +138,14 @@ func (c *Client) removeClusterPeer(ctx context.Context, remoteClusterName string
 
 	cpUUID := cp.Records[0].UUID
 	builder = c.baseRequestBuilder(`/api/cluster/peers/`+url.PathEscape(cpUUID), &statusCode, responseHeaders).
-		Delete()
+		Delete().
+		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
-	return c.checkStatus(statusCode)
+	return c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) fetchClusterName(ctx context.Context) (string, error) {

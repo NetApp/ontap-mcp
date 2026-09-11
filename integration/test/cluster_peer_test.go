@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"github.com/carlmjohnson/requests"
+	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -13,10 +15,32 @@ import (
 )
 
 func TestClusterPeer(t *testing.T) {
-	SourceCluster := "aff"
+	SourceCluster := "umeng-aff300-05-06"
 	SourceClusterStr := "On the " + SourceCluster + " cluster, "
-	DestinationCluster := "umeng-aff300-05-06"
+	DestinationCluster := "aff"
 	SkipIfMissing(t, CheckTools)
+
+	cfg, err := config.ReadConfig(ConfigFile)
+	if err != nil {
+		t.Fatalf("Error parsing the config: %v", err)
+	}
+
+	sourcePoller := cfg.Pollers[SourceCluster]
+	sourceTransport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: sourcePoller.InsecureTLS(), // #nosec G402
+		},
+	}
+	sourceClient := &http.Client{Transport: sourceTransport, Timeout: 10 * time.Second}
+
+	destinationPoller := cfg.Pollers[DestinationCluster]
+	destinationTransport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: destinationPoller.InsecureTLS(), // #nosec G402
+		},
+	}
+	destinationClient := &http.Client{Transport: destinationTransport, Timeout: 10 * time.Second}
+
 	tests := []struct {
 		name             string
 		input            string
@@ -28,34 +52,21 @@ func TestClusterPeer(t *testing.T) {
 			name:             "Remove cluster peer",
 			input:            SourceClusterStr + "remove cluster peer relationship with " + DestinationCluster + " cluster",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/cluster/peers?remote.name=" + DestinationCluster + "&fields=status.state", validationFunc: verifyClusterPeer(false)},
+			verifyAPI:        ontapVerifier{api: "api/cluster/peers?fields=status.state&remote.name=", validationFunc: verifyClusterPeer(false, destinationPoller, destinationClient)},
 		},
 		{
 			name:             "Create cluster peer",
 			input:            SourceClusterStr + "create cluster peer relationship with " + DestinationCluster + " cluster",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/cluster/peers?remote.name=" + DestinationCluster + "&fields=status.state", validationFunc: verifyClusterPeer(true)},
+			verifyAPI:        ontapVerifier{api: "api/cluster/peers?fields=status.state&remote.name=", validationFunc: verifyClusterPeer(true, destinationPoller, destinationClient)},
 		},
 		{
 			name:             "Remove cluster peer",
 			input:            SourceClusterStr + "remove cluster peer relationship with " + DestinationCluster + " cluster",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/cluster/peers?remote.name=" + DestinationCluster + "&fields=status.state", validationFunc: verifyClusterPeer(false)},
+			verifyAPI:        ontapVerifier{api: "api/cluster/peers?fields=status.state&remote.name=", validationFunc: verifyClusterPeer(false, destinationPoller, destinationClient)},
 		},
 	}
-
-	cfg, err := config.ReadConfig(ConfigFile)
-	if err != nil {
-		t.Fatalf("Error parsing the config: %v", err)
-	}
-
-	poller := cfg.Pollers[SourceCluster]
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: poller.InsecureTLS(), // #nosec G402
-		},
-	}
-	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -65,15 +76,30 @@ func TestClusterPeer(t *testing.T) {
 			if _, err := testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
 				t.Fatalf("Error processing input %q: %v", tt.input, err)
 			}
-			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
+			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, sourcePoller, sourceClient) {
 				t.Errorf("Error while accessing the object via prompt %q", tt.input)
 			}
 		})
 	}
 }
 
-func verifyClusterPeer(exist bool) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
-	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+func verifyClusterPeer(exist bool, destinationPoller *config.Poller, destinationClient *http.Client) func(t *testing.T, api string, sourcePoller *config.Poller, sourceClient *http.Client) bool {
+	return func(t *testing.T, api string, sourcePoller *config.Poller, sourceClient *http.Client) bool {
+		var (
+			cl ontap.Cluster
+		)
+		params := url.Values{}
+		params.Set("fields", "name")
+		if err := requests.URL("https://"+destinationPoller.Addr+"/api/cluster").
+			BasicAuth(destinationPoller.Username, destinationPoller.Password).
+			Params(params).
+			Client(destinationClient).
+			ToJSON(&cl).
+			Fetch(context.Background()); err != nil {
+			t.Errorf("verifyClusterPeer: request failed: %v", err)
+			return false
+		}
+
 		// Cluster requires some time to reach the state value to available for cluster peer operation
 		time.Sleep(10 * time.Second)
 		type Status struct {
@@ -88,9 +114,9 @@ func verifyClusterPeer(exist bool) func(t *testing.T, api string, poller *config
 		}
 
 		var data response
-		err := requests.URL("https://"+poller.Addr+"/"+api).
-			BasicAuth(poller.Username, poller.Password).
-			Client(client).
+		err := requests.URL("https://"+sourcePoller.Addr+"/"+api+cl.Name).
+			BasicAuth(sourcePoller.Username, sourcePoller.Password).
+			Client(sourceClient).
 			ToJSON(&data).
 			Fetch(context.Background())
 		if err != nil {
