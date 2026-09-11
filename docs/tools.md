@@ -21,7 +21,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 ## Volume Management
 
-- `create_volume`
+- `create_volume` — FlexVol by default (`aggregate_name` on CDOT; omit on AFX). FlexGroup on Unified NAS (AFF/FAS) when `style=flexgroup` with `aggregate_names` (optional `constituents_per_aggregate`, `optimize_aggr_list`, `granular_data`). Not used to provision ASA r2 (storage units); FlexGroup is not supported on classic ASA.
 - `update_volume`
 - `delete_volume`
 

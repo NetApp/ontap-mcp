@@ -134,21 +134,25 @@ type VolumeQoS struct {
 }
 
 type Volume struct {
-	SVM            NameAndUUID          `json:"svm,omitzero"`
-	Name           string               `json:"name,omitzero"`
-	Aggregates     []NameAndUUID        `json:"aggregates,omitzero"`
-	Files          Files                `json:"files,omitzero"`
-	State          string               `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
-	Style          string               `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
-	Size           int64                `json:"size,omitempty"`
-	Nas            NAS                  `json:"nas,omitzero"`
-	Autosize       Autosize             `json:"autosize,omitzero"`
-	Guarantee      VolumeGuarantee      `json:"guarantee,omitzero"`
-	SnapshotPolicy VolumeSnapshotPolicy `json:"snapshot_policy,omitzero"`
-	Space          VolumeSpace          `json:"space,omitzero"`
-	Efficiency     VolumeEfficiency     `json:"efficiency,omitzero"`
-	QoS            VolumeQoS            `json:"qos,omitzero"`
-	Type           string               `json:"type,omitzero"` // enum: rw, dp, ls
+	SVM                      NameAndUUID          `json:"svm,omitzero"`
+	Name                     string               `json:"name,omitzero"`
+	Aggregates               []NameAndUUID        `json:"aggregates,omitzero"`
+	Files                    Files                `json:"files,omitzero"`
+	State                    string               `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
+	Style                    string               `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
+	Size                     int64                `json:"size,omitempty"`
+	Nas                      NAS                  `json:"nas,omitzero"`
+	Autosize                 Autosize             `json:"autosize,omitzero"`
+	Guarantee                VolumeGuarantee      `json:"guarantee,omitzero"`
+	SnapshotPolicy           VolumeSnapshotPolicy `json:"snapshot_policy,omitzero"`
+	Space                    VolumeSpace          `json:"space,omitzero"`
+	Efficiency               VolumeEfficiency     `json:"efficiency,omitzero"`
+	QoS                      VolumeQoS            `json:"qos,omitzero"`
+	Type                     string               `json:"type,omitzero"` // enum: rw, dp, ls
+	ConstituentsPerAggregate *int                 `json:"constituents_per_aggregate,omitzero"`
+	OptimizeAggregates       *bool                `json:"optimize_aggregates,omitzero"`
+	GranularData             *bool                `json:"granular_data,omitzero"`
+	GranularDataMode         string               `json:"granular_data_mode,omitempty"`
 }
 
 type NameAndUUID struct {

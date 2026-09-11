@@ -30,7 +30,15 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
 	}
 
-	volumeCreate, err := newCreateVolume(parameters, model)
+	remote := ontap.Remote{Model: model}
+	if info, err := client.Remote(ctx); err == nil && !info.IsZero() {
+		remote = info
+		if remote.Model == "" {
+			remote.Model = model
+		}
+	}
+
+	volumeCreate, err := newCreateVolumeRemote(parameters, remote)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
@@ -289,8 +297,13 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 }
 
 // newCreateVolume validates the customer provided arguments and converts them into
-// the corresponding ONTAP object ready to use via the REST API
+// the corresponding ONTAP object ready to use via the REST API.
+// model is ontap.CDOT, ontap.AFX, ontap.ASAr2, or empty (treated as CDOT).
 func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
+	return newCreateVolumeRemote(in, ontap.Remote{Model: model})
+}
+
+func newCreateVolumeRemote(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, error) {
 	out := ontap.Volume{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -298,22 +311,67 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
 	}
-	switch model {
-	case ontap.ASAr2:
+
+	model := remote.Model
+	if model == ontap.ASAr2 {
 		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
-	case ontap.AFX:
-		if in.Aggregate != "" {
-			return out, errors.New("aggregate name must not be provided for AFX clusters")
-		}
-		if in.GuaranteeType != "" {
-			return out, errors.New("space guarantee type must not be provided for AFX clusters")
-		}
+	}
+
+	style := strings.ToLower(strings.TrimSpace(in.Style))
+	switch style {
+	case "", "flexvol", "flexgroup":
+	case "flexgroup_constituent":
+		return out, errors.New("style flexgroup_constituent is not supported when creating a volume")
 	default:
-		if in.Aggregate == "" {
-			return out, errors.New("aggregate name is required")
+		return out, fmt.Errorf("unsupported volume style %q; use flexvol or flexgroup", in.Style)
+	}
+
+	isFlexGroup := style == "flexgroup"
+	if !isFlexGroup && hasFlexGroupPlacementFields(in) {
+		return out, errors.New("aggregate_names, constituents_per_aggregate, optimize_aggr_list, and granular_data are only valid when style is flexgroup")
+	}
+	if in.Aggregate != "" && len(in.AggregateNames) > 0 {
+		return out, errors.New("cannot set both aggregate_name and aggregate_names")
+	}
+
+	if isFlexGroup {
+		if model == ontap.AFX {
+			return out, errors.New("AFX volume placement omits aggregates; do not set style, aggregate_names, constituents_per_aggregate, optimize_aggr_list, or granular_data")
 		}
-		out.Aggregates = []ontap.NameAndUUID{
-			{Name: in.Aggregate},
+		if remote.IsSanOptimized {
+			return out, errors.New("FlexGroup is not supported on All SAN Arrays")
+		}
+		if len(in.AggregateNames) == 0 {
+			return out, errors.New("aggregate_names is required when style is flexgroup")
+		}
+		out.Style = "flexgroup"
+		out.Aggregates = make([]ontap.NameAndUUID, 0, len(in.AggregateNames))
+		for _, name := range in.AggregateNames {
+			out.Aggregates = append(out.Aggregates, ontap.NameAndUUID{Name: name})
+		}
+		out.ConstituentsPerAggregate = in.ConstituentsPerAggregate
+		if in.OptimizeAggrList != nil && *in.OptimizeAggrList {
+			out.OptimizeAggregates = in.OptimizeAggrList
+		}
+		if err := applyGranularData(&out, in.GranularData); err != nil {
+			return out, err
+		}
+	} else {
+		switch model {
+		case ontap.AFX:
+			if in.Aggregate != "" {
+				return out, errors.New("aggregate name must not be provided for AFX clusters")
+			}
+			if in.GuaranteeType != "" {
+				return out, errors.New("space guarantee type must not be provided for AFX clusters")
+			}
+		default:
+			if in.Aggregate == "" {
+				return out, errors.New("aggregate name is required")
+			}
+			out.Aggregates = []ontap.NameAndUUID{
+				{Name: in.Aggregate},
+			}
 		}
 	}
 
@@ -384,6 +442,24 @@ func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
 	}
 
 	return out, nil
+}
+
+func hasFlexGroupPlacementFields(in tool.VolumeCreate) bool {
+	return len(in.AggregateNames) > 0 || in.ConstituentsPerAggregate != nil || in.OptimizeAggrList != nil || strings.TrimSpace(in.GranularData) != ""
+}
+
+func applyGranularData(out *ontap.Volume, mode string) error {
+	switch strings.ToLower(strings.TrimSpace(mode)) {
+	case "", "disabled":
+		return nil
+	case "basic", "advanced":
+		enabled := true
+		out.GranularData = &enabled
+		out.GranularDataMode = strings.ToLower(strings.TrimSpace(mode))
+		return nil
+	default:
+		return fmt.Errorf("unsupported granular_data %q; use disabled, basic, or advanced", mode)
+	}
 }
 
 // newUpdateVolume validates the customer provided arguments and converts them into
