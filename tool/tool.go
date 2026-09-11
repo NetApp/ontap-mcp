@@ -8,19 +8,24 @@ type ListVolume struct {
 type ListClusterParams struct{}
 
 type VolumeCreate struct {
-	Cluster                string           `json:"cluster_name" jsonschema:"cluster name"`
-	SVM                    string           `json:"svm_name" jsonschema:"SVM name"`
-	Volume                 string           `json:"volume_name" jsonschema:"volume name"`
-	Aggregate              string           `json:"aggregate_name,omitzero" jsonschema:"aggregate name. required for CDOT cluster, must be omitted for AFX cluster"`
-	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
-	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
-	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
-	QoS                    VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
-	Type                   string           `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
-	GuaranteeType          string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
-	SnapshotPolicyName     string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
-	SnapshotReservePercent *int             `json:"space.snapshot.reserve_percent,omitzero" jsonschema:"percentage of volume space reserved for snapshots (e.g., 5)"`
-	Efficiency             VolumeEfficiency `json:"efficiency,omitzero" jsonschema:"volume storage efficiency settings"`
+	Cluster                  string           `json:"cluster_name" jsonschema:"cluster name"`
+	SVM                      string           `json:"svm_name" jsonschema:"SVM name"`
+	Volume                   string           `json:"volume_name" jsonschema:"volume name"`
+	Aggregate                string           `json:"aggregate_name,omitzero" jsonschema:"aggregate name. required for FlexVol on CDOT; must be omitted for AFX; do not set with aggregate_names"`
+	Style                    string           `json:"style,omitzero" jsonschema:"volume style: flexvol (default) or flexgroup. FlexGroup is Unified NAS (AFF/FAS) only"`
+	AggregateNames           []string         `json:"aggregate_names,omitzero" jsonschema:"list of aggregate names; required when style is flexgroup"`
+	ConstituentsPerAggregate *int             `json:"constituents_per_aggregate,omitzero" jsonschema:"FlexGroup constituents per aggregate; optional when style is flexgroup"`
+	OptimizeAggrList         *bool            `json:"optimize_aggr_list,omitzero" jsonschema:"when true, ONTAP may reorder FlexGroup aggregates; default false preserves caller order"`
+	GranularData             string           `json:"granular_data,omitzero" jsonschema:"FlexGroup granular data mode: disabled (default), basic, or advanced"`
+	JunctionPath             string           `json:"nas.path,omitzero" jsonschema:"junction path"`
+	Size                     string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	ExportPolicy             string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
+	QoS                      VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
+	Type                     string           `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
+	GuaranteeType            string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
+	SnapshotPolicyName       string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
+	SnapshotReservePercent   *int             `json:"space.snapshot.reserve_percent,omitzero" jsonschema:"percentage of volume space reserved for snapshots (e.g., 5)"`
+	Efficiency               VolumeEfficiency `json:"efficiency,omitzero" jsonschema:"volume storage efficiency settings"`
 }
 
 type Volume struct {
