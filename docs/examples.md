@@ -343,6 +343,13 @@ Below are example questions that work well with the ONTAP MCP Server:
 - On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate
 - <span class="key">Expected Response</span>: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
 
+**Create a FlexGroup Volume**
+
+- On the umeng-aff300-05-06 cluster, create a 400MB FlexGroup volume named fgdocs on the marketing svm using aggregates harvest_vc_aggr1 and harvest_vc_aggr2 with 2 constituents per aggregate and junction path /fgdocs
+- <span class="key">Expected Response</span>: Volume created successfully
+
+FlexGroup create is for Unified NAS (AFF/FAS) only. Classic ASA rejects FlexGroup. AFX volume placement omits aggregates. ASA r2 does not provision volumes with `create_volume`.
+
 **Resize a Volume**
 
 - On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.
