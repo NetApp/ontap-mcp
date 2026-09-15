@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Client, sourceCluster, destinationCluster string) error {
@@ -27,14 +29,13 @@ func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Clien
 
 	// Step3: Generate passphrase in source cluster with destination LIFs
 	cp := ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: destinationLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
-	if err := c.managePassphrase(ctx, cp); err != nil {
-		return err
-	}
+	err1 := c.managePassphrase(ctx, cp)
 
 	// Step4: Approve passphrase in destination cluster with source LIFs
 	cp = ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: sourceLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
-	if err := destinationClient.managePassphrase(ctx, cp); err != nil {
-		return err
+	err2 := destinationClient.managePassphrase(ctx, cp)
+	if err1 != nil || err2 != nil {
+		return errors.Join(err1, err2)
 	}
 	return nil
 }
@@ -82,7 +83,11 @@ func (c *Client) managePassphrase(ctx context.Context, clusterPeer ontap.Cluster
 		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
+		if !strings.Contains(err.Error(), "4653075") {
+			return err
+		}
+		fmt.Println("cluster peer relationship already exists")
+		return nil
 	}
 	return c.handleJob(ctx, statusCode, &buf)
 }
@@ -99,13 +104,12 @@ func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Clien
 	}
 
 	// Step2: delete cluster peer from source cluster
-	if err := c.removeClusterPeer(ctx, destinationClusterName); err != nil {
-		return err
-	}
+	err1 := c.removeClusterPeer(ctx, destinationClusterName)
 
 	// Step3: delete cluster peer from destination cluster
-	if err := destinationClient.removeClusterPeer(ctx, sourceClusterName); err != nil {
-		return err
+	err2 := destinationClient.removeClusterPeer(ctx, sourceClusterName)
+	if err1 != nil || err2 != nil {
+		return errors.Join(err1, err2)
 	}
 	return nil
 }

@@ -85,60 +85,78 @@ func TestClusterPeer(t *testing.T) {
 
 func verifyClusterPeer(exist bool, destinationPoller *config.Poller, destinationClient *http.Client) func(t *testing.T, api string, sourcePoller *config.Poller, sourceClient *http.Client) bool {
 	return func(t *testing.T, api string, sourcePoller *config.Poller, sourceClient *http.Client) bool {
-		var (
-			cl ontap.Cluster
-		)
-		params := url.Values{}
-		params.Set("fields", "name")
-		if err := requests.URL("https://"+destinationPoller.Addr+"/api/cluster").
-			BasicAuth(destinationPoller.Username, destinationPoller.Password).
-			Params(params).
-			Client(destinationClient).
-			ToJSON(&cl).
-			Fetch(context.Background()); err != nil {
+		destinationClusterName, err := getClusterName(t, destinationPoller, destinationClient)
+		if err != nil {
+			t.Errorf("verifyClusterPeer: request failed: %v", err)
+			return false
+		}
+		sourceClusterName, err := getClusterName(t, sourcePoller, sourceClient)
+		if err != nil {
 			t.Errorf("verifyClusterPeer: request failed: %v", err)
 			return false
 		}
 
 		// Cluster requires some time to reach the state value to available for cluster peer operation
 		time.Sleep(10 * time.Second)
-		type Status struct {
-			State string `json:"state"`
-		}
-		type ClusterPeer struct {
-			Status Status `json:"status"`
-		}
-		type response struct {
-			NumRecords int           `json:"num_records"`
-			Records    []ClusterPeer `json:"records"`
-		}
-
-		var data response
-		err := requests.URL("https://"+sourcePoller.Addr+"/"+api+cl.Name).
-			BasicAuth(sourcePoller.Username, sourcePoller.Password).
-			Client(sourceClient).
-			ToJSON(&data).
-			Fetch(context.Background())
-		if err != nil {
-			t.Errorf("verifyClusterPeer: request failed: %v", err)
-			return false
-		}
-
-		if exist {
-			if data.NumRecords != 1 {
-				t.Errorf("verifyClusterPeer: expected 1 record, got %d", data.NumRecords)
-				return false
-			}
-
-			gotClusterPeer := data.Records[0]
-			if gotClusterPeer.Status.State != "available" {
-				t.Errorf("verifyClusterPeer: got state = %s, want %s", gotClusterPeer.Status.State, "available")
-				return false
-			}
-		} else if data.NumRecords > 0 {
-			t.Errorf("verifyClusterPeer: expected 0 record, got %d", data.NumRecords)
-			return false
-		}
-		return true
+		return validatePeer(t, exist, sourcePoller, sourceClient, api+destinationClusterName) && validatePeer(t, exist, destinationPoller, destinationClient, api+sourceClusterName)
 	}
+}
+
+func getClusterName(t *testing.T, poller *config.Poller, client *http.Client) (string, error) {
+	var (
+		cl ontap.Cluster
+	)
+	params := url.Values{}
+	params.Set("fields", "name")
+	if err := requests.URL("https://"+poller.Addr+"/api/cluster").
+		BasicAuth(poller.Username, poller.Password).
+		Params(params).
+		Client(client).
+		ToJSON(&cl).
+		Fetch(context.Background()); err != nil {
+		t.Errorf("verifyClusterPeer: request failed: %v", err)
+		return "", err
+	}
+	return cl.Name, nil
+}
+
+func validatePeer(t *testing.T, exist bool, poller *config.Poller, client *http.Client, destinationPath string) bool {
+	type Status struct {
+		State string `json:"state"`
+	}
+	type ClusterPeer struct {
+		Status Status `json:"status"`
+	}
+	type response struct {
+		NumRecords int           `json:"num_records"`
+		Records    []ClusterPeer `json:"records"`
+	}
+
+	var data response
+	err := requests.URL("https://"+poller.Addr+"/"+destinationPath).
+		BasicAuth(poller.Username, poller.Password).
+		Client(client).
+		ToJSON(&data).
+		Fetch(context.Background())
+	if err != nil {
+		t.Errorf("verifyClusterPeer: request failed: %v", err)
+		return false
+	}
+
+	if exist {
+		if data.NumRecords != 1 {
+			t.Errorf("verifyClusterPeer: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+
+		gotClusterPeer := data.Records[0]
+		if gotClusterPeer.Status.State != "available" {
+			t.Errorf("verifyClusterPeer: got state = %s, want %s", gotClusterPeer.Status.State, "available")
+			return false
+		}
+	} else if data.NumRecords > 0 {
+		t.Errorf("verifyClusterPeer: expected 0 record, got %d", data.NumRecords)
+		return false
+	}
+	return true
 }
