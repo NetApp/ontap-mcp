@@ -411,6 +411,26 @@ Expected Response: SnapMirror relationship deleted successfully
 
 ---
 
+### Cluster Peering
+
+Both cluster names in these prompts are identifiers from the `Pollers` section of `ontap.yaml`. Both clusters must be registered with the same ONTAP MCP server and have intercluster LIFs configured.
+
+**Create a cluster peer relationship**
+
+- Create a cluster peer relationship between the sar source cluster and the aff destination cluster.
+- <span class="key">Expected Response</span>: cluster peer relationship created successfully
+
+The server discovers both clusters' intercluster LIFs and generates the authentication passphrase; do not include either in the prompt.
+
+**Delete a cluster peer relationship**
+
+- Delete the cluster peer relationship between the sar source cluster and the aff destination cluster.
+- <span class="key">Expected Response</span>: cluster peer relationship deleted successfully
+
+Deletion removes the relationship from both clusters.
+
+---
+
 ## MCP Clients
 
 Common MCP clients that work with ONTAP MCP Server:
