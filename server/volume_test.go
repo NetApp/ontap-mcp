@@ -112,10 +112,6 @@ func classicASA() ontap.Remote {
 	return ontap.Remote{Model: ontap.CDOT, IsSanOptimized: true}
 }
 
-func intPtr(v int) *int { return &v }
-
-func boolPtr(v bool) *bool { return &v }
-
 func marshalVolume(t *testing.T, v ontap.Volume) string {
 	t.Helper()
 	body, err := json.Marshal(v)
@@ -147,7 +143,7 @@ func TestCreateVolumeMapsFlexGroupWithTwoAggregates(t *testing.T) {
 		Volume:                   "fg1",
 		Style:                    "flexgroup",
 		AggregateNames:           []string{"aggr1", "aggr2"},
-		ConstituentsPerAggregate: intPtr(10),
+		ConstituentsPerAggregate: new(10),
 		Size:                     "1TB",
 		JunctionPath:             "/fg1",
 		GuaranteeType:            "none",
@@ -227,7 +223,7 @@ func TestCreateVolumeRejectsFlexGroupFieldsOnFlexVol(t *testing.T) {
 				SVM:                      "vs1",
 				Volume:                   "vol1",
 				Aggregate:                "aggr1",
-				ConstituentsPerAggregate: intPtr(4),
+				ConstituentsPerAggregate: new(4),
 			},
 		},
 		{
@@ -236,7 +232,7 @@ func TestCreateVolumeRejectsFlexGroupFieldsOnFlexVol(t *testing.T) {
 				SVM:              "vs1",
 				Volume:           "vol1",
 				Aggregate:        "aggr1",
-				OptimizeAggrList: boolPtr(true),
+				OptimizeAggrList: new(true),
 			},
 		},
 		{
@@ -276,7 +272,7 @@ func TestCreateVolumeOmitsOptimizeAggregatesUnlessTrue(t *testing.T) {
 	}
 
 	falseVal := base
-	falseVal.OptimizeAggrList = boolPtr(false)
+	falseVal.OptimizeAggrList = new(false)
 	gotFalse, err := newCreateVolume(falseVal, ontap.CDOT)
 	if err != nil {
 		t.Fatalf("optimize_aggr_list=false: %v", err)
@@ -286,7 +282,7 @@ func TestCreateVolumeOmitsOptimizeAggregatesUnlessTrue(t *testing.T) {
 	}
 
 	trueVal := base
-	trueVal.OptimizeAggrList = boolPtr(true)
+	trueVal.OptimizeAggrList = new(true)
 	gotTrue, err := newCreateVolume(trueVal, ontap.CDOT)
 	if err != nil {
 		t.Fatalf("optimize_aggr_list=true: %v", err)
