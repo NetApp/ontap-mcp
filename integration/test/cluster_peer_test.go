@@ -17,7 +17,7 @@ import (
 func TestClusterPeer(t *testing.T) {
 	SourceCluster := "umeng-aff300-05-06"
 	SourceClusterStr := "On the " + SourceCluster + " cluster, "
-	DestinationCluster := "aff"
+	DestinationCluster := "vsim"
 	SkipIfMissing(t, CheckTools)
 
 	cfg, err := config.ReadConfig(ConfigFile)

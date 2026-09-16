@@ -41,7 +41,11 @@ func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Clien
 		if err1 != nil {
 			return err1
 		}
-		if err2 := c.removeClusterPeer(ctx, destinationClusterName); err2 != nil {
+		destinationUUID, err1 := c.fetchClusterPeerUUID(ctx, destinationClusterName)
+		if err1 != nil {
+			return err1
+		}
+		if err2 := c.removeClusterPeer(ctx, destinationUUID); err2 != nil {
 			return err2
 		}
 		return err
@@ -120,7 +124,7 @@ func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Clien
 	err1 := c.removeClusterPeer(ctx, destinationUUID)
 
 	// Step3: delete cluster peer from destination cluster
-	sourceUUID, err := c.fetchClusterPeerUUID(ctx, sourceClusterName)
+	sourceUUID, err := destinationClient.fetchClusterPeerUUID(ctx, sourceClusterName)
 	if err != nil {
 		return err
 	}
