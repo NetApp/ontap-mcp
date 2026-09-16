@@ -29,13 +29,22 @@ func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Clien
 
 	// Step3: Generate passphrase in source cluster with destination LIFs
 	cp := ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: destinationLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
-	err1 := c.managePassphrase(ctx, cp)
+	if err := c.managePassphrase(ctx, cp); err != nil {
+		return err
+	}
 
 	// Step4: Approve passphrase in destination cluster with source LIFs
 	cp = ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: sourceLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
-	err2 := destinationClient.managePassphrase(ctx, cp)
-	if err1 != nil || err2 != nil {
-		return errors.Join(err1, err2)
+	if err := destinationClient.managePassphrase(ctx, cp); err != nil {
+		fmt.Println("failed to create cluster peer relationships in destination cluster, rolling back in source cluster")
+		destinationClusterName, err1 := destinationClient.fetchClusterName(ctx)
+		if err1 != nil {
+			return err1
+		}
+		if err2 := c.removeClusterPeer(ctx, destinationClusterName); err2 != nil {
+			return err2
+		}
+		return err
 	}
 	return nil
 }
@@ -104,44 +113,31 @@ func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Clien
 	}
 
 	// Step2: delete cluster peer from source cluster
-	err1 := c.removeClusterPeer(ctx, destinationClusterName)
+	destinationUUID, err := c.fetchClusterPeerUUID(ctx, destinationClusterName)
+	if err != nil {
+		return err
+	}
+	err1 := c.removeClusterPeer(ctx, destinationUUID)
 
 	// Step3: delete cluster peer from destination cluster
-	err2 := destinationClient.removeClusterPeer(ctx, sourceClusterName)
+	sourceUUID, err := c.fetchClusterPeerUUID(ctx, sourceClusterName)
+	if err != nil {
+		return err
+	}
+	err2 := destinationClient.removeClusterPeer(ctx, sourceUUID)
 	if err1 != nil || err2 != nil {
 		return errors.Join(err1, err2)
 	}
 	return nil
 }
 
-func (c *Client) removeClusterPeer(ctx context.Context, remoteClusterName string) error {
+func (c *Client) removeClusterPeer(ctx context.Context, cpUUID string) error {
 	var (
 		statusCode int
 		buf        bytes.Buffer
-		cp         ontap.GetData
 	)
 	responseHeaders := http.Header{}
-	params := url.Values{}
-	params.Set("fields", "uuid")
-	params.Set("remote.name", remoteClusterName)
-
-	builder := c.baseRequestBuilder(`/api/cluster/peers`, &statusCode, responseHeaders).
-		Params(params).
-		ToJSON(&cp)
-
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
-	}
-
-	if cp.NumRecords == 0 {
-		return fmt.Errorf("failed to find cluster peer relationships for remote cluster=%s because it does not exist", remoteClusterName)
-	}
-	if cp.NumRecords != 1 {
-		return fmt.Errorf("failed to find cluster peer relationships for remote cluster=%s because there are %d matching records", remoteClusterName, cp.NumRecords)
-	}
-
-	cpUUID := cp.Records[0].UUID
-	builder = c.baseRequestBuilder(`/api/cluster/peers/`+url.PathEscape(cpUUID), &statusCode, responseHeaders).
+	builder := c.baseRequestBuilder(`/api/cluster/peers/`+url.PathEscape(cpUUID), &statusCode, responseHeaders).
 		Delete().
 		ToBytesBuffer(&buf)
 
@@ -170,4 +166,32 @@ func (c *Client) fetchClusterName(ctx context.Context) (string, error) {
 	}
 
 	return cl.Name, nil
+}
+
+func (c *Client) fetchClusterPeerUUID(ctx context.Context, remoteClusterName string) (string, error) {
+	var (
+		statusCode int
+		cp         ontap.GetData
+	)
+	responseHeaders := http.Header{}
+	params := url.Values{}
+	params.Set("fields", "uuid")
+	params.Set("remote.name", remoteClusterName)
+
+	builder := c.baseRequestBuilder(`/api/cluster/peers`, &statusCode, responseHeaders).
+		Params(params).
+		ToJSON(&cp)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return "", err
+	}
+
+	if cp.NumRecords == 0 {
+		return "", fmt.Errorf("failed to find cluster peer relationships for remote cluster=%s because it does not exist", remoteClusterName)
+	}
+	if cp.NumRecords != 1 {
+		return "", fmt.Errorf("failed to find cluster peer relationships for remote cluster=%s because there are %d matching records", remoteClusterName, cp.NumRecords)
+	}
+
+	return cp.Records[0].UUID, nil
 }
