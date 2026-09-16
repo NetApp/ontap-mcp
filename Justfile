@@ -17,6 +17,7 @@ license-check:
     @go run github.com/frapposelli/wwhrd@latest check -q -t
 
 @_lint-impl target:
+    cd {{target}} && go mod tidy -diff || { echo "ERROR: {{target}}/go.mod is not tidy (see diff above) -- run 'just tidy'"; exit 1; }
     cd {{target}} && go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.0 run ./...
     cd {{target}} && go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest $(go list ./... | grep -v /third_party/)
     cd {{target}} && go run golang.org/x/vuln/cmd/govulncheck@latest ./...
@@ -24,6 +25,10 @@ license-check:
 @lint:
     just _lint-impl .
     just _lint-impl integration
+
+@tidy:
+    go mod tidy
+    cd integration && go mod tidy
 
 @test:
     go test ./...
