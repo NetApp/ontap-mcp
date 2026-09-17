@@ -50,19 +50,19 @@ func TestSnapshotPolicy(t *testing.T) {
 		},
 		{
 			name:             "Create snapshot policy every4hours",
-			input:            ClusterStr + "create a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM. The schedule is 4hours and keeps the last 5 snapshots",
+			input:            ClusterStr + "create a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM. Use schedule 4hours, if not exist then only create schedule first with this expression `0 0,4,8,12,16,20 * * *` and keeps the last 5 snapshots",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours"), validationFunc: createObject},
 		},
 		{
 			name:             "Create snapshot policy every5min",
-			input:            ClusterStr + "create a snapshot policy named " + rn("every5min") + " on the " + rn("marketing") + " SVM. The schedule is 5minutes and keeps the last 2 snapshots",
+			input:            ClusterStr + "create a snapshot policy named " + rn("every5min") + " on the " + rn("marketing") + " SVM. Use schedule 5minutes, if not exist then only create schedule first with this expression `0,5,10,15,20,25,30,35,40,45,50,55 * * * *` and keeps the last 2 snapshots",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every5min"), validationFunc: createObject},
 		},
 		{
 			name:             "Add schedule to snapshot policy every4hours",
-			input:            ClusterStr + "add schedule 2hours in a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM and keeps the last 6 snapshots",
+			input:            ClusterStr + "add schedule 2hours in a snapshot policy named " + rn("every4hours") + " on the " + rn("marketing") + " SVM and keeps the last 6 snapshots. if schedule not exist then only create schedule first with this expression `0 0,2,4,6,8,10,12,14,16,18,20,22 * * *`",
 			expectedOntapErr: "",
 			verifyAPI:        ontapVerifier{api: "api/storage/snapshot-policies?name=" + rn("every4hours") + "&svm.name=" + rn("marketing") + "&fields=copies", validationFunc: verifySchedule(true, "2hours", "-", 6)},
 		},

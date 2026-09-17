@@ -95,6 +95,10 @@ type Autosize struct {
 	ShrinkThreshold string `json:"shrink_threshold,omitzero"`
 }
 
+type Files struct {
+	Maximum *int `json:"maximum,omitzero"`
+}
+
 type VolumeGuarantee struct {
 	Type string `json:"type,omitzero"`
 }
@@ -133,6 +137,7 @@ type Volume struct {
 	SVM            NameAndUUID          `json:"svm,omitzero"`
 	Name           string               `json:"name,omitzero"`
 	Aggregates     []NameAndUUID        `json:"aggregates,omitzero"`
+	Files          Files                `json:"files,omitzero"`
 	State          string               `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
 	Style          string               `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
 	Size           int64                `json:"size,omitempty"`
@@ -435,6 +440,7 @@ type SnapMirrorRelationship struct {
 
 const (
 	ASAr2 = "asar2"
+	AFX   = "afx"
 	CDOT  = "cdot"
 )
 
@@ -469,16 +475,4 @@ type Remote struct {
 
 func (r Remote) IsZero() bool {
 	return r.Name == "" && r.Model == "" && r.UUID == ""
-}
-
-func (r Remote) IsKeyPerf() bool {
-	return r.IsDisaggregated
-}
-
-func (r Remote) IsAFX() bool {
-	return r.IsDisaggregated && !r.IsSanOptimized
-}
-
-func (r Remote) IsASAr2() bool {
-	return r.Model == ASAr2
 }

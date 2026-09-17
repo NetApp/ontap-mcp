@@ -11,7 +11,7 @@ type VolumeCreate struct {
 	Cluster                string           `json:"cluster_name" jsonschema:"cluster name"`
 	SVM                    string           `json:"svm_name" jsonschema:"SVM name"`
 	Volume                 string           `json:"volume_name" jsonschema:"volume name"`
-	Aggregate              string           `json:"aggregate_name" jsonschema:"aggregate name"`
+	Aggregate              string           `json:"aggregate_name,omitzero" jsonschema:"aggregate name. required for CDOT cluster, must be omitted for AFX cluster"`
 	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
 	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
@@ -63,6 +63,7 @@ type VolumeUpdate struct {
 	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name"`
 	Autosize               Autosize         `json:"autosize,omitzero" jsonschema:"autosize"`
+	FilesMaximum           *int             `json:"files.maximum,omitzero" jsonschema:"maximum number of files (inodes) for user-visible data allowed on the volume"`
 	QoS                    VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings"`
 	GuaranteeType          string           `json:"guarantee.type,omitzero" jsonschema:"volume space guarantee type (e.g., 'volume' for thick, 'none' for thin)"`
 	SnapshotPolicyName     string           `json:"snapshot_policy.name,omitzero" jsonschema:"snapshot policy name (e.g., 'none')"`
