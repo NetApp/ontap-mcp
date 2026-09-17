@@ -109,9 +109,9 @@ func (a *App) ModifySnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 		case "resync":
 			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
 			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resynced successfully")
-		case "quiesce":
+		case "pause", "quiesce":
 			rel := ontap.SnapMirrorRelationship{State: "paused"}
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship quiesced successfully")
+			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship paused successfully")
 		case "resume":
 			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
 			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resumed successfully")
@@ -200,7 +200,7 @@ func (a *App) AbortSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolReques
 		return errorResult(err), nil, err
 	}
 
-	rel := ontap.SnapMirrorRelationship{State: "aborted"}
+	rel := ontap.SnapMirrorTransfer{State: "aborted"}
 	if err := client.AbortSnapMirrorTransfer(ctx, parameters.DestinationPath, rel); err != nil {
 		return errorResult(err), nil, err
 	}

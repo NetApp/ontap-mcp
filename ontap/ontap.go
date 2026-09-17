@@ -438,6 +438,10 @@ type SnapMirrorRelationship struct {
 	State            string             `json:"state,omitzero"` // enum: broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding
 }
 
+type SnapMirrorTransfer struct {
+	State string `json:"state,omitzero"` // enum: aborted, failed, hard_aborted, queued, success, transferring
+}
+
 const (
 	ASAr2 = "asar2"
 	AFX   = "afx"

@@ -36,7 +36,7 @@ func (c *Client) getSnapMirrorUUID(ctx context.Context, destPath string) (string
 	return data.Records[0].UUID, nil
 }
 
-// getSnapMirrorTransferUUID returns the UUID of a SnapMirror relationship identified by its destination path.
+// getSnapMirrorTransferUUID returns the UUID of an in-progress transfer (state=transferring) for the given SnapMirror relationship UUID.
 func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) (string, error) {
 	var data ontap.GetData
 
@@ -144,7 +144,7 @@ func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destPath string) 
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, rel ontap.SnapMirrorRelationship) error {
+func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, rel ontap.SnapMirrorTransfer) error {
 	var (
 		buf        bytes.Buffer
 		statusCode int
