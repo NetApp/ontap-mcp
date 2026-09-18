@@ -165,7 +165,7 @@ const DeleteSnapMirror = `Delete a SnapMirror relationship on a cluster by clust
 const ModifySnapMirror = `Update or delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names. initialize, break, resync, quiesce (or pause) and resume operations are supported for update.`
 const InitializeSnapMirror = `Initialize a SnapMirror relationship on a cluster by cluster name. Starts the baseline transfer from source to destination. Identifies the relationship by destination SVM and volume names.`
 const UpdateSnapMirrorTransfer = `Trigger a SnapMirror transfer initialize or update on a cluster by cluster name. Transfers new data from source to destination to bring the relationship up to date. Identifies the relationship by destination SVM and volume names.`
-const AbortSnapMirrorTransfer = `Abort a SnapMirror transfer on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
+const AbortSnapMirrorTransfer = `Abort a SnapMirror transfer on a cluster by cluster name. Identifies the relationship by destination SVM and volume names. This tool would abort active snapmirror transfer only.`
 const BreakSnapMirror = `Break a SnapMirror relationship on a cluster by cluster name. Sets the relationship state to broken_off, making the destination volume read-write. Identifies the relationship by destination SVM and volume names.`
 const ResyncSnapMirror = `Resync a SnapMirror relationship on a cluster by cluster name. Re-establishes replication by setting the state back to snapmirrored. Identifies the relationship by destination SVM and volume names.`
 

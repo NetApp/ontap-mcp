@@ -46,21 +46,26 @@ type PostJob struct {
 
 type GetData struct {
 	Records []struct {
-		ID       int          `json:"id,omitzero"`
-		UUID     string       `json:"uuid,omitzero"`
-		Index    int          `json:"index,omitzero"`
-		Name     string       `json:"name,omitzero"`
-		Svm      NameAndUUID  `json:"svm,omitzero"`
-		Volume   NameAndUUID  `json:"volume,omitzero"`
-		RoRule   []string     `json:"ro_rule,omitzero"`
-		RwRule   []string     `json:"rw_rule,omitzero"`
-		Clients  []ClientData `json:"clients,omitzero"`
-		Nas      NAS          `json:"nas,omitzero"`
-		Schedule NameAndUUID  `json:"schedule,omitzero"`
-		Lun      NameAndUUID  `json:"lun,omitzero"`
-		IGroup   NameAndUUID  `json:"igroup,omitzero"`
+		ID       int              `json:"id,omitzero"`
+		UUID     string           `json:"uuid,omitzero"`
+		Index    int              `json:"index,omitzero"`
+		Name     string           `json:"name,omitzero"`
+		Svm      NameAndUUID      `json:"svm,omitzero"`
+		Volume   NameAndUUID      `json:"volume,omitzero"`
+		RoRule   []string         `json:"ro_rule,omitzero"`
+		RwRule   []string         `json:"rw_rule,omitzero"`
+		Clients  []ClientData     `json:"clients,omitzero"`
+		Nas      NAS              `json:"nas,omitzero"`
+		Schedule NameAndUUID      `json:"schedule,omitzero"`
+		Lun      NameAndUUID      `json:"lun,omitzero"`
+		IGroup   NameAndUUID      `json:"igroup,omitzero"`
+		Policy   SnapMirrorPolicy `json:"policy,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
+}
+
+type SnapMirrorPolicy struct {
+	Type string `json:"type"` // enum: async, sync, continuous
 }
 
 type NASExportPolicy struct {
