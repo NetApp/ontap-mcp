@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -29,23 +30,15 @@ func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Clien
 
 	// Step3: Generate passphrase in source cluster with destination LIFs
 	cp := ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: destinationLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
-	if err := c.managePassphrase(ctx, cp); err != nil {
+	sourceClusterPeerUUID, err := c.createClusterPeer(ctx, cp)
+	if err != nil {
 		return err
 	}
 
 	// Step4: Approve passphrase in destination cluster with source LIFs
 	cp = ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: sourceLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
-	if err := destinationClient.managePassphrase(ctx, cp); err != nil {
-		fmt.Println("failed to create cluster peer relationships in destination cluster, rolling back in source cluster")
-		destinationClusterName, err1 := destinationClient.fetchClusterName(ctx)
-		if err1 != nil {
-			return err1
-		}
-		destinationUUID, err1 := c.fetchClusterPeerUUID(ctx, destinationClusterName)
-		if err1 != nil {
-			return err1
-		}
-		if err2 := c.removeClusterPeer(ctx, destinationUUID); err2 != nil {
+	if _, err = destinationClient.createClusterPeer(ctx, cp); err != nil {
+		if err2 := c.removeClusterPeer(ctx, sourceClusterPeerUUID); err2 != nil {
 			return err2
 		}
 		return err
@@ -85,9 +78,10 @@ func (c *Client) fetchInterClusterLIFs(ctx context.Context, cluster string) ([]s
 	return icls, nil
 }
 
-func (c *Client) managePassphrase(ctx context.Context, clusterPeer ontap.ClusterPeer) error {
+func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.ClusterPeer) (string, error) {
 	var (
 		buf        bytes.Buffer
+		res        ontap.PostJob
 		statusCode int
 	)
 	responseHeaders := http.Header{}
@@ -97,17 +91,29 @@ func (c *Client) managePassphrase(ctx context.Context, clusterPeer ontap.Cluster
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		if !strings.Contains(err.Error(), "4653075") {
-			return err
+			return "", err
 		}
 		fmt.Println("cluster peer relationship already exists")
-		return nil
+		return "", nil
 	}
-	return c.handleJob(ctx, statusCode, &buf)
+
+	if err := json.Unmarshal(buf.Bytes(), &res); err != nil {
+		return "", fmt.Errorf("failed to decode cluster peer job response: %w", err)
+	}
+	if strings.TrimSpace(res.Job.UUID) == "" {
+		return "", errors.New("cluster peer job response is missing UUID")
+	}
+
+	return strings.TrimSpace(res.Job.UUID), c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Client) error {
-	// Step1: fetch source and destination cluster names
+	// Step1: fetch source and destination UUID
 	sourceClusterName, err := c.fetchClusterName(ctx)
+	if err != nil {
+		return err
+	}
+	sourceUUID, err := destinationClient.fetchClusterPeerUUID(ctx, sourceClusterName)
 	if err != nil {
 		return err
 	}
@@ -115,19 +121,15 @@ func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Clien
 	if err != nil {
 		return err
 	}
-
-	// Step2: delete cluster peer from source cluster
 	destinationUUID, err := c.fetchClusterPeerUUID(ctx, destinationClusterName)
 	if err != nil {
 		return err
 	}
+
+	// Step2: delete cluster peer from source cluster
 	err1 := c.removeClusterPeer(ctx, destinationUUID)
 
 	// Step3: delete cluster peer from destination cluster
-	sourceUUID, err := destinationClient.fetchClusterPeerUUID(ctx, sourceClusterName)
-	if err != nil {
-		return err
-	}
 	err2 := destinationClient.removeClusterPeer(ctx, sourceUUID)
 	if err1 != nil || err2 != nil {
 		return errors.Join(err1, err2)
