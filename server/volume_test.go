@@ -188,6 +188,33 @@ func TestCreateVolumeRejectsFlexGroupWithoutAggregateNames(t *testing.T) {
 	}
 }
 
+func TestCreateVolumeRejectsEmptyFlexGroupAggregateNames(t *testing.T) {
+	tests := []struct {
+		name  string
+		names []string
+	}{
+		{name: "empty string", names: []string{""}},
+		{name: "whitespace", names: []string{"  "}},
+		{name: "empty among valid", names: []string{"aggr1", ""}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := newCreateVolume(tool.VolumeCreate{
+				SVM:            "vs1",
+				Volume:         "fg1",
+				Style:          "flexgroup",
+				AggregateNames: tt.names,
+			}, ontap.CDOT)
+			if err == nil {
+				t.Fatal("newCreateVolume() error = nil, want empty aggregate name rejected")
+			}
+			if !strings.Contains(err.Error(), "aggregate_names") {
+				t.Errorf("error = %q, want aggregate_names", err)
+			}
+		})
+	}
+}
+
 func TestCreateVolumeRejectsFlexGroupConstituentStyle(t *testing.T) {
 	_, err := newCreateVolume(tool.VolumeCreate{
 		SVM:            "vs1",

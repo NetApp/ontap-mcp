@@ -205,18 +205,6 @@ func (c *Client) getHTTPClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *Client) Remote(ctx context.Context) (ontap.Remote, error) {
-	if !c.remote.IsZero() {
-		return c.remote, nil
-	}
-	remote, err := c.GetClusterInfo(ctx)
-	if err != nil {
-		return ontap.Remote{}, err
-	}
-	c.remote = remote
-	return remote, nil
-}
-
 func (c *Client) GetClusterInfo(ctx context.Context) (ontap.Remote, error) {
 	var cluster ontap.Cluster
 

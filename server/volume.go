@@ -13,7 +13,6 @@ import (
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.VolumeCreate) (*mcp.CallToolResult, any, error) {
-	model := ontap.CDOT
 	if !a.locks.TryLock(parameters.Cluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
 	}
@@ -24,18 +23,14 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	if _, m, err := a.getClusterVersion(ctx, parameters.Cluster); err == nil {
-		model = m
-	} else {
-		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
-	}
-
-	remote := ontap.Remote{Model: model}
-	if info, err := client.Remote(ctx); err == nil && !info.IsZero() {
+	remote := ontap.Remote{Model: ontap.CDOT}
+	if info, err := a.getClusterRemote(ctx, parameters.Cluster); err == nil {
 		remote = info
 		if remote.Model == "" {
-			remote.Model = model
+			remote.Model = ontap.CDOT
 		}
+	} else {
+		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
 	}
 
 	volumeCreate, err := newCreateVolumeRemote(parameters, remote)
@@ -347,6 +342,10 @@ func newCreateVolumeRemote(in tool.VolumeCreate, remote ontap.Remote) (ontap.Vol
 		out.Style = "flexgroup"
 		out.Aggregates = make([]ontap.NameAndUUID, 0, len(in.AggregateNames))
 		for _, name := range in.AggregateNames {
+			name = strings.TrimSpace(name)
+			if name == "" {
+				return out, errors.New("aggregate_names entries must not be empty")
+			}
 			out.Aggregates = append(out.Aggregates, ontap.NameAndUUID{Name: name})
 		}
 		out.ConstituentsPerAggregate = in.ConstituentsPerAggregate
