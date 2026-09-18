@@ -32,7 +32,7 @@ Create/update/delete operations remain as dedicated typed tools
 const ListClusters = `List all ONTAP clusters registered in the server configuration. Returns cluster names with ONTAP version and model (e.g. cdot, asar2, afx).
 USE THIS FIRST: Always call this before any other tool to discover valid cluster names.`
 
-const CreateVolume = `Create a volume on a cluster by cluster name.`
+const CreateVolume = `Create a volume on a cluster by cluster name. FlexVol is the default: aggregate_name is required on CDOT and must be omitted on AFX. Set style=flexgroup with aggregate_names for a FlexGroup on Unified NAS (AFF/FAS) only. FlexGroup is not supported on classic ASA; AFX omits aggregates; ASA r2 does not use create_volume (provision a storage unit instead).`
 const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
 const DeleteVolume = `Delete a volume on a cluster by cluster name.`
 const ModifyVolume = `Update or delete a volume on a cluster by cluster name.`
