@@ -72,14 +72,19 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_qos_policy`
 - `delete_qos_policy`
 
-## Snapmirror Management
+## SnapMirror Management
+
 - `create_snapmirror`
+- `update_snapmirror_transfer`
+- `abort_snapmirror_transfer` (available in `multiplex` or `both` mode)
+- `modify_snapmirror` (available in `multiplex` or `both` mode)
 - `update_snapmirror`
 - `delete_snapmirror`
 - `initialize_snapmirror`
-- `update_snapmirror_transfer`
 - `break_snapmirror`
 - `resync_snapmirror`
+
+The `update_snapmirror`, `delete_snapmirror`, `initialize_snapmirror`, `break_snapmirror`, and `resync_snapmirror` tools are available in `legacy` or `both` mode. In the default `multiplex` mode, use `modify_snapmirror` for these relationship operations. The `abort_snapmirror_transfer` tool only aborts an active transfer.
 
 ## SVM Management
 

@@ -106,6 +106,18 @@ func TestSnapMirror(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/snapmirror/relationships?destination.path=" + rn("dtsvm") + ":" + rn("dtvol") + "&fields=state,policy.name", validationFunc: verifySnapMirror(true, "MirrorAndVault", "snapmirrored")},
 		},
 		{
+			name:             "Pause SnapMirror relationship",
+			input:            ClusterStr + "pause a snapmirror relationship of destination svm " + rn("dtsvm") + " and destination volume " + rn("dtvol"),
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/snapmirror/relationships?destination.path=" + rn("dtsvm") + ":" + rn("dtvol") + "&fields=state,policy.name", validationFunc: verifySnapMirror(true, "MirrorAndVault", "paused")},
+		},
+		{
+			name:             "Resume SnapMirror relationship",
+			input:            ClusterStr + "resume a snapmirror relationship of destination svm " + rn("dtsvm") + " and destination volume " + rn("dtvol"),
+			expectedOntapErr: "",
+			verifyAPI:        ontapVerifier{api: "api/snapmirror/relationships?destination.path=" + rn("dtsvm") + ":" + rn("dtvol") + "&fields=state,policy.name", validationFunc: verifySnapMirror(true, "MirrorAndVault", "snapmirrored")},
+		},
+		{
 			name:             "Delete SnapMirror relationship",
 			input:            ClusterStr + "delete a snapmirror relationship of destination svm " + rn("dtsvm") + " and destination volume " + rn("dtvol"),
 			expectedOntapErr: "",
