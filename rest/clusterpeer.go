@@ -38,8 +38,10 @@ func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Clien
 	// Step4: Approve passphrase in destination cluster with source LIFs
 	cp = ontap.ClusterPeer{RemotePeer: ontap.RemotePeer{IPaddresses: sourceLIFs}, Authentication: ontap.Authentication{Passphrase: passphrase}}
 	if _, err = destinationClient.createClusterPeer(ctx, cp); err != nil {
-		if err2 := c.removeClusterPeer(ctx, sourceClusterPeerUUID); err2 != nil {
-			return err2
+		if sourceClusterPeerUUID != "" {
+			if err2 := c.removeClusterPeer(ctx, sourceClusterPeerUUID); err2 != nil {
+				return err2
+			}
 		}
 		return err
 	}
@@ -56,7 +58,6 @@ func (c *Client) fetchInterClusterLIFs(ctx context.Context, cluster string) ([]s
 
 	params := url.Values{}
 	params.Set("fields", "ip.address")
-	params.Set("service_policy.name", "default-intercluster")
 	params.Set("services", "intercluster_core")
 
 	builder := c.baseRequestBuilder(`/api/network/ip/interfaces`, &statusCode, responseHeaders).
