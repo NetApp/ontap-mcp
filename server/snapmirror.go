@@ -109,6 +109,12 @@ func (a *App) ModifySnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 		case "resync":
 			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
 			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resynced successfully")
+		case "pause", "quiesce":
+			rel := ontap.SnapMirrorRelationship{State: "paused"}
+			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship paused successfully")
+		case "resume":
+			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
+			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resumed successfully")
 		default:
 			rel, err := newUpdateSnapMirror(tool.SnapMirror{
 				DestinationPath:      parameters.DestinationPath,
@@ -175,6 +181,33 @@ func (a *App) UpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolReque
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
 			&mcp.TextContent{Text: "SnapMirror transfer updated successfully"},
+		},
+	}, nil, nil
+}
+
+func (a *App) AbortSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapMirror) (*mcp.CallToolResult, any, error) {
+	if !a.locks.TryLock(parameters.Cluster) {
+		return errorResult(fmt.Errorf("another write operation is in progress on cluster %s, please try again", parameters.Cluster)), nil, nil
+	}
+	defer a.locks.Unlock(parameters.Cluster)
+
+	if err := validateDestination(parameters.DestinationPath); err != nil {
+		return nil, nil, err
+	}
+
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	rel := ontap.SnapMirrorTransfer{State: "aborted"}
+	if err := client.AbortSnapMirrorTransfer(ctx, parameters.DestinationPath, rel); err != nil {
+		return errorResult(err), nil, err
+	}
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: "SnapMirror transfer aborted successfully"},
 		},
 	}, nil, nil
 }
@@ -268,7 +301,16 @@ func validateDestination(destPath string) error {
 }
 
 func (a *App) updateSnapMirrorState(ctx context.Context, client *rest.Client, destPath string, rel ontap.SnapMirrorRelationship, returnText string) (*mcp.CallToolResult, any, error) { //nolint:unparam
-	if err := client.UpdateSnapMirror(ctx, destPath, rel); err != nil {
+	uuid, rType, err := client.GetSnapMirrorUUIDAndType(ctx, destPath)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
+	if rel.State == "snapmirrored" && (rType == "sync" || rType == "strict_sync") {
+		rel.State = "in_sync"
+	}
+
+	if err := client.UpdateSnapMirror(ctx, uuid, rel); err != nil {
 		return errorResult(err), nil, err
 	}
 

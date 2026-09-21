@@ -385,29 +385,57 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 - On the umeng-aff300-05-06 cluster, create a snapmirror relationship from source svm srsvm and source volume srvol to destination svm dtsvm and destination volume dtvol with policy name XDPDefault
 
-Expected Response: SnapMirror relationship created successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship created successfully
 
 **Update a SnapMirror relationship**
 
 - On the umeng-aff300-05-06 cluster, update a snapmirror relationship of destination svm dtsvm and destination volume dtvol with transfer schedule name to hourly
 
-Expected Response: SnapMirror relationship updated successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship updated successfully
+
+**Initialize a SnapMirror relationship**
+
+- On the umeng-aff300-05-06 cluster, initialize a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror relationship initialized successfully
+
+**Trigger an on-demand SnapMirror transfer**
+
+- On the umeng-aff300-05-06 cluster, update the snapmirror transfer for destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror transfer updated successfully
+
+**Abort an active SnapMirror transfer**
+
+- On the umeng-aff300-05-06 cluster, abort the active snapmirror transfer for destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror transfer aborted successfully
+
+The abort operation requires a transfer that is currently in the `transferring` state.
 
 **Update a SnapMirror relationship state**
 
 - On the umeng-aff300-05-06 cluster, break a snapmirror relationship of destination svm dtsvm and destination volume dtvol
 
-Expected Response: SnapMirror relationship broken successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship broken successfully
 
 - On the umeng-aff300-05-06 cluster, resync a snapmirror relationship of destination svm dtsvm and destination volume dtvol
 
-Expected Response: SnapMirror relationship resynced successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship resynced successfully
+
+- On the umeng-aff300-05-06 cluster, pause a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror relationship paused successfully
+
+- On the umeng-aff300-05-06 cluster, resume a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror relationship resumed successfully
 
 **Delete a SnapMirror relationship**
 
 - On the umeng-aff300-05-06 cluster, delete a snapmirror relationship of destination svm dtsvm and destination volume dtvol
 
-Expected Response: SnapMirror relationship deleted successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship deleted successfully
 
 ---
 
