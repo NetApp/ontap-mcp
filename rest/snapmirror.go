@@ -10,7 +10,7 @@ import (
 	"github.com/netapp/ontap-mcp/ontap"
 )
 
-// GetSnapMirrorUUIDAndType returns the UUID of a SnapMirror relationship identified by its destination path.
+// GetSnapMirrorUUIDAndType returns the UUID and Policy type of SnapMirror relationship identified by its destination path.
 func (c *Client) GetSnapMirrorUUIDAndType(ctx context.Context, destPath string) (string, string, error) {
 	var data ontap.GetData
 
@@ -79,6 +79,7 @@ func (c *Client) CreateSnapMirror(ctx context.Context, rel ontap.SnapMirrorRelat
 	return c.handleJob(ctx, statusCode, &buf)
 }
 
+// UpdateSnapMirror updates the SnapMirror relationship identified by its UUID.
 func (c *Client) UpdateSnapMirror(ctx context.Context, uuid string, rel ontap.SnapMirrorRelationship) error {
 	var (
 		buf        bytes.Buffer
