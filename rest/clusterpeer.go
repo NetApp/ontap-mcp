@@ -82,7 +82,7 @@ func (c *Client) fetchInterClusterLIFs(ctx context.Context, cluster string) ([]s
 func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.ClusterPeer) (string, error) {
 	var (
 		buf        bytes.Buffer
-		res        ontap.PostJob
+		res        ontap.GetData
 		statusCode int
 	)
 	responseHeaders := http.Header{}
@@ -97,11 +97,13 @@ func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.Cluste
 	if err := json.Unmarshal(buf.Bytes(), &res); err != nil {
 		return "", fmt.Errorf("failed to decode cluster peer job response: %w", err)
 	}
-	if strings.TrimSpace(res.Job.UUID) == "" {
+
+	clPeerUUID := strings.TrimSpace(res.Records[0].UUID)
+	if clPeerUUID == "" {
 		return "", errors.New("cluster peer job response is missing UUID")
 	}
 
-	return strings.TrimSpace(res.Job.UUID), c.handleJob(ctx, statusCode, &buf)
+	return clPeerUUID, c.handleJob(ctx, statusCode, &buf)
 }
 
 func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Client) error {
