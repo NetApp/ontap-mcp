@@ -269,6 +269,9 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_lun_map", descriptions.CreateLunMap, createAnnotation, a.CreateLunMap)
 	addTool(a, server, "delete_lun_map", descriptions.DeleteLunMap, deleteAnnotation, a.DeleteLunMap)
 
+	addTool(a, server, "create_cluster_peer", descriptions.CreateClusterPeer, createAnnotation, a.CreateClusterPeer)
+	addTool(a, server, "delete_cluster_peer", descriptions.DeleteClusterPeer, deleteAnnotation, a.DeleteClusterPeer)
+
 	// This section of code, along with the corresponding functions, should be removed before the next release.
 	if a.options.ToolMode == "both" || a.options.ToolMode == "legacy" {
 		addTool(a, server, "update_volume", descriptions.UpdateVolume, updateAnnotation, a.UpdateVolume)

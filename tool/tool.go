@@ -741,3 +741,8 @@ type SVMPeer struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM     string `json:"svm_name" jsonschema:"SVM name"`
 }
+
+type ClusterPeer struct {
+	SourceCluster      string `json:"source_cluster_name" jsonschema:"source cluster name"`
+	DestinationCluster string `json:"destination_cluster_name" jsonschema:"destination cluster name"`
+}
