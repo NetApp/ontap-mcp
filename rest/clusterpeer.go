@@ -91,11 +91,7 @@ func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.Cluste
 		ToBytesBuffer(&buf)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		if !strings.Contains(err.Error(), "4653075") {
-			return "", err
-		}
-		fmt.Println("cluster peer relationship already exists")
-		return "", nil
+		return "", err
 	}
 
 	if err := json.Unmarshal(buf.Bytes(), &res); err != nil {
