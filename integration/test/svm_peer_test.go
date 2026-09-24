@@ -28,10 +28,12 @@ func TestSVMPeer(t *testing.T) {
 
 	localSourceSVM := rn("peer_local_src")
 	localDestinationSVM := rn("peer_local_dst")
+	//nolint:gocritic
 	//remoteSourceSVM := rn("peer_remote_src")
 	//remoteDestinationSVM := rn("peer_remote_dst")
 
 	localPeerAPI := "api/svm/peers?svm.name=" + localSourceSVM + "&peer.svm.name=" + localDestinationSVM + "&fields=state,applications"
+	//nolint:gocritic
 	//remoteSourcePeerAPI := "api/svm/peers?svm.name=" + remoteSourceSVM + "&peer.svm.name=" + remoteDestinationSVM + "&fields=state,applications"
 	//remoteDestinationPeerAPI := "api/svm/peers?svm.name=" + remoteDestinationSVM + "&peer.svm.name=" + remoteSourceSVM + "&fields=state,applications"
 
@@ -105,6 +107,7 @@ func TestSVMPeer(t *testing.T) {
 				verifier: ontapVerifier{api: "api/svm/svms?name=" + localDestinationSVM, validationFunc: deleteObject},
 			}},
 		},
+		//nolint:gocritic
 		//{
 		//	name:  "Delete remote source SVM on vsim",
 		//	input: "On the " + SVMPeerVsimCluster + " cluster, Delete the " + remoteSourceSVM + " SVM",
