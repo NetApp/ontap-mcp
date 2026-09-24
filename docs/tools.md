@@ -89,7 +89,27 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 ## SVM Peer Management
 
+- `create_svm_peer`
 - `delete_svm_peer`
+
+Both tools identify a relationship with four arguments:
+
+| Argument | Description |
+|----------|-------------|
+| `source_cluster_name` | Registered cluster identifier containing the source SVM. |
+| `source_svm_name` | Source or local SVM name. |
+| `destination_cluster_name` | Registered cluster identifier containing the destination SVM. May equal the source cluster for intracluster peering. |
+| `destination_svm_name` | Destination or remote SVM name. |
+
+`create_svm_peer` creates the proposal on the source and accepts it on the destination as one operation. If the relationship already exists, its application is updated instead of creating a duplicate. The optional `application` argument defaults to `snapmirror`.
+
+Set `accept_only` to `true` when the proposal was created out of band. In this mode, the tool only finds and accepts the pending relationship on the destination; it never creates a proposal.
+
+`delete_svm_peer` finds the exact relationship using both SVM names and the remote cluster, then removes all existing sides of the relationship. For an intracluster peer, it removes the relationship once on the shared cluster.
+
+!!! note
+
+	Cross-cluster SVM peering requires an existing cluster peer relationship. Both clusters must be registered with this ONTAP MCP server. These tools do not create cluster peers, intercluster LIFs, or SVM peer permissions.
 
 ## DNS Management
 

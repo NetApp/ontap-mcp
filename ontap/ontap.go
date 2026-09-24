@@ -452,6 +452,24 @@ type Cluster struct {
 	Disaggregated bool    `json:"disaggregated"`
 }
 
+type SVMPeer struct {
+	UUID         string        `json:"uuid,omitzero"`
+	SVM          NameAndUUID   `json:"svm,omitzero"`
+	Peer         SVMPeerRemote `json:"peer,omitzero"`
+	Applications []string      `json:"applications,omitzero"`
+	State        string        `json:"state,omitzero"`
+}
+
+type SVMPeerRemote struct {
+	Cluster NameAndUUID `json:"cluster,omitzero"`
+	SVM     NameAndUUID `json:"svm,omitzero"`
+}
+
+type SVMPeerCollection struct {
+	Records    []SVMPeer `json:"records"`
+	NumRecords int       `json:"num_records"`
+}
+
 type Version struct {
 	Full       string `json:"full"`
 	Generation int    `json:"generation"`
