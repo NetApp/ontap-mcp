@@ -411,6 +411,38 @@ Expected Response: SnapMirror relationship deleted successfully
 
 ---
 
+### Manage SVM Peer Relationships
+
+**Create or update and accept an SVM peer relationship**
+
+- Create an SVM peer relationship from the source_svm SVM on the sar cluster to the destination_svm SVM on the aff cluster for the snapmirror application.
+
+Expected Response: SVM peer created or updated successfully
+
+Omit the application to use the default, `snapmirror`. Repeating the request updates the existing relationship instead of creating a duplicate.
+
+**Accept a proposal created out of band**
+
+- Accept only the pending SVM peer proposal from the source_svm SVM on the sar cluster to the destination_svm SVM on the aff cluster.
+
+Expected Response: SVM peer accepted successfully
+
+**Create an intracluster SVM peer relationship**
+
+- On the sar cluster, create an SVM peer relationship from source_svm to destination_svm.
+
+Expected Response: SVM peer created or updated successfully
+
+**Delete an SVM peer relationship on both clusters**
+
+- Delete the SVM peer relationship from the source_svm SVM on the sar cluster to the destination_svm SVM on the aff cluster.
+
+Expected Response: SVM peer deleted successfully
+
+Cross-cluster SVM peering requires the clusters to already be peered and both cluster identifiers to be registered with the ONTAP MCP server.
+
+---
+
 ## MCP Clients
 
 Common MCP clients that work with ONTAP MCP Server:

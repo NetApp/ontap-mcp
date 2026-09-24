@@ -125,9 +125,9 @@ func TestSnapMirror(t *testing.T) {
 		},
 		{
 			name:             "Clean SVM peer",
-			input:            ClusterStr + "delete svm peer of " + rn("srsvm") + " svm",
+			input:            "Delete the SVM peer relationship from the " + rn("srsvm") + " SVM on the " + Cluster + " cluster to the " + rn("dtsvm") + " SVM on the " + Cluster + " cluster",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/svm/peers?svm.name=" + rn("srsvm"), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/svm/peers?svm.name=" + rn("srsvm") + "&peer.svm.name=" + rn("dtsvm"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean source SVM",

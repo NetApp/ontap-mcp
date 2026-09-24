@@ -182,7 +182,8 @@ const CreateSVM = `Create an SVM on a cluster by cluster name.`
 const UpdateSVM = `Update an SVM name, comment, or SVM state on a cluster by cluster name.`
 const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
 const ModifySVM = `Update or delete an SVM on a cluster by cluster name.`
-const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and local SVM name. The peer relationship UUID is looked up internally using the svm.name filter.`
+const CreateSVMPeer = `Create an SVM peer relationship between source and destination SVMs, then accept it on the destination. The application defaults to snapmirror. Set accept_only to accept a proposal created out of band without creating one.`
+const DeleteSVMPeer = `Delete the exact SVM peer relationship identified by source cluster and SVM plus destination cluster and SVM. The relationship is removed across both clusters.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 
