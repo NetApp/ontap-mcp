@@ -36,13 +36,13 @@ func (c *Client) GetSnapMirrorUUIDAndType(ctx context.Context, destPath string) 
 	return data.Records[0].UUID, data.Records[0].Policy.Type, nil
 }
 
-// getSnapMirrorTransferUUID returns the UUID of an in-progress transfer (state=transferring) and queued transfer (state=queued) for the given SnapMirror relationship UUID.
+// getSnapMirrorTransferUUID returns the UUID of an active transfer (state=transferring) for the given SnapMirror relationship UUID.
 func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) ([]string, error) {
 	var data ontap.GetData
 	var UUIDs []string
 
 	params := url.Values{}
-	params.Set("state", "transferring|queued")
+	params.Set("state", "transferring")
 	params.Set("fields", "uuid")
 
 	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers`, nil, nil).
@@ -54,7 +54,7 @@ func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) ([]
 	}
 
 	if data.NumRecords == 0 {
-		return []string{}, errors.New("SnapMirror transfer with state transferring or queued not found")
+		return []string{}, errors.New("SnapMirror transfer with state transferring not found")
 	}
 
 	for _, record := range data.Records {
@@ -167,6 +167,7 @@ func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, r
 
 		if e := c.buildAndExecuteRequest(ctx, builder); e != nil {
 			errs = append(errs, e)
+			continue
 		}
 
 		if e := c.handleJob(ctx, statusCode, &buf); e != nil {
