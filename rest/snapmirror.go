@@ -36,12 +36,13 @@ func (c *Client) GetSnapMirrorUUIDAndType(ctx context.Context, destPath string) 
 	return data.Records[0].UUID, data.Records[0].Policy.Type, nil
 }
 
-// getSnapMirrorTransferUUID returns the UUID of an in-progress transfer (state=transferring) for the given SnapMirror relationship UUID.
-func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) (string, error) {
+// getSnapMirrorTransferUUID returns the UUID of an in-progress transfer (state=transferring) and queued transfer (state=queued) for the given SnapMirror relationship UUID.
+func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) ([]string, error) {
 	var data ontap.GetData
+	var UUIDs []string
 
 	params := url.Values{}
-	params.Set("state", "transferring")
+	params.Set("state", "transferring|queued")
 	params.Set("fields", "uuid")
 
 	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers`, nil, nil).
@@ -49,17 +50,18 @@ func (c *Client) getSnapMirrorTransferUUID(ctx context.Context, uuid string) (st
 		ToJSON(&data)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return "", err
+		return []string{}, err
 	}
 
 	if data.NumRecords == 0 {
-		return "", errors.New("SnapMirror transfer with state transferring not found")
-	}
-	if data.NumRecords != 1 {
-		return "", fmt.Errorf("found %d SnapMirror transfers with SnapMirror relationship UUID %s, expected 1", data.NumRecords, uuid)
+		return []string{}, errors.New("SnapMirror transfer with state transferring or queued not found")
 	}
 
-	return data.Records[0].UUID, nil
+	for _, record := range data.Records {
+		UUIDs = append(UUIDs, record.UUID)
+	}
+
+	return UUIDs, nil
 }
 
 func (c *Client) CreateSnapMirror(ctx context.Context, rel ontap.SnapMirrorRelationship) error {
@@ -143,6 +145,7 @@ func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destPath string) 
 func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, rel ontap.SnapMirrorTransfer) error {
 	var (
 		buf        bytes.Buffer
+		errs       []error
 		statusCode int
 	)
 
@@ -151,19 +154,24 @@ func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, r
 		return err
 	}
 
-	transferUUID, err := c.getSnapMirrorTransferUUID(ctx, uuid)
+	transferUUIDs, err := c.getSnapMirrorTransferUUID(ctx, uuid)
 	if err != nil {
 		return err
 	}
 
-	builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers/`+transferUUID, &statusCode, nil).
-		Patch().
-		BodyJSON(rel).
-		ToBytesBuffer(&buf)
+	for _, transferUUID := range transferUUIDs {
+		builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers/`+transferUUID, &statusCode, nil).
+			Patch().
+			BodyJSON(rel).
+			ToBytesBuffer(&buf)
 
-	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
+		if e := c.buildAndExecuteRequest(ctx, builder); e != nil {
+			errs = append(errs, e)
+		}
+
+		if e := c.handleJob(ctx, statusCode, &buf); e != nil {
+			errs = append(errs, e)
+		}
 	}
-
-	return c.handleJob(ctx, statusCode, &buf)
+	return errors.Join(errs...)
 }

@@ -53,7 +53,7 @@ func (a *App) UpdateSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 	if err != nil {
 		return nil, nil, err
 	}
-	return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship updated successfully")
+	return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship updated successfully")
 }
 
 func (a *App) DeleteSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapMirror) (*mcp.CallToolResult, any, error) {
@@ -101,20 +101,60 @@ func (a *App) ModifySnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 	case "update":
 		switch parameters.SnapMirrorUpdate.SnapMirrorOperation {
 		case "initialize":
-			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship initialized successfully")
+			rel, err := newUpdateSnapMirror(tool.SnapMirror{
+				DestinationPath:      parameters.DestinationPath,
+				PolicyName:           parameters.SnapMirrorUpdate.PolicyName,
+				TransferScheduleName: parameters.SnapMirrorUpdate.TransferScheduleName,
+				State:                "snapmirrored",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship initialized successfully")
 		case "break":
-			rel := ontap.SnapMirrorRelationship{State: "broken_off"}
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship broken successfully")
+			rel, err := newUpdateSnapMirror(tool.SnapMirror{
+				DestinationPath:      parameters.DestinationPath,
+				PolicyName:           parameters.SnapMirrorUpdate.PolicyName,
+				TransferScheduleName: parameters.SnapMirrorUpdate.TransferScheduleName,
+				State:                "broken_off",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship broken successfully")
 		case "resync":
-			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resynced successfully")
+			rel, err := newUpdateSnapMirror(tool.SnapMirror{
+				DestinationPath:      parameters.DestinationPath,
+				PolicyName:           parameters.SnapMirrorUpdate.PolicyName,
+				TransferScheduleName: parameters.SnapMirrorUpdate.TransferScheduleName,
+				State:                "snapmirrored",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resynced successfully")
 		case "pause", "quiesce":
-			rel := ontap.SnapMirrorRelationship{State: "paused"}
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship paused successfully")
+			rel, err := newUpdateSnapMirror(tool.SnapMirror{
+				DestinationPath:      parameters.DestinationPath,
+				PolicyName:           parameters.SnapMirrorUpdate.PolicyName,
+				TransferScheduleName: parameters.SnapMirrorUpdate.TransferScheduleName,
+				State:                "paused",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship paused successfully")
 		case "resume":
-			rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resumed successfully")
+			rel, err := newUpdateSnapMirror(tool.SnapMirror{
+				DestinationPath:      parameters.DestinationPath,
+				PolicyName:           parameters.SnapMirrorUpdate.PolicyName,
+				TransferScheduleName: parameters.SnapMirrorUpdate.TransferScheduleName,
+				State:                "snapmirrored",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resumed successfully")
 		default:
 			rel, err := newUpdateSnapMirror(tool.SnapMirror{
 				DestinationPath:      parameters.DestinationPath,
@@ -125,8 +165,7 @@ func (a *App) ModifySnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 			if err != nil {
 				return nil, nil, err
 			}
-
-			return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship updated successfully")
+			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship updated successfully")
 		}
 	case "delete":
 		err = client.DeleteSnapMirror(ctx, parameters.DestinationPath)
@@ -156,7 +195,7 @@ func (a *App) InitializeSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, 
 	}
 
 	rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
-	return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship initialized successfully")
+	return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship initialized successfully")
 }
 
 func (a *App) UpdateSnapMirrorTransfer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapMirror) (*mcp.CallToolResult, any, error) {
@@ -228,7 +267,7 @@ func (a *App) BreakSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, param
 	}
 
 	rel := ontap.SnapMirrorRelationship{State: "broken_off"}
-	return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship broken successfully")
+	return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship broken successfully")
 }
 
 func (a *App) ResyncSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SnapMirror) (*mcp.CallToolResult, any, error) {
@@ -247,7 +286,7 @@ func (a *App) ResyncSnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 	}
 
 	rel := ontap.SnapMirrorRelationship{State: "snapmirrored"}
-	return a.updateSnapMirrorState(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resynced successfully")
+	return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resynced successfully")
 }
 
 func newCreateSnapMirror(in tool.SnapMirrorCreate) (ontap.SnapMirrorRelationship, error) {
@@ -300,13 +339,13 @@ func validateDestination(destPath string) error {
 	return nil
 }
 
-func (a *App) updateSnapMirrorState(ctx context.Context, client *rest.Client, destPath string, rel ontap.SnapMirrorRelationship, returnText string) (*mcp.CallToolResult, any, error) { //nolint:unparam
+func (a *App) updateSnapMirror(ctx context.Context, client *rest.Client, destPath string, rel ontap.SnapMirrorRelationship, returnText string) (*mcp.CallToolResult, any, error) { //nolint:unparam
 	uuid, rType, err := client.GetSnapMirrorUUIDAndType(ctx, destPath)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
 
-	if rel.State == "snapmirrored" && (rType == "sync" || rType == "strict_sync") {
+	if rel.State == "snapmirrored" && rType == "sync" {
 		rel.State = "in_sync"
 	}
 
