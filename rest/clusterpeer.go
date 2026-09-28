@@ -97,6 +97,10 @@ func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.Cluste
 		return "", err
 	}
 
+	if err := c.handleJob(ctx, statusCode, &buf); err != nil {
+		return "", err
+	}
+
 	if err := json.Unmarshal(buf.Bytes(), &res); err != nil {
 		return "", fmt.Errorf("failed to decode cluster peer job response: %w", err)
 	}
@@ -113,7 +117,7 @@ func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.Cluste
 		return "", errors.New("cluster peer response is missing UUID")
 	}
 
-	return clPeerUUID, c.handleJob(ctx, statusCode, &buf)
+	return clPeerUUID, nil
 }
 
 func (c *Client) DeleteClusterPeer(ctx context.Context, destinationClient *Client) error {
