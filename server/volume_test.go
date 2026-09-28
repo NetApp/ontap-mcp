@@ -15,7 +15,7 @@ func TestNewCreateVolume(t *testing.T) {
 		volume          string
 		svm             string
 		aggregate       string
-		model           string
+		remote          ontap.Remote
 		size            string
 		path            string
 		expectedErr     string
@@ -26,7 +26,7 @@ func TestNewCreateVolume(t *testing.T) {
 			volume:          "volume1",
 			svm:             "svm1",
 			aggregate:       "aggr1",
-			model:           ontap.CDOT,
+			remote:          ontap.Remote{Model: ontap.CDOT},
 			size:            "100mb",
 			path:            "/volume1",
 			expectedErr:     "",
@@ -37,7 +37,7 @@ func TestNewCreateVolume(t *testing.T) {
 			volume:          "volume2",
 			svm:             "svm2",
 			aggregate:       "",
-			model:           ontap.AFX,
+			remote:          ontap.Remote{Model: ontap.AFX},
 			size:            "10GB",
 			path:            "/volume2",
 			expectedErr:     "",
@@ -48,7 +48,7 @@ func TestNewCreateVolume(t *testing.T) {
 			volume:          "volume3",
 			svm:             "svm3",
 			aggregate:       "",
-			model:           ontap.CDOT,
+			remote:          ontap.Remote{Model: ontap.CDOT},
 			size:            "100mb",
 			path:            "/volume3",
 			expectedErr:     "aggregate name is required",
@@ -59,7 +59,7 @@ func TestNewCreateVolume(t *testing.T) {
 			volume:          "volume4",
 			svm:             "svm4",
 			aggregate:       "aggr4",
-			model:           ontap.AFX,
+			remote:          ontap.Remote{Model: ontap.AFX},
 			size:            "100mb",
 			path:            "/volume4",
 			expectedErr:     "aggregate name must not be provided for AFX clusters",
@@ -70,7 +70,7 @@ func TestNewCreateVolume(t *testing.T) {
 			volume:          "volume5",
 			svm:             "svm5",
 			aggregate:       "aggr5",
-			model:           ontap.ASAr2,
+			remote:          ontap.Remote{Model: ontap.ASAr2},
 			size:            "100mb",
 			path:            "/volume5",
 			expectedErr:     "volume creation is not supported on ASAr2 clusters, use storage units instead",
@@ -81,7 +81,7 @@ func TestNewCreateVolume(t *testing.T) {
 			volume:          "volume6",
 			svm:             "svm6",
 			aggregate:       "",
-			model:           "",
+			remote:          ontap.Remote{},
 			size:            "100mb",
 			path:            "/volume6",
 			expectedErr:     "aggregate name is required",
@@ -91,7 +91,7 @@ func TestNewCreateVolume(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := newCreateVolume(tool.VolumeCreate{SVM: tt.svm, Aggregate: tt.aggregate, Volume: tt.volume, Size: tt.size, JunctionPath: tt.path}, tt.model)
+			_, err := newCreateVolume(tool.VolumeCreate{SVM: tt.svm, Aggregate: tt.aggregate, Volume: tt.volume, Size: tt.size, JunctionPath: tt.path}, tt.remote)
 			if tt.expectedErr == "" {
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
@@ -126,7 +126,7 @@ func TestCreateVolumeMapsCDOTFlexVolWithoutStyle(t *testing.T) {
 		SVM:       "vs1",
 		Volume:    "vol1",
 		Aggregate: "aggr1",
-	}, ontap.CDOT)
+	}, ontap.Remote{Model: ontap.CDOT})
 	if err != nil {
 		t.Fatalf("newCreateVolume() error = %v", err)
 	}
@@ -147,7 +147,7 @@ func TestCreateVolumeMapsFlexGroupWithTwoAggregates(t *testing.T) {
 		Size:                     "1TB",
 		JunctionPath:             "/fg1",
 		GuaranteeType:            "none",
-	}, ontap.CDOT)
+	}, ontap.Remote{Model: ontap.CDOT})
 	if err != nil {
 		t.Fatalf("newCreateVolume() error = %v", err)
 	}
@@ -165,7 +165,7 @@ func TestCreateVolumeRejectsBothAggregateNameAndAggregateNames(t *testing.T) {
 		Style:          "flexgroup",
 		Aggregate:      "aggr1",
 		AggregateNames: []string{"aggr1", "aggr2"},
-	}, ontap.CDOT)
+	}, ontap.Remote{Model: ontap.CDOT})
 	if err == nil {
 		t.Fatal("newCreateVolume() error = nil, want aggregate name conflict")
 	}
@@ -179,7 +179,7 @@ func TestCreateVolumeRejectsFlexGroupWithoutAggregateNames(t *testing.T) {
 		SVM:    "vs1",
 		Volume: "fg1",
 		Style:  "flexgroup",
-	}, ontap.CDOT)
+	}, ontap.Remote{Model: ontap.CDOT})
 	if err == nil {
 		t.Fatal("newCreateVolume() error = nil, want missing aggregate_names")
 	}
@@ -204,7 +204,7 @@ func TestCreateVolumeRejectsEmptyFlexGroupAggregateNames(t *testing.T) {
 				Volume:         "fg1",
 				Style:          "flexgroup",
 				AggregateNames: tt.names,
-			}, ontap.CDOT)
+			}, ontap.Remote{Model: ontap.CDOT})
 			if err == nil {
 				t.Fatal("newCreateVolume() error = nil, want empty aggregate name rejected")
 			}
@@ -221,7 +221,7 @@ func TestCreateVolumeRejectsFlexGroupConstituentStyle(t *testing.T) {
 		Volume:         "fg1",
 		Style:          "flexgroup_constituent",
 		AggregateNames: []string{"aggr1"},
-	}, ontap.CDOT)
+	}, ontap.Remote{Model: ontap.CDOT})
 	if err == nil {
 		t.Fatal("newCreateVolume() error = nil, want unsupported style")
 	}
@@ -274,7 +274,7 @@ func TestCreateVolumeRejectsFlexGroupFieldsOnFlexVol(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := newCreateVolume(tt.in, ontap.CDOT)
+			_, err := newCreateVolume(tt.in, ontap.Remote{Model: ontap.CDOT})
 			if err == nil {
 				t.Fatal("newCreateVolume() error = nil, want FlexGroup fields rejected on FlexVol")
 			}
@@ -290,7 +290,7 @@ func TestCreateVolumeOmitsOptimizeAggregatesUnlessTrue(t *testing.T) {
 		AggregateNames: []string{"aggr1", "aggr2"},
 	}
 
-	omitted, err := newCreateVolume(base, ontap.CDOT)
+	omitted, err := newCreateVolume(base, ontap.Remote{Model: ontap.CDOT})
 	if err != nil {
 		t.Fatalf("omitted optimize_aggr_list: %v", err)
 	}
@@ -300,7 +300,7 @@ func TestCreateVolumeOmitsOptimizeAggregatesUnlessTrue(t *testing.T) {
 
 	falseVal := base
 	falseVal.OptimizeAggrList = new(false)
-	gotFalse, err := newCreateVolume(falseVal, ontap.CDOT)
+	gotFalse, err := newCreateVolume(falseVal, ontap.Remote{Model: ontap.CDOT})
 	if err != nil {
 		t.Fatalf("optimize_aggr_list=false: %v", err)
 	}
@@ -310,7 +310,7 @@ func TestCreateVolumeOmitsOptimizeAggregatesUnlessTrue(t *testing.T) {
 
 	trueVal := base
 	trueVal.OptimizeAggrList = new(true)
-	gotTrue, err := newCreateVolume(trueVal, ontap.CDOT)
+	gotTrue, err := newCreateVolume(trueVal, ontap.Remote{Model: ontap.CDOT})
 	if err != nil {
 		t.Fatalf("optimize_aggr_list=true: %v", err)
 	}
@@ -330,7 +330,7 @@ func TestCreateVolumeMapsGranularDataModes(t *testing.T) {
 	for _, mode := range []string{"", "disabled"} {
 		in := base
 		in.GranularData = mode
-		got, err := newCreateVolume(in, ontap.CDOT)
+		got, err := newCreateVolume(in, ontap.Remote{Model: ontap.CDOT})
 		if err != nil {
 			t.Fatalf("granular_data=%q: %v", mode, err)
 		}
@@ -343,7 +343,7 @@ func TestCreateVolumeMapsGranularDataModes(t *testing.T) {
 	for _, mode := range []string{"basic", "advanced"} {
 		in := base
 		in.GranularData = mode
-		got, err := newCreateVolume(in, ontap.CDOT)
+		got, err := newCreateVolume(in, ontap.Remote{Model: ontap.CDOT})
 		if err != nil {
 			t.Fatalf("granular_data=%q: %v", mode, err)
 		}
@@ -355,13 +355,13 @@ func TestCreateVolumeMapsGranularDataModes(t *testing.T) {
 
 	in := base
 	in.GranularData = "weird"
-	if _, err := newCreateVolume(in, ontap.CDOT); err == nil {
+	if _, err := newCreateVolume(in, ontap.Remote{Model: ontap.CDOT}); err == nil {
 		t.Fatal("granular_data=weird: error = nil, want rejection")
 	}
 }
 
 func TestCreateVolumeRejectsFlexGroupOnClassicASA(t *testing.T) {
-	_, err := newCreateVolumeRemote(tool.VolumeCreate{
+	_, err := newCreateVolume(tool.VolumeCreate{
 		SVM:            "vs1",
 		Volume:         "fg1",
 		Style:          "flexgroup",
@@ -381,7 +381,7 @@ func TestCreateVolumeRejectsFlexGroupFieldsOnAFX(t *testing.T) {
 		Volume:         "fg1",
 		Style:          "flexgroup",
 		AggregateNames: []string{"saz0"},
-	}, ontap.AFX)
+	}, ontap.Remote{Model: ontap.AFX})
 	if err == nil {
 		t.Fatal("newCreateVolume() error = nil, want AFX FlexGroup refusal")
 	}
@@ -391,7 +391,7 @@ func TestCreateVolumeRejectsFlexGroupFieldsOnAFX(t *testing.T) {
 }
 
 func TestCreateVolumeAllowsFlexVolOnClassicASA(t *testing.T) {
-	got, err := newCreateVolumeRemote(tool.VolumeCreate{
+	got, err := newCreateVolume(tool.VolumeCreate{
 		SVM:       "vs1",
 		Volume:    "vol1",
 		Aggregate: "aggr1",
@@ -410,7 +410,7 @@ func TestCreateVolumeMapsAFXFlexVolWithoutAggregate(t *testing.T) {
 		SVM:    "vs1",
 		Volume: "vol1",
 		Size:   "10GB",
-	}, ontap.AFX)
+	}, ontap.Remote{Model: ontap.AFX})
 	if err != nil {
 		t.Fatalf("newCreateVolume() error = %v", err)
 	}
