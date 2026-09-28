@@ -57,6 +57,9 @@ func (c *Client) fetchInterClusterLIFs(ctx context.Context, cluster string) ([]s
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
+	// Filter inter cluster LIFs which are up and running.
+	params.Set("enabled", "true")
+	params.Set("state", "up")
 	params.Set("fields", "ip.address")
 	params.Set("services", "intercluster_core")
 
@@ -69,7 +72,7 @@ func (c *Client) fetchInterClusterLIFs(ctx context.Context, cluster string) ([]s
 	}
 
 	if icl.NumRecords == 0 {
-		return []string{}, fmt.Errorf("failed to find intercluster LIFS for cluster=%s because it does not exist", cluster)
+		return []string{}, fmt.Errorf("failed to find up and running intercluster LIFS for cluster=%s because it does not exist", cluster)
 	}
 
 	for _, lifData := range icl.Records {
@@ -98,9 +101,16 @@ func (c *Client) createClusterPeer(ctx context.Context, clusterPeer ontap.Cluste
 		return "", fmt.Errorf("failed to decode cluster peer job response: %w", err)
 	}
 
+	if res.NumRecords == 0 {
+		return "", errors.New("cluster peer not found")
+	}
+	if res.NumRecords != 1 {
+		return "", fmt.Errorf("found %d cluster peer, expected 1", res.NumRecords)
+	}
+
 	clPeerUUID := strings.TrimSpace(res.Records[0].UUID)
 	if clPeerUUID == "" {
-		return "", errors.New("cluster peer job response is missing UUID")
+		return "", errors.New("cluster peer response is missing UUID")
 	}
 
 	return clPeerUUID, c.handleJob(ctx, statusCode, &buf)
