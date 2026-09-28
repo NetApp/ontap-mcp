@@ -28,6 +28,7 @@ import (
 	"github.com/netapp/ontap-mcp/catalog"
 	"github.com/netapp/ontap-mcp/config"
 	"github.com/netapp/ontap-mcp/descriptions"
+	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/rest"
 	"github.com/netapp/ontap-mcp/server/lock"
 	"github.com/netapp/ontap-mcp/tool"
@@ -73,8 +74,7 @@ type App struct {
 }
 
 type cachedVersion struct {
-	version string
-	model   string
+	remote  ontap.Remote
 	fetched time.Time
 }
 
@@ -490,31 +490,38 @@ func (a *App) resolveCluster(input string) (string, bool) {
 	return canonical, ok
 }
 
-func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, string, error) {
+func (a *App) getClusterRemote(ctx context.Context, cluster string) (ontap.Remote, error) {
 	canonical, ok := a.resolveCluster(cluster)
 	if !ok {
-		return "", "", fmt.Errorf("cluster %s not found", cluster)
+		return ontap.Remote{}, fmt.Errorf("cluster %s not found", cluster)
 	}
 
 	if cached, ok := a.versionCache.Load(canonical); ok {
 		cv := cached.(cachedVersion)
 		if time.Since(cv.fetched) < versionCacheTTL {
-			return cv.version, cv.model, nil
+			return cv.remote, nil
 		}
 	}
 
 	client, err := a.getClient(cluster)
 	if err != nil {
-		return "", "", err
+		return ontap.Remote{}, err
 	}
 	remote, err := client.GetClusterInfo(ctx)
+	if err != nil {
+		return ontap.Remote{}, err
+	}
+	a.versionCache.Store(canonical, cachedVersion{remote: remote, fetched: time.Now()})
+	return remote, nil
+}
+
+func (a *App) getClusterVersion(ctx context.Context, cluster string) (string, string, error) {
+	remote, err := a.getClusterRemote(ctx, cluster)
 	if err != nil {
 		return "", "", err
 	}
 	ver := fmt.Sprintf("%d.%d", remote.Version.Generation, remote.Version.Major)
-	model := remote.Model
-	a.versionCache.Store(canonical, cachedVersion{version: ver, model: model, fetched: time.Now()})
-	return ver, model, nil
+	return ver, remote.Model, nil
 }
 
 func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.ListClusterParams) (*mcp.CallToolResult, any, error) {
