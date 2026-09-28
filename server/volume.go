@@ -33,7 +33,7 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
 	}
 
-	volumeCreate, err := newCreateVolumeRemote(parameters, remote)
+	volumeCreate, err := newCreateVolume(parameters, remote)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
@@ -293,12 +293,7 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 
 // newCreateVolume validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API.
-// model is ontap.CDOT, ontap.AFX, ontap.ASAr2, or empty (treated as CDOT).
-func newCreateVolume(in tool.VolumeCreate, model string) (ontap.Volume, error) {
-	return newCreateVolumeRemote(in, ontap.Remote{Model: model})
-}
-
-func newCreateVolumeRemote(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, error) {
+func newCreateVolume(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, error) {
 	out := ontap.Volume{}
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -341,11 +336,16 @@ func newCreateVolumeRemote(in tool.VolumeCreate, remote ontap.Remote) (ontap.Vol
 		}
 		out.Style = "flexgroup"
 		out.Aggregates = make([]ontap.NameAndUUID, 0, len(in.AggregateNames))
+		seenAggrs := make(map[string]bool)
 		for _, name := range in.AggregateNames {
 			name = strings.TrimSpace(name)
 			if name == "" {
 				return out, errors.New("aggregate_names entries must not be empty")
 			}
+			if seenAggrs[name] {
+				return out, fmt.Errorf("aggregate_names contains duplicate aggregate %q", name)
+			}
+			seenAggrs[name] = true
 			out.Aggregates = append(out.Aggregates, ontap.NameAndUUID{Name: name})
 		}
 		out.ConstituentsPerAggregate = in.ConstituentsPerAggregate
