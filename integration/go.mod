@@ -7,12 +7,13 @@ replace github.com/netapp/ontap-mcp => ../
 require (
 	github.com/carlmjohnson/requests v0.26.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/netapp/ontap-mcp v0.0.0
-	github.com/openai/openai-go/v3 v3.61.0
+	github.com/openai/openai-go/v3 v3.64.0
 )
 
 require (
+	github.com/coder/websocket v1.8.15 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
