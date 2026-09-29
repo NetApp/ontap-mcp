@@ -184,6 +184,9 @@ const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
 const ModifySVM = `Update or delete an SVM on a cluster by cluster name.`
 const DeleteSVMPeer = `Delete an SVM peer on a cluster by cluster name and local SVM name. The peer relationship UUID is looked up internally using the svm.name filter.`
 
+const CreateClusterPeer = `Create a cluster peer relationship on source and destination registered cluster identifiers.`
+const DeleteClusterPeer = `Delete a cluster peer relationship on source and destination registered cluster identifiers.`
+
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 
 RULES:

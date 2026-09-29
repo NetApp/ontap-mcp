@@ -155,6 +155,25 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 ## Multi-Cluster Management
 
 - `list_registered_clusters`
+- `create_cluster_peer`
+- `delete_cluster_peer`
+
+### Cluster peer relationships
+
+The cluster peer tools create or delete a peer relationship on both clusters in one operation. Both clusters must be registered in the same ONTAP MCP configuration and must have intercluster LIFs configured. Use the cluster identifiers from the `Pollers` section of `ontap.yaml`, not necessarily the cluster names reported by ONTAP. Call `list_registered_clusters` to discover the available identifiers.
+
+| Argument | Description |
+|----------|-------------|
+| `source_cluster_name` | Registered identifier of the source cluster. |
+| `destination_cluster_name` | Registered identifier of the destination cluster. |
+
+`create_cluster_peer` discovers the intercluster LIF addresses on both clusters and generates the authentication passphrase internally. The caller does not provide LIF addresses or a passphrase.
+
+`delete_cluster_peer` looks up the ONTAP cluster names and removes the matching relationship from both clusters. Deletion fails if either side has no matching relationship or has more than one matching relationship.
+
+!!! warning
+
+	`create_cluster_peer` and `delete_cluster_peer` modify both named clusters. `delete_cluster_peer` is destructive.
 
 # Tool Mode
 
