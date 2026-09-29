@@ -60,6 +60,7 @@ type GetData struct {
 		Lun      NameAndUUID      `json:"lun,omitzero"`
 		IGroup   NameAndUUID      `json:"igroup,omitzero"`
 		Policy   SnapMirrorPolicy `json:"policy,omitzero"`
+		IP       IP           `json:"ip,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -139,21 +140,25 @@ type VolumeQoS struct {
 }
 
 type Volume struct {
-	SVM            NameAndUUID          `json:"svm,omitzero"`
-	Name           string               `json:"name,omitzero"`
-	Aggregates     []NameAndUUID        `json:"aggregates,omitzero"`
-	Files          Files                `json:"files,omitzero"`
-	State          string               `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
-	Style          string               `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
-	Size           int64                `json:"size,omitempty"`
-	Nas            NAS                  `json:"nas,omitzero"`
-	Autosize       Autosize             `json:"autosize,omitzero"`
-	Guarantee      VolumeGuarantee      `json:"guarantee,omitzero"`
-	SnapshotPolicy VolumeSnapshotPolicy `json:"snapshot_policy,omitzero"`
-	Space          VolumeSpace          `json:"space,omitzero"`
-	Efficiency     VolumeEfficiency     `json:"efficiency,omitzero"`
-	QoS            VolumeQoS            `json:"qos,omitzero"`
-	Type           string               `json:"type,omitzero"` // enum: rw, dp, ls
+	SVM                      NameAndUUID          `json:"svm,omitzero"`
+	Name                     string               `json:"name,omitzero"`
+	Aggregates               []NameAndUUID        `json:"aggregates,omitzero"`
+	Files                    Files                `json:"files,omitzero"`
+	State                    string               `json:"state,omitempty"` // enum: error, mixed, offline, online, restricted
+	Style                    string               `json:"style,omitempty"` // enum: flexvol, flexgroup, flexgroup_constituent
+	Size                     int64                `json:"size,omitempty"`
+	Nas                      NAS                  `json:"nas,omitzero"`
+	Autosize                 Autosize             `json:"autosize,omitzero"`
+	Guarantee                VolumeGuarantee      `json:"guarantee,omitzero"`
+	SnapshotPolicy           VolumeSnapshotPolicy `json:"snapshot_policy,omitzero"`
+	Space                    VolumeSpace          `json:"space,omitzero"`
+	Efficiency               VolumeEfficiency     `json:"efficiency,omitzero"`
+	QoS                      VolumeQoS            `json:"qos,omitzero"`
+	Type                     string               `json:"type,omitzero"` // enum: rw, dp, ls
+	ConstituentsPerAggregate *int                 `json:"constituents_per_aggregate,omitzero"`
+	OptimizeAggregates       *bool                `json:"optimize_aggregates,omitzero"`
+	GranularData             *bool                `json:"granular_data,omitzero"`
+	GranularDataMode         string               `json:"granular_data_mode,omitempty"`
 }
 
 type NameAndUUID struct {
@@ -445,6 +450,19 @@ type SnapMirrorRelationship struct {
 
 type SnapMirrorTransfer struct {
 	State string `json:"state,omitzero"` // enum: aborted, failed, hard_aborted, queued, success, transferring
+}
+
+type ClusterPeer struct {
+	RemotePeer     RemotePeer     `json:"remote" jsonschema:"remote cluster peer lifs detail"`
+	Authentication Authentication `json:"authentication" jsonschema:"authentication"`
+}
+
+type RemotePeer struct {
+	IPaddresses []string `json:"ip_addresses" jsonschema:"inter remote cluster LIFs addresses for cluster peer"`
+}
+
+type Authentication struct {
+	Passphrase string `json:"passphrase" jsonschema:"passphrase"`
 }
 
 const (

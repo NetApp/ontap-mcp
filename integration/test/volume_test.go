@@ -6,7 +6,9 @@ import (
 	"github.com/carlmjohnson/requests"
 	"github.com/netapp/ontap-mcp/ontap"
 	"log/slog"
+	"maps"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -178,6 +180,139 @@ func TestVolume(t *testing.T) {
 	}
 }
 
+func TestFlexGroupVolume(t *testing.T) {
+	SkipIfMissing(t, CheckTools)
+
+	const (
+		firstAggregate  = "harvest_vc_aggr"
+		secondAggregate = "umeng_aff300_aggr1"
+	)
+	flexGroupName := rn("fgdocs")
+	svmName := rn("fgmarketing")
+	flexGroupAPI := "api/storage/volumes?name=" + flexGroupName + "&svm.name=" + svmName + "&fields=style,aggregates.name,constituents.name,nas.path"
+
+	tests := []struct {
+		name             string
+		input            string
+		toolArgs         map[string]any
+		expectedOntapErr string
+		verifyAPI        ontapVerifier
+	}{
+		{
+			name:             "Clean FlexGroup SVM",
+			input:            ClusterStr + "delete " + svmName + " svm",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/svm/svms?name=" + svmName, validationFunc: deleteObject},
+		},
+		{
+			name:      "Create FlexGroup SVM",
+			input:     ClusterStr + "create " + svmName + " svm",
+			verifyAPI: ontapVerifier{api: "api/svm/svms?name=" + svmName, validationFunc: createObject},
+		},
+		{
+			name:             "Reject FlexGroup without aggregates",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, nil),
+			expectedOntapErr: "aggregate_names is required",
+		},
+		{
+			name:             "Reject FlexGroup with both aggregate fields",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"aggregate_name": firstAggregate, "aggregate_names": []string{firstAggregate, secondAggregate}}),
+			expectedOntapErr: "cannot set both aggregate_name and aggregate_names",
+		},
+		{
+			name:             "Reject FlexGroup with duplicate aggregates",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"aggregate_names": []string{firstAggregate, firstAggregate}}),
+			expectedOntapErr: "contains duplicate aggregate",
+		},
+		{
+			name:             "Reject FlexGroup constituent style",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"style": "flexgroup_constituent", "aggregate_names": []string{firstAggregate, secondAggregate}}),
+			expectedOntapErr: "flexgroup_constituent is not supported",
+		},
+		{
+			name:             "Reject invalid granular data mode",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"aggregate_names": []string{firstAggregate, secondAggregate}, "granular_data": "weird"}),
+			expectedOntapErr: "unsupported granular_data",
+		},
+		{
+			name:             "Reject basic granular data on ONTAP 9.9.1",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"aggregate_names": []string{firstAggregate, secondAggregate}, "granular_data": "basic"}),
+			expectedOntapErr: "Unexpected argument",
+		},
+		{
+			name:             "Reject advanced granular data on ONTAP 9.9.1",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"aggregate_names": []string{firstAggregate, secondAggregate}, "granular_data": "advanced"}),
+			expectedOntapErr: "Unexpected argument",
+		},
+		{
+			name:             "Reject optimized aggregates on ONTAP 9.9.1",
+			toolArgs:         flexGroupCreateArgs(svmName, flexGroupName, map[string]any{"aggregate_names": []string{firstAggregate, secondAggregate}, "constituents_per_aggregate": 2, "optimize_aggr_list": true}),
+			expectedOntapErr: "Unexpected argument",
+		},
+		{
+			name:  "Create FlexGroup with placement fields",
+			input: ClusterStr + "create a 100GB FlexGroup volume named " + flexGroupName + " on the " + svmName + " svm using aggregate_names " + firstAggregate + " with 1 constituent per aggregate, optimize_aggr_list false, granular_data disabled, and junction path /" + flexGroupName,
+			verifyAPI: ontapVerifier{
+				api:            flexGroupAPI,
+				validationFunc: verifyFlexGroup([]string{firstAggregate}, 1, "/"+flexGroupName),
+			},
+		},
+		{
+			name:      "Clear FlexGroup volume",
+			input:     ClusterStr + "delete volume " + flexGroupName + " in " + svmName + " svm",
+			verifyAPI: ontapVerifier{api: "api/storage/volumes?name=" + flexGroupName + "&svm.name=" + svmName, validationFunc: deleteObject},
+		},
+		{
+			name:      "Clean FlexGroup SVM",
+			input:     ClusterStr + "delete " + svmName + " svm",
+			verifyAPI: ontapVerifier{api: "api/svm/svms?name=" + svmName, validationFunc: deleteObject},
+		},
+	}
+
+	cfg, err := config.ReadConfig(ConfigFile)
+	if err != nil {
+		t.Fatalf("Error parsing the config: %v", err)
+	}
+	poller := cfg.Pollers[Cluster]
+	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: poller.InsecureTLS()}} // #nosec G402
+	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.toolArgs != nil {
+				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+				defer cancel()
+				_, err := testAgent.callMCPTool(ctx, "create_volume", tt.toolArgs)
+				if err == nil || !strings.Contains(err.Error(), tt.expectedOntapErr) {
+					t.Fatalf("create_volume error = %v, want error containing %q", err, tt.expectedOntapErr)
+				}
+				return
+			}
+			slog.Debug("", slog.String("Input", tt.input))
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+			defer cancel()
+			if _, err := testAgent.ChatWithResponse(ctx, t, tt.input, tt.expectedOntapErr); err != nil {
+				t.Fatalf("Error processing input %q: %v", tt.input, err)
+			}
+			if tt.verifyAPI.api != "" && !tt.verifyAPI.validationFunc(t, tt.verifyAPI.api, poller, client) {
+				t.Errorf("Error while accessing the object via prompt %q", tt.input)
+			}
+		})
+	}
+}
+
+func flexGroupCreateArgs(svmName, volumeName string, extra map[string]any) map[string]any {
+	args := map[string]any{
+		"cluster_name": Cluster,
+		"svm_name":     svmName,
+		"volume_name":  volumeName,
+		"style":        "flexgroup",
+		"size":         "100GB",
+	}
+	maps.Copy(args, extra)
+	return args
+}
+
 func fetchModel(api string, poller *config.Poller, client *http.Client) string {
 	type response struct {
 		Name          string `json:"name"`
@@ -243,6 +378,68 @@ func verifyFilesMax(expectedFilesMax int) func(t *testing.T, api string, poller 
 
 		if v := *gotVolume.Files.Maximum; v < (expectedFilesMax-possibleVariation) || v >= expectedFilesMax {
 			t.Errorf("verifyFilesMax: files.maximum value is not in range %d - %d, got %d", expectedFilesMax-possibleVariation, expectedFilesMax, v)
+			return false
+		}
+		return true
+	}
+}
+
+func verifyFlexGroup(expectedAggregates []string, expectedConstituents int, expectedJunctionPath string) func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+	return func(t *testing.T, api string, poller *config.Poller, client *http.Client) bool {
+		type volume struct {
+			Style        string              `json:"style"`
+			Aggregates   []ontap.NameAndUUID `json:"aggregates"`
+			Constituents []ontap.NameAndUUID `json:"constituents"`
+			NAS          struct {
+				Path string `json:"path"`
+			} `json:"nas"`
+		}
+		type response struct {
+			NumRecords int      `json:"num_records"`
+			Records    []volume `json:"records"`
+		}
+
+		var data response
+		if err := requests.URL("https://"+poller.Addr+"/"+api).
+			BasicAuth(poller.Username, poller.Password).
+			Client(client).
+			ToJSON(&data).
+			Fetch(context.Background()); err != nil {
+			t.Errorf("verifyFlexGroup: request failed: %v", err)
+			return false
+		}
+		if data.NumRecords != 1 {
+			t.Errorf("verifyFlexGroup: expected 1 record, got %d", data.NumRecords)
+			return false
+		}
+
+		got := data.Records[0]
+		if got.Style != "flexgroup" {
+			t.Errorf("verifyFlexGroup: style = %q, want flexgroup", got.Style)
+			return false
+		}
+		expectedTotalConstituents := len(expectedAggregates) * expectedConstituents
+		if len(got.Constituents) != expectedTotalConstituents {
+			t.Errorf("verifyFlexGroup: constituent count = %d, want %d", len(got.Constituents), expectedTotalConstituents)
+			return false
+		}
+		if expectedJunctionPath != "" && got.NAS.Path != expectedJunctionPath {
+			t.Errorf("verifyFlexGroup: nas.path = %q, want %q", got.NAS.Path, expectedJunctionPath)
+			return false
+		}
+
+		gotAggregates := make(map[string]bool, len(got.Aggregates))
+		for _, aggregate := range got.Aggregates {
+			gotAggregates[aggregate.Name] = true
+		}
+		for _, aggregate := range expectedAggregates {
+			if !gotAggregates[aggregate] {
+				t.Errorf("verifyFlexGroup: aggregates = %v, missing %q", got.Aggregates, aggregate)
+				return false
+			}
+		}
+		if len(gotAggregates) != len(expectedAggregates) {
+			t.Errorf("verifyFlexGroup: aggregates = %v, want %v", got.Aggregates, expectedAggregates)
 			return false
 		}
 		return true
