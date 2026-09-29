@@ -923,7 +923,7 @@
 </ul>
 <h2 id="volume-management">Volume Management<a class="headerlink" href="#volume-management" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>create_volume</code></li>
+<li><code>create_volume</code> — FlexVol by default (<code>aggregate_name</code> on CDOT; omit on AFX). FlexGroup on Unified NAS (AFF/FAS) when <code>style=flexgroup</code> with <code>aggregate_names</code> (optional <code>constituents_per_aggregate</code>, <code>optimize_aggr_list</code>, <code>granular_data</code>). Not used to provision ASA r2 (storage units); FlexGroup is not supported on classic ASA.</li>
 <li><code>update_volume</code></li>
 <li><code>delete_volume</code></li>
 </ul>
