@@ -282,7 +282,11 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		}
 	}
 
-	applications := []string{strings.TrimSpace(parameters.Application)}
+	application := strings.TrimSpace(parameters.Application)
+	if application == "" {
+		application = "snapmirror"
+	}
+	applications := []string{application}
 	if parameters.AcceptOnly {
 		err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, applications, false)
 	} else {
@@ -417,7 +421,7 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		} else if !errors.Is(destinationErr, rest.ErrSVMPeerNotFound) {
 			deleteErrors = append(deleteErrors, destinationErr)
 		}
-		if !found {
+		if !found && len(deleteErrors) == 0 {
 			err = fmt.Errorf("%w between %s and %s", rest.ErrSVMPeerNotFound, parameters.SourceSVM, parameters.DestinationSVM)
 		} else {
 			err = errors.Join(deleteErrors...)

@@ -28,14 +28,29 @@ func TestSVMPeer(t *testing.T) {
 
 	localSourceSVM := rn("peer_local_src")
 	localDestinationSVM := rn("peer_local_dst")
-	//nolint:gocritic
-	//remoteSourceSVM := rn("peer_remote_src")
-	//remoteDestinationSVM := rn("peer_remote_dst")
+	remoteSourceSVM := rn("peer_remote_src")
+	remoteDestinationSVM := rn("peer_remote_dst")
 
 	localPeerAPI := "api/svm/peers?svm.name=" + localSourceSVM + "&peer.svm.name=" + localDestinationSVM + "&fields=state,applications"
-	//nolint:gocritic
-	//remoteSourcePeerAPI := "api/svm/peers?svm.name=" + remoteSourceSVM + "&peer.svm.name=" + remoteDestinationSVM + "&fields=state,applications"
-	//remoteDestinationPeerAPI := "api/svm/peers?svm.name=" + remoteDestinationSVM + "&peer.svm.name=" + remoteSourceSVM + "&fields=state,applications"
+	remoteSourcePeerAPI := "api/svm/peers?svm.name=" + remoteSourceSVM + "&peer.svm.name=" + remoteDestinationSVM + "&fields=state,applications"
+	remoteDestinationPeerAPI := "api/svm/peers?svm.name=" + remoteDestinationSVM + "&peer.svm.name=" + remoteSourceSVM + "&fields=state,applications"
+
+	cfg, err := config.ReadConfig(ConfigFile)
+	if err != nil {
+		t.Fatalf("Error parsing the config: %v", err)
+	}
+
+	clients := make(map[string]*http.Client, 2)
+	for _, cluster := range []string{SVMPeerVsimCluster, SVMPeerUmengCluster} {
+		poller := cfg.Pollers[cluster]
+		if poller == nil {
+			t.Skipf("Cluster %q not found in %s, skipping SVM peer tests", cluster, ConfigFile)
+		}
+		clients[cluster] = &http.Client{
+			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: poller.InsecureTLS()}}, // #nosec G402
+			Timeout:   10 * time.Second,
+		}
+	}
 
 	tests := []struct {
 		name             string
@@ -44,16 +59,18 @@ func TestSVMPeer(t *testing.T) {
 		verifications    []svmPeerVerification
 	}{
 		{
-			name:  "Delete local source SVM on vsim",
-			input: "On the " + SVMPeerVsimCluster + " cluster, Delete the " + localSourceSVM + " SVM",
+			name:             "Delete local source SVM on vsim",
+			input:            "On the " + SVMPeerVsimCluster + " cluster, Delete the " + localSourceSVM + " SVM",
+			expectedOntapErr: "because it does not exist",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerVsimCluster,
 				verifier: ontapVerifier{api: "api/svm/svms?name=" + localSourceSVM, validationFunc: deleteObject},
 			}},
 		},
 		{
-			name:  "Delete local destination SVM on vsim",
-			input: "On the " + SVMPeerVsimCluster + " cluster, Delete the " + localDestinationSVM + " SVM",
+			name:             "Delete local destination SVM on vsim",
+			input:            "On the " + SVMPeerVsimCluster + " cluster, Delete the " + localDestinationSVM + " SVM",
+			expectedOntapErr: "because it does not exist",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerVsimCluster,
 				verifier: ontapVerifier{api: "api/svm/svms?name=" + localDestinationSVM, validationFunc: deleteObject},
@@ -77,7 +94,7 @@ func TestSVMPeer(t *testing.T) {
 		},
 		{
 			name:  "Create local SVM peer on vsim",
-			input: "Use create_svm_peer with application snapmirror from the " + localSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + localDestinationSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
+			input: "Create svm peer with application snapmirror from the " + localSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + localDestinationSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerVsimCluster,
 				verifier: ontapVerifier{api: localPeerAPI, validationFunc: verifySVMPeer},
@@ -85,7 +102,7 @@ func TestSVMPeer(t *testing.T) {
 		},
 		{
 			name:  "Delete local SVM peer on vsim",
-			input: "Use delete_svm_peer to delete the SVM peer relationship from the " + localSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + localDestinationSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
+			input: "Delete the SVM peer relationship from the " + localSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + localDestinationSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerVsimCluster,
 				verifier: ontapVerifier{api: localPeerAPI, validationFunc: deleteObject},
@@ -93,7 +110,7 @@ func TestSVMPeer(t *testing.T) {
 		},
 		{
 			name:  "Delete local source SVM on vsim",
-			input: "Use modify_svm with operation delete for the " + localSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
+			input: "Delete " + localSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerVsimCluster,
 				verifier: ontapVerifier{api: "api/svm/svms?name=" + localSourceSVM, validationFunc: deleteObject},
@@ -101,96 +118,104 @@ func TestSVMPeer(t *testing.T) {
 		},
 		{
 			name:  "Delete local destination SVM on vsim",
-			input: "Use modify_svm with operation delete for the " + localDestinationSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
+			input: "Delete " + localDestinationSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerVsimCluster,
 				verifier: ontapVerifier{api: "api/svm/svms?name=" + localDestinationSVM, validationFunc: deleteObject},
 			}},
 		},
-		//nolint:gocritic
-		//{
-		//	name:  "Delete remote source SVM on vsim",
-		//	input: "On the " + SVMPeerVsimCluster + " cluster, Delete the " + remoteSourceSVM + " SVM",
-		//	verifications: []svmPeerVerification{{
-		//		cluster:  SVMPeerVsimCluster,
-		//		verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteSourceSVM, validationFunc: deleteObject},
-		//	}},
-		//},
-		//{
-		//	name:  "Delete remote destination SVM on umeng",
-		//	input: "On the " + SVMPeerVsimCluster + " cluster, Delete the " + remoteDestinationSVM + " SVM",
-		//	verifications: []svmPeerVerification{{
-		//		cluster:  SVMPeerUmengCluster,
-		//		verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteDestinationSVM, validationFunc: deleteObject},
-		//	}},
-		//},
-		//{
-		//	name:  "Create remote source SVM on vsim",
-		//	input: "On the " + SVMPeerVsimCluster + " cluster, create " + remoteSourceSVM + " svm",
-		//	verifications: []svmPeerVerification{{
-		//		cluster:  SVMPeerVsimCluster,
-		//		verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteSourceSVM, validationFunc: createObject},
-		//	}},
-		//},
-		//{
-		//	name:  "Create remote destination SVM on umeng",
-		//	input: "On the " + SVMPeerUmengCluster + " cluster, create " + remoteDestinationSVM + " svm",
-		//	verifications: []svmPeerVerification{{
-		//		cluster:  SVMPeerUmengCluster,
-		//		verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteDestinationSVM, validationFunc: createObject},
-		//	}},
-		//},
-		// Create cluster peer
-		//{
-		//	name:  "Create remote SVM peer from vsim to umeng",
-		//	input: "Use create_svm_peer with application snapmirror from the " + remoteSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + remoteDestinationSVM + " SVM on the " + SVMPeerUmengCluster + " cluster",
-		//	verifications: []svmPeerVerification{
-		//		{cluster: SVMPeerVsimCluster, verifier: ontapVerifier{api: remoteSourcePeerAPI, validationFunc: verifySVMPeer}},
-		//		{cluster: SVMPeerUmengCluster, verifier: ontapVerifier{api: remoteDestinationPeerAPI, validationFunc: verifySVMPeer}},
-		//	},
-		//},
-		//{
-		//	name:  "Delete remote SVM peer from vsim to umeng",
-		//	input: "Use delete_svm_peer to delete the SVM peer relationship from the " + remoteSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + remoteDestinationSVM + " SVM on the " + SVMPeerUmengCluster + " cluster",
-		//	verifications: []svmPeerVerification{
-		//		{cluster: SVMPeerVsimCluster, verifier: ontapVerifier{api: remoteSourcePeerAPI, validationFunc: deleteObject}},
-		//		{cluster: SVMPeerUmengCluster, verifier: ontapVerifier{api: remoteDestinationPeerAPI, validationFunc: deleteObject}},
-		//	},
-		//},
-		//{
-		//	name:  "Delete remote source SVM on vsim",
-		//	input: "Use modify_svm with operation delete for the " + remoteSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
-		//	verifications: []svmPeerVerification{{
-		//		cluster:  SVMPeerVsimCluster,
-		//		verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteSourceSVM, validationFunc: deleteObject},
-		//	}},
-		//},
-		//{
-		//	name:  "Delete remote destination SVM on umeng",
-		//	input: "Use modify_svm with operation delete for the " + remoteDestinationSVM + " SVM on the " + SVMPeerUmengCluster + " cluster",
-		//	verifications: []svmPeerVerification{{
-		//		cluster:  SVMPeerUmengCluster,
-		//		verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteDestinationSVM, validationFunc: deleteObject},
-		//	}},
-		//},
-		// Delete cluster peer
-	}
-
-	cfg, err := config.ReadConfig(ConfigFile)
-	if err != nil {
-		t.Fatalf("Error parsing the config: %v", err)
-	}
-
-	clients := make(map[string]*http.Client, 2)
-	for _, cluster := range []string{SVMPeerVsimCluster, SVMPeerUmengCluster} {
-		poller := cfg.Pollers[cluster]
-		if poller == nil {
-			t.Skipf("Cluster %q not found in %s, skipping SVM peer tests", cluster, ConfigFile)
-		}
-		clients[cluster] = &http.Client{
-			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: poller.InsecureTLS()}}, // #nosec G402
-			Timeout:   10 * time.Second,
-		}
+		{
+			name:             "Delete remote source SVM on vsim",
+			input:            "On the " + SVMPeerVsimCluster + " cluster, Delete the " + remoteSourceSVM + " SVM",
+			expectedOntapErr: "because it does not exist",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerVsimCluster,
+				verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteSourceSVM, validationFunc: deleteObject},
+			}},
+		},
+		{
+			name:             "Delete remote destination SVM on umeng",
+			input:            "On the " + SVMPeerVsimCluster + " cluster, Delete the " + remoteDestinationSVM + " SVM",
+			expectedOntapErr: "because it does not exist",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerUmengCluster,
+				verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteDestinationSVM, validationFunc: deleteObject},
+			}},
+		},
+		{
+			name:  "Create remote source SVM on vsim",
+			input: "On the " + SVMPeerVsimCluster + " cluster, create " + remoteSourceSVM + " svm",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerVsimCluster,
+				verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteSourceSVM, validationFunc: createObject},
+			}},
+		},
+		{
+			name:  "Create remote destination SVM on umeng",
+			input: "On the " + SVMPeerUmengCluster + " cluster, create " + remoteDestinationSVM + " svm",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerUmengCluster,
+				verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteDestinationSVM, validationFunc: createObject},
+			}},
+		},
+		{
+			name:             "Remove cluster peer",
+			input:            "On the " + SVMPeerVsimCluster + " cluster, remove cluster peer relationship with " + SVMPeerUmengCluster + " cluster",
+			expectedOntapErr: "because it does not exist",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerVsimCluster,
+				verifier: ontapVerifier{api: "api/cluster/peers?fields=status.state&remote.name=", validationFunc: verifyClusterPeer(false, cfg.Pollers[SVMPeerUmengCluster], clients[SVMPeerUmengCluster])},
+			}},
+		},
+		{
+			name:  "Create cluster peer",
+			input: "On the " + SVMPeerVsimCluster + " cluster, create cluster peer relationship with " + SVMPeerUmengCluster + " cluster",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerVsimCluster,
+				verifier: ontapVerifier{api: "api/cluster/peers?fields=status.state&remote.name=", validationFunc: verifyClusterPeer(true, cfg.Pollers[SVMPeerUmengCluster], clients[SVMPeerUmengCluster])},
+			}},
+		},
+		{
+			name:  "Create remote SVM peer from vsim to umeng",
+			input: "Create svm peer with application snapmirror from the " + remoteSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + remoteDestinationSVM + " SVM on the " + SVMPeerUmengCluster + " cluster",
+			verifications: []svmPeerVerification{
+				{cluster: SVMPeerVsimCluster, verifier: ontapVerifier{api: remoteSourcePeerAPI, validationFunc: verifySVMPeer}},
+				{cluster: SVMPeerUmengCluster, verifier: ontapVerifier{api: remoteDestinationPeerAPI, validationFunc: verifySVMPeer}},
+			},
+		},
+		{
+			name:  "Delete remote SVM peer from vsim to umeng",
+			input: "Delete svm peer relationship from the " + remoteSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster to the " + remoteDestinationSVM + " SVM on the " + SVMPeerUmengCluster + " cluster",
+			verifications: []svmPeerVerification{
+				{cluster: SVMPeerVsimCluster, verifier: ontapVerifier{api: remoteSourcePeerAPI, validationFunc: deleteObject}},
+				{cluster: SVMPeerUmengCluster, verifier: ontapVerifier{api: remoteDestinationPeerAPI, validationFunc: deleteObject}},
+			},
+		},
+		{
+			name:  "Delete remote source SVM on vsim",
+			input: "Delete " + remoteSourceSVM + " SVM on the " + SVMPeerVsimCluster + " cluster",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerVsimCluster,
+				verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteSourceSVM, validationFunc: deleteObject},
+			}},
+		},
+		{
+			name:  "Delete remote destination SVM on umeng",
+			input: "Delete " + remoteDestinationSVM + " SVM on the " + SVMPeerUmengCluster + " cluster",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerUmengCluster,
+				verifier: ontapVerifier{api: "api/svm/svms?name=" + remoteDestinationSVM, validationFunc: deleteObject},
+			}},
+		},
+		{
+			name:             "Remove cluster peer",
+			input:            "On the " + SVMPeerVsimCluster + " cluster, remove cluster peer relationship with " + SVMPeerUmengCluster + " cluster",
+			expectedOntapErr: "",
+			verifications: []svmPeerVerification{{
+				cluster:  SVMPeerVsimCluster,
+				verifier: ontapVerifier{api: "api/cluster/peers?fields=status.state&remote.name=", validationFunc: verifyClusterPeer(false, cfg.Pollers[SVMPeerUmengCluster], clients[SVMPeerUmengCluster])},
+			}},
+		},
 	}
 
 	for _, tt := range tests {
