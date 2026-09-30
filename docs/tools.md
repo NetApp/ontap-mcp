@@ -21,7 +21,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 ## Volume Management
 
-- `create_volume`
+- `create_volume` — FlexVol by default (`aggregate_name` on CDOT; omit on AFX). FlexGroup on Unified NAS (AFF/FAS) when `style=flexgroup` with `aggregate_names` (optional `constituents_per_aggregate`, `optimize_aggr_list`, `granular_data`). Not used to provision ASA r2 (storage units); FlexGroup is not supported on classic ASA.
 - `update_volume`
 - `delete_volume`
 
@@ -72,14 +72,19 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_qos_policy`
 - `delete_qos_policy`
 
-## Snapmirror Management
+## SnapMirror Management
+
 - `create_snapmirror`
+- `update_snapmirror_transfer`
+- `abort_snapmirror_transfer` (available in `multiplex` or `both` mode)
+- `modify_snapmirror` (available in `multiplex` or `both` mode)
 - `update_snapmirror`
 - `delete_snapmirror`
 - `initialize_snapmirror`
-- `update_snapmirror_transfer`
 - `break_snapmirror`
 - `resync_snapmirror`
+
+The `update_snapmirror`, `delete_snapmirror`, `initialize_snapmirror`, `break_snapmirror`, and `resync_snapmirror` tools are available in `legacy` or `both` mode. In the default `multiplex` mode, use `modify_snapmirror` for these relationship operations. The `abort_snapmirror_transfer` tool only aborts an active transfer.
 
 ## SVM Management
 
@@ -175,6 +180,25 @@ Set `accept_only` to `true` when the proposal was created out of band. In this m
 ## Multi-Cluster Management
 
 - `list_registered_clusters`
+- `create_cluster_peer`
+- `delete_cluster_peer`
+
+### Cluster peer relationships
+
+The cluster peer tools create or delete a peer relationship on both clusters in one operation. Both clusters must be registered in the same ONTAP MCP configuration and must have intercluster LIFs configured. Use the cluster identifiers from the `Pollers` section of `ontap.yaml`, not necessarily the cluster names reported by ONTAP. Call `list_registered_clusters` to discover the available identifiers.
+
+| Argument | Description |
+|----------|-------------|
+| `source_cluster_name` | Registered identifier of the source cluster. |
+| `destination_cluster_name` | Registered identifier of the destination cluster. |
+
+`create_cluster_peer` discovers the intercluster LIF addresses on both clusters and generates the authentication passphrase internally. The caller does not provide LIF addresses or a passphrase.
+
+`delete_cluster_peer` looks up the ONTAP cluster names and removes the matching relationship from both clusters. Deletion fails if either side has no matching relationship or has more than one matching relationship.
+
+!!! warning
+
+	`create_cluster_peer` and `delete_cluster_peer` modify both named clusters. `delete_cluster_peer` is destructive.
 
 # Tool Mode
 

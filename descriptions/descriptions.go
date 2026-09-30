@@ -32,7 +32,7 @@ Create/update/delete operations remain as dedicated typed tools
 const ListClusters = `List all ONTAP clusters registered in the server configuration. Returns cluster names with ONTAP version and model (e.g. cdot, asar2, afx).
 USE THIS FIRST: Always call this before any other tool to discover valid cluster names.`
 
-const CreateVolume = `Create a volume on a cluster by cluster name.`
+const CreateVolume = `Create a volume on a cluster by cluster name. FlexVol is the default: aggregate_name is required on CDOT and must be omitted on AFX. Set style=flexgroup with aggregate_names for a FlexGroup on Unified NAS (AFF/FAS) only. FlexGroup is not supported on classic ASA; AFX omits aggregates; ASA r2 does not use create_volume (provision a storage unit instead).`
 const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
 const DeleteVolume = `Delete a volume on a cluster by cluster name.`
 const ModifyVolume = `Update or delete a volume on a cluster by cluster name.`
@@ -162,9 +162,10 @@ const DeleteLunMap = `Delete a LUN map on a cluster by cluster name. Removes the
 const CreateSnapMirror = `Create a SnapMirror relationship on a cluster by cluster name.`
 const UpdateSnapMirror = `Update a SnapMirror relationship on a cluster by cluster name. Supports updating the snapmirror policy, snapmirror relationship state and transfer schedule of an existing relationship identified by its destination SVM and volume.`
 const DeleteSnapMirror = `Delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
-const ModifySnapMirror = `Update or delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names.`
+const ModifySnapMirror = `Update or delete a SnapMirror relationship on a cluster by cluster name. Identifies the relationship by destination SVM and volume names. initialize, break, resync, quiesce (or pause) and resume operations are supported for update.`
 const InitializeSnapMirror = `Initialize a SnapMirror relationship on a cluster by cluster name. Starts the baseline transfer from source to destination. Identifies the relationship by destination SVM and volume names.`
 const UpdateSnapMirrorTransfer = `Trigger a SnapMirror transfer initialize or update on a cluster by cluster name. Transfers new data from source to destination to bring the relationship up to date. Identifies the relationship by destination SVM and volume names.`
+const AbortSnapMirrorTransfer = `Abort a SnapMirror transfer on a cluster by cluster name. Identifies the relationship by destination SVM and volume names. This tool would abort active snapmirror transfer only.`
 const BreakSnapMirror = `Break a SnapMirror relationship on a cluster by cluster name. Sets the relationship state to broken_off, making the destination volume read-write. Identifies the relationship by destination SVM and volume names.`
 const ResyncSnapMirror = `Resync a SnapMirror relationship on a cluster by cluster name. Re-establishes replication by setting the state back to snapmirrored. Identifies the relationship by destination SVM and volume names.`
 
@@ -184,6 +185,9 @@ const DeleteSVM = `Delete an SVM on a cluster by cluster name.`
 const ModifySVM = `Update or delete an SVM on a cluster by cluster name.`
 const CreateSVMPeer = `Create an SVM peer relationship between source and destination SVMs, then accept it on the destination. The application defaults to snapmirror. Set accept_only to accept a proposal created out of band without creating one.`
 const DeleteSVMPeer = `Delete the exact SVM peer relationship identified by source cluster and SVM plus destination cluster and SVM. The relationship is removed across both clusters.`
+
+const CreateClusterPeer = `Create a cluster peer relationship on source and destination registered cluster identifiers.`
+const DeleteClusterPeer = `Delete a cluster peer relationship on source and destination registered cluster identifiers.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 

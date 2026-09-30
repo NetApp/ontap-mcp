@@ -343,6 +343,13 @@ Below are example questions that work well with the ONTAP MCP Server:
 - On the umeng-aff300-05-06 cluster, create a 20MB volume named docs on the marketing svm and the harvest_vc_aggr aggregate
 - <span class="key">Expected Response</span>: Volume "docs" has been created successfully on the umeng-aff300-05-06 cluster with 20MB size on the marketing SVM using the harvest_vc_aggr aggregate.
 
+**Create a FlexGroup Volume**
+
+- On the umeng-aff300-05-06 cluster, create a 400MB FlexGroup volume named fgdocs on the marketing svm using aggregates harvest_vc_aggr1 and harvest_vc_aggr2 with 2 constituents per aggregate and junction path /fgdocs
+- <span class="key">Expected Response</span>: Volume created successfully
+
+FlexGroup create is for Unified NAS (AFF/FAS) only. Classic ASA rejects FlexGroup. AFX volume placement omits aggregates. ASA r2 does not provision volumes with `create_volume`.
+
 **Resize a Volume**
 
 - On the umeng-aff300-05-06 cluster, resize the docs volume on the marketing svm to 25MB.
@@ -385,29 +392,77 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 - On the umeng-aff300-05-06 cluster, create a snapmirror relationship from source svm srsvm and source volume srvol to destination svm dtsvm and destination volume dtvol with policy name XDPDefault
 
-Expected Response: SnapMirror relationship created successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship created successfully
 
 **Update a SnapMirror relationship**
 
 - On the umeng-aff300-05-06 cluster, update a snapmirror relationship of destination svm dtsvm and destination volume dtvol with transfer schedule name to hourly
 
-Expected Response: SnapMirror relationship updated successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship updated successfully
+
+**Initialize a SnapMirror relationship**
+
+- On the umeng-aff300-05-06 cluster, initialize a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror relationship initialized successfully
+
+**Trigger an on-demand SnapMirror transfer**
+
+- On the umeng-aff300-05-06 cluster, update the snapmirror transfer for destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror transfer updated successfully
+
+**Abort an active SnapMirror transfer**
+
+- On the umeng-aff300-05-06 cluster, abort the active snapmirror transfer for destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror transfer aborted successfully
+
+The abort operation requires a transfer that is currently in the `transferring` state.
 
 **Update a SnapMirror relationship state**
 
 - On the umeng-aff300-05-06 cluster, break a snapmirror relationship of destination svm dtsvm and destination volume dtvol
 
-Expected Response: SnapMirror relationship broken successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship broken successfully
 
 - On the umeng-aff300-05-06 cluster, resync a snapmirror relationship of destination svm dtsvm and destination volume dtvol
 
-Expected Response: SnapMirror relationship resynced successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship resynced successfully
+
+- On the umeng-aff300-05-06 cluster, pause a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror relationship paused successfully
+
+- On the umeng-aff300-05-06 cluster, resume a snapmirror relationship of destination svm dtsvm and destination volume dtvol
+
+- <span class="key">Expected Response</span>: SnapMirror relationship resumed successfully
 
 **Delete a SnapMirror relationship**
 
 - On the umeng-aff300-05-06 cluster, delete a snapmirror relationship of destination svm dtsvm and destination volume dtvol
 
-Expected Response: SnapMirror relationship deleted successfully
+- <span class="key">Expected Response</span>: SnapMirror relationship deleted successfully
+
+---
+
+### Cluster Peering
+
+Both cluster names in these prompts are identifiers from the `Pollers` section of `ontap.yaml`. Both clusters must be registered with the same ONTAP MCP server and have intercluster LIFs configured.
+
+**Create a cluster peer relationship**
+
+- Create a cluster peer relationship between the sar source cluster and the aff destination cluster.
+- <span class="key">Expected Response</span>: cluster peer relationship created successfully
+
+The server discovers both clusters' intercluster LIFs and generates the authentication passphrase; do not include either in the prompt.
+
+**Delete a cluster peer relationship**
+
+- Delete the cluster peer relationship between the sar source cluster and the aff destination cluster.
+- <span class="key">Expected Response</span>: cluster peer relationship deleted successfully
+
+Deletion removes the relationship from both clusters.
 
 ---
 

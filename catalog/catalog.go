@@ -170,9 +170,9 @@ func compareVersions(a, b string) int {
 }
 
 func dirOf(path string) string {
-	idx := strings.LastIndexByte(path, '/')
-	if idx < 0 {
+	before, _, found := strings.CutLast(path, "/")
+	if !found {
 		return "."
 	}
-	return path[:idx]
+	return before
 }
