@@ -485,7 +485,7 @@
         <li class="md-nav__item">
   <a href="#snapmirror-management" class="md-nav__link">
     <span class="md-ellipsis">
-      Snapmirror Management
+      SnapMirror Management
     </span>
   </a>
   
@@ -578,6 +578,21 @@
       Multi-Cluster Management
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Multi-Cluster Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cluster-peer-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cluster peer relationships
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -796,7 +811,7 @@
         <li class="md-nav__item">
   <a href="#snapmirror-management" class="md-nav__link">
     <span class="md-ellipsis">
-      Snapmirror Management
+      SnapMirror Management
     </span>
   </a>
   
@@ -890,6 +905,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Multi-Cluster Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cluster-peer-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cluster peer relationships
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -974,16 +1004,19 @@
 <li><code>update_qos_policy</code></li>
 <li><code>delete_qos_policy</code></li>
 </ul>
-<h2 id="snapmirror-management">Snapmirror Management<a class="headerlink" href="#snapmirror-management" title="Permanent link">&para;</a></h2>
+<h2 id="snapmirror-management">SnapMirror Management<a class="headerlink" href="#snapmirror-management" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>create_snapmirror</code></li>
+<li><code>update_snapmirror_transfer</code></li>
+<li><code>abort_snapmirror_transfer</code> (available in <code>multiplex</code> or <code>both</code> mode)</li>
+<li><code>modify_snapmirror</code> (available in <code>multiplex</code> or <code>both</code> mode)</li>
 <li><code>update_snapmirror</code></li>
 <li><code>delete_snapmirror</code></li>
 <li><code>initialize_snapmirror</code></li>
-<li><code>update_snapmirror_transfer</code></li>
 <li><code>break_snapmirror</code></li>
 <li><code>resync_snapmirror</code></li>
 </ul>
+<p>The <code>update_snapmirror</code>, <code>delete_snapmirror</code>, <code>initialize_snapmirror</code>, <code>break_snapmirror</code>, and <code>resync_snapmirror</code> tools are available in <code>legacy</code> or <code>both</code> mode. In the default <code>multiplex</code> mode, use <code>modify_snapmirror</code> for these relationship operations. The <code>abort_snapmirror_transfer</code> tool only aborts an active transfer.</p>
 <h2 id="svm-management">SVM Management<a class="headerlink" href="#svm-management" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>create_svm</code></li>
@@ -1058,7 +1091,35 @@
 <h2 id="multi-cluster-management">Multi-Cluster Management<a class="headerlink" href="#multi-cluster-management" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>list_registered_clusters</code></li>
+<li><code>create_cluster_peer</code></li>
+<li><code>delete_cluster_peer</code></li>
 </ul>
+<h3 id="cluster-peer-relationships">Cluster peer relationships<a class="headerlink" href="#cluster-peer-relationships" title="Permanent link">&para;</a></h3>
+<p>The cluster peer tools create or delete a peer relationship on both clusters in one operation. Both clusters must be registered in the same ONTAP MCP configuration and must have intercluster LIFs configured. Use the cluster identifiers from the <code>Pollers</code> section of <code>ontap.yaml</code>, not necessarily the cluster names reported by ONTAP. Call <code>list_registered_clusters</code> to discover the available identifiers.</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_cluster_name</code></td>
+<td>Registered identifier of the source cluster.</td>
+</tr>
+<tr>
+<td><code>destination_cluster_name</code></td>
+<td>Registered identifier of the destination cluster.</td>
+</tr>
+</tbody>
+</table>
+<p><code>create_cluster_peer</code> discovers the intercluster LIF addresses on both clusters and generates the authentication passphrase internally. The caller does not provide LIF addresses or a passphrase.</p>
+<p><code>delete_cluster_peer</code> looks up the ONTAP cluster names and removes the matching relationship from both clusters. Deletion fails if either side has no matching relationship or has more than one matching relationship.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>create_cluster_peer</code> and <code>delete_cluster_peer</code> modify both named clusters. <code>delete_cluster_peer</code> is destructive.</p>
+</div>
 <h1 id="tool-mode">Tool Mode<a class="headerlink" href="#tool-mode" title="Permanent link">&para;</a></h1>
 <p>The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the <code>--tool-mode</code> flag (default: <code>multiplex</code>; env: <code>TOOL_MODE</code>):</p>
 <table>
