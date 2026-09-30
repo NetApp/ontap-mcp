@@ -308,12 +308,8 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		default:
 			err = findErr
 		}
-		if err == nil {
-			if destinationClient == sourceClient {
-				err = acceptSVMPeer(ctx, sourceClient, parameters.SourceSVM, parameters.DestinationSVM, sourceInfo.Name, applications, true)
-			} else {
-				err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, applications, true)
-			}
+		if err == nil && destinationClient != sourceClient {
+			err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, applications, true)
 		}
 	}
 	if err != nil {
@@ -394,7 +390,11 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		}
 	}
 
-	sourcePeer, sourceErr := sourceClient.FindSVMPeer(ctx, parameters.SourceSVM, parameters.DestinationSVM, destinationInfo.Name)
+	remoteCluster := destinationInfo.Name
+	if destinationClient == sourceClient {
+		remoteCluster = ""
+	}
+	sourcePeer, sourceErr := sourceClient.FindSVMPeer(ctx, parameters.SourceSVM, parameters.DestinationSVM, remoteCluster)
 	if sourceErr != nil && !errors.Is(sourceErr, rest.ErrSVMPeerNotFound) {
 		return errorResult(sourceErr), nil, sourceErr
 	}

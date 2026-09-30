@@ -135,7 +135,7 @@ func TestSVMPeer(t *testing.T) {
 		},
 		{
 			name:             "Delete remote destination SVM on umeng",
-			input:            "On the " + SVMPeerVsimCluster + " cluster, Delete the " + remoteDestinationSVM + " SVM",
+			input:            "On the " + SVMPeerUmengCluster + " cluster, Delete the " + remoteDestinationSVM + " SVM",
 			expectedOntapErr: "because it does not exist",
 			verifications: []svmPeerVerification{{
 				cluster:  SVMPeerUmengCluster,
