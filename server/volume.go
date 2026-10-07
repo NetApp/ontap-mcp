@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/netapp/ontap-mcp/ontap"
-	"github.com/netapp/ontap-mcp/tool"
 	"log/slog"
 	"strconv"
 	"strings"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/ontap"
+	"github.com/netapp/ontap-mcp/tool"
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.VolumeCreate) (*mcp.CallToolResult, any, error) {
@@ -295,16 +296,17 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 // the corresponding ONTAP object ready to use via the REST API.
 func newCreateVolume(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, error) {
 	out := ontap.Volume{}
+
+	model := remote.Model
+	if model == ontap.ASAr2 {
+		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
+	}
+
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
-	}
-
-	model := remote.Model
-	if model == ontap.ASAr2 {
-		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
 	}
 
 	style := strings.ToLower(strings.TrimSpace(in.Style))

@@ -25,6 +25,11 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_volume`
 - `delete_volume`
 
+## Storage Unit Management
+
+- `create_storage_unit`
+- `modify_storage_unit`
+
 ## Data Protection
 
 - `create_snapshot`

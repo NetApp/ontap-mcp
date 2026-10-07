@@ -61,6 +61,28 @@ type VolumeModify struct {
 	VolumeUpdate VolumeUpdate `json:"volume_update,omitzero" jsonschema:"update volume operation"`
 }
 
+type StorageUnitModify struct {
+	Cluster           string            `json:"cluster_name" jsonschema:"cluster name"`
+	Operation         string            `json:"operation" jsonschema:"storage unit operation type: update or delete"`
+	SVM               string            `json:"svm_name" jsonschema:"SVM name"`
+	Name              string            `json:"storage_unit_name,omitzero" jsonschema:"existing storage unit name for update or delete"`
+	StorageUnitUpdate StorageUnitUpdate `json:"storage_unit_update,omitzero" jsonschema:"storage unit properties for update"`
+}
+
+type StorageUnitCreate struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM     string `json:"svm_name" jsonschema:"SVM name"`
+	Name    string `json:"storage_unit_name" jsonschema:"storage unit name"`
+	Size    string `json:"space.size" jsonschema:"provisioned size (e.g., '100GB', '1TB')"`
+	OsType  string `json:"os_type" jsonschema:"operating system type (e.g., linux, vmware, windows)"`
+}
+
+type StorageUnitUpdate struct {
+	NewName string `json:"new_name,omitzero" jsonschema:"new storage unit name"`
+	Size    string `json:"space.size,omitzero" jsonschema:"new provisioned size (e.g., '100GB', '1TB')"`
+	OsType  string `json:"os_type,omitzero" jsonschema:"operating system type (e.g., linux, vmware, windows)"`
+}
+
 type VolumeUpdate struct {
 	NewVolume              string           `json:"new_volume_name,omitzero" jsonschema:"new volume name for rename operation"`
 	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -21,7 +22,17 @@ func (a *App) CreateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	lunCreate, err := newCreateLUN(parameters)
+	remote := ontap.Remote{Model: ontap.CDOT}
+	if info, err := a.getClusterRemote(ctx, parameters.Cluster); err == nil {
+		remote = info
+		if remote.Model == "" {
+			remote.Model = ontap.CDOT
+		}
+	} else {
+		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
+	}
+
+	lunCreate, err := newCreateLUN(parameters, remote)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -144,8 +155,14 @@ func (a *App) ModifyLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 
 // newCreateLUN validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newCreateLUN(in tool.LUNCreate) (ontap.LUN, error) {
+func newCreateLUN(in tool.LUNCreate, remote ontap.Remote) (ontap.LUN, error) {
 	out := ontap.LUN{}
+
+	model := remote.Model
+	if model == ontap.ASAr2 {
+		return out, errors.New("lun creation is not supported on ASAr2 clusters, use storage units instead")
+	}
+
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
