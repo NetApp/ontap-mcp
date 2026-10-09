@@ -60,7 +60,7 @@ type GetData struct {
 		Lun      NameAndUUID      `json:"lun,omitzero"`
 		IGroup   NameAndUUID      `json:"igroup,omitzero"`
 		Policy   SnapMirrorPolicy `json:"policy,omitzero"`
-		IP       IP           `json:"ip,omitzero"`
+		IP       IP               `json:"ip,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
@@ -159,6 +159,17 @@ type Volume struct {
 	OptimizeAggregates       *bool                `json:"optimize_aggregates,omitzero"`
 	GranularData             *bool                `json:"granular_data,omitzero"`
 	GranularDataMode         string               `json:"granular_data_mode,omitempty"`
+}
+
+type StorageUnit struct {
+	SVM    NameAndUUID      `json:"svm,omitzero"`
+	Name   string           `json:"name,omitzero"`
+	OsType string           `json:"os_type,omitzero"`
+	Space  StorageUnitSpace `json:"space,omitzero"`
+}
+
+type StorageUnitSpace struct {
+	Size int64 `json:"size,omitempty"`
 }
 
 type NameAndUUID struct {

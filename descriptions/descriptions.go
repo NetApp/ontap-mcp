@@ -36,6 +36,8 @@ const CreateVolume = `Create a volume on a cluster by cluster name. FlexVol is t
 const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
 const DeleteVolume = `Delete a volume on a cluster by cluster name.`
 const ModifyVolume = `Update or delete a volume on a cluster by cluster name.`
+const CreateStorageUnit = `Create a storage unit on a cluster by cluster name. Use this for ASA r2 storage provisioning. Create requires SVM name, storage unit name, size, and OS type.`
+const ModifyStorageUnit = `Update or delete a storage unit on a cluster by cluster name. Use this for ASA r2 storage provisioning. Update and delete require the existing storage unit name and SVM name.`
 
 const CreateSnapshot = `Create a snapshot of a volume on a cluster by cluster name.`
 const DeleteSnapshot = `Delete a snapshot of a volume on a cluster by cluster name.`

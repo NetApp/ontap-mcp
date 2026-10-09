@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
-	"log/slog"
-	"strconv"
-	"strings"
 )
 
 func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.VolumeCreate) (*mcp.CallToolResult, any, error) {
@@ -23,15 +23,7 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	remote := ontap.Remote{Model: ontap.CDOT}
-	if info, err := a.getClusterRemote(ctx, parameters.Cluster); err == nil {
-		remote = info
-		if remote.Model == "" {
-			remote.Model = ontap.CDOT
-		}
-	} else {
-		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
-	}
+	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
 
 	volumeCreate, err := newCreateVolume(parameters, remote)
 	if err != nil {
@@ -295,16 +287,17 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 // the corresponding ONTAP object ready to use via the REST API.
 func newCreateVolume(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, error) {
 	out := ontap.Volume{}
+
+	model := remote.Model
+	if model == ontap.ASAr2 {
+		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
+	}
+
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
 	if in.Volume == "" {
 		return out, errors.New("volume name is required")
-	}
-
-	model := remote.Model
-	if model == ontap.ASAr2 {
-		return out, errors.New("volume creation is not supported on ASAr2 clusters, use storage units instead")
 	}
 
 	style := strings.ToLower(strings.TrimSpace(in.Style))
