@@ -5,7 +5,7 @@ go 1.27
 replace github.com/netapp/ontap-mcp => ../
 
 require (
-	github.com/carlmjohnson/requests v0.26.1
+	github.com/carlmjohnson/requests v0.26.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/netapp/ontap-mcp v0.0.0
@@ -23,7 +23,7 @@ require (
 	github.com/tidwall/pretty v1.2.2 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
-	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/oauth2 v0.37.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
