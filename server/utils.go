@@ -7,7 +7,7 @@ import (
 	"github.com/netapp/ontap-mcp/ontap"
 )
 
-func (a *App) clusterModelOrDefault(ctx context.Context, cluster string) (ontap.Remote, error) {
+func (a *App) clusterModelOrDefault(ctx context.Context, cluster string) ontap.Remote {
 	remote := ontap.Remote{Model: ontap.CDOT}
 	if info, err := a.getClusterRemote(ctx, cluster); err == nil {
 		remote = info
@@ -17,5 +17,5 @@ func (a *App) clusterModelOrDefault(ctx context.Context, cluster string) (ontap.
 	} else {
 		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", cluster), slog.String("error", err.Error()))
 	}
-	return remote, nil
+	return remote
 }

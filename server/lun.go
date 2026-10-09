@@ -21,10 +21,7 @@ func (a *App) CreateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	remote, err := a.clusterModelOrDefault(ctx, parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
+	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
 
 	lunCreate, err := newCreateLUN(parameters, remote)
 	if err != nil {

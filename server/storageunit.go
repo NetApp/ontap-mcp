@@ -22,13 +22,8 @@ func (a *App) CreateStorageUnit(ctx context.Context, _ *mcp.CallToolRequest, par
 		return errorResult(err), nil, err
 	}
 
-	remote := ontap.Remote{Model: ontap.CDOT}
-	if info, err := a.getClusterRemote(ctx, parameters.Cluster); err == nil {
-		remote = info
-		if remote.Model == "" {
-			remote.Model = ontap.CDOT
-		}
-	} else {
+	remote, err := a.getClusterRemote(ctx, parameters.Cluster)
+	if err != nil {
 		return errorResult(err), nil, err
 	}
 

@@ -23,10 +23,7 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	remote, err := a.clusterModelOrDefault(ctx, parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
-	}
+	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
 
 	volumeCreate, err := newCreateVolume(parameters, remote)
 	if err != nil {
