@@ -3,11 +3,14 @@ package rest
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
 )
+
+var ErrSVMPeerNotFound = errors.New("SVM peer relationship not found")
 
 func (c *Client) CreateSVM(ctx context.Context, svm ontap.SVMCreate) error {
 	var (
@@ -106,39 +109,90 @@ func (c *Client) DeleteSVM(ctx context.Context, svmName string) error {
 	return c.handleJob(ctx, statusCode, &buf)
 }
 
-func (c *Client) DeleteSVMPeer(ctx context.Context, svmName string) error {
+func (c *Client) FindSVMPeer(ctx context.Context, localSVM, remoteSVM, remoteCluster string) (ontap.SVMPeer, error) {
 	var (
-		buf         bytes.Buffer
 		statusCode  int
-		svmPeerData ontap.GetData
+		svmPeerData ontap.SVMPeerCollection
 	)
 	responseHeaders := http.Header{}
 
 	params := url.Values{}
-	params.Set("svm.name", svmName)
-	params.Set("fields", "uuid")
+	params.Set("svm.name", localSVM)
+	params.Set("peer.svm.name", remoteSVM)
+	if remoteCluster != "" {
+		params.Set("peer.cluster.name", remoteCluster)
+	}
+	params.Set("fields", "uuid,state,applications,svm.name,peer.svm.name,peer.cluster.name")
 
 	builder := c.baseRequestBuilder(`/api/svm/peers`, &statusCode, responseHeaders).
 		Params(params).
 		ToJSON(&svmPeerData)
 
 	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
-		return err
+		return ontap.SVMPeer{}, err
 	}
 
 	if svmPeerData.NumRecords == 0 {
-		return fmt.Errorf("failed to get details of SVM peer %s because it does not exist", svmName)
+		return ontap.SVMPeer{}, fmt.Errorf("%w for local SVM %s, remote SVM %s, remote cluster %s", ErrSVMPeerNotFound, localSVM, remoteSVM, remoteCluster)
 	}
 	if svmPeerData.NumRecords != 1 {
-		return fmt.Errorf("failed to get details of SVM peer %s because there are %d matching records",
-			svmName, svmPeerData.NumRecords)
+		return ontap.SVMPeer{}, fmt.Errorf("failed to uniquely identify SVM peer for local SVM %s, remote SVM %s, remote cluster %s because there are %d matching records",
+			localSVM, remoteSVM, remoteCluster, svmPeerData.NumRecords)
 	}
 
-	builder2 := c.baseRequestBuilder(`/api/svm/peers/`+svmPeerData.Records[0].UUID, &statusCode, responseHeaders).
+	return svmPeerData.Records[0], nil
+}
+
+func (c *Client) CreateSVMPeer(ctx context.Context, svmPeer ontap.SVMPeer) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
+	responseHeaders := http.Header{}
+
+	builder := c.baseRequestBuilder(`/api/svm/peers`, &statusCode, responseHeaders).
+		BodyJSON(svmPeer).
+		ToBytesBuffer(&buf)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	return c.handleJob(ctx, statusCode, &buf)
+}
+
+func (c *Client) UpdateSVMPeer(ctx context.Context, uuid string, applications []string, state string) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
+	responseHeaders := http.Header{}
+	svmPeer := ontap.SVMPeer{Applications: applications, State: state}
+
+	builder := c.baseRequestBuilder(`/api/svm/peers/`+url.PathEscape(uuid), &statusCode, responseHeaders).
+		Patch().
+		BodyJSON(svmPeer).
+		ToBytesBuffer(&buf)
+
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
+		return err
+	}
+
+	return c.handleJob(ctx, statusCode, &buf)
+}
+
+func (c *Client) DeleteSVMPeer(ctx context.Context, uuid string) error {
+	var (
+		buf        bytes.Buffer
+		statusCode int
+	)
+	responseHeaders := http.Header{}
+
+	builder := c.baseRequestBuilder(`/api/svm/peers/`+url.PathEscape(uuid), &statusCode, responseHeaders).
 		Delete().
 		ToBytesBuffer(&buf)
 
-	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {
+	if err := c.buildAndExecuteRequest(ctx, builder); err != nil {
 		return err
 	}
 
