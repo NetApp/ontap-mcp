@@ -10,59 +10,54 @@ import (
 
 func TestNewCreateLun(t *testing.T) {
 	tests := []struct {
-		name            string
-		volume          string
-		svm             string
-		lun             string
-		remote          ontap.Remote
-		size            string
-		osType          string
-		expectedErr     string
-		expectedVolJSON ontap.LUN
+		name        string
+		volume      string
+		svm         string
+		lun         string
+		remote      ontap.Remote
+		size        string
+		osType      string
+		expectedErr string
 	}{
 		{
-			name:            "Normal lun in cdot",
-			volume:          "volume1",
-			svm:             "svm1",
-			lun:             "lun1",
-			remote:          ontap.Remote{Model: ontap.CDOT},
-			size:            "100mb",
-			osType:          "linux",
-			expectedErr:     "",
-			expectedVolJSON: ontap.LUN{SVM: ontap.NameAndUUID{Name: "svm1"}, Name: "lun1", Space: ontap.LUNSpace{Size: 104857600}},
+			name:        "Normal lun in cdot",
+			volume:      "volume1",
+			svm:         "svm1",
+			lun:         "lun1",
+			remote:      ontap.Remote{Model: ontap.CDOT},
+			size:        "100mb",
+			osType:      "linux",
+			expectedErr: "",
 		},
 		{
-			name:            "lun with error in cdot",
-			volume:          "volume2",
-			svm:             "svm2",
-			lun:             "",
-			remote:          ontap.Remote{Model: ontap.CDOT},
-			size:            "100mb",
-			osType:          "windows",
-			expectedErr:     "LUN name is required",
-			expectedVolJSON: ontap.LUN{},
+			name:        "lun with error in cdot",
+			volume:      "volume2",
+			svm:         "svm2",
+			lun:         "",
+			remote:      ontap.Remote{Model: ontap.CDOT},
+			size:        "100mb",
+			osType:      "windows",
+			expectedErr: "LUN name is required",
 		},
 		{
-			name:            "lun with error in asar2",
-			volume:          "volume3",
-			svm:             "svm3",
-			lun:             "lun3",
-			remote:          ontap.Remote{Model: ontap.ASAr2},
-			size:            "100mb",
-			osType:          "exsi",
-			expectedErr:     "lun creation is not supported on ASAr2 clusters, use storage units instead",
-			expectedVolJSON: ontap.LUN{},
+			name:        "lun with error in asar2",
+			volume:      "volume3",
+			svm:         "svm3",
+			lun:         "lun3",
+			remote:      ontap.Remote{Model: ontap.ASAr2},
+			size:        "100mb",
+			osType:      "exsi",
+			expectedErr: "lun creation is not supported on ASAr2 clusters, use storage units instead",
 		},
 		{
-			name:            "lun without model in cdot",
-			volume:          "volume4",
-			svm:             "svm4",
-			lun:             "lun4",
-			remote:          ontap.Remote{},
-			size:            "100mb",
-			osType:          "",
-			expectedErr:     "OS type is required",
-			expectedVolJSON: ontap.LUN{},
+			name:        "lun without model in cdot",
+			volume:      "volume4",
+			svm:         "svm4",
+			lun:         "lun4",
+			remote:      ontap.Remote{},
+			size:        "100mb",
+			osType:      "",
+			expectedErr: "OS type is required",
 		},
 	}
 

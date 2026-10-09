@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -30,7 +29,7 @@ func (a *App) CreateStorageUnit(ctx context.Context, _ *mcp.CallToolRequest, par
 			remote.Model = ontap.CDOT
 		}
 	} else {
-		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
+		return errorResult(err), nil, err
 	}
 
 	storageUnit, err := newCreateStorageUnit(parameters, remote)
@@ -60,12 +59,18 @@ func (a *App) ModifyStorageUnit(ctx context.Context, _ *mcp.CallToolRequest, par
 	if strings.TrimSpace(parameters.Name) == "" {
 		return nil, nil, errors.New("storage unit name is required")
 	}
+	if err := validateStorageUnitName(parameters.Name, "storage unit name"); err != nil {
+		return nil, nil, err
+	}
 	if strings.TrimSpace(parameters.SVM) == "" {
 		return nil, nil, errors.New("SVM name is required")
 	}
 
 	switch parameters.Operation {
 	case "update":
+		if err := validateStorageUnitName(parameters.StorageUnitUpdate.NewName, "new storage unit name"); err != nil {
+			return errorResult(err), nil, err
+		}
 		storageUnit, err := newUpdateStorageUnit(parameters.StorageUnitUpdate)
 		if err != nil {
 			return errorResult(err), nil, err
@@ -84,9 +89,16 @@ func (a *App) ModifyStorageUnit(ctx context.Context, _ *mcp.CallToolRequest, par
 			Content: []mcp.Content{&mcp.TextContent{Text: "Storage unit deleted successfully"}},
 		}, nil, nil
 	default:
-		err := fmt.Errorf("unsupported operation %q; supported values: create, update, delete", parameters.Operation)
+		err := fmt.Errorf("unsupported operation %q; supported values: update, delete", parameters.Operation)
 		return errorResult(err), nil, nil
 	}
+}
+
+func validateStorageUnitName(name, field string) error {
+	if strings.ContainsAny(name, `*|!<>{}`) {
+		return fmt.Errorf("%s contains an invalid character; names cannot contain *|!<>{}", field)
+	}
+	return nil
 }
 
 func newCreateStorageUnit(in tool.StorageUnitCreate, remote ontap.Remote) (ontap.StorageUnit, error) {

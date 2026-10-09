@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 
@@ -24,14 +23,9 @@ func (a *App) CreateVolume(ctx context.Context, _ *mcp.CallToolRequest, paramete
 		return errorResult(err), nil, err
 	}
 
-	remote := ontap.Remote{Model: ontap.CDOT}
-	if info, err := a.getClusterRemote(ctx, parameters.Cluster); err == nil {
-		remote = info
-		if remote.Model == "" {
-			remote.Model = ontap.CDOT
-		}
-	} else {
-		a.logger.Warn("failed to determine cluster model, choosing default model as CDOT", slog.String("cluster", parameters.Cluster), slog.String("error", err.Error()))
+	remote, err := a.clusterModelOrDefault(ctx, parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
 	}
 
 	volumeCreate, err := newCreateVolume(parameters, remote)

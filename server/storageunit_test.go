@@ -10,54 +10,49 @@ import (
 
 func TestNewCreateStorageUnit(t *testing.T) {
 	tests := []struct {
-		name            string
-		storageUnit     string
-		svm             string
-		remote          ontap.Remote
-		size            string
-		osType          string
-		expectedErr     string
-		expectedVolJSON ontap.StorageUnit
+		name        string
+		storageUnit string
+		svm         string
+		remote      ontap.Remote
+		size        string
+		osType      string
+		expectedErr string
 	}{
 		{
-			name:            "storage unit in cdot",
-			svm:             "svm1",
-			storageUnit:     "sunit1",
-			remote:          ontap.Remote{Model: ontap.CDOT},
-			size:            "100mb",
-			osType:          "linux",
-			expectedErr:     "storage unit creation is only supported on ASAr2 clusters",
-			expectedVolJSON: ontap.StorageUnit{},
+			name:        "storage unit in cdot",
+			svm:         "svm1",
+			storageUnit: "sunit1",
+			remote:      ontap.Remote{Model: ontap.CDOT},
+			size:        "100mb",
+			osType:      "linux",
+			expectedErr: "storage unit creation is only supported on ASAr2 clusters",
 		},
 		{
-			name:            "storage unit in asar2",
-			svm:             "svm2",
-			storageUnit:     "sunit2",
-			remote:          ontap.Remote{Model: ontap.ASAr2},
-			size:            "100mb",
-			osType:          "windows",
-			expectedErr:     "",
-			expectedVolJSON: ontap.StorageUnit{SVM: ontap.NameAndUUID{Name: "svm2"}, Name: "sunit2", Space: ontap.StorageUnitSpace{Size: 104857600}},
+			name:        "storage unit in asar2",
+			svm:         "svm2",
+			storageUnit: "sunit2",
+			remote:      ontap.Remote{Model: ontap.ASAr2},
+			size:        "100mb",
+			osType:      "windows",
+			expectedErr: "",
 		},
 		{
-			name:            "storage unit with error in asar2",
-			svm:             "svm3",
-			storageUnit:     "sunit3",
-			remote:          ontap.Remote{Model: ontap.ASAr2},
-			size:            "",
-			osType:          "vmware",
-			expectedErr:     "invalid storage unit size: size is empty",
-			expectedVolJSON: ontap.StorageUnit{},
+			name:        "storage unit with error in asar2",
+			svm:         "svm3",
+			storageUnit: "sunit3",
+			remote:      ontap.Remote{Model: ontap.ASAr2},
+			size:        "",
+			osType:      "vmware",
+			expectedErr: "invalid storage unit size: size is empty",
 		},
 		{
-			name:            "storage unit in afx",
-			svm:             "svm4",
-			storageUnit:     "sunit4",
-			remote:          ontap.Remote{Model: ontap.AFX},
-			size:            "200mb",
-			osType:          "",
-			expectedErr:     "storage unit creation is only supported on ASAr2 clusters",
-			expectedVolJSON: ontap.StorageUnit{},
+			name:        "storage unit in afx",
+			svm:         "svm4",
+			storageUnit: "sunit4",
+			remote:      ontap.Remote{Model: ontap.AFX},
+			size:        "200mb",
+			osType:      "",
+			expectedErr: "storage unit creation is only supported on ASAr2 clusters",
 		},
 	}
 
@@ -77,5 +72,23 @@ func TestNewCreateStorageUnit(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestStorageUnitNameRejectsInvalidCharacters(t *testing.T) {
+	for _, character := range []string{"*", "|", "!", "<", ">", "{", "}"} {
+		t.Run(character, func(t *testing.T) {
+			err := validateStorageUnitName("storage"+character+"unit", "storage unit name")
+			if err == nil {
+				t.Fatalf("expected name containing %q to be rejected", character)
+			}
+			if !strings.Contains(err.Error(), "storage unit name contains an invalid character") {
+				t.Errorf("unexpected error: %v", err)
+			}
+		})
+	}
+
+	if err := validateStorageUnitName("storage-unit_1", "storage unit name"); err != nil {
+		t.Errorf("unexpected error for valid name: %v", err)
 	}
 }
