@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/netapp/ontap-mcp/ontap"
-	"github.com/netapp/ontap-mcp/rest"
-	"github.com/netapp/ontap-mcp/tool"
 	"slices"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/netapp/ontap-mcp/ontap"
+	"github.com/netapp/ontap-mcp/rest"
+	"github.com/netapp/ontap-mcp/tool"
 )
 
 func (a *App) CreateSVM(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SVMCreate) (*mcp.CallToolResult, any, error) {
@@ -22,7 +23,7 @@ func (a *App) CreateSVM(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 
 	svmCreate, err := newCreateSVM(parameters)
 	if err != nil {
-		return nil, nil, err
+		return errorResult(err), nil, err
 	}
 
 	client, err := a.getClient(parameters.Cluster)
@@ -50,7 +51,7 @@ func (a *App) UpdateSVM(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 
 	svmUpdate, err := newUpdateSVM(parameters)
 	if err != nil {
-		return nil, nil, err
+		return errorResult(err), nil, err
 	}
 
 	client, err := a.getClient(parameters.Cluster)
@@ -152,7 +153,7 @@ func (a *App) ModifySVM(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	case "update":
 		svmUpdate, err := updateSVMValidation(parameters.SVMUpdate)
 		if err != nil {
-			return nil, nil, err
+			return errorResult(err), nil, err
 		}
 
 		err = client.UpdateSVM(ctx, svmUpdate, parameters.Name)
@@ -204,18 +205,27 @@ func updateSVMValidation(in tool.SVMUpdate) (ontap.SVM, error) {
 	return out, nil
 }
 
-func validateParams(sourceCluster, sourceSVM, destinationCluster, destinationSVM string) error {
-	if strings.TrimSpace(sourceCluster) == "" {
+func validateSVMPeerParams(sourceCluster, sourceSVM, destinationCluster, destinationSVM string, applications []string) error {
+	var supportedApplication = []string{"snapmirror", "file_copy", "lun_copy", "flexcache"}
+
+	if sourceCluster == "" {
 		return errors.New("source cluster name is required")
 	}
-	if strings.TrimSpace(sourceSVM) == "" {
+	if sourceSVM == "" {
 		return errors.New("source SVM name is required")
 	}
-	if strings.TrimSpace(destinationCluster) == "" {
+	if destinationCluster == "" {
 		return errors.New("destination cluster name is required")
 	}
-	if strings.TrimSpace(destinationSVM) == "" {
+	if destinationSVM == "" {
 		return errors.New("destination SVM name is required")
+	}
+	if len(applications) > 0 {
+		for _, application := range applications {
+			if !slices.Contains(supportedApplication, strings.ToLower(application)) {
+				return fmt.Errorf("application %q found, supported application are only %v", application, supportedApplication)
+			}
+		}
 	}
 	return nil
 }
@@ -248,8 +258,12 @@ func (a *App) lockSVMPeerClusters(sourceCluster, destinationCluster string) (fun
 }
 
 func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SVMPeerCreate) (*mcp.CallToolResult, any, error) {
-	if err := validateParams(parameters.SourceCluster, parameters.SourceSVM, parameters.DestinationCluster, parameters.DestinationSVM); err != nil {
-		return nil, nil, err
+	parameters.SourceCluster = strings.TrimSpace(parameters.SourceCluster)
+	parameters.SourceSVM = strings.TrimSpace(parameters.SourceSVM)
+	parameters.DestinationCluster = strings.TrimSpace(parameters.DestinationCluster)
+	parameters.DestinationSVM = strings.TrimSpace(parameters.DestinationSVM)
+	if err := validateSVMPeerParams(parameters.SourceCluster, parameters.SourceSVM, parameters.DestinationCluster, parameters.DestinationSVM, parameters.Application); err != nil {
+		return errorResult(err), nil, err
 	}
 
 	unlock, err := a.lockSVMPeerClusters(parameters.SourceCluster, parameters.DestinationCluster)
@@ -282,13 +296,13 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		}
 	}
 
-	application := strings.TrimSpace(parameters.Application)
-	if application == "" {
-		application = "snapmirror"
+	applications := parameters.Application
+	if len(applications) == 0 {
+		applications = []string{"snapmirror"}
 	}
-	applications := []string{application}
+
 	if parameters.AcceptOnly {
-		err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, applications, false)
+		err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, false)
 	} else {
 		lookupCluster := destinationInfo.Name
 		payloadCluster := destinationInfo.Name
@@ -298,7 +312,12 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		peer, findErr := sourceClient.FindSVMPeer(ctx, parameters.SourceSVM, parameters.DestinationSVM, lookupCluster)
 		switch {
 		case findErr == nil:
-			err = sourceClient.UpdateSVMPeer(ctx, peer.UUID, applications, "")
+			for _, application := range peer.Applications {
+				if !slices.Contains(applications, application) {
+					applications = append(applications, application)
+				}
+			}
+			err = sourceClient.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{Applications: applications})
 		case errors.Is(findErr, rest.ErrSVMPeerNotFound):
 			err = sourceClient.CreateSVMPeer(ctx, ontap.SVMPeer{
 				SVM:          ontap.NameAndUUID{Name: parameters.SourceSVM},
@@ -309,7 +328,7 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 			err = findErr
 		}
 		if err == nil && destinationClient != sourceClient {
-			err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, applications, true)
+			err = acceptSVMPeer(ctx, destinationClient, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name, true)
 		}
 	}
 	if err != nil {
@@ -323,7 +342,7 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: message}}}, nil, nil
 }
 
-func acceptSVMPeer(ctx context.Context, client *rest.Client, localSVM, remoteSVM, remoteCluster string, applications []string, wait bool) error {
+func acceptSVMPeer(ctx context.Context, client *rest.Client, localSVM, remoteSVM, remoteCluster string, wait bool) error {
 	peer, err := client.FindSVMPeer(ctx, localSVM, remoteSVM, remoteCluster)
 	if wait && errors.Is(err, rest.ErrSVMPeerNotFound) {
 		waitCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -345,19 +364,23 @@ func acceptSVMPeer(ctx context.Context, client *rest.Client, localSVM, remoteSVM
 
 	switch peer.State {
 	case "pending":
-		return client.UpdateSVMPeer(ctx, peer.UUID, applications, "peered")
+		return client.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{State: "peered"})
 	case "peered":
-		return client.UpdateSVMPeer(ctx, peer.UUID, applications, "")
+		return client.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{})
 	case "":
-		return client.UpdateSVMPeer(ctx, peer.UUID, applications, "")
+		return client.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{})
 	default:
-		return fmt.Errorf("cannot accept SVM peer in state %q", peer.State)
+		return fmt.Errorf("timed out after 30s waiting for SVM peer proposal, found peer state %s", peer.State)
 	}
 }
 
 func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.SVMPeerDelete) (*mcp.CallToolResult, any, error) {
-	if err := validateParams(parameters.SourceCluster, parameters.SourceSVM, parameters.DestinationCluster, parameters.DestinationSVM); err != nil {
-		return nil, nil, err
+	parameters.SourceCluster = strings.TrimSpace(parameters.SourceCluster)
+	parameters.SourceSVM = strings.TrimSpace(parameters.SourceSVM)
+	parameters.DestinationCluster = strings.TrimSpace(parameters.DestinationCluster)
+	parameters.DestinationSVM = strings.TrimSpace(parameters.DestinationSVM)
+	if err := validateSVMPeerParams(parameters.SourceCluster, parameters.SourceSVM, parameters.DestinationCluster, parameters.DestinationSVM, []string{}); err != nil {
+		return errorResult(err), nil, err
 	}
 
 	unlock, err := a.lockSVMPeerClusters(parameters.SourceCluster, parameters.DestinationCluster)
@@ -412,19 +435,22 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 			}
 		}
 
-		destinationPeer, destinationErr := destinationClient.FindSVMPeer(ctx, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name)
-		if destinationErr == nil {
-			found = true
-			if deleteErr := destinationClient.DeleteSVMPeer(ctx, destinationPeer.UUID); deleteErr != nil {
-				deleteErrors = append(deleteErrors, deleteErr)
+		// only delete from destination when source peer has not found or delete failed in source
+		if sourceErr != nil || len(deleteErrors) > 0 {
+			destinationPeer, destinationErr := destinationClient.FindSVMPeer(ctx, parameters.DestinationSVM, parameters.SourceSVM, sourceInfo.Name)
+			if destinationErr == nil {
+				found = true
+				if deleteErr := destinationClient.DeleteSVMPeer(ctx, destinationPeer.UUID); deleteErr != nil {
+					deleteErrors = append(deleteErrors, deleteErr)
+				}
+			} else if !errors.Is(destinationErr, rest.ErrSVMPeerNotFound) {
+				deleteErrors = append(deleteErrors, destinationErr)
 			}
-		} else if !errors.Is(destinationErr, rest.ErrSVMPeerNotFound) {
-			deleteErrors = append(deleteErrors, destinationErr)
-		}
-		if !found && len(deleteErrors) == 0 {
-			err = fmt.Errorf("%w between %s and %s", rest.ErrSVMPeerNotFound, parameters.SourceSVM, parameters.DestinationSVM)
-		} else {
-			err = errors.Join(deleteErrors...)
+			if !found && len(deleteErrors) == 0 {
+				err = fmt.Errorf("%w between %s and %s", rest.ErrSVMPeerNotFound, parameters.SourceSVM, parameters.DestinationSVM)
+			} else {
+				err = errors.Join(deleteErrors...)
+			}
 		}
 	}
 

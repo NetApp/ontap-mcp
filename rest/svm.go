@@ -5,9 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/netapp/ontap-mcp/ontap"
 	"net/http"
 	"net/url"
+
+	"github.com/netapp/ontap-mcp/ontap"
 )
 
 var ErrSVMPeerNotFound = errors.New("SVM peer relationship not found")
@@ -161,13 +162,12 @@ func (c *Client) CreateSVMPeer(ctx context.Context, svmPeer ontap.SVMPeer) error
 	return c.handleJob(ctx, statusCode, &buf)
 }
 
-func (c *Client) UpdateSVMPeer(ctx context.Context, uuid string, applications []string, state string) error {
+func (c *Client) UpdateSVMPeer(ctx context.Context, uuid string, svmPeer ontap.SVMPeer) error {
 	var (
 		buf        bytes.Buffer
 		statusCode int
 	)
 	responseHeaders := http.Header{}
-	svmPeer := ontap.SVMPeer{Applications: applications, State: state}
 
 	builder := c.baseRequestBuilder(`/api/svm/peers/`+url.PathEscape(uuid), &statusCode, responseHeaders).
 		Patch().
