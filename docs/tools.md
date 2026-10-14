@@ -27,7 +27,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 ## Storage Unit Management
 
-- `create_storage_unit`
+- `create_storage_unit` — clone an existing storage unit (optionally from a named snapshot); a source storage unit is required, so standalone creation is not supported.
 - `modify_storage_unit`
 
 ## Data Protection

@@ -104,25 +104,28 @@ func newCreateStorageUnit(in tool.StorageUnitCreate, remote ontap.Remote) (ontap
 	if strings.TrimSpace(in.Name) == "" {
 		return ontap.StorageUnit{}, errors.New("storage unit name is required")
 	}
+	if err := validateStorageUnitName(in.Name, "storage unit name"); err != nil {
+		return ontap.StorageUnit{}, err
+	}
 	if strings.TrimSpace(in.SVM) == "" {
 		return ontap.StorageUnit{}, errors.New("SVM name is required")
 	}
-	if strings.TrimSpace(in.OsType) == "" {
-		return ontap.StorageUnit{}, errors.New("OS type is required")
+	if strings.TrimSpace(in.CloneSource) == "" {
+		return ontap.StorageUnit{}, errors.New("source storage unit name is required for storage unit cloning")
 	}
-	size, err := parseSize(in.Size)
-	if err != nil {
-		return ontap.StorageUnit{}, fmt.Errorf("invalid storage unit size: %w", err)
-	}
-	if size <= 0 {
-		return ontap.StorageUnit{}, errors.New("storage unit size must be greater than zero")
+	if err := validateStorageUnitName(in.CloneSource, "source storage unit name"); err != nil {
+		return ontap.StorageUnit{}, err
 	}
 
 	return ontap.StorageUnit{
-		SVM:    ontap.NameAndUUID{Name: in.SVM},
-		Name:   in.Name,
-		OsType: in.OsType,
-		Space:  ontap.StorageUnitSpace{Size: size},
+		SVM:  ontap.NameAndUUID{Name: in.SVM},
+		Name: in.Name,
+		Clone: ontap.StorageUnitClone{
+			Source: ontap.StorageUnitCloneSource{
+				StorageUnit: ontap.NameAndUUID{Name: in.CloneSource},
+				Snapshot:    ontap.NameAndUUID{Name: in.CloneSnapshot},
+			},
+		},
 	}, nil
 }
 

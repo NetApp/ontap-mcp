@@ -166,6 +166,16 @@ type StorageUnit struct {
 	Name   string           `json:"name,omitzero"`
 	OsType string           `json:"os_type,omitzero"`
 	Space  StorageUnitSpace `json:"space,omitzero"`
+	Clone  StorageUnitClone `json:"clone,omitzero"`
+}
+
+type StorageUnitClone struct {
+	Source StorageUnitCloneSource `json:"source,omitzero"`
+}
+
+type StorageUnitCloneSource struct {
+	StorageUnit NameAndUUID `json:"storage_unit,omitzero"`
+	Snapshot    NameAndUUID `json:"snapshot,omitzero"`
 }
 
 type StorageUnitSpace struct {

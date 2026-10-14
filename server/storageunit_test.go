@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -14,8 +15,8 @@ func TestNewCreateStorageUnit(t *testing.T) {
 		storageUnit string
 		svm         string
 		remote      ontap.Remote
-		size        string
-		osType      string
+		cloneSource string
+		snapshot    string
 		expectedErr string
 	}{
 		{
@@ -23,8 +24,7 @@ func TestNewCreateStorageUnit(t *testing.T) {
 			svm:         "svm1",
 			storageUnit: "sunit1",
 			remote:      ontap.Remote{Model: ontap.CDOT},
-			size:        "100mb",
-			osType:      "linux",
+			cloneSource: "source1",
 			expectedErr: "storage unit creation is only supported on ASAr2 clusters",
 		},
 		{
@@ -32,36 +32,52 @@ func TestNewCreateStorageUnit(t *testing.T) {
 			svm:         "svm2",
 			storageUnit: "sunit2",
 			remote:      ontap.Remote{Model: ontap.ASAr2},
-			size:        "100mb",
-			osType:      "windows",
+			cloneSource: "source2",
+			snapshot:    "snapshot2",
 			expectedErr: "",
-		},
-		{
-			name:        "storage unit with error in asar2",
-			svm:         "svm3",
-			storageUnit: "sunit3",
-			remote:      ontap.Remote{Model: ontap.ASAr2},
-			size:        "",
-			osType:      "vmware",
-			expectedErr: "invalid storage unit size: size is empty",
 		},
 		{
 			name:        "storage unit in afx",
 			svm:         "svm4",
 			storageUnit: "sunit4",
 			remote:      ontap.Remote{Model: ontap.AFX},
-			size:        "200mb",
-			osType:      "",
+			cloneSource: "source4",
 			expectedErr: "storage unit creation is only supported on ASAr2 clusters",
+		},
+		{
+			name:        "storage unit clone source is required",
+			svm:         "svm5",
+			storageUnit: "sunit5",
+			remote:      ontap.Remote{Model: ontap.ASAr2},
+			expectedErr: "source storage unit name is required",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := newCreateStorageUnit(tool.StorageUnitCreate{SVM: tt.svm, Name: tt.storageUnit, Size: tt.size, OsType: tt.osType}, tt.remote)
+			got, err := newCreateStorageUnit(tool.StorageUnitCreate{
+				SVM: tt.svm, Name: tt.storageUnit,
+				CloneSource: tt.cloneSource, CloneSnapshot: tt.snapshot,
+			}, tt.remote)
 			if tt.expectedErr == "" {
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
+				}
+				if got.Clone.Source.StorageUnit.Name != tt.cloneSource {
+					t.Errorf("expected clone source %q, got %q", tt.cloneSource, got.Clone.Source.StorageUnit.Name)
+				}
+				if got.Clone.Source.Snapshot.Name != tt.snapshot {
+					t.Errorf("expected clone snapshot %q, got %q", tt.snapshot, got.Clone.Source.Snapshot.Name)
+				}
+				if tt.snapshot != "" {
+					payload, err := json.Marshal(got)
+					if err != nil {
+						t.Fatalf("failed to marshal clone request: %v", err)
+					}
+					expectedClone := `"clone":{"source":{"storage_unit":{"name":"` + tt.cloneSource + `"},"snapshot":{"name":"` + tt.snapshot + `"}}}`
+					if !strings.Contains(string(payload), expectedClone) {
+						t.Errorf("expected clone request payload to contain %s, got %s", expectedClone, payload)
+					}
 				}
 			} else {
 				if err == nil {

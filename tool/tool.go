@@ -70,11 +70,11 @@ type StorageUnitModify struct {
 }
 
 type StorageUnitCreate struct {
-	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM     string `json:"svm_name" jsonschema:"SVM name"`
-	Name    string `json:"storage_unit_name" jsonschema:"storage unit name"`
-	Size    string `json:"space.size" jsonschema:"provisioned size (e.g., '100GB', '1TB')"`
-	OsType  string `json:"os_type" jsonschema:"operating system type (e.g., linux, vmware, windows)"`
+	Cluster       string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM           string `json:"svm_name" jsonschema:"SVM name"`
+	Name          string `json:"storage_unit_name" jsonschema:"storage unit name"`
+	CloneSource   string `json:"clone.source.storage_unit.name" jsonschema:"required source storage unit name to clone"`
+	CloneSnapshot string `json:"clone.source.snapshot.name,omitzero" jsonschema:"optional source snapshot name to clone"`
 }
 
 type StorageUnitUpdate struct {
