@@ -252,6 +252,7 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_snapshot", descriptions.CreateSnapshot, createAnnotation, a.CreateSnapshot)
 	addTool(a, server, "update_snapmirror_transfer", descriptions.UpdateSnapMirrorTransfer, createAnnotation, a.UpdateSnapMirrorTransfer)
 
+	addTool(a, server, "create_svm_peer", descriptions.CreateSVMPeer, createAnnotation, a.CreateSVMPeer)
 	addTool(a, server, "delete_svm_peer", descriptions.DeleteSVMPeer, deleteAnnotation, a.DeleteSVMPeer)
 
 	addTool(a, server, "create_dns", descriptions.CreateDNS, createAnnotation, a.CreateDNS)
