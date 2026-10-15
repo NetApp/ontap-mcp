@@ -221,9 +221,10 @@ func validateSVMPeerParams(sourceCluster, sourceSVM, destinationCluster, destina
 		return errors.New("destination SVM name is required")
 	}
 	if len(applications) > 0 {
-		for _, application := range applications {
-			if !slices.Contains(supportedApplication, strings.ToLower(application)) {
-				return fmt.Errorf("application %q found, supported application are only %v", application, supportedApplication)
+		for i := range applications {
+			applications[i] = strings.ToLower(applications[i])
+			if !slices.Contains(supportedApplication, applications[i]) {
+				return fmt.Errorf("application %q found, supported application are only %v", applications[i], supportedApplication)
 			}
 		}
 	}
@@ -335,7 +336,7 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		return errorResult(err), nil, err
 	}
 
-	message := "SVM peer created successfully"
+	message := "SVM peer created or updated successfully"
 	if parameters.AcceptOnly {
 		message = "SVM peer accepted successfully"
 	}
@@ -344,12 +345,13 @@ func (a *App) CreateSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 
 func acceptSVMPeer(ctx context.Context, client *rest.Client, localSVM, remoteSVM, remoteCluster string, wait bool) error {
 	peer, err := client.FindSVMPeer(ctx, localSVM, remoteSVM, remoteCluster)
-	if wait && errors.Is(err, rest.ErrSVMPeerNotFound) {
+	// polling until peer state would be pending or peered or deadlined exceed.
+	if wait && (errors.Is(err, rest.ErrSVMPeerNotFound) || (peer.State != "" && peer.State != "pending" && peer.State != "peered")) {
 		waitCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
 		ticker := time.NewTicker(500 * time.Millisecond)
 		defer ticker.Stop()
-		for errors.Is(err, rest.ErrSVMPeerNotFound) {
+		for errors.Is(err, rest.ErrSVMPeerNotFound) || (peer.State != "" && peer.State != "pending" && peer.State != "peered") {
 			select {
 			case <-waitCtx.Done():
 				return err
@@ -366,8 +368,6 @@ func acceptSVMPeer(ctx context.Context, client *rest.Client, localSVM, remoteSVM
 	case "pending":
 		return client.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{State: "peered"})
 	case "peered":
-		return client.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{})
-	case "":
 		return client.UpdateSVMPeer(ctx, peer.UUID, ontap.SVMPeer{})
 	default:
 		return fmt.Errorf("timed out after 30s waiting for SVM peer proposal, found peer state %s", peer.State)
@@ -421,6 +421,7 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 	if sourceErr != nil && !errors.Is(sourceErr, rest.ErrSVMPeerNotFound) {
 		return errorResult(sourceErr), nil, sourceErr
 	}
+	destinationPeerDeleted := false
 	if destinationClient == sourceClient {
 		if sourceErr != nil {
 			return errorResult(sourceErr), nil, sourceErr
@@ -442,6 +443,8 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 				found = true
 				if deleteErr := destinationClient.DeleteSVMPeer(ctx, destinationPeer.UUID); deleteErr != nil {
 					deleteErrors = append(deleteErrors, deleteErr)
+				} else {
+					destinationPeerDeleted = true
 				}
 			} else if !errors.Is(destinationErr, rest.ErrSVMPeerNotFound) {
 				deleteErrors = append(deleteErrors, destinationErr)
@@ -454,7 +457,7 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		}
 	}
 
-	if err != nil {
+	if err != nil && !destinationPeerDeleted {
 		return errorResult(err), nil, err
 	}
 

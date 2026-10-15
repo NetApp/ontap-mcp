@@ -140,6 +140,9 @@ func (c *Client) FindSVMPeer(ctx context.Context, localSVM, remoteSVM, remoteClu
 		return ontap.SVMPeer{}, fmt.Errorf("failed to uniquely identify SVM peer for local SVM %s, remote SVM %s, remote cluster %s because there are %d matching records",
 			localSVM, remoteSVM, remoteCluster, svmPeerData.NumRecords)
 	}
+	if svmPeerData.Records[0].UUID == "" {
+		return ontap.SVMPeer{}, fmt.Errorf("empty UUID found for local SVM %s, remote SVM %s, remote cluster %s", localSVM, remoteSVM, remoteCluster)
+	}
 
 	return svmPeerData.Records[0], nil
 }
