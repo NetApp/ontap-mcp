@@ -48,8 +48,11 @@ func (c *Client) UpdateNVMeService(ctx context.Context, svmName string, nvmeServ
 		return err
 	}
 
-	if nvmeSr.NumRecords == 0 {
+	if nvmeSr.NumRecords == 0 || len(nvmeSr.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme service in svm %s because it does not exist", svmName)
+	}
+	if nvmeSr.NumRecords != 1 {
+		return fmt.Errorf("failed to get nvme service on svm=%s because there are %d matching records", svmName, nvmeSr.NumRecords)
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
@@ -84,8 +87,11 @@ func (c *Client) DeleteNVMeService(ctx context.Context, svmName string) error {
 		return err
 	}
 
-	if nvmeSr.NumRecords == 0 {
+	if nvmeSr.NumRecords == 0 || len(nvmeSr.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme service in svm %s because it does not exist", svmName)
+	}
+	if nvmeSr.NumRecords != 1 {
+		return fmt.Errorf("failed to get nvme service on svm=%s because there are %d matching records", svmName, nvmeSr.NumRecords)
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/nvme/services/`+nvmeSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
@@ -136,7 +142,7 @@ func (c *Client) UpdateNVMeSubsystem(ctx context.Context, svmName string, name s
 		return err
 	}
 
-	if nvmeSs.NumRecords == 0 {
+	if nvmeSs.NumRecords == 0 || len(nvmeSs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme subsystem of name %s in svm %s because it does not exist", name, svmName)
 	}
 
@@ -178,7 +184,7 @@ func (c *Client) DeleteNVMeSubsystem(ctx context.Context, svmName string, name s
 		return err
 	}
 
-	if nvmeSs.NumRecords == 0 {
+	if nvmeSs.NumRecords == 0 || len(nvmeSs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme subsystem of name %s in svm %s because it does not exist", name, svmName)
 	}
 
@@ -223,7 +229,7 @@ func (c *Client) AddNVMeSubsystemHost(ctx context.Context, svmName string, name 
 		return err
 	}
 
-	if nvmeSs.NumRecords == 0 {
+	if nvmeSs.NumRecords == 0 || len(nvmeSs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme subsystem of name %s in svm %s because it does not exist", name, svmName)
 	}
 
@@ -264,7 +270,7 @@ func (c *Client) RemoveNVMeSubsystemHost(ctx context.Context, svmName string, na
 		return err
 	}
 
-	if nvmeSs.NumRecords == 0 {
+	if nvmeSs.NumRecords == 0 || len(nvmeSs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme subsystem of name %s in svm %s because it does not exist", name, svmName)
 	}
 
@@ -323,7 +329,7 @@ func (c *Client) UpdateNVMeNamespace(ctx context.Context, svmName string, name s
 		return err
 	}
 
-	if nvmeNs.NumRecords == 0 {
+	if nvmeNs.NumRecords == 0 || len(nvmeNs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme namespace of name %s in svm %s because it does not exist", name, svmName)
 	}
 
@@ -365,7 +371,7 @@ func (c *Client) DeleteNVMeNamespace(ctx context.Context, svmName string, name s
 		return err
 	}
 
-	if nvmeNs.NumRecords == 0 {
+	if nvmeNs.NumRecords == 0 || len(nvmeNs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme namespace of name %s in svm %s because it does not exist", name, svmName)
 	}
 
@@ -427,7 +433,7 @@ func (c *Client) DeleteNVMeSubsystemMap(ctx context.Context, svmName string, sub
 		return err
 	}
 
-	if nvmeSs.NumRecords == 0 {
+	if nvmeSs.NumRecords == 0 || len(nvmeSs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme subsystem of name %s in svm %s because it does not exist", subsystemName, svmName)
 	}
 
@@ -449,7 +455,7 @@ func (c *Client) DeleteNVMeSubsystemMap(ctx context.Context, svmName string, sub
 		return err
 	}
 
-	if nvmeNs.NumRecords == 0 {
+	if nvmeNs.NumRecords == 0 || len(nvmeNs.Records) == 0 {
 		return fmt.Errorf("failed to get detail of nvme namespace of name %s in svm %s because it does not exist", namespaceName, svmName)
 	}
 

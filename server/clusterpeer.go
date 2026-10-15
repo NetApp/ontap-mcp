@@ -2,12 +2,19 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/tool"
 )
 
+var errSameCluster = errors.New("source and destination clusters must differ")
+
 func (a *App) CreateClusterPeer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.ClusterPeer) (*mcp.CallToolResult, any, error) {
+	// Without this, the second TryLock below fails on the same cluster and reports a retryable lock conflict.
+	if parameters.SourceCluster == parameters.DestinationCluster {
+		return errorResult(errSameCluster), nil, nil
+	}
 	if !a.locks.TryLock(parameters.SourceCluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on source cluster %s, please try again", parameters.SourceCluster)), nil, nil
 	}
@@ -40,6 +47,10 @@ func (a *App) CreateClusterPeer(ctx context.Context, _ *mcp.CallToolRequest, par
 }
 
 func (a *App) DeleteClusterPeer(ctx context.Context, _ *mcp.CallToolRequest, parameters tool.ClusterPeer) (*mcp.CallToolResult, any, error) {
+	// Without this, the second TryLock below fails on the same cluster and reports a retryable lock conflict.
+	if parameters.SourceCluster == parameters.DestinationCluster {
+		return errorResult(errSameCluster), nil, nil
+	}
 	if !a.locks.TryLock(parameters.SourceCluster) {
 		return errorResult(fmt.Errorf("another write operation is in progress on source cluster %s, please try again", parameters.SourceCluster)), nil, nil
 	}

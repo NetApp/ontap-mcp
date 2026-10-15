@@ -214,14 +214,14 @@ type NFSExportPolicyCreate struct {
 	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM          string `json:"svm_name" jsonschema:"SVM name"`
 	ExportPolicy string `json:"export_policy" jsonschema:"nfs export policy name"`
-	ClientMatch  string `json:"client_match" jsonschema:"list of clients"`
-	ROrule       string `json:"ro_rule" jsonschema:"read only rules"`
-	RWrule       string `json:"rw_rule" jsonschema:"read write rules"`
+	ClientMatch  string `json:"client_match,omitzero" jsonschema:"optional initial rule: list of clients; set with ro_rule and rw_rule"`
+	ROrule       string `json:"ro_rule,omitzero" jsonschema:"optional initial rule: comma-separated read only rules; set with client_match and rw_rule"`
+	RWrule       string `json:"rw_rule,omitzero" jsonschema:"optional initial rule: comma-separated read write rules; set with client_match and ro_rule"`
 }
 
 type NFSExportPolicy struct {
 	Cluster         string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM             string `json:"svm_name,omitzero" jsonschema:"SVM name"`
+	SVM             string `json:"svm_name" jsonschema:"SVM name that owns the export policy"`
 	ExportPolicy    string `json:"export_policy,omitzero" jsonschema:"nfs export policy name"`
 	NewExportPolicy string `json:"new_export_policy,omitzero" jsonschema:"new nfs export policy name"`
 	ClientMatch     string `json:"client_match,omitzero" jsonschema:"list of clients"`
@@ -232,6 +232,7 @@ type NFSExportPolicy struct {
 type NFSExportPolicyModify struct {
 	Cluster               string                `json:"cluster_name" jsonschema:"cluster name"`
 	Operation             string                `json:"operation" jsonschema:"NFS export policy operation type (e.g., update, delete)"`
+	SVM                   string                `json:"svm_name" jsonschema:"SVM name that owns the export policy"`
 	ExportPolicy          string                `json:"export_policy" jsonschema:"nfs export policy name"`
 	NFSExportPolicyUpdate NFSExportPolicyUpdate `json:"nfs_export_policy_update,omitzero" jsonschema:"update NFS export policy operation"`
 }
@@ -245,6 +246,7 @@ type NFSExportPolicyUpdate struct {
 
 type NFSExportPolicyRulesCreate struct {
 	Cluster      string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM          string `json:"svm_name" jsonschema:"SVM name that owns the export policy"`
 	ExportPolicy string `json:"export_policy" jsonschema:"nfs export policy name"`
 	ClientMatch  string `json:"client" jsonschema:"list of clients"`
 	ROrule       string `json:"ro_rule" jsonschema:"read only rules"`
@@ -253,6 +255,7 @@ type NFSExportPolicyRulesCreate struct {
 
 type NFSExportPolicyRules struct {
 	Cluster        string `json:"cluster_name" jsonschema:"cluster name"`
+	SVM            string `json:"svm_name" jsonschema:"SVM name that owns the export policy"`
 	ExportPolicy   string `json:"export_policy" jsonschema:"nfs export policy name"`
 	OldClientMatch string `json:"old_client,omitzero" jsonschema:"old list of clients"`
 	ClientMatch    string `json:"client,omitzero" jsonschema:"list of clients"`
@@ -265,6 +268,7 @@ type NFSExportPolicyRules struct {
 type NFSExportPolicyRulesModify struct {
 	Cluster                    string                     `json:"cluster_name" jsonschema:"cluster name"`
 	Operation                  string                     `json:"operation" jsonschema:"NFS export policy rules operation type (e.g., update, delete)"`
+	SVM                        string                     `json:"svm_name" jsonschema:"SVM name that owns the export policy"`
 	ExportPolicy               string                     `json:"export_policy" jsonschema:"nfs export policy name"`
 	NFSExportPolicyRulesUpdate NFSExportPolicyRulesUpdate `json:"nfs_export_policy_rules_update,omitzero" jsonschema:"update NFS export policy rules operation"`
 }
@@ -737,9 +741,9 @@ type SVMModify struct {
 }
 
 type SVMUpdate struct {
-	NewName string `json:"new_name,omitzero" jsonschema:"new name of SVM"`
-	State   string `json:"state,omitzero" jsonschema:"state of SVM (e.g., starting, running, stopping, stopped, deleting, initializing)"`
-	Comment string `json:"comment,omitzero" jsonschema:"comment"`
+	NewName string  `json:"new_name,omitzero" jsonschema:"new name of SVM"`
+	State   string  `json:"state,omitzero" jsonschema:"state of SVM (e.g., starting, running, stopping, stopped, deleting, initializing)"`
+	Comment *string `json:"comment,omitempty" jsonschema:"comment of SVM; omit to leave it unchanged, or pass an empty string to clear it"`
 }
 
 type SVMPeer struct {
