@@ -53,7 +53,7 @@ func (c *Client) UpdateCIFSShare(ctx context.Context, svmName, cifsShareName str
 		return fmt.Errorf("failed to get detail of cifs share %s because it does not exist", cifsShareName)
 	}
 
-	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/shares/`+cShare.Records[0].Svm.UUID+`/`+cifsShareName, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/shares/`+url.PathEscape(cShare.Records[0].Svm.UUID)+`/`+url.PathEscape(cifsShareName), &statusCode, responseHeaders).
 		BodyJSON(cifsShare).
 		ToJSON(&cShare).
 		Patch()
@@ -91,7 +91,7 @@ func (c *Client) DeleteCIFSShare(ctx context.Context, cifsShare ontap.CIFSShare)
 		return fmt.Errorf("failed to get detail of cifs share %s because it does not exist", cifsShare.Name)
 	}
 
-	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/shares/`+cShare.Records[0].Svm.UUID+`/`+cifsShare.Name, &statusCode, responseHeaders).
+	builder2 := c.baseRequestBuilder(`/api/protocols/cifs/shares/`+url.PathEscape(cShare.Records[0].Svm.UUID)+`/`+url.PathEscape(cifsShare.Name), &statusCode, responseHeaders).
 		Delete()
 
 	if err := c.buildAndExecuteRequest(ctx, builder2); err != nil {

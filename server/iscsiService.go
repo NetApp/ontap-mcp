@@ -293,6 +293,9 @@ func newUpdateIscsiService(in tool.IscsiService) (ontap.IscsiService, error) {
 		return out, errors.New("SVM name is required")
 	}
 	out.Enabled = in.Enabled
+	if out.Enabled == "" {
+		return out, errors.New("at least one field must be provided for update (e.g. enabled)")
+	}
 	return out, nil
 }
 
