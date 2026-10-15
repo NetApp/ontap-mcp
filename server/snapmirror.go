@@ -155,7 +155,7 @@ func (a *App) ModifySnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 				return nil, nil, err
 			}
 			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship resumed successfully")
-		default:
+		case "":
 			rel, err := newUpdateSnapMirror(tool.SnapMirror{
 				DestinationPath:      parameters.DestinationPath,
 				PolicyName:           parameters.SnapMirrorUpdate.PolicyName,
@@ -166,6 +166,8 @@ func (a *App) ModifySnapMirror(ctx context.Context, _ *mcp.CallToolRequest, para
 				return nil, nil, err
 			}
 			return a.updateSnapMirror(ctx, client, parameters.DestinationPath, rel, "SnapMirror relationship updated successfully")
+		default:
+			return errorResult(fmt.Errorf("unsupported snapmirror_operation %q; supported values: initialize, break, resync, pause, quiesce, resume", parameters.SnapMirrorUpdate.SnapMirrorOperation)), nil, nil
 		}
 	case "delete":
 		err = client.DeleteSnapMirror(ctx, parameters.DestinationPath)

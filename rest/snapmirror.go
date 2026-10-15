@@ -143,11 +143,7 @@ func (c *Client) UpdateSnapMirrorTransfer(ctx context.Context, destPath string) 
 }
 
 func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, rel ontap.SnapMirrorTransfer) error {
-	var (
-		buf        bytes.Buffer
-		errs       []error
-		statusCode int
-	)
+	var errs []error
 
 	uuid, _, err := c.GetSnapMirrorUUIDAndType(ctx, destPath)
 	if err != nil {
@@ -160,6 +156,12 @@ func (c *Client) AbortSnapMirrorTransfer(ctx context.Context, destPath string, r
 	}
 
 	for _, transferUUID := range transferUUIDs {
+		// Fresh per iteration: ToBytesBuffer appends, so a shared buffer would
+		// concatenate job responses and break decoding of the second one.
+		var (
+			buf        bytes.Buffer
+			statusCode int
+		)
 		builder := c.baseRequestBuilder(`/api/snapmirror/relationships/`+uuid+`/transfers/`+transferUUID, &statusCode, nil).
 			Patch().
 			BodyJSON(rel).

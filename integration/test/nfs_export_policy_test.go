@@ -34,21 +34,21 @@ func TestNFSExportPolicy(t *testing.T) {
 		},
 		{
 			name:             "Clean NFS export policy",
-			input:            ClusterStr + "delete " + rn("nfsEngPolicy") + " NFS export policy",
+			input:            ClusterStr + "delete " + rn("nfsEngPolicy") + " NFS export policy in the " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy"), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean NFS export policy",
-			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy",
+			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy in the " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Create NFS export policy",
 			input:            ClusterStr + "create an NFS export policy name " + rn("nfsEngPolicy") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy"), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsEngPolicy") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
 			name:             "Create volume",
@@ -66,7 +66,7 @@ func TestNFSExportPolicy(t *testing.T) {
 			name:             "Rename NFS export policy",
 			input:            ClusterStr + "rename the NFS export policy from " + rn("nfsEngPolicy") + " to " + rn("nfsMgrPolicy") + " on the " + rn("marketing") + " svm",
 			expectedOntapErr: "",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: createObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy") + "&svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
 			name:             "Clean volume",
@@ -76,9 +76,9 @@ func TestNFSExportPolicy(t *testing.T) {
 		},
 		{
 			name:             "Clean NFS export policy",
-			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy",
+			input:            ClusterStr + "delete " + rn("nfsMgrPolicy") + " NFS export policy in the " + rn("marketing") + " svm",
 			expectedOntapErr: "because it does not exist",
-			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy"), validationFunc: deleteObject},
+			verifyAPI:        ontapVerifier{api: "api/protocols/nfs/export-policies?name=" + rn("nfsMgrPolicy") + "&svm.name=" + rn("marketing"), validationFunc: deleteObject},
 		},
 		{
 			name:             "Clean SVM",

@@ -55,7 +55,7 @@ func (a *App) UpdateNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.UpdateNFSExportPolicy(ctx, parameters.ExportPolicy, nfsExportPolicyUpdate)
+	err = client.UpdateNFSExportPolicy(ctx, parameters.SVM, parameters.ExportPolicy, nfsExportPolicyUpdate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -76,6 +76,9 @@ func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 	out := ontap.ExportPolicy{}
 
 	hasUpdate := false
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
 	if in.ExportPolicy == "" {
 		return out, errors.New("export policy name is required")
 	}
@@ -84,14 +87,14 @@ func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 		hasUpdate = true
 	}
 
-	if in.ClientMatch != "" || in.ROrule != "" || in.RWrule != "" {
+	if in.ClientMatch != "" || len(ruleList(in.ROrule)) > 0 || len(ruleList(in.RWrule)) > 0 {
 		if in.ClientMatch == "" {
 			return out, errors.New("client match is required")
 		}
-		if in.ROrule == "" {
+		if len(ruleList(in.ROrule)) == 0 {
 			return out, errors.New("read only rules are required")
 		}
-		if in.RWrule == "" {
+		if len(ruleList(in.RWrule)) == 0 {
 			return out, errors.New("read write rules are required")
 		}
 
@@ -99,8 +102,8 @@ func newUpdateNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, erro
 			{Clients: []ontap.ClientData{
 				{Match: in.ClientMatch},
 			},
-				RWrule: strings.Split(in.RWrule, ","),
-				ROrule: strings.Split(in.ROrule, ","),
+				RWrule: ruleList(in.RWrule),
+				ROrule: ruleList(in.ROrule),
 			},
 		}
 		hasUpdate = true
@@ -149,6 +152,9 @@ func (a *App) ModifyNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
 	if parameters.ExportPolicy == "" {
 		return nil, nil, errors.New("export policy name is required")
 	}
@@ -165,7 +171,7 @@ func (a *App) ModifyNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 			return nil, nil, err
 		}
 
-		err = client.UpdateNFSExportPolicy(ctx, parameters.ExportPolicy, nfsExportPolicyUpdate)
+		err = client.UpdateNFSExportPolicy(ctx, parameters.SVM, parameters.ExportPolicy, nfsExportPolicyUpdate)
 		if err != nil {
 			return errorResult(err), nil, err
 		}
@@ -177,6 +183,7 @@ func (a *App) ModifyNFSExportPolicy(ctx context.Context, _ *mcp.CallToolRequest,
 		}, nil, nil
 	case "delete":
 		nfsExportPolicyDelete := ontap.ExportPolicy{
+			SVM:  ontap.NameAndUUID{Name: parameters.SVM},
 			Name: parameters.ExportPolicy,
 		}
 
@@ -204,14 +211,14 @@ func updateNFSExportPolicyValidation(in tool.NFSExportPolicyUpdate) (ontap.Expor
 		hasUpdate = true
 	}
 
-	if in.ClientMatch != "" || in.ROrule != "" || in.RWrule != "" {
+	if in.ClientMatch != "" || len(ruleList(in.ROrule)) > 0 || len(ruleList(in.RWrule)) > 0 {
 		if in.ClientMatch == "" {
 			return out, errors.New("client_match is required")
 		}
-		if in.ROrule == "" {
+		if len(ruleList(in.ROrule)) == 0 {
 			return out, errors.New("ro_rule is required")
 		}
-		if in.RWrule == "" {
+		if len(ruleList(in.RWrule)) == 0 {
 			return out, errors.New("rw_rule is required")
 		}
 
@@ -220,8 +227,8 @@ func updateNFSExportPolicyValidation(in tool.NFSExportPolicyUpdate) (ontap.Expor
 				Clients: []ontap.ClientData{
 					{Match: in.ClientMatch},
 				},
-				RWrule: strings.Split(in.RWrule, ","),
-				ROrule: strings.Split(in.ROrule, ","),
+				RWrule: ruleList(in.RWrule),
+				ROrule: ruleList(in.ROrule),
 			},
 		}
 
@@ -239,11 +246,27 @@ func updateNFSExportPolicyValidation(in tool.NFSExportPolicyUpdate) (ontap.Expor
 // the corresponding ONTAP object ready to use via the REST API
 func newDeleteNFSExportPolicy(in tool.NFSExportPolicy) (ontap.ExportPolicy, error) {
 	out := ontap.ExportPolicy{}
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
 	if in.ExportPolicy == "" {
 		return out, errors.New("export policy name is required")
 	}
+	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.ExportPolicy
 	return out, nil
+}
+
+// ruleList splits a comma-separated list of security flavors such as "sys, krb5", trimming spaces
+// and dropping empty entries so ONTAP never receives values like " krb5" or "".
+func ruleList(s string) []string {
+	var out []string
+	for part := range strings.SplitSeq(s, ",") {
+		if part = strings.TrimSpace(part); part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
 }
 
 // newCreateNFSExportPolicy validates the customer provided arguments and converts them into
@@ -259,14 +282,14 @@ func newCreateNFSExportPolicy(in tool.NFSExportPolicyCreate) (ontap.ExportPolicy
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.ExportPolicy
 
-	if in.ClientMatch != "" || in.ROrule != "" || in.RWrule != "" {
+	if in.ClientMatch != "" || len(ruleList(in.ROrule)) > 0 || len(ruleList(in.RWrule)) > 0 {
 		if in.ClientMatch == "" {
 			return out, errors.New("client match is required")
 		}
-		if in.ROrule == "" {
+		if len(ruleList(in.ROrule)) == 0 {
 			return out, errors.New("read only rules are required")
 		}
-		if in.RWrule == "" {
+		if len(ruleList(in.RWrule)) == 0 {
 			return out, errors.New("read write rules are required")
 		}
 
@@ -274,8 +297,8 @@ func newCreateNFSExportPolicy(in tool.NFSExportPolicyCreate) (ontap.ExportPolicy
 			{Clients: []ontap.ClientData{
 				{Match: in.ClientMatch},
 			},
-				RWrule: strings.Split(in.RWrule, ","),
-				ROrule: strings.Split(in.ROrule, ","),
+				RWrule: ruleList(in.RWrule),
+				ROrule: ruleList(in.ROrule),
 			},
 		}
 	}
@@ -297,7 +320,7 @@ func (a *App) CreateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.CreateNFSExportPolicyRules(ctx, parameters.ExportPolicy, nfsExportPolicyRulesCreate)
+	err = client.CreateNFSExportPolicyRules(ctx, parameters.SVM, parameters.ExportPolicy, nfsExportPolicyRulesCreate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -319,11 +342,14 @@ func newCreateNFSExportPolicyRules(in tool.NFSExportPolicyRulesCreate) (ontap.Ru
 	if in.ClientMatch == "" {
 		return out, errors.New("client match is required")
 	}
-	if in.ROrule == "" {
+	if len(ruleList(in.ROrule)) == 0 {
 		return out, errors.New("read only rules are required")
 	}
-	if in.RWrule == "" {
+	if len(ruleList(in.RWrule)) == 0 {
 		return out, errors.New("read write rules are required")
+	}
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
 	}
 	if in.ExportPolicy == "" {
 		return out, errors.New("export policy name is required")
@@ -332,8 +358,8 @@ func newCreateNFSExportPolicyRules(in tool.NFSExportPolicyRulesCreate) (ontap.Ru
 	out.Clients = []ontap.ClientData{
 		{Match: in.ClientMatch},
 	}
-	out.ROrule = strings.Split(in.ROrule, ",")
-	out.RWrule = strings.Split(in.RWrule, ",")
+	out.ROrule = ruleList(in.ROrule)
+	out.RWrule = ruleList(in.RWrule)
 	return out, nil
 }
 
@@ -352,7 +378,7 @@ func (a *App) UpdateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.UpdateNFSExportPolicyRules(ctx, parameters.ExportPolicy, parameters.OldClientMatch, parameters.OldROrule, parameters.OldRWrule, nfsExportPolicyRulesUpdate)
+	err = client.UpdateNFSExportPolicyRules(ctx, parameters.SVM, parameters.ExportPolicy, parameters.OldClientMatch, parameters.OldROrule, parameters.OldRWrule, nfsExportPolicyRulesUpdate)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -371,6 +397,9 @@ func (a *App) UpdateNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 // the corresponding ONTAP object ready to use via the REST API
 func newUpdateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, error) {
 	out := ontap.Rule{}
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
 	if in.ExportPolicy == "" {
 		return out, errors.New("export policy name is required")
 	}
@@ -385,12 +414,12 @@ func newUpdateNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, er
 		}
 		hasUpdate = true
 	}
-	if in.ROrule != "" {
-		out.ROrule = strings.Split(in.ROrule, ",")
+	if len(ruleList(in.ROrule)) > 0 {
+		out.ROrule = ruleList(in.ROrule)
 		hasUpdate = true
 	}
-	if in.RWrule != "" {
-		out.RWrule = strings.Split(in.RWrule, ",")
+	if len(ruleList(in.RWrule)) > 0 {
+		out.RWrule = ruleList(in.RWrule)
 		hasUpdate = true
 	}
 
@@ -416,7 +445,7 @@ func (a *App) DeleteNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	err = client.DeleteNFSExportPolicyRules(ctx, parameters.ExportPolicy, nfsExportPolicyRulesDelete)
+	err = client.DeleteNFSExportPolicyRules(ctx, parameters.SVM, parameters.ExportPolicy, nfsExportPolicyRulesDelete)
 
 	if err != nil {
 		return errorResult(err), nil, err
@@ -437,6 +466,9 @@ func (a *App) ModifyNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
+	if parameters.SVM == "" {
+		return nil, nil, errors.New("SVM name is required")
+	}
 	if parameters.ExportPolicy == "" {
 		return nil, nil, errors.New("export policy name is required")
 	}
@@ -457,7 +489,7 @@ func (a *App) ModifyNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 		oldROrule := parameters.NFSExportPolicyRulesUpdate.OldROrule
 		oldRWrule := parameters.NFSExportPolicyRulesUpdate.OldRWrule
 
-		err = client.UpdateNFSExportPolicyRules(ctx, parameters.ExportPolicy, oldClientMatch, oldROrule, oldRWrule, nfsExportPolicyRulesUpdate)
+		err = client.UpdateNFSExportPolicyRules(ctx, parameters.SVM, parameters.ExportPolicy, oldClientMatch, oldROrule, oldRWrule, nfsExportPolicyRulesUpdate)
 		if err != nil {
 			return errorResult(err), nil, err
 		}
@@ -473,7 +505,7 @@ func (a *App) ModifyNFSExportPoliciesRule(ctx context.Context, _ *mcp.CallToolRe
 			return nil, nil, err
 		}
 
-		err = client.DeleteNFSExportPolicyRules(ctx, parameters.ExportPolicy, nfsExportPolicyRulesDelete)
+		err = client.DeleteNFSExportPolicyRules(ctx, parameters.SVM, parameters.ExportPolicy, nfsExportPolicyRulesDelete)
 		if err != nil {
 			return errorResult(err), nil, err
 		}
@@ -500,12 +532,12 @@ func updateNFSExportPoliciesRuleValidation(in tool.NFSExportPolicyRulesUpdate) (
 		}
 		hasUpdate = true
 	}
-	if in.ROrule != "" {
-		out.ROrule = strings.Split(in.ROrule, ",")
+	if len(ruleList(in.ROrule)) > 0 {
+		out.ROrule = ruleList(in.ROrule)
 		hasUpdate = true
 	}
-	if in.RWrule != "" {
-		out.RWrule = strings.Split(in.RWrule, ",")
+	if len(ruleList(in.RWrule)) > 0 {
+		out.RWrule = ruleList(in.RWrule)
 		hasUpdate = true
 	}
 
@@ -541,6 +573,12 @@ func deleteNFSExportPoliciesRuleValidation(in tool.NFSExportPolicyRulesUpdate) (
 // the corresponding ONTAP object ready to use via the REST API
 func newDeleteNFSExportPolicyRules(in tool.NFSExportPolicyRules) (ontap.Rule, error) {
 	out := ontap.Rule{}
+	if in.SVM == "" {
+		return out, errors.New("SVM name is required")
+	}
+	if in.ExportPolicy == "" {
+		return out, errors.New("export policy name is required")
+	}
 	if in.OldClientMatch == "" && in.OldROrule == "" && in.OldRWrule == "" {
 		return out, errors.New("old client match OR old ro rule OR old rw rules are required")
 	}
