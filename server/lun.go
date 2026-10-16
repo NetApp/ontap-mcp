@@ -11,7 +11,10 @@ import (
 	"github.com/netapp/ontap-mcp/tool"
 )
 
-func lunPath(volume, name string) string {
+func lunPath(volume, name string, remote ontap.Remote) string {
+	if remote.Model == ontap.ASAr2 {
+		return name
+	}
 	return "/vol/" + volume + "/" + name
 }
 
@@ -50,7 +53,9 @@ func (a *App) UpdateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	lunUpdate, err := newUpdateLUN(parameters)
+	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+
+	lunUpdate, err := newUpdateLUN(parameters, remote)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -60,7 +65,7 @@ func (a *App) UpdateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
-	if err := client.UpdateLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name), lunUpdate); err != nil {
+	if err := client.UpdateLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name, remote), lunUpdate); err != nil {
 		return errorResult(err), nil, err
 	}
 
@@ -86,7 +91,9 @@ func (a *App) DeleteLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
-	if err := client.DeleteLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name), parameters.AllowDeleteWhileMapped); err != nil {
+	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+
+	if err := client.DeleteLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name, remote), parameters.AllowDeleteWhileMapped); err != nil {
 		return errorResult(err), nil, err
 	}
 
@@ -112,6 +119,8 @@ func (a *App) ModifyLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
+	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+
 	switch parameters.Operation {
 	case "update":
 		lunUpdate, err := newUpdateLUN(tool.LUN{
@@ -121,19 +130,19 @@ func (a *App) ModifyLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 			NewName: parameters.LUNUpdate.NewName,
 			Size:    parameters.LUNUpdate.Size,
 			Enabled: parameters.LUNUpdate.Enabled,
-		})
+		}, remote)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		err = client.UpdateLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name), lunUpdate)
+		err = client.UpdateLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name, remote), lunUpdate)
 		if err != nil {
 			return errorResult(err), nil, err
 		}
 
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "LUN updated successfully"}}}, nil, nil
 	case "delete":
-		err = client.DeleteLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name), parameters.AllowDeleteWhileMapped)
+		err = client.DeleteLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name, remote), parameters.AllowDeleteWhileMapped)
 		if err != nil {
 			return errorResult(err), nil, err
 		}
@@ -148,11 +157,6 @@ func (a *App) ModifyLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 // the corresponding ONTAP object ready to use via the REST API
 func newCreateLUN(in tool.LUNCreate, remote ontap.Remote) (ontap.LUN, error) {
 	out := ontap.LUN{}
-
-	model := remote.Model
-	if model == ontap.ASAr2 {
-		return out, errors.New("lun creation is not supported on ASAr2 clusters, use storage units instead")
-	}
 
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
@@ -176,7 +180,7 @@ func newCreateLUN(in tool.LUNCreate, remote ontap.Remote) (ontap.LUN, error) {
 	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
-	out.Name = lunPath(in.Volume, in.Name)
+	out.Name = lunPath(in.Volume, in.Name, remote)
 	out.Space = ontap.LUNSpace{Size: size}
 	if in.SpaceGuaranteeRequested {
 		t := true
@@ -188,7 +192,7 @@ func newCreateLUN(in tool.LUNCreate, remote ontap.Remote) (ontap.LUN, error) {
 
 // newUpdateLUN validates the customer provided arguments and converts them into
 // the corresponding ONTAP object ready to use via the REST API
-func newUpdateLUN(in tool.LUN) (ontap.LUN, error) {
+func newUpdateLUN(in tool.LUN, remote ontap.Remote) (ontap.LUN, error) {
 	out := ontap.LUN{}
 	hasUpdate := false
 	if in.SVM == "" {
@@ -205,7 +209,7 @@ func newUpdateLUN(in tool.LUN) (ontap.LUN, error) {
 	}
 
 	if in.NewName != "" {
-		out.Name = lunPath(in.Volume, in.NewName)
+		out.Name = lunPath(in.Volume, in.NewName, remote)
 		hasUpdate = true
 	}
 

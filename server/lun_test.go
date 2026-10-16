@@ -40,14 +40,14 @@ func TestNewCreateLun(t *testing.T) {
 			expectedErr: "LUN name is required",
 		},
 		{
-			name:        "lun with error in asar2",
+			name:        "lun creation in asar2",
 			volume:      "volume3",
 			svm:         "svm3",
 			lun:         "lun3",
 			remote:      ontap.Remote{Model: ontap.ASAr2},
 			size:        "100mb",
 			osType:      "exsi",
-			expectedErr: "lun creation is not supported on ASAr2 clusters, use storage units instead",
+			expectedErr: "",
 		},
 		{
 			name:        "lun without model in cdot",

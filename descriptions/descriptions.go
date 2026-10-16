@@ -36,8 +36,6 @@ const CreateVolume = `Create a volume on a cluster by cluster name. FlexVol is t
 const UpdateVolume = `Update volume name, size, state, nfs export policy of volume on a cluster by cluster name.`
 const DeleteVolume = `Delete a volume on a cluster by cluster name.`
 const ModifyVolume = `Update or delete a volume on a cluster by cluster name.`
-const CreateStorageUnit = `Create a storage unit by cloning an existing storage unit on an ASA r2 cluster. Requires SVM name, new storage unit name, and source storage unit name. Optionally specify a source snapshot. The clone and its source must reside on the same SVM; standalone storage-unit creation is not supported by this tool.`
-const ModifyStorageUnit = `Update or delete a storage unit on a cluster by cluster name. Use this for ASA r2 storage provisioning. Update and delete require the existing storage unit name and SVM name.`
 
 const CreateSnapshot = `Create a snapshot of a volume on a cluster by cluster name.`
 const DeleteSnapshot = `Delete a snapshot of a volume on a cluster by cluster name.`
@@ -136,10 +134,10 @@ const ModifyNVMeNamespace = `Update or delete NVMe namespace on a cluster by clu
 const CreateNVMeSubsystemMap = `Create NVMe subsystem map on a cluster by cluster name.`
 const DeleteNVMeSubsystemMap = `Delete NVMe subsystem map on a cluster by cluster name.`
 
-const CreateLUN = `Create a LUN on a specified volume and SVM with a given size and OS type.`
-const UpdateLUN = `Update a LUN: resize, rename, or toggle enable/disable state (online/offline).`
-const DeleteLUN = `Delete a LUN from a specified volume and SVM.`
-const ModifyLUN = `Update or delete a LUN from a specified volume and SVM.`
+const CreateLUN = `Create a LUN on a specified volume and SVM with a given size and OS type. This tool can be used when creating storage-unit on ASAr2 platform.`
+const UpdateLUN = `Update a LUN: resize, rename, or toggle enable/disable state (online/offline). This tool can be used when updating storage-unit on ASAr2 platform.`
+const DeleteLUN = `Delete a LUN from a specified volume and SVM. This tool can be used when deleting storage-unit on ASAr2 platform.`
+const ModifyLUN = `Update or delete a LUN from a specified volume and SVM. This tool can be used when updating or deleting storage-unit on ASAr2 platform.`
 
 const CreateFCPService = `Create FCP service on a cluster by cluster name.`
 const UpdateFCPService = `Update FCP service admin state on a cluster by cluster name.`

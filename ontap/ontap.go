@@ -161,27 +161,6 @@ type Volume struct {
 	GranularDataMode         string               `json:"granular_data_mode,omitempty"`
 }
 
-type StorageUnit struct {
-	SVM    NameAndUUID      `json:"svm,omitzero"`
-	Name   string           `json:"name,omitzero"`
-	OsType string           `json:"os_type,omitzero"`
-	Space  StorageUnitSpace `json:"space,omitzero"`
-	Clone  StorageUnitClone `json:"clone,omitzero"`
-}
-
-type StorageUnitClone struct {
-	Source StorageUnitCloneSource `json:"source,omitzero"`
-}
-
-type StorageUnitCloneSource struct {
-	StorageUnit NameAndUUID `json:"storage_unit,omitzero"`
-	Snapshot    NameAndUUID `json:"snapshot,omitzero"`
-}
-
-type StorageUnitSpace struct {
-	Size int64 `json:"size,omitempty"`
-}
-
 type NameAndUUID struct {
 	Name string `json:"name,omitempty"`
 	UUID string `json:"uuid,omitempty"`

@@ -229,7 +229,6 @@ func (a *App) createMCPServer() *mcp.Server {
 
 	// operation on Volume object
 	addTool(a, server, "create_volume", descriptions.CreateVolume, createAnnotation, a.CreateVolume)
-	addTool(a, server, "create_storage_unit", descriptions.CreateStorageUnit, createAnnotation, a.CreateStorageUnit)
 	addTool(a, server, "create_snapshot_policy", descriptions.CreateSnapshotPolicy, createAnnotation, a.CreateSnapshotPolicy)
 	addTool(a, server, "create_schedule", descriptions.CreateSchedule, createAnnotation, a.CreateSchedule)
 	addTool(a, server, "add_schedule_in_snapshot_policy", descriptions.AddScheduleInSnapshotPolicy, createAnnotation, a.AddScheduleInSnapshotPolicy)
@@ -326,7 +325,6 @@ func (a *App) createMCPServer() *mcp.Server {
 	}
 	if a.options.ToolMode == "both" || a.options.ToolMode == "multiplex" {
 		addTool(a, server, "modify_volume", descriptions.ModifyVolume, updateAnnotation, a.ModifyVolume)
-		addTool(a, server, "modify_storage_unit", descriptions.ModifyStorageUnit, updateAnnotation, a.ModifyStorageUnit)
 		addTool(a, server, "modify_snapshot_policy", descriptions.ModifySnapshotPolicy, updateAnnotation, a.ModifySnapshotPolicy)
 		addTool(a, server, "modify_schedule_in_snapshot_policy", descriptions.ModifyScheduleInSnapshotPolicy, updateAnnotation, a.ModifyScheduleInSnapshotPolicy)
 		addTool(a, server, "modify_qos_policy", descriptions.ModifyQoSPolicy, updateAnnotation, a.ModifyQoSPolicy)
