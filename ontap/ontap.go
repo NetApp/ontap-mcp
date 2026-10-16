@@ -60,7 +60,7 @@ type GetData struct {
 		Lun      NameAndUUID      `json:"lun,omitzero"`
 		IGroup   NameAndUUID      `json:"igroup,omitzero"`
 		Policy   SnapMirrorPolicy `json:"policy,omitzero"`
-		IP       IP           `json:"ip,omitzero"`
+		IP       IP               `json:"ip,omitzero"`
 	} `json:"records"`
 	NumRecords int `json:"num_records"`
 }
