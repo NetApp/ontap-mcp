@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -24,16 +25,16 @@ func (a *App) CreateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
 	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
 
 	lunCreate, err := newCreateLUN(parameters, remote)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
 	}
 
 	if err := client.CreateLUN(ctx, lunCreate); err != nil {
@@ -53,16 +54,16 @@ func (a *App) UpdateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
+	client, err := a.getClient(parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
+
 	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
 
 	lunUpdate, err := newUpdateLUN(parameters, remote)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	client, err := a.getClient(parameters.Cluster)
-	if err != nil {
-		return errorResult(err), nil, err
 	}
 
 	if err := client.UpdateLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name, remote), lunUpdate); err != nil {
@@ -82,16 +83,16 @@ func (a *App) DeleteLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if err := validateLUN(parameters.SVM, parameters.Volume, parameters.Name); err != nil {
-		return nil, nil, err
-	}
-
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
 
 	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+
+	if err := validateLUN(parameters.SVM, parameters.Volume, parameters.Name, remote); err != nil {
+		return nil, nil, err
+	}
 
 	if err := client.DeleteLUN(ctx, parameters.SVM, lunPath(parameters.Volume, parameters.Name, remote), parameters.AllowDeleteWhileMapped); err != nil {
 		return errorResult(err), nil, err
@@ -110,16 +111,16 @@ func (a *App) ModifyLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 	}
 	defer a.locks.Unlock(parameters.Cluster)
 
-	if err := validateLUN(parameters.SVM, parameters.Volume, parameters.Name); err != nil {
-		return nil, nil, err
-	}
-
 	client, err := a.getClient(parameters.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
 	}
 
 	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+
+	if err := validateLUN(parameters.SVM, parameters.Volume, parameters.Name, remote); err != nil {
+		return nil, nil, err
+	}
 
 	switch parameters.Operation {
 	case "update":
@@ -161,11 +162,14 @@ func newCreateLUN(in tool.LUNCreate, remote ontap.Remote) (ontap.LUN, error) {
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
-	if in.Volume == "" {
+	if in.Volume == "" && remote.Model != ontap.ASAr2 {
 		return out, errors.New("volume name is required")
 	}
 	if in.Name == "" {
 		return out, errors.New("LUN name is required")
+	}
+	if err := validateName(in.Name); err != nil {
+		return out, err
 	}
 	if in.Size == "" {
 		return out, errors.New("LUN size is required")
@@ -198,17 +202,23 @@ func newUpdateLUN(in tool.LUN, remote ontap.Remote) (ontap.LUN, error) {
 	if in.SVM == "" {
 		return out, errors.New("SVM name is required")
 	}
-	if in.Volume == "" {
+	if in.Volume == "" && remote.Model != ontap.ASAr2 {
 		return out, errors.New("volume name is required")
 	}
 	if in.Name == "" {
 		return out, errors.New("LUN name is required")
+	}
+	if err := validateName(in.Name); err != nil {
+		return out, err
 	}
 	if in.NewName == "" && in.Size == "" && in.Enabled == "" {
 		return out, errors.New("at least one of new_lun_name, size, or enabled must be provided")
 	}
 
 	if in.NewName != "" {
+		if err := validateName(in.NewName); err != nil {
+			return out, err
+		}
 		out.Name = lunPath(in.Volume, in.NewName, remote)
 		hasUpdate = true
 	}
@@ -238,15 +248,25 @@ func newUpdateLUN(in tool.LUN, remote ontap.Remote) (ontap.LUN, error) {
 	return out, nil
 }
 
-func validateLUN(svm, volume, name string) error {
+func validateLUN(svm, volume, name string, remote ontap.Remote) error {
 	if svm == "" {
 		return errors.New("SVM name is required")
 	}
-	if volume == "" {
+	if volume == "" && remote.Model != ontap.ASAr2 {
 		return errors.New("volume name is required")
 	}
 	if name == "" {
 		return errors.New("LUN name is required")
+	}
+	if err := validateName(name); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateName(name string) error {
+	if strings.ContainsAny(name, `*|!<>{}`) {
+		return fmt.Errorf("%s contains an invalid character; names cannot contain *|!<>{}", name)
 	}
 	return nil
 }

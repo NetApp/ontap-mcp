@@ -46,7 +46,7 @@ func TestNewCreateLun(t *testing.T) {
 			lun:         "lun3",
 			remote:      ontap.Remote{Model: ontap.ASAr2},
 			size:        "100mb",
-			osType:      "exsi",
+			osType:      "esxi",
 			expectedErr: "",
 		},
 		{
