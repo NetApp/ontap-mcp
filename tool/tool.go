@@ -751,7 +751,7 @@ type SVMPeerCreate struct {
 	SourceSVM          string   `json:"source_svm_name" jsonschema:"source SVM name"`
 	DestinationCluster string   `json:"destination_cluster_name" jsonschema:"registered destination cluster name"`
 	DestinationSVM     string   `json:"destination_svm_name" jsonschema:"destination SVM name"`
-	Application        []string `json:"application,omitzero" jsonschema:"peering application; defaults to snapmirror"`
+	Applications       []string `json:"applications,omitzero" jsonschema:"peering applications; defaults to snapmirror"`
 	AcceptOnly         bool     `json:"accept_only,omitzero" jsonschema:"accept an existing out-of-band proposal without creating one"`
 }
 
