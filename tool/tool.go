@@ -339,7 +339,7 @@ type QtreeUpdate struct {
 type LUNCreate struct {
 	Cluster                 string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM                     string `json:"svm_name" jsonschema:"SVM name"`
-	Volume                  string `json:"volume_name" jsonschema:"volume name where the LUN resides"`
+	Volume                  string `json:"volume_name,omitzero" jsonschema:"volume name where the LUN resides, required except on ASAr2"`
 	Name                    string `json:"lun_name" jsonschema:"LUN name"`
 	Size                    string `json:"size" jsonschema:"size of the LUN (e.g., '10GB', '1TB')"`
 	OsType                  string `json:"os_type" jsonschema:"OS type (e.g., linux, windows, windows_2008, windows_gpt, aix, esxi, hyper_v, solaris, vmware, xen)"`
@@ -349,7 +349,7 @@ type LUNCreate struct {
 type LUN struct {
 	Cluster                string `json:"cluster_name" jsonschema:"cluster name"`
 	SVM                    string `json:"svm_name" jsonschema:"SVM name"`
-	Volume                 string `json:"volume_name" jsonschema:"volume name where the LUN resides"`
+	Volume                 string `json:"volume_name,omitzero" jsonschema:"volume name where the LUN resides, required except on ASAr2"`
 	Name                   string `json:"lun_name" jsonschema:"LUN name"`
 	NewName                string `json:"new_lun_name,omitzero" jsonschema:"new LUN name for rename operation"`
 	Size                   string `json:"size,omitzero" jsonschema:"size of the LUN (e.g., '10GB', '1TB')"`
@@ -361,7 +361,7 @@ type LUNModify struct {
 	Cluster                string    `json:"cluster_name" jsonschema:"cluster name"`
 	Operation              string    `json:"operation" jsonschema:"LUN operation type (e.g., update, delete)"`
 	SVM                    string    `json:"svm_name" jsonschema:"SVM name"`
-	Volume                 string    `json:"volume_name" jsonschema:"volume name where the LUN resides"`
+	Volume                 string    `json:"volume_name,omitzero" jsonschema:"volume name where the LUN resides, required except on ASAr2"`
 	Name                   string    `json:"lun_name" jsonschema:"LUN name"`
 	AllowDeleteWhileMapped bool      `json:"allow_delete_while_mapped,omitzero" jsonschema:"Allows deletion of a mapped LUN. This parameter should be used with caution"`
 	LUNUpdate              LUNUpdate `json:"lun_update,omitzero" jsonschema:"update LUN operation"`

@@ -79,3 +79,27 @@ func TestNewCreateLun(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateName(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{name: "lun_1.v2-prod"},
+		{name: ""},
+		{name: "name with spaces", wantErr: true},
+		{name: "name/with/slashes", wantErr: true},
+		{name: "name..with-dots", wantErr: true},
+		{name: "name.with.dots"},
+		{name: "name+with+plus", wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateName(tt.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("validateName(%q) error = %v, wantErr %t", tt.name, err, tt.wantErr)
+			}
+		})
+	}
+}

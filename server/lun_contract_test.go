@@ -8,6 +8,12 @@ import (
 	"github.com/netapp/ontap-mcp/assert"
 )
 
+var lunClusterInfo = exchange{
+	method: http.MethodGet,
+	path:   "/api/cluster?fields=*",
+	resp:   `{"name":"` + contractCluster + `"}`,
+}
+
 // lunLookup is the name-to-UUID lookup that precedes every LUN update and delete; an empty uuid
 // means the LUN does not exist.
 func lunLookup(path, uuid string) exchange {
@@ -305,7 +311,11 @@ func TestLUNContract(t *testing.T) {
 			if mode == "" {
 				mode = "multiplex"
 			}
-			cs := newContractSession(t, mode, tt.ontap)
+			script := tt.ontap
+			if cluster, ok := tt.args["cluster_name"].(string); ok && cluster == contractCluster {
+				script = append([]exchange{lunClusterInfo}, script...)
+			}
+			cs := newContractSession(t, mode, script)
 			text, isErr := callTool(t, cs, tt.tool, tt.args)
 			assert.Equal(t, isErr, tt.wantErr)
 			if !strings.Contains(text, tt.wantText) {

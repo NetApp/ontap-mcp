@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
 )
+
+var validName = regexp.MustCompile(`^[A-Za-z0-9_.-]*$`)
 
 func lunPath(volume, name string, remote ontap.Remote) string {
 	if remote.Model == ontap.ASAr2 {
@@ -165,6 +168,9 @@ func newCreateLUN(in tool.LUNCreate, remote ontap.Remote) (ontap.LUN, error) {
 	if in.Volume == "" && remote.Model != ontap.ASAr2 {
 		return out, errors.New("volume name is required")
 	}
+	if err := validateName(in.Volume); err != nil {
+		return out, err
+	}
 	if in.Name == "" {
 		return out, errors.New("LUN name is required")
 	}
@@ -204,6 +210,9 @@ func newUpdateLUN(in tool.LUN, remote ontap.Remote) (ontap.LUN, error) {
 	}
 	if in.Volume == "" && remote.Model != ontap.ASAr2 {
 		return out, errors.New("volume name is required")
+	}
+	if err := validateName(in.Volume); err != nil {
+		return out, err
 	}
 	if in.Name == "" {
 		return out, errors.New("LUN name is required")
@@ -255,6 +264,9 @@ func validateLUN(svm, volume, name string, remote ontap.Remote) error {
 	if volume == "" && remote.Model != ontap.ASAr2 {
 		return errors.New("volume name is required")
 	}
+	if err := validateName(volume); err != nil {
+		return err
+	}
 	if name == "" {
 		return errors.New("LUN name is required")
 	}
@@ -265,8 +277,8 @@ func validateLUN(svm, volume, name string, remote ontap.Remote) error {
 }
 
 func validateName(name string) error {
-	if strings.ContainsAny(name, `*|!<>{}`) {
-		return fmt.Errorf("%s contains an invalid character; names cannot contain *|!<>{}", name)
+	if !validName.MatchString(name) || strings.Contains(name, "..") {
+		return fmt.Errorf("%s contains an invalid character or sequence; names may only contain A-Z, a-z, 0-9, _, ., and -, and cannot contain `..`", name)
 	}
 	return nil
 }
