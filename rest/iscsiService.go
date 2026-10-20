@@ -45,8 +45,13 @@ func (c *Client) UpdateIscsiService(ctx context.Context, svmName string, iscsiSe
 		return err
 	}
 
-	if iscsiSr.NumRecords == 0 {
+	if iscsiSr.NumRecords == 0 || len(iscsiSr.Records) == 0 {
 		return fmt.Errorf("failed to get detail of iscsi service in svm %s because it does not exist", svmName)
+	}
+
+	if iscsiSr.NumRecords != 1 {
+		return fmt.Errorf("failed to get iscsi service on svm=%s because there are %d matching records",
+			svmName, iscsiSr.NumRecords)
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
@@ -81,8 +86,13 @@ func (c *Client) DeleteIscsiService(ctx context.Context, svmName string) error {
 		return err
 	}
 
-	if iscsiSr.NumRecords == 0 {
+	if iscsiSr.NumRecords == 0 || len(iscsiSr.Records) == 0 {
 		return fmt.Errorf("failed to get detail of iscsi service in svm %s because it does not exist", svmName)
+	}
+
+	if iscsiSr.NumRecords != 1 {
+		return fmt.Errorf("failed to get iscsi service on svm=%s because there are %d matching records",
+			svmName, iscsiSr.NumRecords)
 	}
 
 	builder = c.baseRequestBuilder(`/api/protocols/san/iscsi/services/`+iscsiSr.Records[0].Svm.UUID, &statusCode, responseHeaders).
@@ -136,7 +146,7 @@ func (c *Client) UpdateNetworkIPInterface(ctx context.Context, scope string, int
 		return err
 	}
 
-	if interfaceData.NumRecords == 0 {
+	if interfaceData.NumRecords == 0 || len(interfaceData.Records) == 0 {
 		return fmt.Errorf("failed to get detail of network interface name %s because it does not exist", interfaceName)
 	}
 
@@ -180,7 +190,7 @@ func (c *Client) DeleteNetworkIPInterface(ctx context.Context, scope string, int
 		return err
 	}
 
-	if interfaceData.NumRecords == 0 {
+	if interfaceData.NumRecords == 0 || len(interfaceData.Records) == 0 {
 		return fmt.Errorf("failed to get detail of network interface name %s because it does not exist", interfaceName)
 	}
 

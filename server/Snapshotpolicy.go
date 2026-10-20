@@ -7,6 +7,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
+	"strconv"
 	"strings"
 )
 
@@ -309,62 +310,79 @@ func newCreateSchedule(in tool.Schedule) (ontap.Schedule, error) {
 	return out, nil
 }
 
-func readRanges(minRange int, maxRange int, r string, out *[]int) {
-	if r != "*" {
-		for rng := range strings.SplitSeq(r, ",") {
-			from, to := 0, 0
-			n, _ := fmt.Sscanf(rng, "%d-%d", &from, &to)
-			switch n {
-			case 1: // single value
-				if from >= minRange && from <= maxRange {
-					*out = append(*out, from)
-				}
-			case 2: // range
-				if from < minRange {
-					from = minRange
-				}
-				if to > maxRange {
-					to = maxRange
-				}
-				for i := from; i <= to; i++ {
-					*out = append(*out, i)
-				}
-			default:
-				continue
-			}
+// cronFields lists the five cron fields in order with the bounds ONTAP accepts for each.
+// ONTAP numbers months 1-12 and weekdays 0-6, with 0 meaning Sunday.
+var cronFields = []struct {
+	name     string
+	minRange int
+	maxRange int
+}{
+	{name: "minutes", minRange: 0, maxRange: 59},
+	{name: "hours", minRange: 0, maxRange: 23},
+	{name: "days", minRange: 1, maxRange: 31},
+	{name: "months", minRange: 1, maxRange: 12},
+	{name: "weekdays", minRange: 0, maxRange: 6},
+}
+
+// readRanges parses one cron field, which is either "*" or a comma-separated list of values and
+// from-to ranges, and appends every value it names to out. Any value outside minRange-maxRange,
+// non-numeric or empty token, or inverted range is an error, so ONTAP never receives a schedule
+// that differs from the one requested.
+func readRanges(name string, minRange int, maxRange int, r string, out *[]int) error {
+	if r == "*" {
+		return nil
+	}
+	for rng := range strings.SplitSeq(r, ",") {
+		fromStr, toStr, isRange := strings.Cut(rng, "-")
+		from, err := readCronValue(name, minRange, maxRange, rng, fromStr)
+		if err != nil {
+			return err
+		}
+		if !isRange {
+			*out = append(*out, from)
+			continue
+		}
+		to, err := readCronValue(name, minRange, maxRange, rng, toStr)
+		if err != nil {
+			return err
+		}
+		if from > to {
+			return fmt.Errorf("invalid cron %s range %q: start is greater than end", name, rng)
+		}
+		for i := from; i <= to; i++ {
+			*out = append(*out, i)
 		}
 	}
+	return nil
+}
+
+// readCronValue parses one number of the token rng in a cron field and checks its bounds.
+func readCronValue(name string, minRange int, maxRange int, rng string, s string) (int, error) {
+	if s == "" || strings.Trim(s, "0123456789") != "" {
+		return 0, fmt.Errorf("invalid cron %s value %q: expected *, a number, or a range such as 1-5", name, rng)
+	}
+	v, err := strconv.Atoi(s)
+	if err != nil || v < minRange || v > maxRange {
+		return 0, fmt.Errorf("invalid cron %s value %q: must be between %d and %d", name, rng, minRange, maxRange)
+	}
+	return v, nil
 }
 
 func convertCron(cronStr string, out *ontap.Schedule) error {
 	fields := strings.Fields(cronStr)
-	for i := range 5 {
-		var field string
-		if i < len(fields) {
-			field = fields[i]
-			if strings.Contains(field, "/") {
-				return fmt.Errorf("wrong cron format %s detected", field)
-			}
-		} else {
-			// Cron misses a field, using '*'
-			field = "*"
-		}
-		switch i {
-		case 0:
-			readRanges(0, 59, field, &out.Cron.Minutes)
-		case 1:
-			readRanges(0, 23, field, &out.Cron.Hours)
-		case 2:
-			readRanges(1, 31, field, &out.Cron.Days)
-		case 3:
-			readRanges(1, 12, field, &out.Cron.Months)
-		case 4:
-			readRanges(0, 6, field, &out.Cron.Weekdays)
-		default:
+	for _, field := range fields {
+		if strings.Contains(field, "/") {
+			return fmt.Errorf("wrong cron format %s detected", field)
 		}
 	}
-	if len(fields) > 5 {
-		fmt.Println("Ignoring extra fields in cron")
+	if len(fields) != len(cronFields) {
+		return fmt.Errorf("invalid cron expression %q: expected 5 fields (minutes hours days months weekdays), got %d", cronStr, len(fields))
+	}
+	targets := []*[]int{&out.Cron.Minutes, &out.Cron.Hours, &out.Cron.Days, &out.Cron.Months, &out.Cron.Weekdays}
+	for i, f := range cronFields {
+		if err := readRanges(f.name, f.minRange, f.maxRange, fields[i], targets[i]); err != nil {
+			return err
+		}
 	}
 	return nil
 }

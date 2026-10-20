@@ -89,26 +89,30 @@ func (a *App) ListQoSPolicies(ctx context.Context, _ *mcp.CallToolRequest, p Lis
 
 	svmRecords, err := client.GetSVMQoSPolicies(ctx, args.svmName)
 	if err != nil {
-		return errorResult(fmt.Errorf("failed to fetch SVM-scoped qos policies: %w", err)), empty, err
+		err = fmt.Errorf("failed to fetch SVM-scoped qos policies: %w", err)
+		return errorResult(err), empty, err
 	}
 
 	adminSVM, err := client.GetAdminSVM(ctx)
 	if err != nil {
-		return errorResult(fmt.Errorf("failed to get admin vserver: %w", err)), empty, err
+		err = fmt.Errorf("failed to get admin vserver: %w", err)
+		return errorResult(err), empty, err
 	}
 
 	var adminRecords []json.RawMessage
 	if args.policyType == "" || args.policyType == "fixed" {
 		fixed, err := client.GetAdminSVMFixedPolicies(ctx, adminSVM)
 		if err != nil {
-			return errorResult(fmt.Errorf("failed to fetch cluster-scope fixed qos policies: %w", err)), empty, err
+			err = fmt.Errorf("failed to fetch cluster-scope fixed qos policies: %w", err)
+			return errorResult(err), empty, err
 		}
 		adminRecords = append(adminRecords, fixed...)
 	}
 	if args.policyType == "" || args.policyType == "adaptive" {
 		adaptive, err := client.GetAdminSVMAdaptivePolicies(ctx, adminSVM)
 		if err != nil {
-			return errorResult(fmt.Errorf("failed to fetch cluster-scope adaptive qos policies: %w", err)), empty, err
+			err = fmt.Errorf("failed to fetch cluster-scope adaptive qos policies: %w", err)
+			return errorResult(err), empty, err
 		}
 		adminRecords = append(adminRecords, adaptive...)
 	}

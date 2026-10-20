@@ -96,7 +96,7 @@ type NAS struct {
 type Autosize struct {
 	MaxSize         string `json:"maximum,omitzero"`
 	MinSize         string `json:"minimum,omitzero"`
-	Mode            string `json:"mode"` // enum: grow, grow_shrink, off
+	Mode            string `json:"mode,omitzero"` // enum: grow, grow_shrink, off
 	GrowThreshold   string `json:"grow_threshold,omitzero"`
 	ShrinkThreshold string `json:"shrink_threshold,omitzero"`
 }
@@ -226,16 +226,18 @@ type QoSPolicy struct {
 	Adaptive QoSAdaptive `json:"adaptive,omitzero"`
 }
 
+// QoSFixed uses pointers so a PATCH sends only the fields the caller provided, while an explicit
+// 0 (e.g. min_throughput_iops) is still sent.
 type QoSFixed struct {
-	MaxThIOPS      int64 `json:"max_throughput_iops"`
-	MinThIOPS      int64 `json:"min_throughput_iops"`
-	CapacityShared bool  `json:"capacity_shared"`
+	MaxThIOPS      *int64 `json:"max_throughput_iops,omitzero"`
+	MinThIOPS      *int64 `json:"min_throughput_iops,omitzero"`
+	CapacityShared *bool  `json:"capacity_shared,omitzero"`
 }
 
 type QoSAdaptive struct {
-	ExpectedIOPS           int64  `json:"expected_iops,omitzero"`
-	PeakIOPS               int64  `json:"peak_iops,omitzero"`
-	AbsoluteMinIOPS        int64  `json:"absolute_min_iops,omitzero"`
+	ExpectedIOPS           *int64 `json:"expected_iops,omitzero"`
+	PeakIOPS               *int64 `json:"peak_iops,omitzero"`
+	AbsoluteMinIOPS        *int64 `json:"absolute_min_iops,omitzero"`
 	ExpectedIOPSAllocation string `json:"expected_iops_allocation,omitzero"`
 	PeakIOPSAllocation     string `json:"peak_iops_allocation,omitzero"`
 	BlockSize              string `json:"block_size,omitzero"`
@@ -270,9 +272,9 @@ type SVMCreate struct {
 	Name string `json:"name" jsonschema:"svm name"`
 }
 type SVM struct {
-	Name    string `json:"name,omitzero" jsonschema:"svm name"`
-	State   string `json:"state,omitzero" jsonschema:"svm state"` // enum: starting, running, stopping, stopped, deleting, initializing
-	Comment string `json:"comment,omitzero" jsonschema:"comment"`
+	Name    string  `json:"name,omitzero" jsonschema:"svm name"`
+	State   string  `json:"state,omitzero" jsonschema:"svm state"` // enum: starting, running, stopping, stopped, deleting, initializing
+	Comment *string `json:"comment,omitempty" jsonschema:"comment; nil leaves it unchanged, empty string clears it"`
 }
 
 type LUNSpace struct {

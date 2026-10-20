@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -172,8 +174,85 @@ func (a *App) ModifyQoSPolicy(ctx context.Context, _ *mcp.CallToolRequest, param
 	}
 }
 
+// parseQoSPolicyIOPS parses a QoS policy IOPS value. IOPS are counts, not byte sizes, so only
+// plain non-negative integers are accepted; a suffix such as "5k" is rejected rather than scaled.
+// An empty string means the field was not provided and yields nil.
+func parseQoSPolicyIOPS(field, s string) (*int64, error) {
+	if s == "" {
+		return nil, nil
+	}
+	v, err := strconv.ParseInt(strings.TrimSpace(s), 10, 64)
+	if err != nil || v < 0 {
+		return nil, fmt.Errorf("invalid %s %q: must be a non-negative integer IOPS count without units", field, s)
+	}
+	return &v, nil
+}
+
+// checkQoSPolicyType rejects a request that mixes fixed and adaptive fields. A QoS policy is
+// either fixed or adaptive, so one set of fields would otherwise be silently dropped.
+func checkQoSPolicyType(maxIOPS, minIOPS string, capacityShared bool,
+	expectedIOPS, peakIOPS, absoluteMinIOPS, expectedAlloc, peakAlloc, blockSize string) error {
+	var fixed, adaptive []string
+	add := func(list []string, set bool, name string) []string {
+		if set {
+			return append(list, name)
+		}
+		return list
+	}
+	fixed = add(fixed, maxIOPS != "", "max_throughput_iops")
+	fixed = add(fixed, minIOPS != "", "min_throughput_iops")
+	fixed = add(fixed, capacityShared, "capacity_shared")
+	adaptive = add(adaptive, expectedIOPS != "", "expected_iops")
+	adaptive = add(adaptive, peakIOPS != "", "peak_iops")
+	adaptive = add(adaptive, absoluteMinIOPS != "", "absolute_min_iops")
+	adaptive = add(adaptive, expectedAlloc != "", "expected_iops_allocation")
+	adaptive = add(adaptive, peakAlloc != "", "peak_iops_allocation")
+	adaptive = add(adaptive, blockSize != "", "block_size")
+	if len(fixed) == 0 || len(adaptive) == 0 {
+		return nil
+	}
+	return fmt.Errorf("a QoS policy is either fixed or adaptive: fixed fields (%s) cannot be combined with adaptive fields (%s)",
+		strings.Join(fixed, ", "), strings.Join(adaptive, ", "))
+}
+
+// parseAdaptiveIOPS parses the three adaptive IOPS fields into out.
+func parseAdaptiveIOPS(out *ontap.QoSAdaptive, expectedIOPS, peakIOPS, absoluteMinIOPS string) error {
+	var err error
+	if out.ExpectedIOPS, err = parseQoSPolicyIOPS("expected_iops", expectedIOPS); err != nil {
+		return err
+	}
+	if out.PeakIOPS, err = parseQoSPolicyIOPS("peak_iops", peakIOPS); err != nil {
+		return err
+	}
+	if out.AbsoluteMinIOPS, err = parseQoSPolicyIOPS("absolute_min_iops", absoluteMinIOPS); err != nil {
+		return err
+	}
+	return nil
+}
+
+// parseFixedIOPS parses the fixed max/min IOPS fields. capacity_shared is left unset because it
+// can only be chosen when the policy is created.
+func parseFixedIOPS(maxIOPS, minIOPS string) (ontap.QoSFixed, error) {
+	var (
+		out ontap.QoSFixed
+		err error
+	)
+	if out.MaxThIOPS, err = parseQoSPolicyIOPS("max_throughput_iops", maxIOPS); err != nil {
+		return out, err
+	}
+	if out.MinThIOPS, err = parseQoSPolicyIOPS("min_throughput_iops", minIOPS); err != nil {
+		return out, err
+	}
+	return out, nil
+}
+
 func updateQoSPolicyValidation(in tool.QoSPolicyUpdate) (ontap.QoSPolicy, error) {
 	out := ontap.QoSPolicy{}
+
+	if err := checkQoSPolicyType(in.MaxThIOPS, in.MinThIOPS, false, in.ExpectedIOPS, in.PeakIOPS, in.AbsoluteMinIOPS,
+		in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
+		return out, err
+	}
 
 	hasUpdate := false
 	if in.NewName != "" {
@@ -185,18 +264,11 @@ func updateQoSPolicyValidation(in tool.QoSPolicyUpdate) (ontap.QoSPolicy, error)
 		if in.MaxThIOPS == "" || in.MinThIOPS == "" {
 			return out, errors.New("both max_throughput_iops and min_throughput_iops must be provided for fixed QoS policy")
 		}
-		maxiops, err := parseSize(in.MaxThIOPS)
+		fixed, err := parseFixedIOPS(in.MaxThIOPS, in.MinThIOPS)
 		if err != nil {
-			return out, fmt.Errorf("invalid max_throughput_iops: %w", err)
+			return out, err
 		}
-		miniops, err := parseSize(in.MinThIOPS)
-		if err != nil {
-			return out, fmt.Errorf("invalid min_throughput_iops: %w", err)
-		}
-		out.Fixed = ontap.QoSFixed{
-			MaxThIOPS: maxiops,
-			MinThIOPS: miniops,
-		}
+		out.Fixed = fixed
 		hasUpdate = true
 	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" ||
 		in.ExpectedIOPSAllocation != "" || in.PeakIOPSAllocation != "" || in.BlockSize != "" {
@@ -206,21 +278,9 @@ func updateQoSPolicyValidation(in tool.QoSPolicyUpdate) (ontap.QoSPolicy, error)
 			if in.ExpectedIOPS == "" || in.PeakIOPS == "" || in.AbsoluteMinIOPS == "" {
 				return out, errors.New("all of expected_iops, peak_iops, and absolute_min_iops must be provided for adaptive QoS policy")
 			}
-			expectediops, err := parseSize(in.ExpectedIOPS)
-			if err != nil {
-				return out, fmt.Errorf("invalid expected_iops: %w", err)
+			if err := parseAdaptiveIOPS(&out.Adaptive, in.ExpectedIOPS, in.PeakIOPS, in.AbsoluteMinIOPS); err != nil {
+				return out, err
 			}
-			peakiops, err := parseSize(in.PeakIOPS)
-			if err != nil {
-				return out, fmt.Errorf("invalid peak_iops: %w", err)
-			}
-			absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
-			if err != nil {
-				return out, fmt.Errorf("invalid absolute_min_iops: %w", err)
-			}
-			out.Adaptive.ExpectedIOPS = expectediops
-			out.Adaptive.PeakIOPS = peakiops
-			out.Adaptive.AbsoluteMinIOPS = absoluteMiniops
 		}
 		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
 			return out, err
@@ -248,25 +308,27 @@ func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 	if in.Name == "" {
 		return out, errors.New("qos policy name is required")
 	}
+	if err := checkQoSPolicyType(in.MaxThIOPS, in.MinThIOPS, in.CapacityShared, in.ExpectedIOPS, in.PeakIOPS, in.AbsoluteMinIOPS,
+		in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
+		return out, err
+	}
 
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.Name
 	if in.MaxThIOPS != "" || in.MinThIOPS != "" {
-		// Only one of these need to be provided to create a fixed qos policy
-
-		maxiops, err := parseSizeEmptyAllowed(in.MaxThIOPS)
+		// Only one of these need to be provided to create a fixed qos policy; the other defaults to 0.
+		fixed, err := parseFixedIOPS(in.MaxThIOPS, in.MinThIOPS)
 		if err != nil {
 			return out, err
 		}
-		miniops, err := parseSizeEmptyAllowed(in.MinThIOPS)
-		if err != nil {
-			return out, err
+		if fixed.MaxThIOPS == nil {
+			fixed.MaxThIOPS = new(int64)
 		}
-		out.Fixed = ontap.QoSFixed{
-			MaxThIOPS:      maxiops,
-			MinThIOPS:      miniops,
-			CapacityShared: in.CapacityShared,
+		if fixed.MinThIOPS == nil {
+			fixed.MinThIOPS = new(int64)
 		}
+		fixed.CapacityShared = &in.CapacityShared
+		out.Fixed = fixed
 	} else {
 		if in.ExpectedIOPS == "" {
 			return out, errors.New("expected iops is required")
@@ -278,29 +340,15 @@ func newCreateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 			return out, errors.New("absolute min iops is required")
 		}
 
-		expectediops, err := parseSizeEmptyAllowed(in.ExpectedIOPS)
-		if err != nil {
-			return out, err
-		}
-		peakiops, err := parseSizeEmptyAllowed(in.PeakIOPS)
-		if err != nil {
-			return out, err
-		}
-		absoluteMiniops, err := parseSizeEmptyAllowed(in.AbsoluteMinIOPS)
-		if err != nil {
+		if err := parseAdaptiveIOPS(&out.Adaptive, in.ExpectedIOPS, in.PeakIOPS, in.AbsoluteMinIOPS); err != nil {
 			return out, err
 		}
 		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
 			return out, err
 		}
-		out.Adaptive = ontap.QoSAdaptive{
-			ExpectedIOPS:           expectediops,
-			PeakIOPS:               peakiops,
-			AbsoluteMinIOPS:        absoluteMiniops,
-			ExpectedIOPSAllocation: in.ExpectedIOPSAllocation,
-			PeakIOPSAllocation:     in.PeakIOPSAllocation,
-			BlockSize:              in.BlockSize,
-		}
+		out.Adaptive.ExpectedIOPSAllocation = in.ExpectedIOPSAllocation
+		out.Adaptive.PeakIOPSAllocation = in.PeakIOPSAllocation
+		out.Adaptive.BlockSize = in.BlockSize
 	}
 
 	return out, nil
@@ -315,6 +363,11 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 	}
 	if in.Name == "" && in.NewName == "" {
 		return out, errors.New("qos policy name is required")
+	}
+	// capacity_shared is not checked here: it can only be set at create time and is never sent on update.
+	if err := checkQoSPolicyType(in.MaxThIOPS, in.MinThIOPS, false, in.ExpectedIOPS, in.PeakIOPS, in.AbsoluteMinIOPS,
+		in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
+		return out, err
 	}
 
 	hasUpdate := false
@@ -331,18 +384,11 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 			return out, errors.New("min throughput iops is required")
 		}
 
-		maxiops, err := parseSize(in.MaxThIOPS)
+		fixed, err := parseFixedIOPS(in.MaxThIOPS, in.MinThIOPS)
 		if err != nil {
 			return out, err
 		}
-		miniops, err := parseSize(in.MinThIOPS)
-		if err != nil {
-			return out, err
-		}
-		out.Fixed = ontap.QoSFixed{
-			MaxThIOPS: maxiops,
-			MinThIOPS: miniops,
-		}
+		out.Fixed = fixed
 		hasUpdate = true
 	} else if in.ExpectedIOPS != "" || in.PeakIOPS != "" || in.AbsoluteMinIOPS != "" ||
 		in.ExpectedIOPSAllocation != "" || in.PeakIOPSAllocation != "" || in.BlockSize != "" {
@@ -359,21 +405,9 @@ func newUpdateQoSPolicy(in tool.QoSPolicy) (ontap.QoSPolicy, error) {
 				return out, errors.New("absolute min iops is required")
 			}
 
-			expectediops, err := parseSize(in.ExpectedIOPS)
-			if err != nil {
+			if err := parseAdaptiveIOPS(&out.Adaptive, in.ExpectedIOPS, in.PeakIOPS, in.AbsoluteMinIOPS); err != nil {
 				return out, err
 			}
-			peakiops, err := parseSize(in.PeakIOPS)
-			if err != nil {
-				return out, err
-			}
-			absoluteMiniops, err := parseSize(in.AbsoluteMinIOPS)
-			if err != nil {
-				return out, err
-			}
-			out.Adaptive.ExpectedIOPS = expectediops
-			out.Adaptive.PeakIOPS = peakiops
-			out.Adaptive.AbsoluteMinIOPS = absoluteMiniops
 		}
 		if err := validateAdaptiveAllocationFields(in.ExpectedIOPSAllocation, in.PeakIOPSAllocation, in.BlockSize); err != nil {
 			return out, err
