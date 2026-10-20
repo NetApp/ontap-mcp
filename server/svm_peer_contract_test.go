@@ -144,14 +144,14 @@ func TestSVMPeerContract(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "reject unsupported application without contacting ONTAP",
+			name: "reject unsupported applications without contacting ONTAP",
 			tool: "create_svm_peer",
 			args: map[string]any{
 				"source_cluster_name":      svmPeerSourceCluster,
 				"source_svm_name":          svmPeerSourceSVM,
 				"destination_cluster_name": svmPeerDestinationCluster,
 				"destination_svm_name":     svmPeerDestinationSVM,
-				"application":              []string{"unsupported"},
+				"applications":             []string{"unsupported"},
 			},
 			scripts: map[string][]exchange{svmPeerSourceCluster: {}, svmPeerDestinationCluster: {}},
 			want:    `application "unsupported" found`,

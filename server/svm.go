@@ -208,7 +208,7 @@ func updateSVMValidation(in tool.SVMUpdate) (ontap.SVM, error) {
 
 func validateSVMPeerParams(sourceCluster, sourceSVM, destinationCluster, destinationSVM string, applications []string) ([]string, error) {
 	var supportedApplication = []string{"snapmirror", "file_copy", "lun_copy", "flexcache"}
-	filteredApplications := make([]string, len(applications))
+	filteredApplications := make([]string, 0, len(applications))
 
 	if sourceCluster == "" {
 		return nil, errors.New("source cluster name is required")
@@ -228,7 +228,7 @@ func validateSVMPeerParams(sourceCluster, sourceSVM, destinationCluster, destina
 			if !slices.Contains(supportedApplication, app) {
 				return nil, fmt.Errorf("application %q found, supported applications are only %v", app, supportedApplication)
 			}
-			if !slices.Contains(applications, app) {
+			if !slices.Contains(filteredApplications, app) {
 				filteredApplications = append(filteredApplications, app)
 			}
 		}
@@ -472,7 +472,7 @@ func (a *App) DeleteSVMPeer(ctx context.Context, _ *mcp.CallToolRequest, paramet
 		}
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
-				&mcp.TextContent{Text: fmt.Sprintf("SVM peer deleted successfully from destination, found error from source %s", err.Error())},
+				&mcp.TextContent{Text: "SVM peer deleted successfully from destination, found error from source " + err.Error()},
 			},
 		}, nil, nil
 	}
