@@ -5,6 +5,7 @@ package assert
 import (
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -33,6 +34,13 @@ func False(t *testing.T, got bool) {
 	t.Helper()
 	if got {
 		t.Errorf("got: true; want: false")
+	}
+}
+
+func Contains(t *testing.T, got, substr string) {
+	t.Helper()
+	if !strings.Contains(got, substr) {
+		t.Errorf("got: %q; want to contain: %q", got, substr)
 	}
 }
 

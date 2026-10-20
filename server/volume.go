@@ -230,6 +230,9 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 		hasUpdate = true
 	}
 
+	if err := validateVolumeQoS(in.QoS); err != nil {
+		return out, err
+	}
 	switch {
 	case in.QoS.RemovePolicy:
 		out.QoS.Policy.Name = "none"
@@ -419,6 +422,9 @@ func newCreateVolume(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, e
 		}
 	}
 
+	if err := validateVolumeQoS(in.QoS); err != nil {
+		return out, err
+	}
 	switch {
 	case in.QoS.RemovePolicy:
 		out.QoS.Policy.Name = "none"
@@ -550,6 +556,9 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 		hasUpdate = true
 	}
 
+	if err := validateVolumeQoS(in.QoS); err != nil {
+		return out, err
+	}
 	switch {
 	case in.QoS.RemovePolicy:
 		out.QoS.Policy.Name = "none"
@@ -596,6 +605,29 @@ func newDeleteVolume(in tool.Volume) (ontap.Volume, error) {
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 	out.Name = in.Volume
 	return out, nil
+}
+
+// validateVolumeQoS rejects requests that combine remove_qos_policy, policy_name, and inline
+// limits, since only one of them can be applied to a volume.
+func validateVolumeQoS(q tool.VolumeQoS) error {
+	var set []string
+	if q.RemovePolicy {
+		set = append(set, "remove_qos_policy")
+	}
+	if q.PolicyName != "" {
+		set = append(set, "policy_name")
+	}
+	for _, limit := range []struct{ name, value string }{
+		{"max_iops", q.MaxIOPS}, {"min_iops", q.MinIOPS}, {"max_mbps", q.MaxMBPS}, {"min_mbps", q.MinMBPS},
+	} {
+		if limit.value != "" {
+			set = append(set, limit.name)
+		}
+	}
+	if len(set) > 1 && (q.RemovePolicy || q.PolicyName != "") {
+		return fmt.Errorf("qos: remove_qos_policy, policy_name, and inline limits (max_iops, min_iops, max_mbps, min_mbps) are mutually exclusive; got %s", strings.Join(set, ", "))
+	}
+	return nil
 }
 
 func parseQoSLimit(s string) (*int, error) {

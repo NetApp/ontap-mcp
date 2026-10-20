@@ -71,14 +71,17 @@ const UpdateQoSPolicy = `Update a QoS policy name, max throughput iops, min thro
 const DeleteQoSPolicy = `Delete a QoS policy on a cluster by cluster name.`
 const ModifyQoSPolicy = `Update or delete a QoS policy on a cluster by cluster name.`
 
-const CreateNFSExportPolicy = `Create NFS Export policies on a cluster by cluster name.`
-const UpdateNFSExportPolicy = `Update NFS Export policies name, client match, read only rules, read write rules on a cluster by cluster name.`
-const DeleteNFSExportPolicy = `Delete NFS Export policies on a cluster by cluster name.`
-const ModifyNFSExportPolicy = `Update or delete NFS Export policies on a cluster by cluster name.`
-const CreateNFSExportPolicyRules = `Create NFS Export policies rules on a cluster by cluster name.`
-const UpdateNFSExportPolicyRules = `Update NFS Export policies rules with client match, read only rules, read write rules on a cluster by cluster name.`
-const DeleteNFSExportPolicyRules = `Delete NFS Export policies rules on a cluster by cluster name.`
-const ModifyNFSExportPoliciesRule = `Update or delete NFS Export policies rules on a cluster by cluster name.`
+const CreateNFSExportPolicy = `Create NFS Export policies on an SVM on a cluster by cluster name. svm_name is required.`
+const UpdateNFSExportPolicy = `Update NFS Export policies name, client match, read only rules, read write rules on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired
+const DeleteNFSExportPolicy = `Delete NFS Export policies on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired
+const ModifyNFSExportPolicy = `Update or delete NFS Export policies on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired
+const CreateNFSExportPolicyRules = `Create NFS Export policies rules on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired
+const UpdateNFSExportPolicyRules = `Update NFS Export policies rules with client match, read only rules, read write rules on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired + ` ` + nfsExportPolicyRuleUnique
+const DeleteNFSExportPolicyRules = `Delete NFS Export policies rules on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired + ` ` + nfsExportPolicyRuleUnique
+const ModifyNFSExportPoliciesRule = `Update or delete NFS Export policies rules on an SVM on a cluster by cluster name. ` + nfsExportPolicySVMRequired + ` ` + nfsExportPolicyRuleUnique
+
+const nfsExportPolicySVMRequired = `svm_name is required: export policy names are only unique within an SVM (every SVM has a "default" policy), so ask the user which SVM owns the policy instead of guessing.`
+const nfsExportPolicyRuleUnique = `The old_client, old_ro_rule, and old_rw_rule values must match exactly one rule in the policy.`
 
 const CreateCIFSShare = `Create CIFS share on a cluster by cluster name.`
 const UpdateCIFSShare = `Update CIFS share path on a cluster by cluster name.`

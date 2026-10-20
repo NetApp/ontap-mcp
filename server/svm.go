@@ -120,7 +120,7 @@ func newUpdateSVM(in tool.SVM) (ontap.SVM, error) {
 		hasUpdate = true
 	}
 	if in.Comment != "" {
-		out.Comment = in.Comment
+		out.Comment = &in.Comment
 		hasUpdate = true
 	}
 	if in.State != "" {
@@ -190,7 +190,8 @@ func updateSVMValidation(in tool.SVMUpdate) (ontap.SVM, error) {
 		out.Name = in.NewName
 		hasUpdate = true
 	}
-	if in.Comment != "" {
+	// A nil comment means no change; a pointer to "" clears the comment.
+	if in.Comment != nil {
 		out.Comment = in.Comment
 		hasUpdate = true
 	}

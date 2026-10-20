@@ -40,7 +40,7 @@ func (c *Client) CreateClusterPeer(ctx context.Context, destinationClient *Clien
 	if _, err = destinationClient.createClusterPeer(ctx, cp); err != nil {
 		if sourceClusterPeerUUID != "" {
 			if err2 := c.removeClusterPeer(ctx, sourceClusterPeerUUID); err2 != nil {
-				return err2
+				return errors.Join(err, fmt.Errorf("rollback of source cluster peer %s failed, remove it manually: %w", sourceClusterPeerUUID, err2))
 			}
 		}
 		return err
