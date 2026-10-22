@@ -33,7 +33,10 @@ func (a *App) CreateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
-	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+	remote, err := a.getClusterRemote(ctx, parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
 
 	lunCreate, err := newCreateLUN(parameters, remote)
 	if err != nil {
@@ -62,7 +65,10 @@ func (a *App) UpdateLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
-	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+	remote, err := a.getClusterRemote(ctx, parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
 
 	lunUpdate, err := newUpdateLUN(parameters, remote)
 	if err != nil {
@@ -91,7 +97,10 @@ func (a *App) DeleteLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
-	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+	remote, err := a.getClusterRemote(ctx, parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
 
 	if err := validateLUN(parameters.SVM, parameters.Volume, parameters.Name, remote); err != nil {
 		return nil, nil, err
@@ -119,7 +128,10 @@ func (a *App) ModifyLUN(ctx context.Context, _ *mcp.CallToolRequest, parameters 
 		return errorResult(err), nil, err
 	}
 
-	remote := a.clusterModelOrDefault(ctx, parameters.Cluster)
+	remote, err := a.getClusterRemote(ctx, parameters.Cluster)
+	if err != nil {
+		return errorResult(err), nil, err
+	}
 
 	if err := validateLUN(parameters.SVM, parameters.Volume, parameters.Name, remote); err != nil {
 		return nil, nil, err

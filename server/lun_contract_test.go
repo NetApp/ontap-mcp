@@ -11,7 +11,13 @@ import (
 var lunClusterInfo = exchange{
 	method: http.MethodGet,
 	path:   "/api/cluster?fields=*",
-	resp:   `{"name":"` + contractCluster + `"}`,
+	resp:   `{"name":"` + contractCluster + `","san_optimized":false,"disaggregated":false}`,
+}
+
+var lunASAr2ClusterInfo = exchange{
+	method: http.MethodGet,
+	path:   "/api/cluster?fields=*",
+	resp:   `{"name":"` + contractCluster + `","san_optimized":true,"disaggregated":true}`,
 }
 
 // lunLookup is the name-to-UUID lookup that precedes every LUN update and delete; an empty uuid
@@ -44,13 +50,14 @@ func TestLUNContract(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		mode     string // tool mode; empty means "multiplex"
-		tool     string
-		args     map[string]any
-		ontap    []exchange
-		wantText string
-		wantErr  bool
+		name        string
+		mode        string // tool mode; empty means "multiplex"
+		tool        string
+		args        map[string]any
+		clusterInfo exchange
+		ontap       []exchange
+		wantText    string
+		wantErr     bool
 	}{
 		{
 			name: "create LUN with OS type",
@@ -70,6 +77,26 @@ func TestLUNContract(t *testing.T) {
 				{method: http.MethodGet, path: lunJobPath, resp: `{"uuid":"lun-job-1","state":"success"}`},
 			},
 			wantText: "LUN created successfully",
+		},
+		{
+			name:        "create ASAr2 LUN without volume uses bare name",
+			tool:        "create_lun",
+			args:        map[string]any{"cluster_name": contractCluster, "svm_name": "marketing", "lun_name": "lundoc", "size": "20MB", "os_type": "linux"},
+			clusterInfo: lunASAr2ClusterInfo,
+			ontap: []exchange{
+				{method: http.MethodPost, path: "/api/storage/luns", status: http.StatusCreated,
+					body: `{"svm":{"name":"marketing"},"name":"lundoc","space":{"size":20971520},"os_type":"linux"}`},
+			},
+			wantText: "LUN created successfully",
+		},
+		{
+			name: "create reports cluster model detection error",
+			tool: "create_lun",
+			args: createArgs(),
+			clusterInfo: exchange{method: http.MethodGet, path: "/api/cluster?fields=*", status: http.StatusUnauthorized,
+				resp: `{"error":{"message":"cluster info is not authorized","code":"6"}}`},
+			wantText: "cluster info is not authorized",
+			wantErr:  true,
 		},
 		{
 			name: "create thick-provisioned LUN requests space guarantee",
@@ -136,6 +163,18 @@ func TestLUNContract(t *testing.T) {
 			ontap: []exchange{
 				lunLookup(lunPath, "lun-uuid"),
 				{method: http.MethodPatch, path: "/api/storage/luns/lun-uuid", body: `{"name":"/vol/doc/lundocnew"}`},
+			},
+			wantText: "LUN updated successfully",
+		},
+		{
+			name: "modify renames ASAr2 LUN using bare names",
+			tool: "modify_lun",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "marketing", "lun_name": "lundoc",
+				"lun_update": map[string]any{"new_lun_name": "lundocnew"}},
+			clusterInfo: lunASAr2ClusterInfo,
+			ontap: []exchange{
+				lunLookup("lundoc", "lun-uuid"),
+				{method: http.MethodPatch, path: "/api/storage/luns/lun-uuid", body: `{"name":"lundocnew"}`},
 			},
 			wantText: "LUN updated successfully",
 		},
@@ -313,7 +352,11 @@ func TestLUNContract(t *testing.T) {
 			}
 			script := tt.ontap
 			if cluster, ok := tt.args["cluster_name"].(string); ok && cluster == contractCluster {
-				script = append([]exchange{lunClusterInfo}, script...)
+				clusterInfo := tt.clusterInfo
+				if clusterInfo.method == "" {
+					clusterInfo = lunClusterInfo
+				}
+				script = append([]exchange{clusterInfo}, script...)
 			}
 			cs := newContractSession(t, mode, script)
 			text, isErr := callTool(t, cs, tt.tool, tt.args)
