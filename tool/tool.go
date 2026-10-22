@@ -746,9 +746,20 @@ type SVMUpdate struct {
 	Comment *string `json:"comment,omitempty" jsonschema:"comment of SVM; omit to leave it unchanged, or pass an empty string to clear it"`
 }
 
-type SVMPeer struct {
-	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
-	SVM     string `json:"svm_name" jsonschema:"SVM name"`
+type SVMPeerCreate struct {
+	SourceCluster      string   `json:"source_cluster_name" jsonschema:"registered source cluster name"`
+	SourceSVM          string   `json:"source_svm_name" jsonschema:"source SVM name"`
+	DestinationCluster string   `json:"destination_cluster_name" jsonschema:"registered destination cluster name"`
+	DestinationSVM     string   `json:"destination_svm_name" jsonschema:"destination SVM name"`
+	Applications       []string `json:"applications,omitzero" jsonschema:"peering applications; defaults to snapmirror"`
+	AcceptOnly         bool     `json:"accept_only,omitzero" jsonschema:"accept an existing out-of-band proposal without creating one"`
+}
+
+type SVMPeerDelete struct {
+	SourceCluster      string `json:"source_cluster_name" jsonschema:"registered source cluster name"`
+	SourceSVM          string `json:"source_svm_name" jsonschema:"source SVM name"`
+	DestinationCluster string `json:"destination_cluster_name" jsonschema:"registered destination cluster name"`
+	DestinationSVM     string `json:"destination_svm_name" jsonschema:"destination SVM name"`
 }
 
 type ClusterPeer struct {
