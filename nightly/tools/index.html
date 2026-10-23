@@ -1025,8 +1025,43 @@
 </ul>
 <h2 id="svm-peer-management">SVM Peer Management<a class="headerlink" href="#svm-peer-management" title="Permanent link">&para;</a></h2>
 <ul>
+<li><code>create_svm_peer</code></li>
 <li><code>delete_svm_peer</code></li>
 </ul>
+<p>Both tools identify a relationship with four arguments:</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_cluster_name</code></td>
+<td>Registered cluster identifier containing the source SVM.</td>
+</tr>
+<tr>
+<td><code>source_svm_name</code></td>
+<td>Source or local SVM name.</td>
+</tr>
+<tr>
+<td><code>destination_cluster_name</code></td>
+<td>Registered cluster identifier containing the destination SVM. May equal the source cluster for intracluster peering.</td>
+</tr>
+<tr>
+<td><code>destination_svm_name</code></td>
+<td>Destination or remote SVM name.</td>
+</tr>
+</tbody>
+</table>
+<p><code>create_svm_peer</code> creates the proposal on the source and accepts it on the destination as one operation. If the relationship already exists, its applications are added instead of creating a duplicate. The optional <code>applications</code> argument defaults to <code>snapmirror</code>.</p>
+<p>Set <code>accept_only</code> to <code>true</code> when the proposal was created out of band. In this mode, the tool only finds and accepts the pending relationship on the destination; it never creates a proposal.</p>
+<p><code>delete_svm_peer</code> finds the exact relationship using both SVM names and the remote cluster, then removes all existing sides of the relationship. For an intracluster peer, it removes the relationship once on the shared cluster.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Cross-cluster SVM peering requires an existing cluster peer relationship. Both clusters must be registered with this ONTAP MCP server. These tools do not create cluster peers, intercluster LIFs, or SVM peer permissions.</p>
+</div>
 <h2 id="dns-management">DNS Management<a class="headerlink" href="#dns-management" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>create_dns</code></li>

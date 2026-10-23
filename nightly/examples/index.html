@@ -602,6 +602,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#manage-svm-peer-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage SVM Peer Relationships
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -903,6 +912,15 @@
   <a href="#cluster-peering" class="md-nav__link">
     <span class="md-ellipsis">
       Cluster Peering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-svm-peer-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manage SVM Peer Relationships
     </span>
   </a>
   
@@ -1510,6 +1528,30 @@
 <li><span class="key">Expected Response</span>: cluster peer relationship deleted successfully</li>
 </ul>
 <p>Deletion removes the relationship from both clusters.</p>
+<hr />
+<h3 id="manage-svm-peer-relationships">Manage SVM Peer Relationships<a class="headerlink" href="#manage-svm-peer-relationships" title="Permanent link">&para;</a></h3>
+<p><strong>Create or update and accept an SVM peer relationship</strong></p>
+<ul>
+<li>Create an SVM peer relationship from the source_svm SVM on the sar cluster to the destination_svm SVM on the aff cluster for the snapmirror application.</li>
+</ul>
+<p>Expected Response: SVM peer created or updated successfully</p>
+<p>Omit the application to use the default, <code>snapmirror</code>. Repeating the request updates the existing relationship instead of creating a duplicate.</p>
+<p><strong>Accept a proposal created out of band</strong></p>
+<ul>
+<li>Accept only the pending SVM peer proposal from the source_svm SVM on the sar cluster to the destination_svm SVM on the aff cluster.</li>
+</ul>
+<p>Expected Response: SVM peer accepted successfully</p>
+<p><strong>Create an intracluster SVM peer relationship</strong></p>
+<ul>
+<li>On the sar cluster, create an SVM peer relationship from source_svm to destination_svm.</li>
+</ul>
+<p>Expected Response: SVM peer created or updated successfully</p>
+<p><strong>Delete an SVM peer relationship on both clusters</strong></p>
+<ul>
+<li>Delete the SVM peer relationship from the source_svm SVM on the sar cluster to the destination_svm SVM on the aff cluster.</li>
+</ul>
+<p>Expected Response: SVM peer deleted successfully</p>
+<p>Cross-cluster SVM peering requires the clusters to already be peered and both cluster identifiers to be registered with the ONTAP MCP server.</p>
 <hr />
 <h2 id="mcp-clients">MCP Clients<a class="headerlink" href="#mcp-clients" title="Permanent link">&para;</a></h2>
 <p>Common MCP clients that work with ONTAP MCP Server:</p>
