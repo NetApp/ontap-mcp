@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/netapp/ontap-mcp v0.0.0
-	github.com/openai/openai-go/v3 v3.76.0
+	github.com/openai/openai-go/v3 v3.82.0
 )
 
 require (
