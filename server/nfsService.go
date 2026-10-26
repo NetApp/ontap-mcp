@@ -142,47 +142,158 @@ func (a *App) ModifyNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 	}
 }
 
+const nfsServiceUpdateRequired = "at least one updatable field must be provided: enabled, v3_enabled, v40_enabled, v41_enabled, v41_pnfs_enabled, v41_trunking_enabled, rdma_enabled, v42_enabled, or v4_id_domain"
+
+// nfsBoolStyle selects the invalid-boolean error text. Contract tests pin both forms.
+type nfsBoolStyle int
+
+const (
+	nfsBoolQuoted nfsBoolStyle = iota // invalid value for name: "value"
+	nfsBoolMust                       // invalid value for name "value" (must be true/false)
+)
+
+type nfsServiceFields struct {
+	enabled    string
+	v3         string
+	v40        string
+	v41        string
+	pnfs       string
+	trunking   string
+	rdma       string
+	v42        string
+	v4IDDomain string
+}
+
+func nfsFieldsFromService(in tool.NFSService) nfsServiceFields {
+	return nfsServiceFields{
+		enabled:    in.Enabled,
+		v3:         in.V3Enabled,
+		v40:        in.V40Enabled,
+		v41:        in.V41Enabled,
+		pnfs:       in.V41PNFSEnabled,
+		trunking:   in.V41TrunkingEnabled,
+		rdma:       in.RDMAEnabled,
+		v42:        in.V42Enabled,
+		v4IDDomain: in.V4IDDomain,
+	}
+}
+
+func nfsFieldsFromUpdate(in tool.NFSServiceUpdate) nfsServiceFields {
+	return nfsServiceFields{
+		enabled:    in.Enabled,
+		v3:         in.V3Enabled,
+		v40:        in.V40Enabled,
+		v41:        in.V41Enabled,
+		pnfs:       in.V41PNFSEnabled,
+		trunking:   in.V41TrunkingEnabled,
+		rdma:       in.RDMAEnabled,
+		v42:        in.V42Enabled,
+		v4IDDomain: in.V4IDDomain,
+	}
+}
+
+// parseOptionalBool parses a true/false tool argument. An empty value is left unset.
+func parseOptionalBool(name, value string, style nfsBoolStyle) (*bool, error) {
+	if value == "" {
+		return nil, nil
+	}
+	b, err := strconv.ParseBool(value)
+	if err != nil {
+		if style == nfsBoolMust {
+			return nil, fmt.Errorf("invalid value for %s %q (must be true/false): %w", name, value, err)
+		}
+		return nil, fmt.Errorf("invalid value for %s: %q", name, value)
+	}
+	return &b, nil
+}
+
+func applyNFSServiceFields(out *ontap.NFSService, in nfsServiceFields, style nfsBoolStyle) (bool, error) {
+	hasUpdate := false
+	take := func(name, value string) (*bool, error) {
+		parsed, err := parseOptionalBool(name, value, style)
+		if err != nil {
+			return nil, err
+		}
+		if parsed != nil {
+			hasUpdate = true
+		}
+		return parsed, nil
+	}
+
+	enabled, err := take("enabled", in.enabled)
+	if err != nil {
+		return false, err
+	}
+	out.Enabled = enabled
+
+	v3, err := take("v3_enabled", in.v3)
+	if err != nil {
+		return false, err
+	}
+	out.Protocol.V3Enabled = v3
+
+	v40, err := take("v40_enabled", in.v40)
+	if err != nil {
+		return false, err
+	}
+	out.Protocol.V40Enabled = v40
+
+	v41, err := take("v41_enabled", in.v41)
+	if err != nil {
+		return false, err
+	}
+	out.Protocol.V41Enabled = v41
+
+	pnfs, err := take("v41_pnfs_enabled", in.pnfs)
+	if err != nil {
+		return false, err
+	}
+	out.Protocol.V41Features.PNFSEnabled = pnfs
+
+	trunking, err := take("v41_trunking_enabled", in.trunking)
+	if err != nil {
+		return false, err
+	}
+	out.Protocol.V41Features.TrunkingEnabled = trunking
+
+	rdma, err := take("rdma_enabled", in.rdma)
+	if err != nil {
+		return false, err
+	}
+	out.Transport.RDMAEnabled = rdma
+
+	v42, err := take("v42_enabled", in.v42)
+	if err != nil {
+		return false, err
+	}
+	out.Protocol.V42Enabled = v42
+
+	if in.v4IDDomain != "" {
+		out.Protocol.V4IDDomain = in.v4IDDomain
+		hasUpdate = true
+	}
+
+	if v41 != nil && !*v41 {
+		if pnfs != nil && *pnfs {
+			return false, errors.New("v41_pnfs_enabled cannot be true when v41_enabled is false")
+		}
+		if trunking != nil && *trunking {
+			return false, errors.New("v41_trunking_enabled cannot be true when v41_enabled is false")
+		}
+	}
+
+	return hasUpdate, nil
+}
+
 func updateNFSServiceValidation(in tool.NFSServiceUpdate) (ontap.NFSService, error) {
 	out := ontap.NFSService{}
-
-	hasUpdate := false
-	if in.Enabled != "" {
-		b, err := strconv.ParseBool(in.Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for enabled %q (must be true/false): %w", in.Enabled, err)
-		}
-		out.Enabled = &b
-		hasUpdate = true
+	hasUpdate, err := applyNFSServiceFields(&out, nfsFieldsFromUpdate(in), nfsBoolMust)
+	if err != nil {
+		return out, err
 	}
-	if in.V3Enabled != "" {
-		b, err := strconv.ParseBool(in.V3Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v3_enabled %q (must be true/false): %w", in.V3Enabled, err)
-		}
-		out.Protocol.V3Enabled = &b
-		hasUpdate = true
-	}
-	if in.V40Enabled != "" {
-		b, err := strconv.ParseBool(in.V40Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v40_enabled %q (must be true/false): %w", in.V40Enabled, err)
-		}
-		out.Protocol.V40Enabled = &b
-		hasUpdate = true
-	}
-	if in.V41Enabled != "" {
-		b, err := strconv.ParseBool(in.V41Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v41_enabled %q (must be true/false): %w", in.V41Enabled, err)
-		}
-		out.Protocol.V41Enabled = &b
-		hasUpdate = true
-	}
-
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: enabled, v3_enabled, v40_enabled, or v41_enabled")
+		return out, errors.New(nfsServiceUpdateRequired)
 	}
-
 	return out, nil
 }
 
@@ -193,38 +304,13 @@ func newCreateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 	}
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 
-	enabled := true
-	if in.Enabled != "" {
-		b, err := strconv.ParseBool(in.Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for enabled: %q", in.Enabled)
-		}
-		enabled = b
+	if _, err := applyNFSServiceFields(&out, nfsFieldsFromService(in), nfsBoolQuoted); err != nil {
+		return out, err
 	}
-	out.Enabled = &enabled
-
-	if in.V3Enabled != "" {
-		b, err := strconv.ParseBool(in.V3Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v3_enabled: %q", in.V3Enabled)
-		}
-		out.Protocol.V3Enabled = &b
+	if out.Enabled == nil {
+		enabled := true
+		out.Enabled = &enabled
 	}
-	if in.V40Enabled != "" {
-		b, err := strconv.ParseBool(in.V40Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v40_enabled: %q", in.V40Enabled)
-		}
-		out.Protocol.V40Enabled = &b
-	}
-	if in.V41Enabled != "" {
-		b, err := strconv.ParseBool(in.V41Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v41_enabled: %q", in.V41Enabled)
-		}
-		out.Protocol.V41Enabled = &b
-	}
-
 	return out, nil
 }
 
@@ -234,43 +320,12 @@ func newUpdateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 		return out, errors.New("SVM name is required")
 	}
 
-	hasUpdate := false
-	if in.Enabled != "" {
-		b, err := strconv.ParseBool(in.Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for enabled: %q", in.Enabled)
-		}
-		out.Enabled = &b
-		hasUpdate = true
+	hasUpdate, err := applyNFSServiceFields(&out, nfsFieldsFromService(in), nfsBoolQuoted)
+	if err != nil {
+		return out, err
 	}
-	if in.V3Enabled != "" {
-		b, err := strconv.ParseBool(in.V3Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v3_enabled: %q", in.V3Enabled)
-		}
-		out.Protocol.V3Enabled = &b
-		hasUpdate = true
-	}
-	if in.V40Enabled != "" {
-		b, err := strconv.ParseBool(in.V40Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v40_enabled: %q", in.V40Enabled)
-		}
-		out.Protocol.V40Enabled = &b
-		hasUpdate = true
-	}
-	if in.V41Enabled != "" {
-		b, err := strconv.ParseBool(in.V41Enabled)
-		if err != nil {
-			return out, fmt.Errorf("invalid value for v41_enabled: %q", in.V41Enabled)
-		}
-		out.Protocol.V41Enabled = &b
-		hasUpdate = true
-	}
-
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided: enabled, v3_enabled, v40_enabled, or v41_enabled")
+		return out, errors.New(nfsServiceUpdateRequired)
 	}
-
 	return out, nil
 }

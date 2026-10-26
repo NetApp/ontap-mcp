@@ -126,6 +126,20 @@ Below are example questions that work well with the ONTAP MCP Server:
 
 ---
 
+### NFS Service
+
+**Create an NFS service with pNFS**
+
+- On the umeng-aff300-05-06 cluster, create an NFS service on the marketing svm with NFSv4.1 and pNFS enabled
+- <span class="key">Expected Response</span>: NFS service created successfully.
+
+**Set the NFSv4 ID domain**
+
+- On the umeng-aff300-05-06 cluster, update the NFS service on the marketing svm and set the NFSv4 ID domain to lab.example
+- <span class="key">Expected Response</span>: NFS service updated successfully.
+
+---
+
 ### NFS Export Policies
 
 **Create an NFS Export policy**

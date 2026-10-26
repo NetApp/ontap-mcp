@@ -88,10 +88,10 @@ const UpdateCIFSShare = `Update CIFS share path on a cluster by cluster name.`
 const DeleteCIFSShare = `Delete CIFS share on a cluster by cluster name.`
 const ModifyCIFSShare = `Update or delete a CIFS share on a cluster by cluster name.`
 
-const CreateNFSService = `Create (enable) NFS service on an SVM. Allows configuring NFSv3, NFSv4.0, and NFSv4.1 protocol versions.`
-const UpdateNFSService = `Update NFS service on an SVM. Toggle protocol versions (NFSv3, NFSv4.0, NFSv4.1) or enable/disable the service.`
+const CreateNFSService = `Create (enable) NFS service on an SVM. Allows configuring NFSv3, NFSv4.0, NFSv4.1, and NFSv4.2, plus pNFS, NFS session trunking, NFS over RDMA, and the NFSv4 ID mapping domain.`
+const UpdateNFSService = `Update NFS service on an SVM. Toggle protocol versions (NFSv3, NFSv4.0, NFSv4.1, NFSv4.2), pNFS, NFS session trunking, NFS over RDMA, the NFSv4 ID mapping domain, or enable/disable the service.`
 const DeleteNFSService = `Delete (disable) NFS service on an SVM.`
-const ModifyNFSService = `Update or delete NFS service on an SVM.`
+const ModifyNFSService = `Update or delete NFS service on an SVM. Update can toggle NFSv3, NFSv4.0, NFSv4.1, and NFSv4.2, plus pNFS, NFS session trunking, NFS over RDMA, and the NFSv4 ID mapping domain.`
 
 const CreateCIFSService = `Create (enable) CIFS/SMB service on an SVM by joining an Active Directory domain. Requires AD domain FQDN, admin credentials, and a CIFS server name (NetBIOS name).`
 const UpdateCIFSService = `Update CIFS/SMB service on an SVM. Can rename the CIFS server.`

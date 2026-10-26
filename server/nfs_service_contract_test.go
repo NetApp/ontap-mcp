@@ -8,6 +8,8 @@ import (
 	"github.com/netapp/ontap-mcp/assert"
 )
 
+const nfsServiceFieldsRequired = "at least one updatable field must be provided: enabled, v3_enabled, v40_enabled, v41_enabled, v41_pnfs_enabled, v41_trunking_enabled, rdma_enabled, v42_enabled, or v4_id_domain"
+
 // nfsServiceLookupSVM is the SVM name-to-UUID lookup that precedes every NFS service update and
 // delete; an empty uuid means the SVM does not exist.
 func nfsServiceLookupSVM(svm, uuid string) exchange {
@@ -63,6 +65,107 @@ func TestNFSServiceContract(t *testing.T) {
 			wantText: "NFS service created successfully",
 		},
 		{
+			name: "create with NFSv4.1 and pNFS",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "true", "v41_pnfs_enabled": "true"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v41_enabled":true,"v41_features":{"pnfs_enabled":true}}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create pNFS without v4.1 does not enable v4.1",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_pnfs_enabled": "true"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v41_features":{"pnfs_enabled":true}}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create with trunking and v4.1",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "true", "v41_trunking_enabled": "true"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v41_enabled":true,"v41_features":{"trunking_enabled":true}}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create sends rdma only when set",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "rdma_enabled": "false"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"transport":{"rdma_enabled":false}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create with NFSv4.2 disabled",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v42_enabled": "false"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v42_enabled":false}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create with NFSv4.2 enabled",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v42_enabled": "true"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v42_enabled":true}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create with NFSv4 ID domain",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v4_id_domain": "lab.example"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v4_id_domain":"lab.example"}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name:     "create rejects pNFS when v4.1 is false",
+			tool:     "create_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "false", "v41_pnfs_enabled": "true"},
+			wantText: "v41_pnfs_enabled cannot be true when v41_enabled is false",
+			wantErr:  true,
+		},
+		{
+			name:     "create rejects trunking when v4.1 is false",
+			tool:     "create_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "false", "v41_trunking_enabled": "true"},
+			wantText: "v41_trunking_enabled cannot be true when v41_enabled is false",
+			wantErr:  true,
+		},
+		{
+			name: "create allows pNFS off while v4.1 is off",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "false", "v41_pnfs_enabled": "false"},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v41_enabled":false,"v41_features":{"pnfs_enabled":false}}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name:     "create rejects invalid v4.2 boolean",
+			tool:     "create_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v42_enabled": "maybe"},
+			wantText: `invalid value for v42_enabled: "maybe"`,
+			wantErr:  true,
+		},
+		{
 			name:     "create with invalid boolean is rejected without calling ONTAP",
 			tool:     "create_nfs_service",
 			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v40_enabled": "maybe"},
@@ -101,6 +204,89 @@ func TestNFSServiceContract(t *testing.T) {
 			wantText: "NFS service updated successfully",
 		},
 		{
+			name: "update with only pNFS",
+			tool: "modify_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
+				"nfs_service_update": map[string]any{"v41_pnfs_enabled": "true"}},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"protocol":{"v41_features":{"pnfs_enabled":true}}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
+			name: "update with trunking and v4.1",
+			tool: "modify_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
+				"nfs_service_update": map[string]any{"v41_enabled": "true", "v41_trunking_enabled": "true"}},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"protocol":{"v41_enabled":true,"v41_features":{"trunking_enabled":true}}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
+			name: "update sends rdma only when set",
+			tool: "modify_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
+				"nfs_service_update": map[string]any{"rdma_enabled": "true"}},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"transport":{"rdma_enabled":true}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
+			name: "update disables NFSv4.2",
+			tool: "modify_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
+				"nfs_service_update": map[string]any{"v42_enabled": "false"}},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"protocol":{"v42_enabled":false}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
+			name: "update sets NFSv4 ID domain",
+			tool: "modify_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
+				"nfs_service_update": map[string]any{"v4_id_domain": "lab.example"}},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"protocol":{"v4_id_domain":"lab.example"}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
+			name:     "update rejects pNFS when v4.1 is false",
+			tool:     "modify_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc", "nfs_service_update": map[string]any{"v41_enabled": "false", "v41_pnfs_enabled": "true"}},
+			wantText: "v41_pnfs_enabled cannot be true when v41_enabled is false",
+			wantErr:  true,
+		},
+		{
+			name:     "update rejects trunking when v4.1 is false",
+			tool:     "modify_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc", "nfs_service_update": map[string]any{"v41_enabled": "false", "v41_trunking_enabled": "true"}},
+			wantText: "v41_trunking_enabled cannot be true when v41_enabled is false",
+			wantErr:  true,
+		},
+		{
+			name:     "empty NFSv4 ID domain does not count as an update",
+			tool:     "modify_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc", "nfs_service_update": map[string]any{"v4_id_domain": ""}},
+			wantText: nfsServiceFieldsRequired,
+			wantErr:  true,
+		},
+		{
+			name:     "update rejects invalid rdma boolean",
+			tool:     "modify_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc", "nfs_service_update": map[string]any{"rdma_enabled": "maybe"}},
+			wantText: `invalid value for rdma_enabled "maybe" (must be true/false)`,
+			wantErr:  true,
+		},
+		{
 			name: "update disables the service",
 			tool: "modify_nfs_service",
 			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
@@ -115,7 +301,7 @@ func TestNFSServiceContract(t *testing.T) {
 			name:     "update with no fields is rejected without calling ONTAP",
 			tool:     "modify_nfs_service",
 			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc"},
-			wantText: "at least one updatable field must be provided",
+			wantText: nfsServiceFieldsRequired,
 			wantErr:  true,
 		},
 		{
@@ -205,6 +391,57 @@ func TestNFSServiceContract(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cs := newContractSession(t, "multiplex", tt.ontap)
 			text, isErr := callTool(t, cs, tt.tool, tt.args)
+			assert.Equal(t, isErr, tt.wantErr)
+			if !strings.Contains(text, tt.wantText) {
+				t.Errorf("got: %q; want to contain: %q", text, tt.wantText)
+			}
+		})
+	}
+}
+
+func TestNFSServiceLegacyUpdateContract(t *testing.T) {
+	const servicePath = "/api/protocols/nfs/services/svm-uuid"
+
+	tests := []struct {
+		name     string
+		args     map[string]any
+		ontap    []exchange
+		wantText string
+		wantErr  bool
+	}{
+		{
+			name: "update with only pNFS",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_pnfs_enabled": "true"},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"protocol":{"v41_features":{"pnfs_enabled":true}}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
+			name:     "rejects trunking when v4.1 is false",
+			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "false", "v41_trunking_enabled": "true"},
+			wantText: "v41_trunking_enabled cannot be true when v41_enabled is false",
+			wantErr:  true,
+		},
+		{
+			name:     "rejects invalid v4.2 boolean with the legacy message",
+			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v42_enabled": "maybe"},
+			wantText: `invalid value for v42_enabled: "maybe"`,
+			wantErr:  true,
+		},
+		{
+			name:     "requires at least one updatable field",
+			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc"},
+			wantText: nfsServiceFieldsRequired,
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cs := newContractSession(t, "legacy", tt.ontap)
+			text, isErr := callTool(t, cs, "update_nfs_service", tt.args)
 			assert.Equal(t, isErr, tt.wantErr)
 			if !strings.Contains(text, tt.wantText) {
 				t.Errorf("got: %q; want to contain: %q", text, tt.wantText)

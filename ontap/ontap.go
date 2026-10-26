@@ -364,16 +364,29 @@ type FCPService struct {
 	Enabled string      `json:"enabled,omitzero" jsonschema:"admin state of the FCP service"`
 }
 
+type NFSServiceV41Features struct {
+	PNFSEnabled     *bool `json:"pnfs_enabled,omitempty"`
+	TrunkingEnabled *bool `json:"trunking_enabled,omitempty"`
+}
+
+type NFSServiceTransport struct {
+	RDMAEnabled *bool `json:"rdma_enabled,omitempty"`
+}
+
 type NFSServiceProtocol struct {
-	V3Enabled  *bool `json:"v3_enabled,omitempty"`
-	V40Enabled *bool `json:"v40_enabled,omitempty"`
-	V41Enabled *bool `json:"v41_enabled,omitempty"`
+	V3Enabled   *bool                 `json:"v3_enabled,omitempty"`
+	V40Enabled  *bool                 `json:"v40_enabled,omitempty"`
+	V41Enabled  *bool                 `json:"v41_enabled,omitempty"`
+	V41Features NFSServiceV41Features `json:"v41_features,omitzero"`
+	V42Enabled  *bool                 `json:"v42_enabled,omitempty"`
+	V4IDDomain  string                `json:"v4_id_domain,omitzero"`
 }
 
 type NFSService struct {
-	SVM      NameAndUUID        `json:"svm,omitzero"`
-	Enabled  *bool              `json:"enabled,omitempty"`
-	Protocol NFSServiceProtocol `json:"protocol,omitzero"`
+	SVM       NameAndUUID         `json:"svm,omitzero"`
+	Enabled   *bool               `json:"enabled,omitempty"`
+	Protocol  NFSServiceProtocol  `json:"protocol,omitzero"`
+	Transport NFSServiceTransport `json:"transport,omitzero"`
 }
 
 type CIFSServiceADDomain struct {
