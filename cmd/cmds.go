@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/alecthomas/kong"
-	"github.com/netapp/ontap-mcp/config"
-	"github.com/netapp/ontap-mcp/server"
-	"github.com/netapp/ontap-mcp/version"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/alecthomas/kong"
+	"github.com/netapp/ontap-mcp/config"
+	"github.com/netapp/ontap-mcp/server"
+	"github.com/netapp/ontap-mcp/version"
 )
 
 var logger = setupLogger()
@@ -47,6 +48,9 @@ func (a *StartCmd) Run(cli *CLI) error {
 		return fmt.Errorf("failed to read config path=%s err=%w", cli.ConfigPath, err)
 	}
 	logger.Debug("tool mode", slog.String("tool_mode", cli.ToolMode))
+	if cli.ToolMode != "multiplex" {
+		logger.Warn("This value is deprecated, and will be removed in next release", slog.String("tool_mode", cli.ToolMode))
+	}
 
 	opts := server.Options{
 		Host:           cli.Start.Host,
