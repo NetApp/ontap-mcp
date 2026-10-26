@@ -9,19 +9,19 @@ The ONTAP-MCP team is happy to announce that we've released the 26.10.0 version 
 
 - :medal_sports: The ONTAP-MCP server supports Storage Unit management in ASAr2 platform. Thanks @thestorageden for raising.
 
-- :medal_sports: The ONTAP-MCP server supports optional ExternalSecret to Helm chart. Thanks @ReBaunana for contributing. Details: https://netapp.github.io/ontap-mcp/26.07/helm/.
+- :medal_sports: The ONTAP-MCP server Helm chart now supports an optional ExternalSecret. Thanks @ReBaunana for contributing. Details: https://netapp.github.io/ontap-mcp/26.10/helm/.
 
-- :medal_sports: The ONTAP-MCP server included cluster peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10.0/examples/#cluster-peering
+- :medal_sports: The ONTAP-MCP server includes cluster peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10/examples/#cluster-peering
 
-- :medal_sports: The ONTAP-MCP server includes svm peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10.0/examples/#manage-svm-peer-relationships
+- :medal_sports: The ONTAP-MCP server includes svm peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10/examples/#manage-svm-peer-relationships
 
 - :tophat: The default value of `--tool-mode` flag has been changed to `multiplex` in the current release. `--tool-mode` flag values `legacy` and `both` are deprecated and will be removed in `27.01`. Use `--tool-mode="legacy"` to restore the previous tool names until then.
 
 - :tophat: Tool `delete_svm_peer` has been updated with breaking changes. It's dropping `cluster_name` and `svm_name` arguments and now takes new 4 arguments as `source_cluster_name`, `source_svm_name`, `destination_cluster_name`, `destination_svm_name`.
 
 - :gem: **Tools enhancements** — couple of existing tools include new fields.
-  - **Volume:**: Now volume creation supported on AFX cluster. Increase of maximum number of files of volume supported in modify tool.
-  - **SnapMirror:**: Now supported pause and resume of SnapMirror relationships. Also, SnapMirror Transfer Abort tool has been added.
+  - **Volume**: Volume creation is now supported on AFX clusters. `modify_volume` supports a higher maximum file count. Thanks @karale-netapp for raising.
+  - **SnapMirror**: Added pause and resume for SnapMirror relationships, plus a new `abort_snapmirror_transfer` tool. Thanks @ebarron for raising.
 
 - Join [Discord and GitHub discussions](https://github.com/NetApp/ontap-mcp/blob/main/SUPPORT.md) to participate in the conversation, ask questions, and share your feedback.
 
