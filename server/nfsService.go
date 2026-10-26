@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/ontap"
@@ -144,14 +145,6 @@ func (a *App) ModifyNFSService(ctx context.Context, _ *mcp.CallToolRequest, para
 
 const nfsServiceUpdateRequired = "at least one updatable field must be provided: enabled, v3_enabled, v40_enabled, v41_enabled, v41_pnfs_enabled, v41_trunking_enabled, rdma_enabled, v42_enabled, or v4_id_domain"
 
-// nfsBoolStyle selects the invalid-boolean error text. Contract tests pin both forms.
-type nfsBoolStyle int
-
-const (
-	nfsBoolQuoted nfsBoolStyle = iota // invalid value for name: "value"
-	nfsBoolMust                       // invalid value for name "value" (must be true/false)
-)
-
 type nfsServiceFields struct {
 	enabled    string
 	v3         string
@@ -193,24 +186,21 @@ func nfsFieldsFromUpdate(in tool.NFSServiceUpdate) nfsServiceFields {
 }
 
 // parseOptionalBool parses a true/false tool argument. An empty value is left unset.
-func parseOptionalBool(name, value string, style nfsBoolStyle) (*bool, error) {
+func parseOptionalBool(name, value string) (*bool, error) {
 	if value == "" {
 		return nil, nil
 	}
 	b, err := strconv.ParseBool(value)
 	if err != nil {
-		if style == nfsBoolMust {
-			return nil, fmt.Errorf("invalid value for %s %q (must be true/false): %w", name, value, err)
-		}
-		return nil, fmt.Errorf("invalid value for %s: %q", name, value)
+		return nil, fmt.Errorf("invalid value for %s %q (must be true/false): %w", name, value, err)
 	}
 	return &b, nil
 }
 
-func applyNFSServiceFields(out *ontap.NFSService, in nfsServiceFields, style nfsBoolStyle) (bool, error) {
+func applyNFSServiceFields(out *ontap.NFSService, in nfsServiceFields) (bool, error) {
 	hasUpdate := false
 	take := func(name, value string) (*bool, error) {
-		parsed, err := parseOptionalBool(name, value, style)
+		parsed, err := parseOptionalBool(name, value)
 		if err != nil {
 			return nil, err
 		}
@@ -268,8 +258,8 @@ func applyNFSServiceFields(out *ontap.NFSService, in nfsServiceFields, style nfs
 	}
 	out.Protocol.V42Enabled = v42
 
-	if in.v4IDDomain != "" {
-		out.Protocol.V4IDDomain = in.v4IDDomain
+	if d := strings.TrimSpace(in.v4IDDomain); d != "" {
+		out.Protocol.V4IDDomain = d
 		hasUpdate = true
 	}
 
@@ -287,7 +277,7 @@ func applyNFSServiceFields(out *ontap.NFSService, in nfsServiceFields, style nfs
 
 func updateNFSServiceValidation(in tool.NFSServiceUpdate) (ontap.NFSService, error) {
 	out := ontap.NFSService{}
-	hasUpdate, err := applyNFSServiceFields(&out, nfsFieldsFromUpdate(in), nfsBoolMust)
+	hasUpdate, err := applyNFSServiceFields(&out, nfsFieldsFromUpdate(in))
 	if err != nil {
 		return out, err
 	}
@@ -304,7 +294,7 @@ func newCreateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 	}
 	out.SVM = ontap.NameAndUUID{Name: in.SVM}
 
-	if _, err := applyNFSServiceFields(&out, nfsFieldsFromService(in), nfsBoolQuoted); err != nil {
+	if _, err := applyNFSServiceFields(&out, nfsFieldsFromService(in)); err != nil {
 		return out, err
 	}
 	if out.Enabled == nil {
@@ -320,7 +310,7 @@ func newUpdateNFSService(in tool.NFSService) (ontap.NFSService, error) {
 		return out, errors.New("SVM name is required")
 	}
 
-	hasUpdate, err := applyNFSServiceFields(&out, nfsFieldsFromService(in), nfsBoolQuoted)
+	hasUpdate, err := applyNFSServiceFields(&out, nfsFieldsFromService(in))
 	if err != nil {
 		return out, err
 	}

@@ -661,7 +661,7 @@ type NFSService struct {
 	V41TrunkingEnabled string `json:"v41_trunking_enabled,omitzero" jsonschema:"enable NFSv4.1 or later session trunking (true/false). Cannot be true when v41_enabled is false in the same request"`
 	RDMAEnabled        string `json:"rdma_enabled,omitzero" jsonschema:"enable NFS over RDMA (true/false). ONTAP enables RDMA by default on create when this field is omitted, so leaving it unset does not turn RDMA off"`
 	V42Enabled         string `json:"v42_enabled,omitzero" jsonschema:"enable NFSv4.2 (true/false), independent of v4.1 as of ONTAP 9.19.1. Older clusters may reject this field. ONTAP 9.19 enables NFSv4.2 by default on create when this field is omitted"`
-	V4IDDomain         string `json:"v4_id_domain,omitzero" jsonschema:"NFSv4 ID mapping domain. Omit to leave it unchanged; an empty value does not clear it"`
+	V4IDDomain         string `json:"v4_id_domain,omitzero" jsonschema:"NFSv4 ID mapping domain. Leading and trailing whitespace is trimmed. Omit to leave it unchanged; an empty value does not clear it"`
 }
 
 type NFSServiceModify struct {
@@ -676,11 +676,11 @@ type NFSServiceUpdate struct {
 	V3Enabled          string `json:"v3_enabled,omitzero" jsonschema:"enable NFSv3 (true/false)"`
 	V40Enabled         string `json:"v40_enabled,omitzero" jsonschema:"enable NFSv4.0 (true/false)"`
 	V41Enabled         string `json:"v41_enabled,omitzero" jsonschema:"enable NFSv4.1 (true/false)"`
-	V41PNFSEnabled     string `json:"v41_pnfs_enabled,omitzero" jsonschema:"enable NFSv4.1 or later pNFS (true/false). ONTAP's create default is true when omitted. Cannot be true when v41_enabled is false in the same request"`
+	V41PNFSEnabled     string `json:"v41_pnfs_enabled,omitzero" jsonschema:"enable NFSv4.1 or later pNFS (true/false). Cannot be true when v41_enabled is false in the same request"`
 	V41TrunkingEnabled string `json:"v41_trunking_enabled,omitzero" jsonschema:"enable NFSv4.1 or later session trunking (true/false). Cannot be true when v41_enabled is false in the same request"`
-	RDMAEnabled        string `json:"rdma_enabled,omitzero" jsonschema:"enable NFS over RDMA (true/false). ONTAP enables RDMA by default on create when this field is omitted, so leaving it unset does not turn RDMA off"`
-	V42Enabled         string `json:"v42_enabled,omitzero" jsonschema:"enable NFSv4.2 (true/false), independent of v4.1 as of ONTAP 9.19.1. Older clusters may reject this field. ONTAP 9.19 enables NFSv4.2 by default on create when this field is omitted"`
-	V4IDDomain         string `json:"v4_id_domain,omitzero" jsonschema:"NFSv4 ID mapping domain. Omit to leave it unchanged; an empty value does not clear it"`
+	RDMAEnabled        string `json:"rdma_enabled,omitzero" jsonschema:"enable NFS over RDMA (true/false)"`
+	V42Enabled         string `json:"v42_enabled,omitzero" jsonschema:"enable NFSv4.2 (true/false), independent of v4.1 as of ONTAP 9.19.1. Older clusters may reject this field"`
+	V4IDDomain         string `json:"v4_id_domain,omitzero" jsonschema:"NFSv4 ID mapping domain. Leading and trailing whitespace is trimmed. Omit to leave it unchanged; an empty value does not clear it"`
 }
 
 type CIFSServiceCreate struct {

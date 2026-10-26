@@ -135,6 +135,26 @@ func TestNFSServiceContract(t *testing.T) {
 			wantText: "NFS service created successfully",
 		},
 		{
+			name: "create trims NFSv4 ID domain",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v4_id_domain": " lab.example "},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true,"protocol":{"v4_id_domain":"lab.example"}}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
+			name: "create ignores a whitespace-only NFSv4 ID domain",
+			tool: "create_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v4_id_domain": "  "},
+			ontap: []exchange{
+				{method: http.MethodPost, path: servicesPath, status: http.StatusCreated,
+					body: `{"svm":{"name":"nfsSvc"},"enabled":true}`},
+			},
+			wantText: "NFS service created successfully",
+		},
+		{
 			name:     "create rejects pNFS when v4.1 is false",
 			tool:     "create_nfs_service",
 			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v41_enabled": "false", "v41_pnfs_enabled": "true"},
@@ -162,14 +182,14 @@ func TestNFSServiceContract(t *testing.T) {
 			name:     "create rejects invalid v4.2 boolean",
 			tool:     "create_nfs_service",
 			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v42_enabled": "maybe"},
-			wantText: `invalid value for v42_enabled: "maybe"`,
+			wantText: `invalid value for v42_enabled "maybe" (must be true/false)`,
 			wantErr:  true,
 		},
 		{
 			name:     "create with invalid boolean is rejected without calling ONTAP",
 			tool:     "create_nfs_service",
 			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v40_enabled": "maybe"},
-			wantText: `invalid value for v40_enabled: "maybe"`,
+			wantText: `invalid value for v40_enabled "maybe" (must be true/false)`,
 			wantErr:  true,
 		},
 		{
@@ -248,6 +268,17 @@ func TestNFSServiceContract(t *testing.T) {
 			wantText: "NFS service updated successfully",
 		},
 		{
+			name: "update trims NFSv4 ID domain",
+			tool: "modify_nfs_service",
+			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
+				"nfs_service_update": map[string]any{"v4_id_domain": " lab.example "}},
+			ontap: []exchange{
+				nfsServiceLookupSVM("nfsSvc", "svm-uuid"),
+				{method: http.MethodPatch, path: servicePath, body: `{"protocol":{"v4_id_domain":"lab.example"}}`},
+			},
+			wantText: "NFS service updated successfully",
+		},
+		{
 			name: "update sets NFSv4 ID domain",
 			tool: "modify_nfs_service",
 			args: map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc",
@@ -276,6 +307,13 @@ func TestNFSServiceContract(t *testing.T) {
 			name:     "empty NFSv4 ID domain does not count as an update",
 			tool:     "modify_nfs_service",
 			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc", "nfs_service_update": map[string]any{"v4_id_domain": ""}},
+			wantText: nfsServiceFieldsRequired,
+			wantErr:  true,
+		},
+		{
+			name:     "whitespace-only NFSv4 ID domain does not count as an update",
+			tool:     "modify_nfs_service",
+			args:     map[string]any{"cluster_name": contractCluster, "operation": "update", "svm_name": "nfsSvc", "nfs_service_update": map[string]any{"v4_id_domain": " \t "}},
 			wantText: nfsServiceFieldsRequired,
 			wantErr:  true,
 		},
@@ -425,9 +463,9 @@ func TestNFSServiceLegacyUpdateContract(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			name:     "rejects invalid v4.2 boolean with the legacy message",
+			name:     "rejects invalid v4.2 boolean",
 			args:     map[string]any{"cluster_name": contractCluster, "svm_name": "nfsSvc", "v42_enabled": "maybe"},
-			wantText: `invalid value for v42_enabled: "maybe"`,
+			wantText: `invalid value for v42_enabled "maybe" (must be true/false)`,
 			wantErr:  true,
 		},
 		{
