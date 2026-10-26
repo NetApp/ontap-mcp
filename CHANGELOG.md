@@ -1,6 +1,102 @@
 # Change Log
 ## [Repository](https://github.com/NetApp/ontap-mcp)
 
+## 26.10.0 / 2026-10-27 Release
+
+The ONTAP-MCP team is happy to announce that we've released the 26.10.0 version of ONTAP-MCP. 🤘
+
+- :medal_sports: The ONTAP-MCP server now supports FlexGroup creation in volume create tool. Thanks @dbtinsley for raising and contributing.
+
+- :medal_sports: The ONTAP-MCP server supports Storage Unit management in ASAr2 platform. Thanks @thestorageden for raising.
+
+- :medal_sports: The ONTAP-MCP server supports optional ExternalSecret to Helm chart. Thanks @ReBaunana for contributing. Details: https://netapp.github.io/ontap-mcp/26.07/helm/.
+
+- :medal_sports: The ONTAP-MCP server included cluster peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10.0/examples/#cluster-peering
+
+- :medal_sports: The ONTAP-MCP server includes svm peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10.0/examples/#manage-svm-peer-relationships
+
+- :tophat: The default value of `--tool-mode` flag has been changed to `multiplex` in the current release as communicated prior to reduce the tools count.
+
+- :gem: **Tools enhancements** — couple of existing tools include new fields.
+  - **Volume:**: Now volume creation supported on AFX cluster. Increase of maximum number of files of volume supported in modify tool.
+  - **SnapMirror:**: Now supported pause and resume of SnapMirror relationships. Also, SnapMirror Transfer Abort tool has been added.
+
+- Join [Discord and GitHub discussions](https://github.com/NetApp/ontap-mcp/blob/main/SUPPORT.md) to participate in the conversation, ask questions, and share your feedback.
+
+- :closed_book: Documentation is available at https://netapp.github.io/ontap-mcp/26.10/ and full list of tools is available at https://netapp.github.io/ontap-mcp/26.10/tools/.
+
+Examples showing how you can manage ONTAP: https://netapp.github.io/ontap-mcp/26.10/examples/
+
+## Thanks to all the awesome contributors
+
+:metal: Thanks to all the people who've opened issues, asked questions on Discord, and contributed code for this release:
+
+@karale-netapp, @thestorageden, @ebarron, @ReBaunana, @dbtinsley, @rahulguptajss, @cgrinds, @Hardikl
+
+:seedling: This release includes 10 feature commits, 1 fixes, 8 CI changes, 1 refactoring commits, and 14 miscellaneous merge commits.
+
+<details>
+
+<summary>Expand for full list of changes</summary>
+
+### :rocket: Features
+- Implement storage-unit tools and check for lun create in asar2 (#235) ([946d459](https://github.com/NetApp/ontap-mcp/commit/946d459a9b96ebce3db4e79a678d903586a5a2e1))
+- Added flexgroup test cases in CI (#230) ([c0c6698](https://github.com/NetApp/ontap-mcp/commit/c0c6698d63269f5bae7e4311eb3a5de85bad6326))
+- Support cluster_peer tools (#222) ([767d9e2](https://github.com/NetApp/ontap-mcp/commit/767d9e22f189c9c143c34a34d7d88c3088d188b1))
+- Implement svm peer tools (#227) ([9967f6c](https://github.com/NetApp/ontap-mcp/commit/9967f6c03fecad8aa8014afb6f90ebbaf5928c21))
+- Add FlexGroup create support to create_volume (#223) ([4c7ff90](https://github.com/NetApp/ontap-mcp/commit/4c7ff90e40fc4de027e2b1617c7b789e1c4f9ae7))
+- Increase the maximum number of files in volume modify (#220) ([7ba6baf](https://github.com/NetApp/ontap-mcp/commit/7ba6baf2e7e3ea0d458e2519f288c5eb5a2353d8))
+- Change default tool mode to multiplex (#221) ([b13f860](https://github.com/NetApp/ontap-mcp/commit/b13f860a5001a70ff57d44c4cc8a570ca42b71f9))
+- Add optional ExternalSecret support to Helm chart (#201) ([866e1d8](https://github.com/NetApp/ontap-mcp/commit/866e1d893fc3a5130b861081e4f47a9782f11770))
+- Handled volume create in AFX cluster (#198) ([474db71](https://github.com/NetApp/ontap-mcp/commit/474db716c8cb04aed1c711be6212a5cbf7bfb5c5))
+- Adding pause, resume SM tools (#217) ([f480f57](https://github.com/NetApp/ontap-mcp/commit/f480f57c55b67f0a3b80225b223761d7af073580))
+
+
+
+### :bug: Bug Fixes
+- Add cluster-free contract tests and fix the ONTAP bugs they found (#238) ([0a187cf](https://github.com/NetApp/ontap-mcp/commit/0a187cf278882a8f5404aaae6a56226ac30829cf))
+
+
+### :hammer: CI / Testing
+- Update go version (#241) ([10426c2](https://github.com/NetApp/ontap-mcp/commit/10426c2ecdd174db6f737f5bb481dc9764e39ba7))
+- Update modernize import path (moved from gopls to x/tools) (#240) ([442a46f](https://github.com/NetApp/ontap-mcp/commit/442a46fbbdd7650dda36f1f3bce12c0b9c0d3701))
+- Bump go (#236) ([81df4d5](https://github.com/NetApp/ontap-mcp/commit/81df4d5aaec562916ac71e2703ea18ec4d90e8d3))
+- Fix broken lint from stale integration/go.mod (#225) ([dc5b3e5](https://github.com/NetApp/ontap-mcp/commit/dc5b3e5b4f67b98dcdc232683c205acc141be69e))
+- Bump go (#218) ([5fedf41](https://github.com/NetApp/ontap-mcp/commit/5fedf41edaf22e0bc9fb6bab3005bca1f2c75d1e))
+- Bump go (#212) ([cd64234](https://github.com/NetApp/ontap-mcp/commit/cd64234a23a4d3d38a13b7d1a3e23b25fe2efc38))
+- Bump go (#202) ([92ce729](https://github.com/NetApp/ontap-mcp/commit/92ce729d630b00c6230cecb2119e88b49076fd3a))
+- Bump go-sdk to v1.7.0 (#196)([135cadf](https://github.com/NetApp/ontap-mcp/commit/135cadf0a5310464b19c4d06751bf325dbfd2379))
+
+
+
+### Refactoring
+- Removed cluster ci test as it is covered in contract tests (#242) ([5577442](https://github.com/NetApp/ontap-mcp/commit/557744285e082174b31e75b5114819da7a770795))
+
+
+### Miscellaneous
+- Update all dependencies (#243) ([3379e86](https://github.com/NetApp/ontap-mcp/commit/3379e861f04098edb1290cfca777c9011ddd221d))
+- Update all dependencies (#239) ([2c33b02](https://github.com/NetApp/ontap-mcp/commit/2c33b0277a3dd091e6acfecd38d790d6639dcd90))
+- Update all dependencies (#237) ([dbb87e8](https://github.com/NetApp/ontap-mcp/commit/dbb87e80137360c67efcd4e351358b7c4f1bf6c3))
+- Update all dependencies (#232) ([7bcf371](https://github.com/NetApp/ontap-mcp/commit/7bcf371c4c9dc1cd040115336ffb21e4534d8a8d))
+- Update all dependencies (#229) ([ab816f3](https://github.com/NetApp/ontap-mcp/commit/ab816f3631a4ad4bc3a1299eacc7079d611c03b0))
+- Bump golangci-lint to v2.14.0 and fix new lint findings (#228) ([2e7a799](https://github.com/NetApp/ontap-mcp/commit/2e7a7996bcfc2ecee891d404e8976f1d51ba8782))
+- Update all dependencies (#226) ([3262f3e](https://github.com/NetApp/ontap-mcp/commit/3262f3ed34c7f9c586a134d366d41b7f5b31966e))
+- Update module golang.org/x/sync to v0.23.0 (#224) ([08ba824](https://github.com/NetApp/ontap-mcp/commit/08ba824d87b3997dd9a7d1a14979a4f27d06d4c1))
+- Update all dependencies (#219) ([12cd1eb](https://github.com/NetApp/ontap-mcp/commit/12cd1eb14961df5359a3aa3d3a1af900522aaa79))
+- Update all dependencies (#214) ([c419b06](https://github.com/NetApp/ontap-mcp/commit/c419b069061893acc55927e20901ab015df90e47))
+- Update all dependencies (#213) ([66edb1a](https://github.com/NetApp/ontap-mcp/commit/66edb1ae2802d4b6d93f29d593321489d7310244))
+- Update all dependencies (#203) ([fd33253](https://github.com/NetApp/ontap-mcp/commit/fd33253d8f991eb4f175938441a531112d31ecca))
+- Update github/codeql-action action to v4.37.4 (#199) ([fd63c22](https://github.com/NetApp/ontap-mcp/commit/fd63c2201e6e9693d57c6af2fdb83b8706da623e))
+- Update all dependencies (#197) ([89b07ee](https://github.com/NetApp/ontap-mcp/commit/89b07eecc7ee8c1a1739a079dd7e82cfcd997578))
+
+
+
+
+</details>
+
+
+---
+
 ## 26.07.0 / 2026-07-28 Release
 
 The ONTAP-MCP team is happy to announce that we've released the 26.07.0 version of ONTAP-MCP. 🤘
