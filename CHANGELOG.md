@@ -15,7 +15,9 @@ The ONTAP-MCP team is happy to announce that we've released the 26.10.0 version 
 
 - :medal_sports: The ONTAP-MCP server includes svm peer management tools. Examples: https://netapp.github.io/ontap-mcp/26.10.0/examples/#manage-svm-peer-relationships
 
-- :tophat: The default value of `--tool-mode` flag has been changed to `multiplex` in the current release as communicated prior to reduce the tools count.
+- :tophat: The default value of `--tool-mode` flag has been changed to `multiplex` in the current release. `--tool-mode` flag values `legacy` and `both` are deprecated and will be removed in `27.01`. Use `--tool-mode="legacy"` to restore the previous tool names until then.
+
+- :tophat: Tool `delete_svm_peer` has been updated with breaking changes. It's dropping `cluster_name` and `svm_name` arguments and now takes new 4 arguments as `source_cluster_name`, `source_svm_name`, `destination_cluster_name`, `destination_svm_name`.
 
 - :gem: **Tools enhancements** — couple of existing tools include new fields.
   - **Volume:**: Now volume creation supported on AFX cluster. Increase of maximum number of files of volume supported in modify tool.
