@@ -72,6 +72,7 @@ Examples showing how you can manage ONTAP: https://netapp.github.io/ontap-mcp/26
 
 
 ### Refactoring
+- Log warning for deprecated tool-mode value (#245) ([2c8ed45](https://github.com/NetApp/ontap-mcp/commit/2c8ed4589f9f0aca3e712d9584e13a9b613f5f32))
 - Removed cluster ci test as it is covered in contract tests (#242) ([5577442](https://github.com/NetApp/ontap-mcp/commit/557744285e082174b31e75b5114819da7a770795))
 
 
