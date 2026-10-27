@@ -18,7 +18,7 @@ var logger = setupLogger()
 type Globals struct {
 	LogLevel   string `enum:"debug,info,warn,error" default:"info" env:"LOG_LEVEL" help:"Log level, one of: ${enum}"`
 	ConfigPath string `name:"config" default:"ontap.yaml" env:"ONTAP_MCP_CONFIG" help:"ONTAP-MCP config path"`
-	ToolMode   string `enum:"legacy,multiplex,both" default:"multiplex" env:"TOOL_MODE" help:"ONTAP-MCP tool mode, one of: ${enum}"`
+	ToolMode   string `enum:"legacy,multiplex,both" default:"multiplex" env:"TOOL_MODE" help:"ONTAP-MCP tool mode, one of: ${enum}. legacy and both are deprecated and will be removed in the next release, use multiplex"`
 }
 
 type CLI struct {
@@ -49,7 +49,7 @@ func (a *StartCmd) Run(cli *CLI) error {
 	}
 	logger.Debug("tool mode", slog.String("tool_mode", cli.ToolMode))
 	if cli.ToolMode != "multiplex" {
-		logger.Warn("This value is deprecated, and will be removed in next release", slog.String("tool_mode", cli.ToolMode))
+		logger.Warn("tool-mode values legacy and both are deprecated and will be removed in the next release; use multiplex", slog.String("tool_mode", cli.ToolMode))
 	}
 
 	opts := server.Options{
