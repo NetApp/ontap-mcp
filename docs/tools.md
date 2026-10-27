@@ -202,7 +202,7 @@ The cluster peer tools create or delete a peer relationship on both clusters in 
 
 # Tool Mode
 
-The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `multiplex`; env: `TOOL_MODE`):
+The ONTAP MCP server exposes mutating tools in two naming conventions, controlled by the `--tool-mode` flag (default: `multiplex`; env: `TOOL_MODE`): `legacy` and `both` are deprecated and will be removed in the next release, use `multiplex`
 
 | Mode        | Description                                                                                                                |
 |-------------|----------------------------------------------------------------------------------------------------------------------------|
