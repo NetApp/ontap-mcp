@@ -17,7 +17,7 @@ The ONTAP-MCP team is happy to announce that we've released the 26.10.0 version 
 
 - :tophat: The default value of `--tool-mode` flag has been changed to `multiplex` in the current release. `--tool-mode` flag values `legacy` and `both` are deprecated and will be removed in `27.01`. Use `--tool-mode="legacy"` to restore the previous tool names until then.
 
-- :tophat: Tool `delete_svm_peer` has been updated with breaking changes. It's dropping `cluster_name` and `svm_name` arguments and now takes new 4 arguments as `source_cluster_name`, `source_svm_name`, `destination_cluster_name`, `destination_svm_name`.
+- :tophat: Tool `delete_svm_peer` has breaking changes: `cluster_name` and `svm_name` are replaced by `source_cluster_name`, `source_svm_name`, `destination_cluster_name`, and `destination_svm_name`.
 
 - :gem: **Tools enhancements** — couple of existing tools include new fields.
   - **Volume**: Volume creation is now supported on AFX clusters. `modify_volume` supports a higher maximum file count. Thanks @karale-netapp for raising.
