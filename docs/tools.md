@@ -52,7 +52,7 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 
 ## NFS Service Management
 
-- `create_nfs_service`
+- `create_nfs_service` — optional `v41_pnfs_enabled`, `v41_trunking_enabled`, `rdma_enabled`, `v42_enabled`, and `v4_id_domain`, along with the NFSv3, NFSv4.0, and NFSv4.1 toggles. The same fields are accepted by `update_nfs_service` and `modify_nfs_service`. Omitted fields are not sent. ONTAP enables RDMA on create when `rdma_enabled` is omitted, and ONTAP 9.19 enables NFSv4.2 on create when `v42_enabled` is omitted. Older clusters may reject `v42_enabled`. pNFS and session trunking cannot be turned on in a request that sets `v41_enabled` to false.
 - `update_nfs_service`
 - `delete_nfs_service`
 
