@@ -153,12 +153,17 @@ type Volume struct {
 	SnapshotPolicy           VolumeSnapshotPolicy `json:"snapshot_policy,omitzero"`
 	Space                    VolumeSpace          `json:"space,omitzero"`
 	Efficiency               VolumeEfficiency     `json:"efficiency,omitzero"`
+	Tiering                  VolumeTiering        `json:"tiering,omitzero"`
 	QoS                      VolumeQoS            `json:"qos,omitzero"`
 	Type                     string               `json:"type,omitzero"` // enum: rw, dp, ls
 	ConstituentsPerAggregate *int                 `json:"constituents_per_aggregate,omitzero"`
 	OptimizeAggregates       *bool                `json:"optimize_aggregates,omitzero"`
 	GranularData             *bool                `json:"granular_data,omitzero"`
 	GranularDataMode         string               `json:"granular_data_mode,omitempty"`
+}
+
+type VolumeTiering struct {
+	Policy string `json:"policy,omitzero"` // enum: none, snapshot-only, auto, all
 }
 
 type NameAndUUID struct {

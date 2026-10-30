@@ -419,3 +419,60 @@ func TestCreateVolumeMapsAFXFlexVolWithoutAggregate(t *testing.T) {
 		t.Errorf("AFX flexvol body = %s, want %s", body, want)
 	}
 }
+
+func TestVolumeTieringPolicies(t *testing.T) {
+	for _, policy := range []string{"none", "snapshot-only", "auto", "all"} {
+		t.Run(policy, func(t *testing.T) {
+			created, err := newCreateVolume(tool.VolumeCreate{
+				SVM: "vs1", Volume: "vol1", Aggregate: "aggr1", TieringPolicy: policy,
+			}, ontap.Remote{Model: ontap.CDOT})
+			if err != nil {
+				t.Fatalf("newCreateVolume() error = %v", err)
+			}
+			if got := marshalVolume(t, created); !strings.Contains(got, `"tiering":{"policy":"`+policy+`"}`) {
+				t.Errorf("create body = %s, want tiering policy %q", got, policy)
+			}
+
+			updated, err := newUpdateVolume(tool.Volume{
+				SVM: "vs1", Volume: "vol1", TieringPolicy: policy,
+			})
+			if err != nil {
+				t.Fatalf("newUpdateVolume() error = %v", err)
+			}
+			if got := marshalVolume(t, updated); got != `{"tiering":{"policy":"`+policy+`"}}` {
+				t.Errorf("update body = %s, want tiering policy %q", got, policy)
+			}
+		})
+	}
+}
+
+func TestVolumeTieringPolicyOmittedAndInvalid(t *testing.T) {
+	created, err := newCreateVolume(tool.VolumeCreate{
+		SVM: "vs1", Volume: "vol1", Aggregate: "aggr1",
+	}, ontap.Remote{Model: ontap.CDOT})
+	if err != nil {
+		t.Fatalf("newCreateVolume() error = %v", err)
+	}
+	if body := marshalVolume(t, created); strings.Contains(body, `"tiering"`) {
+		t.Errorf("create body = %s, want tiering omitted", body)
+	}
+
+	updated, err := newUpdateVolume(tool.Volume{SVM: "vs1", Volume: "vol1", Size: "1GB"})
+	if err != nil {
+		t.Fatalf("newUpdateVolume() error = %v", err)
+	}
+	if body := marshalVolume(t, updated); strings.Contains(body, `"tiering"`) {
+		t.Errorf("update body = %s, want tiering omitted", body)
+	}
+
+	if _, err := newCreateVolume(tool.VolumeCreate{
+		SVM: "vs1", Volume: "vol1", Aggregate: "aggr1", TieringPolicy: "invalid",
+	}, ontap.Remote{Model: ontap.CDOT}); err == nil {
+		t.Fatal("newCreateVolume() error = nil, want unsupported tiering policy rejected")
+	}
+	if _, err := newUpdateVolume(tool.Volume{
+		SVM: "vs1", Volume: "vol1", TieringPolicy: "invalid",
+	}); err == nil {
+		t.Fatal("newUpdateVolume() error = nil, want unsupported tiering policy rejected")
+	}
+}

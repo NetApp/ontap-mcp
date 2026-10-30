@@ -19,6 +19,7 @@ type VolumeCreate struct {
 	GranularData             string           `json:"granular_data,omitzero" jsonschema:"FlexGroup granular data mode: disabled (default), basic, or advanced"`
 	JunctionPath             string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	Size                     string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	TieringPolicy            string           `json:"tiering.policy,omitzero" jsonschema:"tiering policy (none, snapshot-only, auto, all)"`
 	ExportPolicy             string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
 	QoS                      VolumeQoS        `json:"qos,omitzero" jsonschema:"QoS settings: use policy_name to assign an existing policy, or max_iops/min_iops/max_mbps/min_mbps for inline limits (mutually exclusive)"`
 	Type                     string           `json:"type,omitzero" jsonschema:"type of volume (e.g., 'rw', 'dp', 'ls')"`
@@ -39,6 +40,7 @@ type Volume struct {
 	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	NewVolume              string           `json:"new_volume_name,omitzero" jsonschema:"new volume name"`
 	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	TieringPolicy          string           `json:"tiering.policy,omitzero" jsonschema:"tiering policy (none, snapshot-only, auto, all)"`
 	State                  string           `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
 	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name. Will be created if it doesn't exist"`
 	Autosize               Autosize         `json:"autosize,omitzero" jsonschema:"autosize"`
@@ -64,6 +66,7 @@ type VolumeModify struct {
 type VolumeUpdate struct {
 	NewVolume              string           `json:"new_volume_name,omitzero" jsonschema:"new volume name for rename operation"`
 	Size                   string           `json:"size,omitzero" jsonschema:"size of the volume (e.g., '100GB', '1TB')"`
+	TieringPolicy          string           `json:"tiering.policy,omitzero" jsonschema:"tiering policy (none, snapshot-only, auto, all)"`
 	State                  string           `json:"state,omitzero" jsonschema:"state of the volume (e.g., 'online', 'offline')"`
 	JunctionPath           string           `json:"nas.path,omitzero" jsonschema:"junction path"`
 	ExportPolicy           string           `json:"nas.export_policy.name,omitzero" jsonschema:"nfs export policy name"`
