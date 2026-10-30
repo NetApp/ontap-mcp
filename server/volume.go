@@ -177,7 +177,14 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 		out.Size = size
 		hasUpdate = true
 	}
-
+	if in.TieringPolicy != "" {
+		policy, err := volumeTieringPolicy(in.TieringPolicy)
+		if err != nil {
+			return ontap.Volume{}, err
+		}
+		out.Tiering.Policy = policy
+		hasUpdate = true
+	}
 	if in.State != "" {
 		out.State = in.State
 		hasUpdate = true
@@ -280,7 +287,7 @@ func updateVolumeValidation(in tool.VolumeUpdate) (ontap.Volume, error) {
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, files.maximum, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps, guarantee.type, snapshot_policy.name, space.snapshot.reserve_percent, efficiency)")
+		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, tiering.policy, files.maximum, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps, guarantee.type, snapshot_policy.name, space.snapshot.reserve_percent, efficiency)")
 	}
 
 	return out, nil
@@ -380,6 +387,13 @@ func newCreateVolume(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, e
 		}
 		out.Size = size
 	}
+	if in.TieringPolicy != "" {
+		policy, err := volumeTieringPolicy(in.TieringPolicy)
+		if err != nil {
+			return ontap.Volume{}, err
+		}
+		out.Tiering.Policy = policy
+	}
 
 	if in.Type != "" {
 		out.Type = in.Type
@@ -442,6 +456,17 @@ func newCreateVolume(in tool.VolumeCreate, remote ontap.Remote) (ontap.Volume, e
 	return out, nil
 }
 
+func volumeTieringPolicy(policy string) (string, error) {
+	provided := policy
+	policy = strings.ToLower(strings.TrimSpace(policy))
+	switch policy {
+	case "none", "snapshot-only", "auto", "all":
+		return policy, nil
+	default:
+		return "", fmt.Errorf("unsupported tiering policy %q; use none, snapshot-only, auto, or all", provided)
+	}
+}
+
 func hasFlexGroupPlacementFields(in tool.VolumeCreate) bool {
 	return len(in.AggregateNames) > 0 || in.ConstituentsPerAggregate != nil || in.OptimizeAggrList != nil || strings.TrimSpace(in.GranularData) != ""
 }
@@ -482,6 +507,14 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 			return ontap.Volume{}, err
 		}
 		out.Size = size
+		hasUpdate = true
+	}
+	if in.TieringPolicy != "" {
+		policy, err := volumeTieringPolicy(in.TieringPolicy)
+		if err != nil {
+			return ontap.Volume{}, err
+		}
+		out.Tiering.Policy = policy
 		hasUpdate = true
 	}
 
@@ -579,7 +612,7 @@ func newUpdateVolume(in tool.Volume) (ontap.Volume, error) {
 	}
 
 	if !hasUpdate {
-		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps, guarantee.type, snapshot_policy.name, space.snapshot.reserve_percent, efficiency)")
+		return out, errors.New("at least one updatable field must be provided (e.g. new_volume_name, size, state, nas.path, nas.export_policy.name, tiering.policy, autosize: mode/maximum/minimum/grow_threshold/shrink_threshold, qos.policy: name/remove_qos_policy/max_iops/min_iops/max_mbps/min_mbps, guarantee.type, snapshot_policy.name, space.snapshot.reserve_percent, efficiency)")
 	}
 
 	return out, nil

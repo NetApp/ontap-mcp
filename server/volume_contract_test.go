@@ -53,6 +53,18 @@ func TestVolumeContract(t *testing.T) {
 			wantText: "Volume created successfully",
 		},
 		{
+			name: "create volume with tiering policy none",
+			tool: "create_volume",
+			args: map[string]any{"cluster_name": contractCluster, "svm_name": "marketing", "volume_name": "cold", "aggregate_name": "aggr1", "tiering.policy": "none"},
+			ontap: []exchange{
+				getCluster(cdotClusterResp),
+				{method: http.MethodPost, path: "/api/storage/volumes", status: http.StatusAccepted, resp: jobAccepted,
+					body: `{"svm":{"name":"marketing"},"name":"cold","aggregates":[{"name":"aggr1"}],"tiering":{"policy":"none"}}`},
+				jobSuccess,
+			},
+			wantText: "Volume created successfully",
+		},
+		{
 			name: "create on AFX omits aggregates",
 			tool: "create_volume",
 			args: map[string]any{"cluster_name": contractCluster, "svm_name": "marketing", "volume_name": "docs", "size": "50MB", "space.snapshot.reserve_percent": 5},
@@ -255,5 +267,21 @@ func TestVolumeContract(t *testing.T) {
 			assert.Equal(t, isErr, tt.wantErr)
 			assert.Contains(t, text, tt.wantText)
 		})
+	}
+}
+
+func TestUpdateVolumeTieringPolicy(t *testing.T) {
+	cs := newContractSession(t, "both", []exchange{
+		lookupVolume("docs", "vol-uuid"),
+		{method: http.MethodPatch, path: "/api/storage/volumes/vol-uuid", body: `{"tiering":{"policy":"auto"}}`},
+	})
+	text, isErr := callTool(t, cs, "update_volume", map[string]any{
+		"cluster_name": contractCluster, "svm_name": "marketing", "volume_name": "docs", "tiering.policy": "auto",
+	})
+	if isErr {
+		t.Fatalf("update_volume error = %s", text)
+	}
+	if text != "Volume updated successfully" {
+		t.Errorf("update_volume text = %q, want success", text)
 	}
 }
