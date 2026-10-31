@@ -984,7 +984,7 @@
 </ul>
 <h2 id="nfs-service-management">NFS Service Management<a class="headerlink" href="#nfs-service-management" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>create_nfs_service</code></li>
+<li><code>create_nfs_service</code> — optional <code>v41_pnfs_enabled</code>, <code>v41_trunking_enabled</code>, <code>rdma_enabled</code>, <code>v42_enabled</code>, and <code>v4_id_domain</code>, along with the NFSv3, NFSv4.0, and NFSv4.1 toggles. The same fields are accepted by <code>update_nfs_service</code> and <code>modify_nfs_service</code>. Omitted fields are not sent. ONTAP enables RDMA on create when <code>rdma_enabled</code> is omitted, and ONTAP 9.19 enables NFSv4.2 on create when <code>v42_enabled</code> is omitted. Older clusters may reject <code>v42_enabled</code>. pNFS and session trunking cannot be turned on in a request that sets <code>v41_enabled</code> to false.</li>
 <li><code>update_nfs_service</code></li>
 <li><code>delete_nfs_service</code></li>
 </ul>
