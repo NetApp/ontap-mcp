@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
@@ -42,7 +43,51 @@ func ReadConfig(path string) (*ONTAP, error) {
 		}
 	}
 
+	// Drop non-ONTAP pollers (Unix, StorageGRID, E-Series, ...). Runs after
+	// applyDefaults so collectors inherited from Defaults count.
+	cfg.Skipped = make(map[string]string)
+	for name, poller := range cfg.Pollers {
+		if !poller.IsONTAP() {
+			cfg.Skipped[name] = SkipReasonNotONTAP
+			delete(cfg.Pollers, name)
+		}
+	}
+	cfg.PollersOrdered = slices.DeleteFunc(cfg.PollersOrdered, func(name string) bool {
+		_, skipped := cfg.Skipped[name]
+		return skipped
+	})
+
 	return &cfg, nil
+}
+
+// SkipReasonNotONTAP is the ONTAP.Skipped reason for a poller without ONTAP collectors.
+const SkipReasonNotONTAP = "no ONTAP collectors"
+
+// ontapCollectors mirrors Harvest's conf.IsONTAPCollector; keep the two in sync.
+// Names match exactly, as in Harvest.
+var ontapCollectors = map[string]struct{}{
+	"Zapi":     {},
+	"ZapiPerf": {},
+	"Rest":     {},
+	"RestPerf": {},
+	"CmPerf":   {},
+	"StatPerf": {},
+	"KeyPerf":  {},
+	"Ems":      {},
+}
+
+// IsONTAP reports whether the poller targets ONTAP: it has no collectors, or at
+// least one of them is an ONTAP collector.
+func (p *Poller) IsONTAP() bool {
+	if len(p.Collectors) == 0 {
+		return true
+	}
+	for _, c := range p.Collectors {
+		if _, ok := ontapCollectors[c]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // applyDefaults fills any unset (zero-valued) field on the poller with the
@@ -74,6 +119,7 @@ type ONTAP struct {
 	McpAuth        *OAuth             `yaml:"McpAuth,omitempty"`
 	TLS            *TLS               `yaml:"Tls,omitempty"`
 	PollersOrdered []string           `yaml:"-"` // poller names in same order as yaml config
+	Skipped        map[string]string  `yaml:"-"` // dropped poller -> reason
 }
 
 type OAuth struct {
@@ -100,6 +146,36 @@ func (s *StringSlice) UnmarshalYAML(b []byte) error {
 		return fmt.Errorf("alg must be a string or a list of strings: %w", err)
 	}
 	*s = StringSlice{single}
+	return nil
+}
+
+// Collectors holds collector names. Each entry may be a name (- Rest) or a
+// name mapped to templates (- Rest: [x.yaml]); only the names are kept.
+type Collectors []string
+
+// UnmarshalYAML implements the goccy/go-yaml BytesUnmarshaler interface.
+func (c *Collectors) UnmarshalYAML(b []byte) error {
+	var entries []any
+	if err := yaml.Unmarshal(b, &entries); err != nil {
+		return fmt.Errorf("collectors must be a list: %w", err)
+	}
+	names := make(Collectors, 0, len(entries))
+	for i, entry := range entries {
+		switch v := entry.(type) {
+		case string:
+			names = append(names, v)
+		case map[string]any:
+			if len(v) != 1 {
+				return fmt.Errorf("collectors entry %d must map exactly one collector name to its templates, got %d keys", i+1, len(v))
+			}
+			for name := range v {
+				names = append(names, name)
+			}
+		default:
+			return fmt.Errorf("collectors entry %d (%v) must be a collector name or a single-key map of name to templates", i+1, entry)
+		}
+	}
+	*c = names
 	return nil
 }
 
@@ -132,6 +208,7 @@ type Poller struct {
 	CaCertPath        string            `yaml:"ca_cert,omitempty"`
 	CertificateScript CertificateScript `yaml:"certificate_script,omitempty"`
 	ClientTimeout     string            `yaml:"client_timeout,omitempty"`
+	Collectors        Collectors        `yaml:"collectors,omitempty"`
 	CredentialsFile   string            `yaml:"credentials_file,omitempty"`
 	CredentialsScript CredentialsScript `yaml:"credentials_script,omitempty"`
 	Datacenter        string            `yaml:"datacenter,omitempty"`
