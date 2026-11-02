@@ -166,7 +166,7 @@ func loadCredentialsFile(filePath string, pollerName string) (string, string, er
 
 	// Look for the matching poller
 	poller, ok := cfg.Pollers[pollerName]
-	if !ok {
+	if !ok || poller == nil {
 		return "", "", fmt.Errorf("poller '%s' not found in credentials_file %s", pollerName, filePath)
 	}
 

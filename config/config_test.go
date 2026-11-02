@@ -534,27 +534,156 @@ Pollers:
 	assert.Equal(t, len(cfg.Skipped), 0)
 }
 
-func TestReadConfig_InvalidCollectors(t *testing.T) {
+func TestReadConfig_CollectorsNotAListErrors(t *testing.T) {
+	yamlContent := `
+Pollers:
+  bad:
+    addr: 10.0.0.1
+    collectors: Rest
+`
+	_, err := ReadConfig(writeConfig(t, yamlContent))
+	assert.NotNil(t, err)
+	if err != nil {
+		assert.Contains(t, err.Error(), "collectors")
+	}
+}
+
+// Collectors parsing is as lenient as Harvest's: a multi-key map contributes
+// its first key and entries of an unknown shape are skipped.
+func TestReadConfig_CollectorsLenient(t *testing.T) {
 	tests := []struct {
 		name       string
 		collectors string
+		want       []string
 	}{
-		{name: "nested list", collectors: "\n      - [Rest]"},
-		{name: "multi-key map", collectors: " [{Rest: [a.yaml], Zapi: [b.yaml]}]"},
-		{name: "scalar", collectors: " Rest"},
+		{name: "multi-key map uses first key", collectors: "\n      - Rest:\n          - a.yaml\n        Zapi:\n          - b.yaml", want: []string{"Rest"}},
+		{name: "multi-key flow map uses first key", collectors: " [{Rest: [a.yaml], Zapi: [b.yaml]}]", want: []string{"Rest"}},
+		{name: "nested list is skipped", collectors: "\n      - [Rest]\n      - Zapi", want: []string{"Zapi"}},
+		{name: "number is skipped", collectors: "\n      - 5\n      - Zapi", want: []string{"Zapi"}},
+		{name: "map without templates keeps name", collectors: "\n      - Rest:\n      - Zapi", want: []string{"Rest", "Zapi"}},
+		{name: "single-key map with templates", collectors: "\n      - Rest:\n          - a.yaml", want: []string{"Rest"}},
+		{name: "empty value", collectors: "", want: []string{}},
+		{name: "empty list", collectors: " []", want: []string{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			yamlContent := `
 Pollers:
-  bad:
+  p:
     addr: 10.0.0.1
     collectors:` + tt.collectors + "\n"
-			_, err := ReadConfig(writeConfig(t, yamlContent))
-			assert.NotNil(t, err)
-			if err != nil {
-				assert.Contains(t, err.Error(), "collectors")
+			cfg, err := ReadConfig(writeConfig(t, yamlContent))
+			assert.Nil(t, err)
+			p := cfg.Pollers["p"]
+			assert.NotNil(t, p)
+			if !slices.Equal([]string(p.Collectors), tt.want) {
+				t.Errorf("collectors = %v, want %v", []string(p.Collectors), tt.want)
 			}
 		})
 	}
+}
+
+// YAML anchors and aliases are valid in a Harvest config, so collectors must
+// decode through them.
+func TestReadConfig_CollectorsAnchorsAndAliases(t *testing.T) {
+	yamlContent := `
+Defaults:
+  collectors: &ontap [Rest, RestPerf]
+
+Pollers:
+  alias-of-defaults:
+    addr: 10.0.0.1
+    collectors: *ontap
+  inherits:
+    addr: 10.0.0.2
+  own-anchor:
+    addr: 10.0.0.3
+    collectors: &own
+      - Unix
+  alias-of-poller:
+    addr: 10.0.0.4
+    collectors: *own
+`
+	cfg, err := ReadConfig(writeConfig(t, yamlContent))
+	assert.Nil(t, err)
+
+	want := map[string][]string{
+		"alias-of-defaults": {"Rest", "RestPerf"},
+		"inherits":          {"Rest", "RestPerf"},
+	}
+	for name, collectors := range want {
+		p := cfg.Pollers[name]
+		assert.NotNil(t, p)
+		if p != nil && !slices.Equal([]string(p.Collectors), collectors) {
+			t.Errorf("%s collectors = %v, want %v", name, []string(p.Collectors), collectors)
+		}
+	}
+
+	// The Unix poller and the alias to it are both dropped.
+	assert.Equal(t, skippedNames(cfg), []string{"alias-of-poller", "own-anchor"})
+}
+
+// A poller listed with no settings decodes to nil. Like Harvest, it is treated
+// as an empty poller that inherits Defaults, and without an addr it is skipped.
+func TestReadConfig_BarePollerWithoutAddrIsSkipped(t *testing.T) {
+	yamlContent := `
+Defaults:
+  username: admin
+  password: secret
+
+Pollers:
+  a:
+  b:
+    addr: 10.0.0.1
+`
+	cfg, err := ReadConfig(writeConfig(t, yamlContent))
+	assert.Nil(t, err)
+
+	assert.Equal(t, cfg.PollersOrdered, []string{"b"})
+	assert.Equal(t, cfg.Skipped["a"], SkipReasonNoAddr)
+	assert.Equal(t, len(cfg.Skipped), 1)
+	_, ok := cfg.Pollers["a"]
+	assert.False(t, ok)
+}
+
+func TestReadConfig_BarePollerInheritsAddrFromDefaults(t *testing.T) {
+	yamlContent := `
+Defaults:
+  addr: 10.0.0.9
+  username: admin
+  password: secret
+
+Pollers:
+  a:
+  b:
+    addr: 10.0.0.1
+`
+	cfg, err := ReadConfig(writeConfig(t, yamlContent))
+	assert.Nil(t, err)
+
+	a := cfg.Pollers["a"]
+	assert.NotNil(t, a)
+	assert.Equal(t, a.Name, "a")
+	assert.Equal(t, a.Addr, "10.0.0.9")
+	assert.Equal(t, a.Username, "admin")
+	assert.Equal(t, a.Password, "secret")
+	assert.Equal(t, cfg.PollersOrdered, []string{"a", "b"})
+	assert.Equal(t, len(cfg.Skipped), 0)
+}
+
+// A poller that is both non-ONTAP and missing addr is reported as non-ONTAP.
+func TestReadConfig_NonONTAPReasonWinsOverNoAddr(t *testing.T) {
+	yamlContent := `
+Pollers:
+  u:
+    collectors: [Unix]
+  nofile:
+    collectors: [Rest]
+`
+	cfg, err := ReadConfig(writeConfig(t, yamlContent))
+	assert.Nil(t, err)
+
+	assert.Equal(t, cfg.Skipped["u"], SkipReasonNotONTAP)
+	assert.Equal(t, cfg.Skipped["nofile"], SkipReasonNoAddr)
+	assert.Equal(t, len(cfg.PollersOrdered), 0)
 }
