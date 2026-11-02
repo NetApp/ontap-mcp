@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"log/slog"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -46,6 +48,12 @@ func (a *StartCmd) Run(cli *CLI) error {
 	cfg, err := config.ReadConfig(cli.ConfigPath)
 	if err != nil {
 		return fmt.Errorf("failed to read config path=%s err=%w", cli.ConfigPath, err)
+	}
+	for _, name := range slices.Sorted(maps.Keys(cfg.Skipped)) {
+		logger.Info("skipping poller", slog.String("poller", name), slog.String("reason", cfg.Skipped[name]))
+	}
+	if len(cfg.Pollers) == 0 && len(cfg.Skipped) > 0 {
+		logger.Warn("no ONTAP pollers left after filtering config", slog.String("path", abs))
 	}
 	logger.Debug("tool mode", slog.String("tool_mode", cli.ToolMode))
 	if cli.ToolMode != "multiplex" {
