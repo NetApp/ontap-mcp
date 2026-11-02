@@ -776,3 +776,10 @@ type ClusterPeer struct {
 	SourceCluster      string `json:"source_cluster_name" jsonschema:"source cluster name"`
 	DestinationCluster string `json:"destination_cluster_name" jsonschema:"destination cluster name"`
 }
+
+type ValidateReplicationParams struct {
+	SourceCluster      string `json:"source_cluster" jsonschema:"source cluster name, from list_registered_clusters"`
+	DestinationCluster string `json:"destination_cluster" jsonschema:"destination cluster name, from list_registered_clusters"`
+	SourceSVM          string `json:"source_svm,omitzero" jsonschema:"optional source SVM name; destination_svm is required when this is provided"`
+	DestinationSVM     string `json:"destination_svm,omitzero" jsonschema:"optional destination SVM name; source_svm is required when this is provided"`
+}
