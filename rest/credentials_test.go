@@ -862,6 +862,29 @@ func TestLoadCredentialsFile_ClusterNotFound(t *testing.T) {
 	}
 }
 
+func TestLoadCredentialsFile_BarePoller(t *testing.T) {
+	tmpDir := t.TempDir()
+	credFile := filepath.Join(tmpDir, "credentials.yml")
+
+	content := `Pollers:
+  cluster1:
+`
+	err := os.WriteFile(credFile, []byte(content), 0600)
+	if err != nil {
+		t.Fatalf("Failed to create credentials file: %v", err)
+	}
+
+	_, _, err = loadCredentialsFile(credFile, "cluster1")
+
+	if err == nil {
+		t.Fatal("loadCredentialsFile() expected error for poller with no settings, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("loadCredentialsFile() error = %v, want 'not found' error", err)
+	}
+}
+
 func TestLoadCredentialsFile_FileNotFound(t *testing.T) {
 	_, _, err := loadCredentialsFile("/nonexistent/file.yml", "cluster1")
 

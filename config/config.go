@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
@@ -36,13 +37,73 @@ func ReadConfig(path string) (*ONTAP, error) {
 	// Set the Name field for each poller and apply Defaults for any
 	// key that is missing from the poller's own configuration.
 	for name, poller := range cfg.Pollers {
+		// A poller listed with no settings decodes to nil; Harvest treats it
+		// as an empty poller that inherits Defaults.
+		if poller == nil {
+			poller = &Poller{}
+			cfg.Pollers[name] = poller
+		}
 		poller.Name = name
 		if err := poller.applyDefaults(cfg.Defaults); err != nil {
 			return nil, fmt.Errorf("error applying defaults to poller %q: %w", name, err)
 		}
 	}
 
+	// Drop non-ONTAP pollers (Unix, StorageGRID, E-Series, ...) and pollers
+	// with no addr. Runs after applyDefaults so values inherited from Defaults
+	// count.
+	cfg.Skipped = make(map[string]string)
+	for name, poller := range cfg.Pollers {
+		switch {
+		case !poller.IsONTAP():
+			cfg.Skipped[name] = SkipReasonNotONTAP
+		case poller.Addr == "":
+			cfg.Skipped[name] = SkipReasonNoAddr
+		default:
+			continue
+		}
+		delete(cfg.Pollers, name)
+	}
+	cfg.PollersOrdered = slices.DeleteFunc(cfg.PollersOrdered, func(name string) bool {
+		_, skipped := cfg.Skipped[name]
+		return skipped
+	})
+
 	return &cfg, nil
+}
+
+// SkipReasonNotONTAP is the ONTAP.Skipped reason for a poller without ONTAP collectors.
+const SkipReasonNotONTAP = "no ONTAP collectors"
+
+// SkipReasonNoAddr is the ONTAP.Skipped reason for a poller with no addr, which
+// ontap-mcp cannot connect to.
+const SkipReasonNoAddr = "no addr"
+
+// ontapCollectors mirrors Harvest's conf.IsONTAPCollector; keep the two in sync.
+// Names match exactly, as in Harvest.
+var ontapCollectors = map[string]struct{}{
+	"Zapi":     {},
+	"ZapiPerf": {},
+	"Rest":     {},
+	"RestPerf": {},
+	"CmPerf":   {},
+	"StatPerf": {},
+	"KeyPerf":  {},
+	"Ems":      {},
+}
+
+// IsONTAP reports whether the poller targets ONTAP: it has no collectors, or at
+// least one of them is an ONTAP collector.
+func (p *Poller) IsONTAP() bool {
+	if len(p.Collectors) == 0 {
+		return true
+	}
+	for _, c := range p.Collectors {
+		if _, ok := ontapCollectors[c]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // applyDefaults fills any unset (zero-valued) field on the poller with the
@@ -74,6 +135,7 @@ type ONTAP struct {
 	McpAuth        *OAuth             `yaml:"McpAuth,omitempty"`
 	TLS            *TLS               `yaml:"Tls,omitempty"`
 	PollersOrdered []string           `yaml:"-"` // poller names in same order as yaml config
+	Skipped        map[string]string  `yaml:"-"` // dropped poller -> reason
 }
 
 type OAuth struct {
@@ -100,6 +162,38 @@ func (s *StringSlice) UnmarshalYAML(b []byte) error {
 		return fmt.Errorf("alg must be a string or a list of strings: %w", err)
 	}
 	*s = StringSlice{single}
+	return nil
+}
+
+// Collectors holds collector names. Each entry may be a name (- Rest) or a
+// name mapped to templates (- Rest: [x.yaml]); only the names are kept.
+type Collectors []string
+
+// UnmarshalYAML decodes the collectors list. It errors only when the value is
+// not a list.
+func (c *Collectors) UnmarshalYAML(n ast.Node) error {
+	if n.Type() == ast.NullType {
+		*c = nil
+		return nil
+	}
+	seq, ok := n.(*ast.SequenceNode)
+	if !ok {
+		return fmt.Errorf("collectors must be a list, got %s", n.Type())
+	}
+	names := make(Collectors, 0, len(seq.Values))
+	for _, entry := range seq.Values {
+		switch v := entry.(type) {
+		case *ast.StringNode:
+			names = append(names, v.Value)
+		case *ast.MappingNode:
+			if len(v.Values) > 0 {
+				names = append(names, toString(v.Values[0].Key))
+			}
+		case *ast.MappingValueNode:
+			names = append(names, toString(v.Key))
+		}
+	}
+	*c = names
 	return nil
 }
 
@@ -132,6 +226,7 @@ type Poller struct {
 	CaCertPath        string            `yaml:"ca_cert,omitempty"`
 	CertificateScript CertificateScript `yaml:"certificate_script,omitempty"`
 	ClientTimeout     string            `yaml:"client_timeout,omitempty"`
+	Collectors        Collectors        `yaml:"collectors,omitempty"`
 	CredentialsFile   string            `yaml:"credentials_file,omitempty"`
 	CredentialsScript CredentialsScript `yaml:"credentials_script,omitempty"`
 	Datacenter        string            `yaml:"datacenter,omitempty"`

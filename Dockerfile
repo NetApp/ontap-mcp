@@ -25,7 +25,7 @@ RUN just VERSION=$VERSION build
 RUN cp -a $BUILD_DIR/ontap-mcp $INSTALL_DIR/
 RUN cp -a $BUILD_DIR/conf $INSTALL_DIR/
 
-FROM gcr.io/distroless/static-debian12:debug
+FROM gcr.io/distroless/static-debian13:debug
 
 ARG INSTALL_DIR=/opt/mcp
 

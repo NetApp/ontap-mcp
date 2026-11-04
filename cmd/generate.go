@@ -27,6 +27,9 @@ func (c *APICatalogCmd) Run(cli *CLI) error {
 		return fmt.Errorf("read config %s: %w", cli.ConfigPath, err)
 	}
 	poller, ok := cfg.Pollers[c.Poller]
+	if reason, skipped := cfg.Skipped[c.Poller]; skipped {
+		return fmt.Errorf("poller %q skipped: %s", c.Poller, reason)
+	}
 	if !ok {
 		return fmt.Errorf("poller %q not found in %s", c.Poller, cli.ConfigPath)
 	}
