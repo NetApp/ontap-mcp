@@ -460,10 +460,10 @@ func volumeTieringPolicy(policy string) (string, error) {
 	provided := policy
 	policy = strings.ToLower(strings.TrimSpace(policy))
 	switch policy {
-	case "none", "snapshot-only", "auto", "all":
+	case "none", "snapshot-only", "snapshot_only", "auto", "all":
 		return policy, nil
 	default:
-		return "", fmt.Errorf("unsupported tiering policy %q; use none, snapshot-only, auto, or all", provided)
+		return "", fmt.Errorf("unsupported tiering policy %q; use none, snapshot-only or snapshot_only, auto, or all", provided)
 	}
 }
 

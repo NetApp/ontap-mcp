@@ -163,7 +163,7 @@ type Volume struct {
 }
 
 type VolumeTiering struct {
-	Policy string `json:"policy,omitzero"` // enum: none, snapshot-only, auto, all
+	Policy string `json:"policy,omitzero"` // enum: none, snapshot-only or snapshot_only, auto, all
 }
 
 type NameAndUUID struct {

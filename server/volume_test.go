@@ -421,7 +421,7 @@ func TestCreateVolumeMapsAFXFlexVolWithoutAggregate(t *testing.T) {
 }
 
 func TestVolumeTieringPolicies(t *testing.T) {
-	for _, policy := range []string{"none", "snapshot-only", "auto", "all"} {
+	for _, policy := range []string{"none", "snapshot-only", "snapshot_only", "auto", "all"} {
 		t.Run(policy, func(t *testing.T) {
 			created, err := newCreateVolume(tool.VolumeCreate{
 				SVM: "vs1", Volume: "vol1", Aggregate: "aggr1", TieringPolicy: policy,
