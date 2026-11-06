@@ -66,6 +66,11 @@ Units:
 - Adaptive: expected_iops and peak_iops are in IOPS/TB. absolute_min_iops is in IOPS.
 - Fixed: *_iops fields are in IOPS; *_mbps fields are in MB/s.`
 
+const ValidateReplication = `Validate whether two registered ONTAP clusters satisfy the prerequisites for asynchronous volume SnapMirror (XDP) replication.
+This is a read-only diagnostic tool and makes only GET requests. It never creates or modifies LIFs, cluster peers, SVM peers, or SnapMirror relationships.
+source_cluster and destination_cluster are required. source_svm and destination_svm are optional, but must be supplied together. When SVMs are supplied, they are used only to validate the reciprocal SVM peer relationship.
+The tool checks intercluster LIF availability on both clusters, reciprocal cluster peering, optional reciprocal SVM peering, and source-to-destination ONTAP version compatibility using the bundled NetApp asynchronous XDP compatibility matrix. It returns all missing or unverifiable prerequisites in one response.`
+
 const CreateQoSPolicy = `Create a QoS policy on a cluster by cluster name.`
 const UpdateQoSPolicy = `Update a QoS policy name, max throughput iops, min throughput iops, expected iops, peak iops and absolute min iops on a cluster by cluster name.`
 const DeleteQoSPolicy = `Delete a QoS policy on a cluster by cluster name.`
