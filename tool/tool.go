@@ -631,6 +631,64 @@ type SnapMirrorUpdate struct {
 	State                string `json:"state,omitzero" jsonschema:"State of the relationship (e.g., broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding)"`
 }
 
+type SnapMirrorPolicyCreate struct {
+	Cluster            string                 `json:"cluster_name" jsonschema:"cluster name"`
+	Name               string                 `json:"name" jsonschema:"SnapMirror policy name"`
+	Type               string                 `json:"policy_type" jsonschema:"explicit SnapMirror policy type: async, async_mirror, vault, or mirror_vault"`
+	Comment            string                 `json:"comment,omitzero" jsonschema:"comment associated with the policy"`
+	NetworkCompression *bool                  `json:"network_compression_enabled,omitzero" jsonschema:"enable network compression for transfers"`
+	Throttle           *int                   `json:"throttle,omitzero" jsonschema:"transfer throttle in KB/s; zero means unlimited"`
+	RetentionRules     []SnapMirrorPolicyRule `json:"retention_rules,omitzero" jsonschema:"initial snapshot retention rules"`
+}
+
+type SnapMirrorPolicy struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	Name    string `json:"name" jsonschema:"SnapMirror policy name"`
+}
+
+type SnapMirrorPolicyUpdate struct {
+	Comment            *string `json:"comment,omitzero" jsonschema:"policy comment; set to an empty string to clear"`
+	NetworkCompression *bool   `json:"network_compression_enabled,omitzero" jsonschema:"enable network compression for transfers"`
+	Throttle           *int    `json:"throttle,omitzero" jsonschema:"transfer throttle in KB/s; zero means unlimited"`
+}
+
+type SnapMirrorPolicyModify struct {
+	Cluster string                 `json:"cluster_name" jsonschema:"cluster name"`
+	Name    string                 `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Update  SnapMirrorPolicyUpdate `json:"snapmirror_policy_update,omitzero" jsonschema:"SnapMirror policy fields to update"`
+}
+
+type SnapMirrorPolicyRule struct {
+	Label    string `json:"label" jsonschema:"SnapMirror label matched by snapshot policy schedule entries"`
+	Keep     int    `json:"keep" jsonschema:"number of matching snapshots to retain"`
+	Preserve *bool  `json:"preserve,omitzero" jsonschema:"preserve matching snapshots"`
+	Warn     *int   `json:"warn,omitzero" jsonschema:"warn threshold for retained snapshots; supported on ONTAP 9.13 and later"`
+}
+
+type SnapMirrorPolicyRuleCreate struct {
+	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
+	Name     string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Label    string `json:"rule_label" jsonschema:"SnapMirror label matched by snapshot policy schedule entries"`
+	Keep     int    `json:"keep_count" jsonschema:"number of matching snapshots to retain"`
+	Preserve *bool  `json:"preserve,omitzero" jsonschema:"preserve matching snapshots"`
+	Warn     *int   `json:"warn,omitzero" jsonschema:"warn threshold for retained snapshots; supported on ONTAP 9.13 and later"`
+}
+
+type SnapMirrorPolicyRuleUpdate struct {
+	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
+	Name     string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Label    string `json:"rule_label" jsonschema:"existing rule label"`
+	Keep     *int   `json:"keep_count,omitzero" jsonschema:"number of matching snapshots to retain"`
+	Preserve *bool  `json:"preserve,omitzero" jsonschema:"preserve matching snapshots"`
+	Warn     *int   `json:"warn,omitzero" jsonschema:"warn threshold for retained snapshots; supported on ONTAP 9.13 and later"`
+}
+
+type SnapMirrorPolicyRuleRemove struct {
+	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
+	Name    string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Label   string `json:"rule_label" jsonschema:"existing rule label"`
+}
+
 type OntapGetParams struct {
 	Cluster    string            `json:"cluster_name" jsonschema:"cluster name, from list_registered_clusters"`
 	Fields     string            `json:"fields,omitzero" jsonschema:"comma-separated dot-notation fields to return, e.g. \"name,svm.name,space.size\" — use space.* to expand all space sub-fields"`
