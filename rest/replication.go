@@ -30,9 +30,10 @@ type ClusterPeer struct {
 }
 
 type SVMPeer struct {
-	UUID  string `json:"uuid"`
-	State string `json:"state"`
-	SVM   struct {
+	UUID         string   `json:"uuid"`
+	State        string   `json:"state"`
+	Applications []string `json:"applications"`
+	SVM          struct {
 		Name string `json:"name"`
 	} `json:"svm"`
 	Peer struct {
@@ -86,7 +87,7 @@ func (c *Client) GetSVMPeers(ctx context.Context, localSVM, peerCluster, peerSVM
 	params.Set("svm.name", localSVM)
 	params.Set("peer.cluster.name", peerCluster)
 	params.Set("peer.svm.name", peerSVM)
-	params.Set("fields", "uuid,state,svm.name,peer.cluster.name,peer.svm.name")
+	params.Set("fields", "uuid,state,applications,svm.name,peer.cluster.name,peer.svm.name")
 
 	var result struct {
 		Records []SVMPeer `json:"records"`

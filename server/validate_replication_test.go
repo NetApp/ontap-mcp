@@ -150,7 +150,7 @@ func replicationFixture(path string, source, failing bool) string {
 		}
 		return `{"records":[{"name":"peer","uuid":"peer-1","status":{"state":"available"}}],"num_records":1}`
 	case "/api/svm/peers":
-		return `{"records":[{"uuid":"svm-peer-1","state":"peered"}],"num_records":1}`
+		return `{"records":[{"uuid":"svm-peer-1","state":"peered","applications":["snapmirror"]}],"num_records":1}`
 	default:
 		return `{"records":[],"num_records":0}`
 	}

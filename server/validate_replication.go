@@ -249,6 +249,10 @@ func svmPeerCheck(scope, cluster, localSVM, peerSVM string, peers []rest.SVMPeer
 		check.Message = fmt.Sprintf("SVM peer %s to %s on %s cluster %s is not peered (state=%s)", localSVM, peerSVM, scope, cluster, peers[0].State)
 		return check
 	}
+	if !slices.Contains(peers[0].Applications, "snapmirror") {
+		check.Message = fmt.Sprintf("SVM peer %s to %s on %s cluster %s is not having application as snapmirror (applications=%s)", localSVM, peerSVM, scope, cluster, peers[0].Applications)
+		return check
+	}
 	check.Passed = true
 	check.Message = fmt.Sprintf("SVM peer %s to %s is peered on %s cluster %s", localSVM, peerSVM, scope, cluster)
 	return check

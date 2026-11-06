@@ -19,7 +19,7 @@ func TestValidateReplicationContract(t *testing.T) {
 		destinationSVM     = "destination-svm"
 		lifFields          = "fields=name%2Cenabled%2Cstate%2Cip.address%2Clocation.node.name&max_records=500&services=intercluster_core"
 		clusterPeerFields  = "fields=name%2Cuuid%2Cstatus&max_records=500&name="
-		svmPeerFields      = "fields=uuid%2Cstate%2Csvm.name%2Cpeer.cluster.name%2Cpeer.svm.name&max_records=500&peer.cluster.name="
+		svmPeerFields      = "fields=uuid%2Cstate%2Capplications%2Csvm.name%2Cpeer.cluster.name%2Cpeer.svm.name&max_records=500&peer.cluster.name="
 	)
 	clusterInfo := func(name string, major, minor int) exchange {
 		return exchange{
@@ -44,7 +44,7 @@ func TestValidateReplicationContract(t *testing.T) {
 		return exchange{
 			method: http.MethodGet,
 			path:   "/api/svm/peers?" + svmPeerFields + peerCluster + "&peer.svm.name=" + peerSVM + "&svm.name=" + localSVM,
-			resp:   `{"num_records":1,"records":[{"uuid":"svm-peer-uuid","state":"peered"}]}`,
+			resp:   `{"num_records":1,"records":[{"uuid":"svm-peer-uuid","state":"peered","applications":["snapmirror"]}]}`,
 		}
 	}
 

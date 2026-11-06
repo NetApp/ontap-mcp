@@ -38,29 +38,43 @@ func TestCheckXDPCompatibility(t *testing.T) {
 		wantReason  string
 	}{
 		{
-			name:        "supported release pair",
-			source:      remoteAt(9, 16, 1, false),
-			destination: remoteAt(9, 15, 1, false),
+			name:        "supported release pair cdot",
+			source:      remoteAt(9, 16, 1, ontap.CDOT),
+			destination: remoteAt(9, 15, 1, ontap.CDOT),
+			wantKnown:   true,
+			wantOK:      true,
+		},
+		{
+			name:        "supported release pair afx",
+			source:      remoteAt(9, 16, 1, ontap.AFX),
+			destination: remoteAt(9, 15, 1, ontap.AFX),
+			wantKnown:   true,
+			wantOK:      true,
+		},
+		{
+			name:        "supported release pair asar2",
+			source:      remoteAt(9, 16, 1, ontap.ASAr2),
+			destination: remoteAt(9, 15, 1, ontap.ASAr2),
 			wantKnown:   true,
 			wantOK:      true,
 		},
 		{
 			name:        "unsupported release pair",
-			source:      remoteAt(9, 19, 1, false),
-			destination: remoteAt(9, 5, 0, false),
+			source:      remoteAt(9, 19, 1, ontap.CDOT),
+			destination: remoteAt(9, 5, 0, ontap.CDOT),
 			wantKnown:   true,
 			wantReason:  "not supported",
 		},
 		{
 			name:        "unknown future release",
-			source:      remoteAt(9, 20, 1, false),
-			destination: remoteAt(9, 19, 1, false),
+			source:      remoteAt(9, 20, 1, ontap.CDOT),
+			destination: remoteAt(9, 19, 1, ontap.CDOT),
 			wantReason:  "not available",
 		},
 		{
 			name:        "ASA r2 mismatch",
-			source:      remoteAt(9, 16, 0, true),
-			destination: remoteAt(9, 16, 1, false),
+			source:      remoteAt(9, 16, 0, ontap.ASAr2),
+			destination: remoteAt(9, 16, 1, ontap.CDOT),
 			wantKnown:   true,
 			wantReason:  "only with other ASA r2",
 		},
@@ -80,9 +94,9 @@ func TestCheckXDPCompatibility(t *testing.T) {
 }
 
 // nolint:unparam
-func remoteAt(generation, major, minor int, disaggregated bool) ontap.Remote {
+func remoteAt(generation, major, minor int, model string) ontap.Remote {
 	return ontap.Remote{
-		Version:         ontap.Version{Generation: generation, Major: major, Minor: minor},
-		IsDisaggregated: disaggregated,
+		Version: ontap.Version{Generation: generation, Major: major, Minor: minor},
+		Model:   model,
 	}
 }

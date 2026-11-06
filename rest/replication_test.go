@@ -63,12 +63,12 @@ func TestReplicationQueries(t *testing.T) {
 				"svm.name":          "svm-a",
 				"peer.cluster.name": "cluster-b",
 				"peer.svm.name":     "svm-b",
-				"fields":            "uuid,state,svm.name,peer.cluster.name,peer.svm.name",
+				"fields":            "uuid,state,applications,svm.name,peer.cluster.name,peer.svm.name",
 			},
-			response: `{"records":[{"uuid":"svm-peer-1","state":"peered","svm":{"name":"svm-a"},"peer":{"cluster":{"name":"cluster-b"},"svm":{"name":"svm-b"}}}],"num_records":1}`,
+			response: `{"records":[{"uuid":"svm-peer-1","state":"peered","applications":["snapmirror"],"svm":{"name":"svm-a"},"peer":{"cluster":{"name":"cluster-b"},"svm":{"name":"svm-b"}}}],"num_records":1}`,
 			invoke: func(ctx context.Context, client *Client) error {
 				records, err := client.GetSVMPeers(ctx, "svm-a", "cluster-b", "svm-b")
-				if err == nil && (len(records) != 1 || records[0].State != "peered" || records[0].Peer.SVM.Name != "svm-b") {
+				if err == nil && (len(records) != 1 || records[0].State != "peered" || records[0].Peer.SVM.Name != "svm-b" || len(records[0].Applications) != 1 || records[0].Applications[0] != "snapmirror") {
 					t.Fatalf("unexpected SVM peer records: %#v", records)
 				}
 				return err

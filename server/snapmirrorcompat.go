@@ -56,7 +56,7 @@ func checkXDPCompatibility(source, destination ontap.Remote) compatibilityResult
 		DestinationRelease: ontapRelease(destination.Version),
 	}
 
-	if source.IsDisaggregated != destination.IsDisaggregated {
+	if source.Model == ontap.ASAr2 && source.Model != destination.Model {
 		result.Known = true
 		result.Reason = "ASA r2 systems support SnapMirror relationships only with other ASA r2 systems"
 		return result
