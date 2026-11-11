@@ -402,6 +402,20 @@ FlexGroup create is for Unified NAS (AFF/FAS) only. Classic ASA rejects FlexGrou
 
 ### Manage SnapMirror Relationships
 
+**Manage SnapMirror retention policies**
+
+- On the umeng-aff300-05-06 cluster, create a mirror_vault SnapMirror policy named daily-retention that keeps 7 snapshots with the daily label and 4 snapshots with the weekly label. Enable network compression and set the throttle to 50000 KB/s.
+- <span class="key">Expected Response</span>: The current policy and both retention rules, including a warning if either label is not produced by a snapshot policy schedule.
+
+- On the umeng-aff300-05-06 cluster, create or update a snapshot policy on the source SVM so its daily schedule entry uses snapmirror_label daily and its weekly schedule entry uses snapmirror_label weekly. Apply that snapshot policy to the source volume protected by daily-retention.
+- <span class="key">Expected Response</span>: Snapshot schedule entries produce the labels used by the SnapMirror policy, allowing destination retention rules to match.
+
+- On the umeng-aff300-05-06 cluster, update the daily-retention policy's daily rule to keep 14 snapshots.
+- <span class="key">Expected Response</span>: The policy's current retention rules with the updated daily keep count.
+
+- On the umeng-aff300-05-06 cluster, delete the daily-retention SnapMirror policy.
+- <span class="key">Expected Response</span>: The policy is deleted, or the response identifies the SnapMirror relationships that must be reassigned or deleted first.
+
 **Create a SnapMirror relationship**
 
 - On the umeng-aff300-05-06 cluster, create a snapmirror relationship from source svm srsvm and source volume srvol to destination svm dtsvm and destination volume dtvol with policy name XDPDefault
