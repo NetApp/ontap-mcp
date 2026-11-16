@@ -468,6 +468,35 @@ type SnapMirrorRelationship struct {
 	State            string             `json:"state,omitzero"` // enum: broken_off, paused, snapmirrored, uninitialized, in_sync, out_of_sync, synchronizing, expanding
 }
 
+type SnapMirrorPolicyConfig struct {
+	UUID                     string                      `json:"uuid,omitzero"`
+	Name                     string                      `json:"name,omitzero"`
+	Type                     string                      `json:"type,omitzero"`
+	Comment                  *string                     `json:"comment,omitzero"`
+	NetworkCompression       *bool                       `json:"network_compression_enabled,omitzero"`
+	Throttle                 *int                        `json:"throttle,omitzero"`
+	CreateSnapshotOnSource   *bool                       `json:"create_snapshot_on_source,omitzero"`
+	CopyLatestSourceSnapshot *bool                       `json:"copy_latest_source_snapshot,omitzero"`
+	Retention                []SnapMirrorPolicyRetention `json:"retention,omitzero"`
+}
+
+type SnapMirrorPolicyRetention struct {
+	Label    string `json:"label"`
+	Count    int    `json:"count"`
+	Preserve *bool  `json:"preserve,omitzero"`
+	Warn     *int   `json:"warn,omitzero"`
+}
+
+type SnapMirrorPolicyCollection struct {
+	Records    []SnapMirrorPolicyConfig `json:"records"`
+	NumRecords int                      `json:"num_records"`
+}
+
+type SnapMirrorRelationshipCollection struct {
+	Records    []SnapMirrorRelationship `json:"records"`
+	NumRecords int                      `json:"num_records"`
+}
+
 type SnapMirrorTransfer struct {
 	State string `json:"state,omitzero"` // enum: aborted, failed, hard_aborted, queued, success, transferring
 }

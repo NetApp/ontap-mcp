@@ -249,6 +249,12 @@ func (a *App) createMCPServer() *mcp.Server {
 	addTool(a, server, "create_fc_interface", descriptions.CreateFCInterface, createAnnotation, a.CreateFCInterface)
 	addTool(a, server, "create_igroup", descriptions.CreateIGroup, createAnnotation, a.CreateIGroup)
 	addTool(a, server, "create_snapmirror", descriptions.CreateSnapMirror, createAnnotation, a.CreateSnapMirror)
+	addTool(a, server, "create_snapmirror_policy", descriptions.CreateSnapMirrorPolicy, createAnnotation, a.CreateSnapMirrorPolicy)
+	addTool(a, server, "update_snapmirror_policy", descriptions.UpdateSnapMirrorPolicy, updateAnnotation, a.UpdateSnapMirrorPolicy)
+	addTool(a, server, "delete_snapmirror_policy", descriptions.DeleteSnapMirrorPolicy, deleteAnnotation, a.DeleteSnapMirrorPolicy)
+	addTool(a, server, "add_rule_in_snapmirror_policy", descriptions.AddRuleInSnapMirrorPolicy, createAnnotation, a.AddRuleInSnapMirrorPolicy)
+	addTool(a, server, "update_rule_in_snapmirror_policy", descriptions.UpdateRuleInSnapMirrorPolicy, updateAnnotation, a.UpdateRuleInSnapMirrorPolicy)
+	addTool(a, server, "remove_rule_in_snapmirror_policy", descriptions.RemoveRuleInSnapMirrorPolicy, deleteAnnotation, a.RemoveRuleInSnapMirrorPolicy)
 	addTool(a, server, "create_snapshot", descriptions.CreateSnapshot, createAnnotation, a.CreateSnapshot)
 	addTool(a, server, "update_snapmirror_transfer", descriptions.UpdateSnapMirrorTransfer, createAnnotation, a.UpdateSnapMirrorTransfer)
 

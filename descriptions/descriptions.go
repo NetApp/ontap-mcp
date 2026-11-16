@@ -48,10 +48,17 @@ const DeleteSnapshotPolicy = `Delete a snapshot policy on a cluster by cluster n
 const ModifySnapshotPolicy = `Update or delete a snapshot policy on a cluster by cluster name.`
 const CreateSchedule = `Create a cron schedule on a cluster by cluster name. Ex: 5 1 * * *, this cron expression indicates schedule would be triggered at 01:05 AM for every day`
 
-const AddScheduleInSnapshotPolicy = `Add a schedule entry to an existing snapshot policy on a cluster by cluster name.`
-const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy by specifying the snapshot count or SnapMirror label on a cluster, identified by its cluster name. At least one of the following parameters—snapshot count or SnapMirror label—must be provided.`
+const AddScheduleInSnapshotPolicy = `Add a schedule entry to an existing snapshot policy on a cluster by cluster name. Set snapmirror_label to the label used by a SnapMirror policy retention rule; the destination retains snapshots only when the rule label matches a label produced by a schedule entry.`
+const UpdateScheduleInSnapshotPolicy = `Update a schedule entry within an existing snapshot policy by specifying the snapshot count or SnapMirror label on a cluster, identified by its cluster name. At least one of the following parameters—snapshot count or SnapMirror label—must be provided. Set snapmirror_label to the label used by a SnapMirror policy retention rule; unmatched labels retain no snapshots.`
 const RemoveScheduleInSnapshotPolicy = `Remove a schedule entry from an existing snapshot policy on a cluster by cluster name.`
 const ModifyScheduleInSnapshotPolicy = `Update or remove a schedule entry in an existing snapshot policy on a cluster by cluster name.`
+
+const CreateSnapMirrorPolicy = `Create a cluster-scoped SnapMirror policy with an explicit policy_type (async, async_mirror, vault, or mirror_vault), optional transfer compression/throttle settings, and initial retention_rules. async_mirror copies the latest source snapshot and cannot have custom retention_rules. Each rule has a label and keep count. That label must match snapmirror_label on a schedule entry in a snapshot policy applied to the source volume; otherwise the rule retains nothing. The result shows the current policy and warns about labels that no snapshot schedule produces.`
+const UpdateSnapMirrorPolicy = `Update the comment, network compression, or throttle of a custom cluster-scoped SnapMirror policy. Built-in policies cannot be modified. The result reports the current policy and which transfer attributes the target cluster accepts.`
+const DeleteSnapMirrorPolicy = `Delete a custom cluster-scoped SnapMirror policy. Deletion is refused when relationships use the policy, and the blocking source and destination paths are listed. Built-in policies cannot be deleted.`
+const AddRuleInSnapMirrorPolicy = `Add a retention rule to a custom SnapMirror policy. Specify rule_label and keep_count. The label must match snapmirror_label on a snapshot policy schedule entry applied to the source volume; a mismatch means the rule retains no snapshots. The result reports whether each rule label is produced by a snapshot schedule. preserve and warn require ONTAP 9.13 or later.`
+const UpdateRuleInSnapMirrorPolicy = `Update the keep count, preserve, or warn setting of a custom SnapMirror policy retention rule by rule_label. That label must match snapmirror_label on a snapshot policy schedule entry applied to the source volume; otherwise the rule retains no snapshots. preserve and warn require ONTAP 9.13 or later.`
+const RemoveRuleInSnapMirrorPolicy = `Remove a retention rule from a custom SnapMirror policy by rule_label.`
 
 const ListQoSPolicies = `List QoS policies from an ONTAP cluster — includes both SVM-scoped and cluster-scoped (admin SVM) policies.
 
