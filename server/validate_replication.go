@@ -199,7 +199,7 @@ func interclusterLIFCheck(scope, cluster string, lifs []rest.InterclusterLIF, er
 			unavailable = append(unavailable, fmt.Sprintf("%s (enabled=%t, state=%s)", lif.Name, lif.Enabled, lif.State))
 		}
 	}
-	if len(unavailable) > 0 {
+	if len(lifs) == len(unavailable) {
 		check.Message = fmt.Sprintf("%s cluster %s has intercluster LIFs that are not enabled and up: %s", scope, cluster, strings.Join(unavailable, ", "))
 		return check
 	}
