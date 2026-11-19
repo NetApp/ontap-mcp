@@ -225,6 +225,7 @@ func (a *App) createMCPServer() *mcp.Server {
 
 	addTool(a, server, "list_registered_clusters", descriptions.ListClusters, readOnlyAnnotation, a.ListClusters)
 	addTool(a, server, "list_qos_policies", descriptions.ListQoSPolicies, readOnlyAnnotation, a.ListQoSPolicies)
+	addTool(a, server, "validate_replication", descriptions.ValidateReplication, readOnlyAnnotation, a.ValidateReplication)
 
 	// operation on Volume object
 	addTool(a, server, "create_volume", descriptions.CreateVolume, createAnnotation, a.CreateVolume)

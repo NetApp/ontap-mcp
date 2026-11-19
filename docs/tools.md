@@ -72,8 +72,9 @@ To respond with `application/json` instead of `text/event-stream` (e.g. behind g
 - `update_qos_policy`
 - `delete_qos_policy`
 
-## SnapMirror Management
 
+## Snapmirror Management
+- `validate_replication`
 - `create_snapmirror`
 - `update_snapmirror_transfer`
 - `abort_snapmirror_transfer` (available in `multiplex` or `both` mode)
