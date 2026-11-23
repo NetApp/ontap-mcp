@@ -640,7 +640,7 @@ func (a *App) DescribeOntapEndpoint(ctx context.Context, _ *mcp.CallToolRequest,
 			names = append(names, k)
 		}
 		sort.Strings(names)
-		sb.WriteString("Filters:\n")
+		sb.WriteString("Filters (each name is also valid in 'fields'):\n")
 		for _, name := range names {
 			f := ep.Filters[name]
 			typ := f.Type
@@ -673,10 +673,14 @@ func (a *App) DescribeOntapEndpoint(ctx context.Context, _ *mcp.CallToolRequest,
 		sb.WriteString("Fields:\n")
 		for _, name := range names {
 			f := ep.Fields[name]
+			label := name
 			if f.Since != "" {
-				fmt.Fprintf(&sb, "  %s(%s) — %s\n", name, f.Since, f.Desc)
+				label += "(" + f.Since + ")"
+			}
+			if f.Desc != "" {
+				fmt.Fprintf(&sb, "  %s — %s\n", label, f.Desc)
 			} else {
-				fmt.Fprintf(&sb, "  %s — %s\n", name, f.Desc)
+				fmt.Fprintf(&sb, "  %s\n", label)
 			}
 		}
 	}
@@ -701,6 +705,9 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	if p.Filters == nil {
 		p.Filters = make(map[string]string)
 	}
+
+	// The catalog is keyed by the template path, so look up unknown fields before resolving placeholders.
+	unknown := a.unknownFields(p.Path, p.Fields)
 
 	// Resolve any path-parameter placeholders (e.g. {volume.uuid}) before making the request.
 	resolvedPath := p.Path
@@ -741,9 +748,37 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 		return errorResult(err), nil, err
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{Text: string(stripLinks(raw))}},
-	}, nil, nil
+	content := []mcp.Content{&mcp.TextContent{Text: string(stripLinks(raw))}}
+	if len(unknown) > 0 {
+		// A separate content item keeps the JSON in the first one parseable.
+		content = append(content, &mcp.TextContent{
+			Text: "Ignored unknown fields: " + strings.Join(unknown, ", ") + ". Call describe_ontap_endpoint for valid fields.",
+		})
+	}
+	return &mcp.CallToolResult{Content: content}, nil, nil
+}
+
+// unknownFields returns requested fields whose top-level name is not in the catalog entry for path.
+func (a *App) unknownFields(path, fields string) []string {
+	if fields == "" {
+		return nil
+	}
+	ep, ok := a.catalog[path]
+	if !ok || len(ep.Fields) == 0 {
+		return nil
+	}
+	var unknown []string
+	for f := range strings.SplitSeq(fields, ",") {
+		f = strings.TrimSpace(f)
+		top, _, _ := strings.Cut(f, ".")
+		if top == "" || top == "*" || top == "**" {
+			continue
+		}
+		if _, ok := ep.Fields[top]; !ok {
+			unknown = append(unknown, f)
+		}
+	}
+	return unknown
 }
 
 func errorResult(err error) *mcp.CallToolResult {

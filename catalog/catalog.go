@@ -20,7 +20,7 @@ type FilterInfo struct {
 
 type FieldInfo struct {
 	Since string `json:"since,omitempty"`
-	Desc  string `json:"desc"`
+	Desc  string `json:"desc,omitempty"`
 }
 
 // PathParamInfo describes a path parameter (e.g. {uuid}) in an endpoint template.

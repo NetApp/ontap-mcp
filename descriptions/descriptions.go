@@ -195,23 +195,29 @@ const DeleteClusterPeer = `Delete a cluster peer relationship on source and dest
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
 
 RULES:
-1. Always specify 'fields' — omitting it returns 50+ fields per record and floods the context window.
+1. Always specify 'fields' using dot-notation for nested values. Omitting it returns only key fields (usually name and uuid) for collections.
    BAD:  {"cluster_name":"dc1","path":"/storage/volumes"}
-   GOOD: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,state,svm.name"}
-2. Always use 'filters' to narrow results — NEVER fetch all records to find one item. This is wasteful and will exceed the context window.
-   WRONG: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,uuid"}  ← fetches everything
+   GOOD: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,state,svm.name,space.size"}
+2. Looking for specific items? Use 'filters' instead of fetching everything and searching the result.
+   WRONG: {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,uuid"}  ← fetches everything to find one volume
    RIGHT: {"cluster_name":"dc1","path":"/storage/volumes","fields":"uuid","filters":{"name":"<vol>","svm.name":"<svm>"}}
+   When the user asks to list all items, omit filters and request only the fields you need.
 3. To query a sub-resource with a UUID path (e.g. /storage/volumes/{volume.uuid}/snapshots):
    a. {"cluster_name":"dc1","path":"/storage/volumes","fields":"uuid","filters":{"name":"<vol>","svm.name":"<svm>"}}
    b. {"cluster_name":"dc1","path":"/storage/volumes/{volume.uuid}/snapshots","path_params":{"volume.uuid":"<uuid-from-a>"},"fields":"name,create_time"}
 
 Parameters:
 - fields:      comma-separated fields, e.g. "name,svm.name,space.size" — use "space.*" to expand sub-objects
-- filters:     key-value object using ONTAP query syntax (see system instructions for syntax reference)
+- filters:     key-value object using ONTAP query syntax:
+               exact "svm.name":"vs1", wildcard "name":"vol*", OR "state":"online|offline",
+               NOT "state":"!offline", greater/less "space.size":">1073741824"
 - path_params: values for {param} placeholders in templated paths, e.g. {"volume.uuid":"abc-123"}
 - max_records: cap result count; omit to return all
 
-Example — collection:
+Example — list all IP interfaces:
+{"cluster_name":"dc1","path":"/network/ip/interfaces","fields":"name,ip.address,svm.name,location.node.name,state"}
+
+Example — collection with filter:
 {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,uuid,svm.name,state","filters":{"svm.name":"vs1"}}
 
 Example — snapshots for a volume (2 calls):

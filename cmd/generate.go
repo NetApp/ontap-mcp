@@ -220,11 +220,7 @@ func extractFieldDescs(op *swaggerOperation, defs map[string]swaggerDef, apiVers
 		if prop.Visibility.Type == "private" {
 			continue
 		}
-		desc := strings.TrimSpace(prop.Description)
-		if desc == "" {
-			continue
-		}
-		fi := catalog.FieldInfo{Desc: stripHTML(desc)}
+		fi := catalog.FieldInfo{Desc: stripHTML(strings.TrimSpace(prop.Description))}
 		if v := prop.Introduced; v != "" && v != "DO_NOT_DISPLAY" && v != apiVersion {
 			fi.Since = v
 		}

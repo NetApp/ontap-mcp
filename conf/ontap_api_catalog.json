@@ -1,6 +1,6 @@
 {
   "ontap_version": "9.16",
-  "generated_at": "2026-03-26T14:07:52Z",
+  "generated_at": "2026-11-23T07:49:05Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
@@ -48,21 +48,40 @@
         "generation": {
           "desc": "The generation number of the application. This indicates which features are supported on the application. For example, generation 1 applications do not support Snapshot copies. Support for Snapshot copies was added at generation 2. Any future generation numbers and their feature set will be documented."
         },
+        "mongo_db_on_san": {},
         "name": {
           "desc": "Application Name. This field is user supplied when the application is created."
         },
+        "nas": {},
+        "nvme": {},
+        "oracle_on_nfs": {},
+        "oracle_on_san": {},
+        "oracle_rac_on_nfs": {},
+        "oracle_rac_on_san": {},
         "protection_granularity": {
           "desc": "Protection granularity determines the scope of Snapshot copy operations for the application. Possible values are \"application\" and \"component\". If the value is \"application\", Snapshot copy operations are performed on the entire application. If the value is \"component\", Snapshot copy operations are performed separately on the application components."
         },
+        "rpo": {},
+        "s3_bucket": {},
+        "san": {},
         "smart_container": {
           "desc": "Identifies if this is a smart container or not."
         },
+        "sql_on_san": {},
+        "sql_on_smb": {},
         "state": {
           "desc": "The state of the application. For full functionality, applications must be in the online state. Other states indicate that the application is in a transient state and not all operations are supported."
         },
+        "statistics": {},
+        "svm": {},
+        "template": {},
         "uuid": {
           "desc": "Application UUID. This field is generated when the application is created."
-        }
+        },
+        "vdi_on_nas": {},
+        "vdi_on_san": {},
+        "vsi_on_nas": {},
+        "vsi_on_san": {}
       }
     },
     "/application/consistency-groups": {
@@ -817,12 +836,27 @@
         "missing_prerequisites": {
           "desc": "Missing prerequisites."
         },
+        "mongo_db_on_san": {},
         "name": {
           "desc": "Template name."
         },
+        "nas": {},
+        "nvme": {},
+        "oracle_on_nfs": {},
+        "oracle_on_san": {},
+        "oracle_rac_on_nfs": {},
+        "oracle_rac_on_san": {},
         "protocol": {
           "desc": "Access protocol."
-        }
+        },
+        "s3_bucket": {},
+        "san": {},
+        "sql_on_san": {},
+        "sql_on_smb": {},
+        "vdi_on_nas": {},
+        "vdi_on_san": {},
+        "vsi_on_nas": {},
+        "vsi_on_san": {}
       }
     },
     "/cloud/targets": {
@@ -909,6 +943,9 @@
         },
         "certificate_validation_enabled": {
           "desc": "Is SSL/TLS certificate validation enabled? The default value is true. This can only be modified for SGWS, IBM_COS, and ONTAP_S3 provider types."
+        },
+        "cluster": {
+          "since": "9.7"
         },
         "container": {
           "desc": "Data bucket/container name. For FabricLink, a wildcard character \"*\" can also be specified to indicate that all the buckets in an SVM can use the same target information. However, for containers other than ONTAP, an exact name should be specified."
@@ -1022,12 +1059,14 @@
         "frus": {
           "desc": "List of FRUs in the chassis."
         },
+        "id": {},
         "nodes": {
           "desc": "List of nodes in the chassis."
         },
         "shelves": {
           "desc": "List of shelves in chassis."
-        }
+        },
+        "state": {}
       }
     },
     "/cluster/counter/tables": {
@@ -1086,9 +1125,13 @@
         "fw_file_name": {
           "desc": "Name of the firmware file."
         },
+        "fw_update_state": {},
+        "job": {},
+        "node": {},
         "start_time": {
           "desc": "Start time of this update request."
-        }
+        },
+        "update_status": {}
       }
     },
     "/cluster/jobs": {
@@ -1159,7 +1202,8 @@
         "svm": {
           "since": "9.8",
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "uuid": {}
       }
     },
     "/cluster/licensing/capacity-pools": {
@@ -1345,6 +1389,7 @@
         "partner_cluster.uuid": {}
       },
       "fields": {
+        "dr_pairs": {},
         "id": {
           "desc": "DR Group ID"
         },
@@ -1402,10 +1447,14 @@
           "since": "9.9",
           "desc": "List of objects which contain interface information such as its IP address, netmask and gateway."
         },
+        "mirror": {
+          "since": "9.11"
+        },
         "multipath_policy": {
           "since": "9.11",
           "desc": "Displays the NVRAM mirror multipath policy for the nodes configured in a MetroCluster."
         },
+        "node": {},
         "partner_type": {
           "desc": "Partner type"
         },
@@ -1509,6 +1558,7 @@
           "since": "9.9",
           "desc": "Specifies if automatic unplanned switchover is enabled."
         },
+        "cluster": {},
         "configuration_state": {
           "desc": "Configuration state of the node."
         },
@@ -1557,7 +1607,8 @@
         "limit_enforcement": {
           "since": "9.12",
           "desc": "Indicates if the node object limits are enforced."
-        }
+        },
+        "node": {}
       }
     },
     "/cluster/metrocluster/operations": {
@@ -1630,12 +1681,14 @@
         "svm.uuid": {}
       },
       "fields": {
+        "cluster": {},
         "configuration_state": {
           "desc": "Configuration state."
         },
         "failed_reason": {
           "desc": "Reason for SVM object replication failure."
         },
+        "partner_svm": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         }
@@ -2038,6 +2091,7 @@
         "authentication_enabled": {
           "desc": "Set NTP symmetric authentication on (true) or off (false)."
         },
+        "key": {},
         "server": {
           "desc": "NTP server host name, IPv4, or IPv6 address."
         },
@@ -2053,6 +2107,8 @@
       ],
       "api_introduced": "9.6",
       "fields": {
+        "authentication": {},
+        "encryption": {},
         "initial_allowed_svms": {
           "desc": "The local SVMs allowed to peer with the peer cluster's SVMs. This list can be modified until the remote cluster accepts this cluster peering relationship."
         },
@@ -2073,6 +2129,8 @@
           "since": "9.7",
           "desc": "Peering applications against which allowed SVMs are configured."
         },
+        "remote": {},
+        "status": {},
         "uuid": {
           "desc": "UUID of the cluster peer relationship. For anonymous cluster peer offers, the UUID will change when the remote cluster accepts the relationship."
         },
@@ -2202,6 +2260,7 @@
         "name": {
           "desc": "Name of the sensor."
         },
+        "node": {},
         "threshold_state": {
           "desc": "Used to determine whether the sensor is in a normal state or any other failed state."
         },
@@ -2273,6 +2332,9 @@
         "from_version": {
           "since": "9.7",
           "desc": "Previous version of node"
+        },
+        "node": {
+          "since": "9.7"
         },
         "start_time": {
           "since": "9.7",
@@ -2611,6 +2673,10 @@
           "since": "9.9",
           "desc": "Number of attempts allowed when querying the DNS name servers."
         },
+        "domains": {},
+        "dynamic_dns": {
+          "since": "9.9"
+        },
         "packet_query_match": {
           "since": "9.9",
           "desc": "Indicates whether or not the query section of the reply packet is equal to that of the query packet."
@@ -2619,6 +2685,7 @@
           "since": "9.9",
           "desc": "Set to \"svm\" for DNS owned by an SVM, otherwise set to \"cluster\"."
         },
+        "servers": {},
         "service_ips": {
           "since": "9.14",
           "desc": "List of IP addresses for a DNS service. Addresses can be IPv4, IPv6 or both."
@@ -2871,6 +2938,7 @@
         "port": {
           "desc": "The port used to connect to the LDAP Servers."
         },
+        "preferred_ad_servers": {},
         "query_timeout": {
           "since": "9.9",
           "desc": "Specifies the maximum time to wait for a query response from the LDAP server, in seconds."
@@ -2886,12 +2954,16 @@
         "schema": {
           "desc": "The name of the schema template used by the SVM. * AD-IDMU - Active Directory Identity Management for UNIX * AD-SFU - Active Directory Services for UNIX * MS-AD-BIS - Active Directory Identity Management for UNIX * RFC-2307 - Schema based on RFC 2307 * Custom schema"
         },
+        "servers": {},
         "session_security": {
           "desc": "Specifies the level of security to be used for LDAP communications: * none - no signing or sealing * sign - sign LDAP traffic * seal - seal and sign LDAP traffic"
         },
         "skip_config_validation": {
           "since": "9.9",
           "desc": "Indicates whether or not the validation for the specified LDAP configuration is disabled."
+        },
+        "status": {
+          "since": "9.9"
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -2972,9 +3044,12 @@
         "name": {
           "desc": "The name of the schema being created, modified or deleted."
         },
+        "name_mapping": {},
         "owner": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
+        "rfc2307": {},
+        "rfc2307bis": {},
         "scope": {
           "desc": "Scope of the entity. Set to \"cluster\" for cluster owned objects and to \"svm\" for SVM owned objects."
         },
@@ -3090,6 +3165,7 @@
           "since": "9.11",
           "desc": "An array of objects where each object represents the NIS server and it's status for a given NIS domain. It is an advanced field."
         },
+        "bound_servers": {},
         "domain": {
           "desc": "The NIS domain to which this configuration belongs."
         },
@@ -3128,7 +3204,8 @@
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "users": {}
       }
     },
     "/name-services/unix-users": {
@@ -3312,6 +3389,7 @@
           "since": "9.12",
           "desc": "Discovered devices"
         },
+        "enabled": {},
         "flowcontrol_admin": {
           "since": "9.16",
           "desc": "Requested flow control"
@@ -3320,6 +3398,8 @@
           "since": "9.11",
           "desc": "Number of interfaces hosted. This field is only applicable for cluster administrators. No value is returned for SVM administrators. If the node hosting a port is not healthy no value will be returned."
         },
+        "lag": {},
+        "mac_address": {},
         "metric": {
           "since": "9.8",
           "desc": "The most recent sample of I/O metrics for the port."
@@ -3330,6 +3410,7 @@
         "name": {
           "desc": "Portname, such as e0a, e1b-100 (VLAN on Ethernet), a0c (LAG/ifgrp), a0d-200 (VLAN on LAG/ifgrp), e0a.pv1 (p-VLAN, in select environments only)"
         },
+        "node": {},
         "pfc_queues_admin": {
           "since": "9.16",
           "desc": "List of PFC queues"
@@ -3361,7 +3442,8 @@
         },
         "uuid": {
           "desc": "Port UUID"
-        }
+        },
+        "vlan": {}
       }
     },
     "/network/ethernet/switch/ports": {
@@ -3421,6 +3503,7 @@
         "duplex_type": {
           "desc": "Duplex Settings."
         },
+        "identity": {},
         "isl": {
           "desc": "Is configured as an ISL link."
         },
@@ -3448,6 +3531,7 @@
         "type": {
           "desc": "Interface Type."
         },
+        "vlan_id": {},
         "vpc_peer_link": {
           "since": "9.15",
           "desc": "Is configured as a Virtual Port Channel (vPC) peer-link."
@@ -3490,6 +3574,7 @@
         "model": {
           "desc": "Model Number."
         },
+        "monitoring": {},
         "name": {
           "desc": "Name."
         },
@@ -3499,6 +3584,7 @@
         "serial_number": {
           "desc": "Serial Number."
         },
+        "snmp": {},
         "version": {
           "desc": "Software Version."
         }
@@ -3777,6 +3863,7 @@
         "name": {
           "desc": "The FC port name."
         },
+        "node": {},
         "physical_protocol": {
           "desc": "The physical network protocol of the FC port."
         },
@@ -4071,6 +4158,7 @@
           "since": "9.11",
           "desc": "This command fails if the specified IP address falls within the address range of a named subnet. Set this value to false to use the specified IP address and to assign the subnet owning that address to the interface."
         },
+        "ip": {},
         "ipspace": {
           "desc": "Either the UUID or name must be supplied on POST for cluster-scoped objects."
         },
@@ -4095,6 +4183,7 @@
         "scope": {
           "desc": "Set to \"svm\" for interfaces owned by an SVM. Otherwise, set to \"cluster\"."
         },
+        "service_policy": {},
         "services": {
           "desc": "The services associated with the interface."
         },
@@ -4152,6 +4241,7 @@
         "uuid": {}
       },
       "fields": {
+        "destination": {},
         "gateway": {
           "desc": "The IP address of the gateway router leading to the destination."
         },
@@ -4166,6 +4256,7 @@
           "since": "9.11",
           "desc": "Indicates a preference order between several routes to the same destination. With typical usage, the default metrics provided are adequate, there is no need to specify a metric in the route creation."
         },
+        "scope": {},
         "svm": {
           "desc": "Applies only to SVM-scoped objects. Either the UUID or name must be supplied."
         },
@@ -4195,12 +4286,19 @@
         "uuid": {}
       },
       "fields": {
+        "ipspace": {},
+        "is_built_in": {
+          "since": "9.11"
+        },
+        "name": {},
         "scope": {
           "desc": "Set to \"svm\" for interfaces owned by an SVM. Otherwise, set to \"cluster\"."
         },
+        "services": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "uuid": {}
       }
     },
     "/network/ip/subnets": {
@@ -4237,6 +4335,8 @@
         "uuid": {}
       },
       "fields": {
+        "available_count": {},
+        "available_ip_ranges": {},
         "broadcast_domain": {
           "desc": "The broadcast domain that the subnet is associated with. Either the UUID or name must be supplied on POST."
         },
@@ -4246,12 +4346,16 @@
         "gateway": {
           "desc": "The IP address of the gateway for this subnet."
         },
+        "ip_ranges": {},
         "ipspace": {
           "desc": "The IPspace that the subnet is associated with. Either the UUID or name must be supplied on POST."
         },
         "name": {
           "desc": "Subnet name"
         },
+        "subnet": {},
+        "total_count": {},
+        "used_count": {},
         "uuid": {
           "desc": "The UUID that uniquely identifies the subnet."
         }
@@ -4411,10 +4515,12 @@
         "enabled": {
           "desc": "Specifies whether or not auditing is enabled on the SVM."
         },
+        "events": {},
         "guarantee": {
           "since": "9.10",
           "desc": "Indicates whether there is a strict Guarantee of Auditing"
         },
+        "log": {},
         "log_path": {
           "desc": "The audit log destination path where consolidated audit logs are stored."
         },
@@ -4462,9 +4568,11 @@
         "network_context_id": {
           "desc": "A unique 32-bit unsigned number used to represent each SMB session's network context ID."
         },
+        "node": {},
         "server_ip": {
           "desc": "Specifies the IP address of the SVM."
         },
+        "sessions": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         }
@@ -4618,7 +4726,8 @@
       "fields": {
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "to_be_applied": {}
       }
     },
     "/protocols/cifs/home-directory/search-paths": {
@@ -4667,6 +4776,9 @@
         "description": {
           "since": "9.10",
           "desc": "Description for the local group."
+        },
+        "members": {
+          "since": "9.10"
         },
         "name": {
           "since": "9.10",
@@ -4765,6 +4877,7 @@
         "wins_servers.state": {}
       },
       "fields": {
+        "interfaces": {},
         "mode": {
           "desc": "Specifies the mode in which the NetBIOS name service is configured. The supported values are: * p - Point to Point * h - Hybrid * m - Mixed * b - Broadcast"
         },
@@ -4774,6 +4887,7 @@
         "name_registration_type": {
           "desc": "Specifies the name registration type."
         },
+        "node": {},
         "scope": {
           "desc": "Specifies the NetBIOS name scope. Scope is used as a name for the set of NetBIOS nodes that participate in a NetBIOS over TCP (NBT) virtual LAN."
         },
@@ -5019,6 +5133,7 @@
         }
       },
       "fields": {
+        "ad_domain": {},
         "auth-style": {
           "since": "9.15",
           "desc": "Authentication type."
@@ -5067,9 +5182,13 @@
         "name": {
           "desc": "The name of the CIFS server."
         },
+        "netbios": {},
         "oauth_host": {
           "since": "9.15",
           "desc": "Open authorization server host name."
+        },
+        "options": {
+          "since": "9.10"
         },
         "proxy_host": {
           "since": "9.15",
@@ -5091,6 +5210,7 @@
           "since": "9.15",
           "desc": "Proxy username."
         },
+        "security": {},
         "statistics": {
           "since": "9.7",
           "desc": "These are raw performance numbers, such as IOPS latency and throughput for SVM protocols. These numbers are aggregated across all nodes in the cluster and increase with the uptime of the cluster."
@@ -5152,12 +5272,14 @@
         "volume.uuid": {}
       },
       "fields": {
+        "connection": {},
         "continuously_available": {
           "desc": "The type of continuous availability protection provided to the file. Opened files are continuously available if there are opened through a SMB3 client through a share with \"continuously_available\" set to yes. These open files are capable of non-disruptively recovering from take over and giveback as well as general aggregate relocation. - no: the open file is not continuously available. - yes: the open file is continuously available."
         },
         "identifier": {
           "desc": "The unique identifier for the opened file."
         },
+        "node": {},
         "open_mode": {
           "desc": "Open mode corresponding to the opened file - r: Opened for read - w: Opened for write - d: Opened for Delete"
         },
@@ -5167,12 +5289,15 @@
         "range_locks_count": {
           "desc": "The number of range locks granted on the file."
         },
+        "session": {},
+        "share": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
         "type": {
           "desc": "The type of opened file. The file can be a regular file, directory, a symbolic link to an existing file/directory, or an alternate data stream."
-        }
+        },
+        "volume": {}
       }
     },
     "/protocols/cifs/sessions": {
@@ -5254,6 +5379,7 @@
         "mapped_unix_user": {
           "desc": "Indicated that a mapped UNIX user has logged in."
         },
+        "node": {},
         "open_files": {
           "desc": "Number of files the SMB session has opened."
         },
@@ -5311,6 +5437,8 @@
         "files": {
           "desc": "The list of files to shadow copy in the share. The path is in UTF8 and uses forward slash as a directory separator. The path is relative to the root of the share."
         },
+        "shadowcopy_set": {},
+        "share": {},
         "source_dir": {
           "desc": "The path of the source directory. The path is in UTF8 and uses forward slash as a directory separator. The path is relative to the root of the volume."
         },
@@ -5446,6 +5574,7 @@
         "access_based_enumeration": {
           "desc": "If enabled, all folders inside this share are visible to a user based on that individual user access right; prevents the display of folders or other shared resources that the user does not have access to."
         },
+        "acls": {},
         "allow_unencrypted_access": {
           "since": "9.11",
           "desc": "Specifies whether or not the SMB2 clients are allowed to access the encrypted share."
@@ -5525,6 +5654,7 @@
         "unix_symlink": {
           "desc": "Controls the access of UNIX symbolic links to CIFS clients. The supported values are: * local - Enables only local symbolic links which is within the same CIFS share. * widelink - Enables both local symlinks and widelinks. * disable - Disables local symlinks and widelinks."
         },
+        "volume": {},
         "vscan_profile": {
           "since": "9.10",
           "desc": "Vscan File-Operations Profile The supported values are: * no_scan - Virus scans are never triggered for accesses to this share. * standard - Virus scans can be triggered by open, close, and rename operations. * strict - Virus scans can be triggered by open, read, close, and rename operations. * writes_only - Virus scans can be triggered only when a file that has been modified is closed."
@@ -5553,6 +5683,7 @@
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
+        "target": {},
         "unix_path": {
           "desc": "Specifies the UNIX path prefix to be matched for the mapping."
         }
@@ -5828,6 +5959,12 @@
         "svm.uuid": {}
       },
       "fields": {
+        "engines": {},
+        "events": {},
+        "persistent_stores": {
+          "since": "9.14"
+        },
+        "policies": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         }
@@ -5888,6 +6025,7 @@
         "volume.uuid": {}
       },
       "fields": {
+        "byte_lock": {},
         "client_address": {
           "desc": "IP address of the client holding the lock."
         },
@@ -5900,6 +6038,7 @@
         "interface": {
           "desc": "A network interface. Either UUID or name may be supplied on input."
         },
+        "node": {},
         "oplock_level": {
           "desc": "The oplock level determines which operations the client may cache locally."
         },
@@ -5912,6 +6051,8 @@
         "protocol": {
           "desc": "Type of lock protocol."
         },
+        "share_lock": {},
+        "smb": {},
         "state": {
           "desc": "State of lock."
         },
@@ -5923,7 +6064,8 @@
         },
         "uuid": {
           "desc": "Lock UUID"
-        }
+        },
+        "volume": {}
       }
     },
     "/protocols/ndmp": {
@@ -6048,6 +6190,7 @@
         "mover": {
           "desc": "Information about the NDMP mover."
         },
+        "node": {},
         "scsi": {
           "desc": "Information about the NDMP SCSI server."
         },
@@ -6113,6 +6256,7 @@
         "client_ips": {
           "desc": "Specifies the IP address of the client."
         },
+        "node": {},
         "server_ip": {
           "desc": "Specifies the IP address of the server."
         },
@@ -6184,6 +6328,7 @@
         "local_request_count": {
           "desc": "A counter that tracks requests that are sent to the volume with fast-path to local node."
         },
+        "node": {},
         "protocol": {
           "desc": "The NFS protocol version over which client is accessing the volume. The following values are supported: * nfs - All NFS versions are considered * nfs3 - NFS version 3 protocol * nfs4 - NFS version 4 protocol * nfs4.1 - NFS version 4 minor version 1 protocol * nfs4.2 - NFS version 4 minor version 2 protocol"
         },
@@ -6199,7 +6344,8 @@
         "trunking_enabled": {
           "since": "9.12",
           "desc": "Flag that indicates the trunking status for the specified SVM connection. True indicates that the trunking feature is enabled while false indicates that the trunking feature is disabled."
-        }
+        },
+        "volume": {}
       }
     },
     "/protocols/nfs/export-policies": {
@@ -6279,6 +6425,7 @@
         "enabled": {
           "desc": "Specifies if Kerberos is enabled."
         },
+        "encryption_types": {},
         "force": {
           "since": "9.13",
           "desc": "Specifies whether the server should ignore any error encountered while deleting the corresponding machine account on the KDC and also disables Kerberos on the LIF."
@@ -6349,6 +6496,10 @@
         "svm.uuid": {}
       },
       "fields": {
+        "ad_server": {},
+        "admin_server": {
+          "since": "9.13"
+        },
         "clock_skew": {
           "since": "9.13",
           "desc": "Specifies the allowed time of clock-skew between the server and clients, in minutes."
@@ -6356,8 +6507,13 @@
         "comment": {
           "desc": "Comment"
         },
+        "encryption_types": {},
+        "kdc": {},
         "name": {
           "desc": "Kerberos realm"
+        },
+        "password_server": {
+          "since": "9.13"
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -6657,12 +6813,21 @@
         }
       },
       "fields": {
+        "access_cache_config": {
+          "since": "9.10"
+        },
         "auth_sys_extended_groups_enabled": {
           "since": "9.8",
           "desc": "Specifies whether or not extended groups support over AUTH_SYS is enabled."
         },
+        "credential_cache": {
+          "since": "9.11"
+        },
         "enabled": {
           "desc": "Specifies if the NFS service is administratively enabled."
+        },
+        "exports": {
+          "since": "9.11"
         },
         "extended_groups_limit": {
           "since": "9.8",
@@ -6680,9 +6845,22 @@
           "since": "9.7",
           "desc": "Historical performance numbers, such as IOPS latency and throughput, for SVM-NFS protocol."
         },
+        "protocol": {},
+        "protocol_access_rules": {
+          "since": "9.10"
+        },
+        "qtree": {
+          "since": "9.10"
+        },
+        "root": {
+          "since": "9.11"
+        },
         "rquota_enabled": {
           "since": "9.8",
           "desc": "Specifies whether or not the remote quota feature is enabled."
+        },
+        "security": {
+          "since": "9.11"
         },
         "showmount_enabled": {
           "since": "9.8",
@@ -6698,8 +6876,12 @@
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
+        "transport": {},
         "vstorage_enabled": {
           "desc": "Specifies whether or not the VMware vstorage feature is enabled."
+        },
+        "windows": {
+          "since": "9.11"
         }
       }
     },
@@ -6795,6 +6977,7 @@
         "name": {
           "desc": "The name of the NVMe interface."
         },
+        "node": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
@@ -6904,6 +7087,7 @@
         }
       },
       "fields": {
+        "admin_queue": {},
         "dh_hmac_chap": {
           "since": "9.12",
           "desc": "A container for properties of the NVMe in-band authentication DH-HMAC-CHAP protocol used by the the host connection to the controller."
@@ -6928,6 +7112,7 @@
           "since": "9.14",
           "desc": "The keep-alive timeout value for the controller and all of its host connections, in milliseconds. If the NVMe controller does not receive a keep-alive request or an I/O request within the timeout window, the NVMe controller terminates its admin queue and I/O queue connections leading to NVMe controller teardown. If the NVMe host does not receive a response to a keep-alive request or an I/O request within the timeout window, the NVMe host initiates a connection disconnect."
         },
+        "node": {},
         "subsystem": {
           "desc": "An NVMe subsystem maintains configuration state and NVMe namespace access control for a set of NVMe-connected hosts."
         },
@@ -7297,6 +7482,7 @@
           "since": "9.16",
           "desc": "Cross-origin resource sharing (CORS) specifies an object associated with a bucket. The CORS configuration enables the bucket to service the cross-origin requests. A request might typically come from an origin with a domain that is different to that of the bucket. By configuring a CORS rule, you can define a combination of allowed origins, HTTP headers and methods that a bucket can use to filter out the cross-origin requests that it can service successfully."
         },
+        "encryption": {},
         "lifecycle_management": {
           "since": "9.13",
           "desc": "Lifecycle management is implemented as an object associated with a bucket. It defines rules to be applied against objects within a bucket. These rules are applied in the background and can delete objects."
@@ -7722,7 +7908,8 @@
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "target": {}
       }
     },
     "/protocols/san/igroups": {
@@ -7928,6 +8115,7 @@
       ],
       "api_introduced": "9.9",
       "fields": {
+        "igroup": {},
         "name": {
           "desc": "The name of the initiator group."
         },
@@ -8073,7 +8261,8 @@
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "target": {}
       }
     },
     "/protocols/san/iscsi/sessions": {
@@ -8353,6 +8542,9 @@
         "enabled": {
           "desc": "Specifies whether or not Vscan is enabled on the SVM."
         },
+        "on_access_policies": {},
+        "on_demand_policies": {},
+        "scanner_pools": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         }
@@ -8397,6 +8589,7 @@
         "ip": {
           "desc": "IP address of the Vscan server."
         },
+        "node": {},
         "state": {
           "desc": "Specifies the server connection state indicating if it is in the connected or disconnected state. The following is a list of the possible states: * connected - Connected * disconnected - Disconnected enum: - connected - disconnected"
         },
@@ -8496,6 +8689,7 @@
         }
       },
       "fields": {
+        "applications": {},
         "comment": {
           "desc": "Optional comment for the user account."
         },
@@ -8515,6 +8709,7 @@
           "since": "9.11",
           "desc": "Password hash algorithm used to generate a hash of the user's password for password matching.To modify \"password_hash_algorithm\", use REST API \"/api/security/authentication/password\"."
         },
+        "role": {},
         "scope": {
           "desc": "Scope of the entity. Set to \"cluster\" for cluster owned objects and to \"svm\" for SVM owned objects."
         }
@@ -8543,6 +8738,10 @@
         "file.suspect_time": {},
         "volume.name": {},
         "volume.uuid": {}
+      },
+      "fields": {
+        "file": {},
+        "volume": {}
       }
     },
     "/security/audit": {
@@ -8594,6 +8793,9 @@
         "hostname_format_override": {
           "since": "9.13",
           "desc": "Syslog Hostname Format Override"
+        },
+        "ipspace": {
+          "since": "9.12"
         },
         "message_format": {
           "since": "9.13",
@@ -8756,9 +8958,11 @@
         "hashed_client_secret": {
           "desc": "The OAuth 2.0 client secret as a SHA256 HMAC hashed value created with the cluster UUID as its HMAC secret key."
         },
+        "introspection": {},
         "issuer": {
           "desc": "The OAuth 2.0 Issuer."
         },
+        "jwks": {},
         "name": {
           "desc": "The configuration name. Required for POST operations."
         },
@@ -8942,6 +9146,7 @@
         "sha_fingerprint": {}
       },
       "fields": {
+        "account": {},
         "certificate": {
           "since": "9.13",
           "desc": "Optional certificate for the public key."
@@ -9054,6 +9259,7 @@
         "default_domain": {
           "desc": "AWS KMS default domain."
         },
+        "ekmip_reachability": {},
         "encryption_context": {
           "desc": "Additional layer of authentication and logging."
         },
@@ -9218,6 +9424,7 @@
           "since": "9.14",
           "desc": "Security keystore object reference."
         },
+        "ekmip_reachability": {},
         "enabled": {
           "since": "9.14",
           "desc": "Indicates whether the configuration is enabled."
@@ -9336,6 +9543,9 @@
           "since": "9.8",
           "desc": "Provides the key identifier of the issuing CA certificate that signed the SSL certificate."
         },
+        "azure": {
+          "since": "9.14"
+        },
         "ca": {
           "desc": "Certificate authority"
         },
@@ -9364,8 +9574,12 @@
         "public_certificate": {
           "desc": "Public key Certificate in PEM format. If this is not provided in POST, a self-signed certificate is created."
         },
+        "scope": {},
         "serial_number": {
           "desc": "Serial number of certificate."
+        },
+        "subject_alternatives": {
+          "since": "9.15"
         },
         "subject_key_identifier": {
           "since": "9.8",
@@ -9491,6 +9705,7 @@
           "since": "9.14",
           "desc": "Google Cloud KMS host subdomain."
         },
+        "ekmip_reachability": {},
         "google_reachability": {
           "desc": "Indicates whether or not the Google Cloud KMS is reachable from all nodes in the cluster. This is an advanced property; there is an added computational cost to retrieving its value. The property is not populated for either a collection GET or an instance GET unless it is explicitly requested using the `fields` query parameter or GET for all advanced properties is enabled."
         },
@@ -9657,6 +9872,7 @@
         "certificate": {
           "desc": "IPsec CA certificate UUID"
         },
+        "scope": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         }
@@ -9881,6 +10097,7 @@
           "since": "9.9",
           "desc": "Security policy associated with the key manager. This value is currently ignored if specified for the onboard key manager."
         },
+        "scope": {},
         "status": {
           "since": "9.7",
           "desc": "Optional status information on the current state of the key manager indicating if it is fully setup or requires more action."
@@ -9888,6 +10105,7 @@
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
+        "uuid": {},
         "volume_encryption": {
           "since": "9.7",
           "desc": "Indicates whether volume encryption is supported in the cluster."
@@ -9935,6 +10153,9 @@
         "location": {
           "desc": "Indicates whether the keystore is onboard or external. * 'onboard' - Onboard Key Database * 'external' - External Key Database, including KMIP and Cloud Key Management Systems"
         },
+        "scope": {
+          "since": "9.14"
+        },
         "state": {
           "since": "9.16",
           "desc": "State of the keystore: * 'active' - The key manager is active and serving new and existing keys. * 'mixed' - The key manager has a mixed configuration. New keys can't be created. * 'svm_kek_rekey' - An SVM key encryption key (KEK) rekey is in progress. New keys can't be created. * 'blocked' - The key manager is blocked and cannot serve new and existing keys. * 'switching' - Switching the enabled key manager keystore configuration. Some operations are blocked. * 'initializing' - The key manager is being initialized. All operations are blocked. * 'disabling' - The key manager is being disabled. All operations are blocked."
@@ -9944,7 +10165,8 @@
         },
         "type": {
           "desc": "Type of keystore that is configured: * 'okm' - Onboard Key Manager * 'kmip' - External Key Manager * 'akv' - Azure Key Vault Key Management Service * 'gcp' - Google Cloud Platform Key Management Service * 'aws' - Amazon Web Service Key Management Service * 'ikp' - IBM Key Protect Key Management Service"
-        }
+        },
+        "uuid": {}
       }
     },
     "/security/login/messages": {
@@ -10003,6 +10225,7 @@
         "sha_fingerprint": {}
       },
       "fields": {
+        "account": {},
         "comment": {
           "desc": "Optional comment for the TOTP profile."
         },
@@ -10092,16 +10315,20 @@
         "user_vetoed": {}
       },
       "fields": {
+        "approve_expiry_time": {},
+        "approve_time": {},
         "approved_users": {
           "desc": "The users that have approved the request."
         },
         "comment": {
           "desc": "Optional user-provided comment that is sent to the approval-group email indicating why the request was made."
         },
+        "create_time": {},
         "execute_on_approval": {
           "since": "9.13",
           "desc": "Specifies that the operation is executed automatically on final approval."
         },
+        "execution_expiry_time": {},
         "index": {
           "desc": "Unique index that represents a request."
         },
@@ -10172,6 +10399,7 @@
         "auto_request_create": {
           "desc": "When true, ONTAP automatically creates a request for any failed operation where there is no matching pending request."
         },
+        "create_time": {},
         "execution_expiry": {
           "desc": "Time for requests to be executed once approved, in ISO-8601 duration format. If not set, the global setting is used."
         },
@@ -10309,6 +10537,7 @@
         "creation_time": {
           "desc": "Date and time indicating when this entry was created."
         },
+        "credential": {},
         "display_name": {
           "desc": "Display name."
         },
@@ -10321,6 +10550,8 @@
         "owner": {
           "desc": "WebAuthn credential owner. Used to identify a cluster or an SVM."
         },
+        "public_key": {},
+        "relying_party": {},
         "scope": {
           "desc": "Scope of the entity. Set to \"cluster\" for cluster owned objects and to \"svm\" for SVM owned objects."
         },
@@ -10366,6 +10597,7 @@
       ],
       "api_introduced": "9.16",
       "fields": {
+        "algorithm": {},
         "owner": {
           "desc": "Used to identify a cluster or an SVM."
         },
@@ -10476,12 +10708,14 @@
         "sync_common_snapshot_schedule": {
           "desc": "Schedule used to create common snapshots for synchronous relationships."
         },
+        "sync_type": {},
         "throttle": {
           "desc": "Throttle in KB/s. Default to unlimited."
         },
         "transfer_schedule": {
           "desc": "The schedule used to update asynchronous relationships. Only cron schedules are supported for SnapMirror."
         },
+        "type": {},
         "uuid": {
           "desc": "Unique identifier of the SnapMirror policy."
         }
@@ -10642,6 +10876,12 @@
         "backoff_level": {
           "since": "9.14",
           "desc": "Specifies the SnapMirror backoff level due to Client Ops for FlexVol SnapMirror relationships."
+        },
+        "consistency_group_failover": {
+          "since": "9.8"
+        },
+        "create_destination": {
+          "since": "9.7"
         },
         "destination": {
           "desc": "This property is the destination endpoint of the relationship. The destination endpoint can be a FlexVol volume, FlexGroup volume, Consistency Group, object store, or SVM. For the POST request, the destination endpoint must be of type \"DP\" when the endpoint is a FlexVol volume or a FlexGroup volume. When specifying a Consistency Group as the destination endpoint, the \"destination.consistency_group_volumes\" or \"destination.luns\" property must be specified with the FlexVol volumes or LUNs of type \"DP\". The POST request for SVM must have a destination endpoint of type \"dp-destination\". The destination endpoint path name must be specified in the \"destination.path\" property. For relationships of type \"async\", the destination endpoint for FlexVol volume and FlexGroup volume will change to type \"RW\" when the relationship status is \"broken_off\" and will revert to type \"DP\" when the relationship status is \"snapmirrored\" or \"in_sync\" using the PATCH request. The destination endpoint for SVM will change from \"dp-destination\" to type \"default\" when the relationship status is \"broken_off\" and will revert to type \"dp-destination\" when the relationship status is \"snapmirrored\" using the PATCH request. When the destination endpoint is a Consistency Group, the Consistency Group FlexVol volumes will change to type \"RW\" when the relationship status is \"broken_off\" and will revert to type \"DP\" when the relationship status is \"in_sync\" using the PATCH request."
@@ -10841,6 +11081,7 @@
           "since": "9.14",
           "desc": "Options for snapmirror transfer."
         },
+        "relationship": {},
         "snapshot": {
           "desc": "Name of snapshot being transferred."
         },
@@ -11280,11 +11521,18 @@
         "create_time": {
           "desc": "Timestamp of aggregate creation."
         },
+        "data_encryption": {},
         "dr_home_node": {
           "desc": "Node where the aggregate resides after disaster recovery. The value for this field might differ from the 'node' field during switchover."
         },
         "home_node": {
           "desc": "Node where the aggregate resides after giveback. The value for this field might differ from the value of the 'node' field during takeover."
+        },
+        "inactive_data_reporting": {
+          "since": "9.8"
+        },
+        "inode_attributes": {
+          "since": "9.11"
         },
         "is_spare_low": {
           "since": "9.11",
@@ -11307,6 +11555,10 @@
         "snaplock_type": {
           "desc": "SnapLock type."
         },
+        "snapshot": {
+          "since": "9.10"
+        },
+        "space": {},
         "state": {
           "desc": "Operational state of the aggregate."
         },
@@ -11447,12 +11699,17 @@
         "chassis_throughput_state": {
           "desc": "Chassis throughput status"
         },
+        "dram_single_bit_error_count": {},
+        "errors": {},
+        "fc_ports": {},
         "firmware_version": {
           "desc": "Bridge firmware version"
         },
         "ip_address": {
           "desc": "IP Address"
         },
+        "last_reboot": {},
+        "managed_by": {},
         "model": {
           "desc": "Bridge model"
         },
@@ -11462,6 +11719,9 @@
         "name": {
           "desc": "Bridge name"
         },
+        "paths": {},
+        "power_supply_units": {},
+        "sas_ports": {},
         "security_enabled": {
           "desc": "Indicates whether security is enabled for the bridge."
         },
@@ -11474,6 +11734,7 @@
         "symbolic_name": {
           "desc": "Bridge symbolic name"
         },
+        "temperature_sensor": {},
         "vendor": {
           "desc": "Bridge vendor"
         },
@@ -11825,6 +12086,8 @@
           "since": "9.11",
           "desc": "Standard that the device supports for encryption control."
         },
+        "dr_node": {},
+        "drawer": {},
         "effective_type": {
           "since": "9.9",
           "desc": "Effective Disk type"
@@ -11837,6 +12100,14 @@
           "since": "9.9",
           "desc": "List of disk errors information."
         },
+        "fips_certified": {
+          "since": "9.7"
+        },
+        "firmware_version": {},
+        "home_node": {},
+        "key_id": {
+          "since": "9.7"
+        },
         "local": {
           "since": "9.9",
           "desc": "Indicates if a disk is locally attached versus being remotely attached. A locally attached disk resides in the same proximity as the host cluster versus been attached to the remote cluster."
@@ -11845,9 +12116,11 @@
           "since": "9.14",
           "desc": "Physical location of the disk"
         },
+        "model": {},
         "name": {
           "desc": "Cluster-wide disk name"
         },
+        "node": {},
         "outage": {
           "since": "9.9",
           "desc": "Indicates if a disk has an entry in the failed disk registry, along with the reason for the failure."
@@ -11889,11 +12162,18 @@
           "since": "9.9",
           "desc": "Number of sectors on the disk."
         },
+        "self_encrypting": {
+          "since": "9.7"
+        },
+        "serial_number": {},
         "shelf": {
           "desc": "Shelf"
         },
         "state": {
           "desc": "State"
+        },
+        "stats": {
+          "since": "9.9"
         },
         "storage_pool": {
           "since": "9.11",
@@ -11905,6 +12185,8 @@
         "uid": {
           "desc": "The unique identifier for a disk"
         },
+        "usable_size": {},
+        "vendor": {},
         "virtual": {
           "since": "9.11",
           "desc": "Information about backing storage for disks on cloud platforms."
@@ -11932,6 +12214,10 @@
         },
         "node.name": {},
         "node.uuid": {}
+      },
+      "fields": {
+        "load": {},
+        "node": {}
       }
     },
     "/storage/file/clone/split-status": {
@@ -11963,7 +12249,8 @@
         "unsplit_size": {
           "since": "9.15",
           "desc": "Specifies the space occupied by unsplit file clones in the volume."
-        }
+        },
+        "volume": {}
       }
     },
     "/storage/file/clone/tokens": {
@@ -11983,6 +12270,8 @@
         "uuid": {}
       },
       "fields": {
+        "expiry_time": {},
+        "node": {},
         "reserve_size": {
           "desc": "Specifies the available reserve in the file clone split load for the given token. Also note that the minimum value for reserve size is 4KB and any value specified below 4KB will be rounded off to 4KB."
         },
@@ -12097,6 +12386,7 @@
         "reference": {
           "desc": "Reference file information."
         },
+        "scanner": {},
         "source": {
           "desc": "Source file information."
         },
@@ -12188,6 +12478,7 @@
         }
       },
       "fields": {
+        "aggregates": {},
         "atime_scrub": {
           "since": "9.14",
           "desc": "FlexCache volume atime-based scrub"
@@ -12207,9 +12498,13 @@
           "since": "9.9",
           "desc": "Specifies whether or not a FlexCache volume has global file locking mode enabled. Global file locking mode is a mode where protocol read locking semantics are enforced across all FlexCaches and origins of a FlexCache volume. When global file locking mode is enabled, the \"is_disconnected_mode_off_for_locks\" flag is always set to \"true\"."
         },
+        "guarantee": {
+          "since": "9.7"
+        },
         "name": {
           "desc": "FlexCache name"
         },
+        "origins": {},
         "override_encryption": {
           "since": "9.14",
           "desc": "If set to true, a plaintext FlexCache volume for an encrypted origin volume is created."
@@ -12281,6 +12576,7 @@
           "since": "9.9",
           "desc": "Block level invalidation enables the FlexCache volume to retain blocks that are not changed at the FlexCache volume without having to evict them. This means that the FlexCache volume does not have to again incur the computational cost of fetching blocks over the WAN from the FlexCache volume origin on the next client access. Block level invalidation is a property of the origin volume. Without block level invalidation, any write at the origin volume would evict the whole file at the FlexCache volume, since by default, origin volume does a file level invalidation."
         },
+        "flexcaches": {},
         "global_file_locking_enabled": {
           "since": "9.9",
           "desc": "Specifies whether a global file locking option is enabled for an origin volume of a FlexCache volume."
@@ -12847,6 +13143,7 @@
         "uuid": {}
       },
       "fields": {
+        "capacity": {},
         "health": {
           "desc": "Properties that outline shared storage pool health."
         },
@@ -12922,20 +13219,42 @@
         }
       },
       "fields": {
+        "board_name": {},
+        "cable": {},
+        "description": {},
+        "enabled": {
+          "since": "9.9"
+        },
+        "error": {},
+        "firmware_version": {
+          "since": "9.9"
+        },
+        "force": {
+          "since": "9.11"
+        },
         "in_use": {
           "since": "9.9",
           "desc": "Specifies whether any devices are connected through this port"
         },
+        "mac_address": {},
         "mode": {
           "since": "9.8",
           "desc": "Operational mode of a non-dedicated Ethernet port"
         },
+        "name": {},
+        "node": {},
+        "part_number": {},
         "redundant": {
           "since": "9.9",
           "desc": "Specifies whether all devices connected through this port have a redundant path from another port"
         },
+        "serial_number": {},
         "speed": {
           "desc": "Operational port speed in Gbps"
+        },
+        "state": {},
+        "type": {
+          "since": "9.9"
         },
         "wwn": {
           "desc": "World Wide Name"
@@ -13019,6 +13338,9 @@
         "export_policy": {
           "desc": "Export Policy"
         },
+        "ext_performance_monitoring": {
+          "since": "9.16"
+        },
         "group": {
           "since": "9.8",
           "desc": "The user set as owner of the qtree."
@@ -13033,6 +13355,9 @@
         "name": {
           "desc": "The name of the qtree. Required in POST; optional in PATCH."
         },
+        "nas": {
+          "since": "9.9"
+        },
         "path": {
           "desc": "Client visible path to the qtree. This field is not available if the volume does not have a junction-path configured. Not valid in POST or PATCH. This field is to be deprecated and replaced with nas.path."
         },
@@ -13040,6 +13365,7 @@
           "since": "9.8",
           "desc": "When \"min_throughput_iops\", \"min_throughput_mbps\", \"max_throughput_iops\" or \"max_throughput_mbps\" attributes are specified, the storage object is assigned to an auto-generated QoS policy group. If the attributes are later modified, the auto-generated QoS policy-group attributes are modified. Attributes can be removed by specifying \"0\" and policy group by specifying \"none\". Upon deletion of the storage object or if the attributes are removed, then the QoS policy-group is also removed."
         },
+        "security_style": {},
         "statistics": {
           "since": "9.8",
           "desc": "These are raw IOPS and throughput performance numbers. These numbers are aggregated across all nodes in the cluster and increase with the uptime of the cluster."
@@ -13119,6 +13445,7 @@
         "volume.uuid": {}
       },
       "fields": {
+        "files": {},
         "group": {
           "desc": "This parameter specifies the target group associated with the given quota report record. This parameter is available for group quota records and is not available for user or tree quota records. The target group is identified by a UNIX group name and UNIX group identifier."
         },
@@ -13128,6 +13455,7 @@
         "qtree": {
           "desc": "This parameter specifies the target qtree associated with the user, group, or tree record. For a user/group quota policy rule at volume level, this parameter is not valid. For a default tree quota policy rule, this parameter is specified as \"\" or \"*\". For a tree quota policy rule at qtree level, this parameter specifies a qtree name and a qtree identifier."
         },
+        "space": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
@@ -13136,7 +13464,8 @@
         },
         "users": {
           "desc": "This parameter specifies the target user or users associated with the given quota report record. This parameter is available for user quota records and is not available for group or tree quota records. The target user or users are identified by a user name and user identifier. The user name can be a UNIX user name or a Windows user name, and the identifier can be a UNIX user identifier or a Windows security identifier."
-        }
+        },
+        "volume": {}
       }
     },
     "/storage/quota/rules": {
@@ -13177,12 +13506,14 @@
         "volume.uuid": {}
       },
       "fields": {
+        "files": {},
         "group": {
           "desc": "This parameter specifies the target group to which the group quota policy rule applies. This parameter takes a group name or identifier. This parameter is only valid for the POST operation of a group quota policy rule. The POST operation will fail with an appropriate error if this parameter is used as an input to create a user or a tree quota policy rule. This input parameter for POST takes either a group name or a group identifier, but not both. For default quota rules, the group name must be chosen and should be specified as \"\". For explicit group quota rules, this parameter can contain a UNIX group name or a UNIX group identifier."
         },
         "qtree": {
           "desc": "This parameter specifies the target qtree to which the user/group/tree quota policy rule applies. For a user/group quota policy rule at qtree level, this parameter takes a qtree name and is valid in GET or POST. For a user/group quota policy rule at volume level, this parameter is not valid in GET or POST. For a tree quota policy rule, this parameter is mandatory and is valid in both POST and GET. For a default tree quota policy rule, this parameter needs to be specified as \"\". For a tree quota policy rule at qtree level, this parameter takes a qtree name and is valid in GET or POST."
         },
+        "space": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
@@ -13197,7 +13528,8 @@
         },
         "uuid": {
           "desc": "Unique identifier for the quota policy rule. This field is generated when the quota policy rule is created."
-        }
+        },
+        "volume": {}
       }
     },
     "/storage/shelves": {
@@ -13483,6 +13815,48 @@
         "acps": {
           "since": "9.10",
           "desc": "Alternate Control Paths to ACP processors/functions in shelf modules and expanders"
+        },
+        "bays": {},
+        "connection_type": {},
+        "current_sensors": {
+          "since": "9.10"
+        },
+        "disk_count": {},
+        "drawers": {},
+        "errors": {
+          "since": "9.9"
+        },
+        "fans": {
+          "since": "9.9"
+        },
+        "frus": {},
+        "id": {},
+        "internal": {},
+        "local": {
+          "since": "9.8"
+        },
+        "location_led": {
+          "since": "9.10"
+        },
+        "manufacturer": {
+          "since": "9.10"
+        },
+        "model": {},
+        "module_type": {},
+        "name": {},
+        "paths": {},
+        "ports": {},
+        "serial_number": {},
+        "state": {},
+        "temperature_sensors": {
+          "since": "9.10"
+        },
+        "uid": {},
+        "vendor": {
+          "since": "9.8"
+        },
+        "voltage_sensors": {
+          "since": "9.10"
         }
       }
     },
@@ -13509,6 +13883,9 @@
         "svm.uuid": {}
       },
       "fields": {
+        "log_archive": {},
+        "log_files": {},
+        "log_volume": {},
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         }
@@ -13521,6 +13898,7 @@
       ],
       "api_introduced": "9.7",
       "fields": {
+        "node": {},
         "time": {
           "desc": "Compliance clock time"
         }
@@ -13556,12 +13934,14 @@
         "path": {
           "desc": "The path for the EBR operation. Specifies the path relative to the output volume root, of the form \"/path\". The path can be path to a file or a directory."
         },
+        "policy": {},
         "state": {
           "desc": "Specifies the operation status of an EBR operation."
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "volume": {}
       }
     },
     "/storage/snaplock/event-retention/policies": {
@@ -13604,6 +13984,9 @@
         "svm": {
           "since": "9.15",
           "desc": "SVM, applies only to SVM-scoped objects."
+        },
+        "volume": {
+          "since": "9.15"
         }
       }
     },
@@ -13622,9 +14005,15 @@
           "since": "9.16",
           "desc": "Specifies the legal-hold litigation name."
         },
+        "operations": {
+          "since": "9.16"
+        },
         "svm": {
           "since": "9.16",
           "desc": "SVM, applies only to SVM-scoped objects."
+        },
+        "volume": {
+          "since": "9.16"
         }
       }
     },
@@ -13661,6 +14050,7 @@
         "comment": {
           "desc": "A comment associated with the snapshot policy."
         },
+        "copies": {},
         "enabled": {
           "desc": "Is the snapshot policy enabled?"
         },
@@ -13672,7 +14062,8 @@
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        }
+        },
+        "uuid": {}
       }
     },
     "/storage/switches": {
@@ -13682,12 +14073,16 @@
       ],
       "api_introduced": "9.9",
       "fields": {
+        "connections": {},
+        "director_class": {},
         "domain_id": {
           "desc": "Domain ID"
         },
+        "errors": {},
         "fabric_name": {
           "desc": "Storage switch fabric name"
         },
+        "fans": {},
         "firmware_version": {
           "desc": "Storage switch firmware version"
         },
@@ -13709,6 +14104,9 @@
         "name": {
           "desc": "Storage switch name"
         },
+        "paths": {},
+        "ports": {},
+        "power_supply_units": {},
         "role": {
           "desc": "Storage switch role in fabric."
         },
@@ -13718,12 +14116,15 @@
         "symbolic_name": {
           "desc": "Storage switch symbolic name"
         },
+        "temperature_sensors": {},
         "vendor": {
           "desc": "Storage switch vendor"
         },
+        "vsans": {},
         "wwn": {
           "desc": "Storage switch world wide name"
-        }
+        },
+        "zones": {}
       }
     },
     "/storage/tape-devices": {
@@ -13775,6 +14176,10 @@
         "wwpn": {}
       },
       "fields": {
+        "alias": {},
+        "aliases": {
+          "since": "9.11"
+        },
         "block_number": {
           "desc": "Block number."
         },
@@ -13782,6 +14187,9 @@
           "since": "9.11",
           "desc": "Density."
         },
+        "description": {},
+        "device_id": {},
+        "device_names": {},
         "device_state": {
           "desc": "Operational state of the device."
         },
@@ -13794,9 +14202,19 @@
         "interface": {
           "desc": "Device interface type."
         },
+        "node": {},
+        "online": {
+          "since": "9.11"
+        },
+        "position": {
+          "since": "9.11"
+        },
+        "reservation_type": {},
         "residual_count": {
           "desc": "Residual count of the last I/O operation."
         },
+        "serial_number": {},
+        "storage_port": {},
         "type": {
           "desc": "Device type."
         },
@@ -13849,6 +14267,7 @@
         "qos_policy": {
           "desc": "QoS policy for the sis operation. Possible values are background and best_effort. In background, sis operation will run in background with minimal or no impact on data serving client operations. In best_effort, sis operations may have some impact on data serving client operations."
         },
+        "schedule": {},
         "start_threshold_percent": {
           "desc": "This field is used with the policy type \"threshold\" to indicate the threshold percentage for triggering the volume efficiency policy. It is mutually exclusive of the schedule."
         },
@@ -15160,6 +15579,9 @@
           "since": "9.8",
           "desc": "Indicates whether or not access time updates are enabled on the volume."
         },
+        "activity_tracking": {
+          "since": "9.10"
+        },
         "aggregates": {
           "desc": "Aggregate hosting the volume. Required on POST."
         },
@@ -15167,14 +15589,20 @@
           "since": "9.13",
           "desc": "Specifies the `aggressive_readahead_mode` enabled on the volume. When set to _file_prefetch_, on a file read, the system aggressively issues readaheads for all of the blocks in the file and retains those blocks in a cache for a finite period of time. When the option is set to _sequential_read_, the system aggressively prefetches the file completely, or to a certain length based on the file size limit, and continues as the read makes progress. If the option is set to _cross_file_sequential_read_, then the system aggressively prefetches multiple files completely, or to a certain length, and continues as the read makes progress."
         },
+        "analytics": {
+          "since": "9.8"
+        },
         "anti_ransomware": {
           "since": "9.10",
           "desc": "Anti-ransomware related information of the volume."
         },
+        "application": {},
         "asynchronous_directory_delete": {
           "since": "9.11",
           "desc": "Configuration for asynchronous directory delete from the client. This is only supported on Flexible volumes and FlexGroup volumes."
         },
+        "autosize": {},
+        "clone": {},
         "cloud_retrieval_policy": {
           "since": "9.8",
           "desc": "This parameter specifies the cloud retrieval policy for the volume. This policy determines which tiered out blocks to retrieve from the capacity tier to the performance tier. The available cloud retrieval policies are \"default\" policy retrieves tiered data based on the underlying tiering policy. If the tiering policy is 'auto', tiered data is retrieved only for random client driven data reads. If the tiering policy is 'none' or 'snapshot_only', tiered data is retrieved for random and sequential client driven data reads. If the tiering policy is 'all', tiered data is not retrieved. \"on_read\" policy retrieves tiered data for all client driven data reads. \"never\" policy never retrieves tiered data. \"promote\" policy retrieves all eligible tiered data automatically during the next scheduled scan. It is only supported when the tiering policy is 'none' or 'snapshot_only'. If the tiering policy is 'snapshot_only', the only data brought back is the data in the AFS. Data that is only in a snapshot copy stays in the cloud and if tiering policy is 'none' then all data is retrieved."
@@ -15204,8 +15632,18 @@
         "create_time": {
           "desc": "Creation time of the volume. This field is generated when the volume is created."
         },
+        "efficiency": {},
+        "encryption": {},
+        "error_state": {},
+        "files": {},
+        "flash_pool": {
+          "since": "9.10"
+        },
         "flexcache_endpoint_type": {
           "desc": "FlexCache endpoint type. none &dash; The volume is neither a FlexCache nor origin of any FlexCache. cache &dash; The volume is a FlexCache volume. origin &dash; The volume is origin of a FlexCache volume."
+        },
+        "flexgroup": {
+          "since": "9.10"
         },
         "granular_data": {
           "since": "9.12",
@@ -15215,6 +15653,7 @@
           "since": "9.16",
           "desc": "Mode of granular data on the volume. This setting defaults to `basic` when the `granular_data` parameter is set to `true`, but can be specified at the time of creation via a POST request. Earlier versions of ONTAP (pre 9.12) are not compatible with the `basic` setting. Therefore, when set to `basic`, reverting to an earlier version of ONTAP is not possible unless this volume is deleted or restored to a snapshot that was taken before the `basic` mode was enabled. Earlier versions of ONTAP (pre 9.16) are not compatible with the `advanced` setting. Therefore, when set to `advanced`, reverting to an earlier version of ONTAP is not possible unless this volume is deleted or restored to a snapshot that was taken before the `advanced` mode was enabled."
         },
+        "guarantee": {},
         "is_object_store": {
           "since": "9.8",
           "desc": "Specifies whether the volume is provisioned for an object store server."
@@ -15243,6 +15682,7 @@
         "name": {
           "desc": "Volume name. The name of volume must start with an alphabetic character (a to z or A to Z) or an underscore (_). The name must be 197 or fewer characters in length for FlexGroup volumes, and 203 or fewer characters in length for all other types of volumes. Volume names must be unique within an SVM. Required on POST."
         },
+        "nas": {},
         "optimize_aggregates": {
           "since": "9.13",
           "desc": "Specifies whether to create the constituents of the FlexGroup volume on the aggregates specified in the order they are specified, or whether the system should optimize the ordering of the aggregates. If this value is 'true', the system optimizes the ordering of the aggregates specified. If this value is false, the order of the aggregates is unchanged. The default value is 'false'."
@@ -15268,6 +15708,7 @@
         "size": {
           "desc": "Physical size of the volume, in bytes. The minimum size for a FlexVol volume is 20MB and the minimum size for a FlexGroup volume is 200MB per constituent. The recommended size for a FlexGroup volume is a minimum of 100GB per constituent. For all volumes, the default size is equal to the minimum size."
         },
+        "snaplock": {},
         "snapmirror": {
           "since": "9.7",
           "desc": "Specifies attributes for SnapMirror protection."
@@ -15287,6 +15728,7 @@
         "snapshot_policy": {
           "desc": "This is a reference to the snapshot policy."
         },
+        "space": {},
         "state": {
           "desc": "Volume state. Client access is supported only when volume is online and junctioned. Taking volume to offline or restricted state removes its junction path and blocks client access. When volume is in restricted state some operations like parity reconstruction and iron on commit are allowed. The 'mixed' state applies to FlexGroup volumes only and cannot be specified as a target state. An 'error' state implies that the volume is not in a state to serve data."
         },
@@ -15303,6 +15745,7 @@
         "svm": {
           "desc": "SVM containing the volume. Required on POST."
         },
+        "tiering": {},
         "type": {
           "desc": "Type of the volume. rw &dash; read-write volume. dp &dash; data-protection volume. ls &dash; load-sharing `dp` volume. Valid in GET."
         },
@@ -15409,6 +15852,9 @@
           "since": "9.16",
           "desc": "Savings due to dedup at the time the snapshot was taken in bytes."
         },
+        "delta": {
+          "since": "9.12"
+        },
         "expiry_time": {
           "desc": "The expiry time for the snapshot. This is an optional attribute for POST or PATCH. Snapshots with an expiry time set are not allowed to be deleted until the retention time is reached."
         },
@@ -15419,6 +15865,12 @@
         "name": {
           "desc": "Snapshot. Valid in POST or PATCH."
         },
+        "owners": {
+          "since": "9.7"
+        },
+        "provenance_volume": {
+          "since": "9.11"
+        },
         "reclaimable_space": {
           "since": "9.10",
           "desc": "Space reclaimed when the snapshot is deleted, in bytes."
@@ -15426,6 +15878,9 @@
         "size": {
           "since": "9.9",
           "desc": "Size of the active file system at the time the snapshot is captured. The actual size of the snapshot also includes those blocks trapped by other snapshots. On a snapshot deletion, the \"size\" amount of blocks is the maximum number of blocks available. On a snapshot restore, the \"afs-used size\" value will match the snapshot \"size\" value."
+        },
+        "snaplock": {
+          "since": "9.15"
         },
         "snaplock_expiry_time": {
           "desc": "SnapLock expiry time for the snapshot, if the snapshot is taken on a SnapLock volume. A snapshot is not allowed to be deleted or renamed until the SnapLock ComplianceClock time goes beyond this retention time. This option can be set during snapshot POST and snapshot PATCH on snapshot locking enabled volumes. This field will no longer be supported in a future release. Use snaplock.expiry_time instead."
@@ -15450,7 +15905,8 @@
         "version_uuid": {
           "since": "9.11",
           "desc": "The 128 bit identifier that uniquely identifies a snapshot and its logical data layout."
-        }
+        },
+        "volume": {}
       }
     },
     "/storage/volumes/{volume.uuid}/snapshots/{uuid}": {
@@ -15629,6 +16085,7 @@
         "message": {
           "desc": "Message included in the AutoSupport subject"
         },
+        "node": {},
         "state": {
           "desc": "State of AutoSupport delivery"
         },
@@ -15738,6 +16195,7 @@
         "name": {
           "desc": "Core name"
         },
+        "node": {},
         "panic_time": {
           "desc": "Time of panic that generated the core."
         },
@@ -15930,6 +16388,7 @@
         "host": {
           "desc": "Fully qualified domain name (FQDN), IPv4 address or IPv6 address of SNMP traphost."
         },
+        "ip_address": {},
         "user": {
           "desc": "Optional SNMP user parameter. For an SNMPv3 traphost, this property refers to an SNMPv3 or User-based Security Model (USM) user. For an SNMPv1 or SNMPv2c traphost, this property refers to an SNMP community."
         }
@@ -16034,6 +16493,7 @@
         "check_only": {
           "desc": "Optional property that when set to true performs only migration pre-checks not the actual migration."
         },
+        "current_operation": {},
         "destination": {
           "desc": "Destination cluster details for the SVM migration."
         },
@@ -16041,6 +16501,8 @@
           "since": "9.12",
           "desc": "Optional property used to specify the IP interface placement in the destination. It is input only and is not returned by a subsequent GET."
         },
+        "last_failed_state": {},
+        "last_operation": {},
         "messages": {
           "desc": "Errors and warnings returned/displayed during migration."
         },
@@ -16053,6 +16515,7 @@
         "source": {
           "desc": "Source cluster details for the SVM migration."
         },
+        "state": {},
         "throttle": {
           "since": "9.12",
           "desc": "Optional property to specify a throttle value in KB/s for each individual volume transfer. Defaults to 0 if not set, which is interpreted as unlimited. The minimum throttle value is 4 KB/s, so if you specify a throttle value between 1 and 4, it will be treated as if you specified 4."
@@ -16410,9 +16873,11 @@
           "since": "9.7",
           "desc": "Support for this field will be removed in a future release. Please use /svm/svms/{svm.uuid}/web for this field. Certificate for incoming TLS connection requests."
         },
+        "cifs": {},
         "comment": {
           "desc": "Comment"
         },
+        "dns": {},
         "fc_interfaces": {
           "since": "9.7",
           "desc": "FC Interface for the SVM"
@@ -16440,6 +16905,7 @@
         "language": {
           "desc": "Default volume language code. UTF-8 encoded languages are valid in POST or PATCH. Non UTF-8 language encodings are for backward compatibility and are not valid input for POST and PATCH requests."
         },
+        "ldap": {},
         "max_volumes": {
           "since": "9.9",
           "desc": "This property is used by cluster administrator to specify the limit on maximum number of volumes allowed in the SVM. The value can be either the string \"unlimited\" or a number."
@@ -16447,6 +16913,11 @@
         "name": {
           "desc": "The name of the SVM."
         },
+        "ndmp": {
+          "since": "9.10"
+        },
+        "nfs": {},
+        "nis": {},
         "nsswitch": {
           "desc": "Name service switch configuration"
         },
@@ -16472,6 +16943,9 @@
         "routes": {
           "desc": "Optional array of routes for the SVM"
         },
+        "s3": {
+          "since": "9.7"
+        },
         "snapmirror": {
           "since": "9.7",
           "desc": "Specifies attributes for SVM DR protection."
@@ -16481,6 +16955,9 @@
         },
         "state": {
           "desc": "SVM State"
+        },
+        "storage": {
+          "since": "9.13"
         },
         "subtype": {
           "desc": "SVM subtype. The SVM subtype sync_destination is created automatically when an SVM of subtype sync_source is created on the source MetroCluster cluster. A POST request with sync_destination as SVM subtype is invalid."
