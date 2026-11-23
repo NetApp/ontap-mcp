@@ -634,6 +634,8 @@ type SnapMirrorUpdate struct {
 type SnapMirrorPolicyCreate struct {
 	Cluster            string                 `json:"cluster_name" jsonschema:"cluster name"`
 	Name               string                 `json:"name" jsonschema:"SnapMirror policy name"`
+	Scope              string                 `json:"scope,omitzero" jsonschema:"policy scope: cluster (default) or svm"`
+	SVMName            string                 `json:"svm_name,omitzero" jsonschema:"required when scope is svm"`
 	Type               string                 `json:"policy_type" jsonschema:"explicit SnapMirror policy type: async, async_mirror, vault, or mirror_vault"`
 	Comment            string                 `json:"comment,omitzero" jsonschema:"comment associated with the policy"`
 	NetworkCompression *bool                  `json:"network_compression_enabled,omitzero" jsonschema:"enable network compression for transfers"`
@@ -644,6 +646,8 @@ type SnapMirrorPolicyCreate struct {
 type SnapMirrorPolicy struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	Name    string `json:"name" jsonschema:"SnapMirror policy name"`
+	Scope   string `json:"scope,omitzero" jsonschema:"policy scope: cluster (default) or svm"`
+	SVMName string `json:"svm_name,omitzero" jsonschema:"required when scope is svm"`
 }
 
 type SnapMirrorPolicyUpdate struct {
@@ -655,6 +659,8 @@ type SnapMirrorPolicyUpdate struct {
 type SnapMirrorPolicyModify struct {
 	Cluster string                 `json:"cluster_name" jsonschema:"cluster name"`
 	Name    string                 `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Scope   string                 `json:"scope,omitzero" jsonschema:"policy scope: cluster (default) or svm"`
+	SVMName string                 `json:"svm_name,omitzero" jsonschema:"required when scope is svm"`
 	Update  SnapMirrorPolicyUpdate `json:"snapmirror_policy_update,omitzero" jsonschema:"SnapMirror policy fields to update"`
 }
 
@@ -668,6 +674,8 @@ type SnapMirrorPolicyRule struct {
 type SnapMirrorPolicyRuleCreate struct {
 	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
 	Name     string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Scope    string `json:"scope,omitzero" jsonschema:"policy scope: cluster (default) or svm"`
+	SVMName  string `json:"svm_name,omitzero" jsonschema:"required when scope is svm"`
 	Label    string `json:"rule_label" jsonschema:"SnapMirror label matched by snapshot policy schedule entries"`
 	Keep     int    `json:"keep_count" jsonschema:"number of matching snapshots to retain"`
 	Preserve *bool  `json:"preserve,omitzero" jsonschema:"preserve matching snapshots"`
@@ -677,6 +685,8 @@ type SnapMirrorPolicyRuleCreate struct {
 type SnapMirrorPolicyRuleUpdate struct {
 	Cluster  string `json:"cluster_name" jsonschema:"cluster name"`
 	Name     string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Scope    string `json:"scope,omitzero" jsonschema:"policy scope: cluster (default) or svm"`
+	SVMName  string `json:"svm_name,omitzero" jsonschema:"required when scope is svm"`
 	Label    string `json:"rule_label" jsonschema:"existing rule label"`
 	Keep     *int   `json:"keep_count,omitzero" jsonschema:"number of matching snapshots to retain"`
 	Preserve *bool  `json:"preserve,omitzero" jsonschema:"preserve matching snapshots"`
@@ -686,6 +696,8 @@ type SnapMirrorPolicyRuleUpdate struct {
 type SnapMirrorPolicyRuleRemove struct {
 	Cluster string `json:"cluster_name" jsonschema:"cluster name"`
 	Name    string `json:"policy_name" jsonschema:"SnapMirror policy name"`
+	Scope   string `json:"scope,omitzero" jsonschema:"policy scope: cluster (default) or svm"`
+	SVMName string `json:"svm_name,omitzero" jsonschema:"required when scope is svm"`
 	Label   string `json:"rule_label" jsonschema:"existing rule label"`
 }
 

@@ -9,9 +9,9 @@ import (
 	"github.com/netapp/ontap-mcp/ontap"
 )
 
-const snapMirrorPolicyFields = "uuid,name,type,comment,retention,network_compression_enabled,throttle"
+const snapMirrorPolicyFields = "uuid,name,scope,svm.name,type,comment,retention,network_compression_enabled,throttle"
 
-func (c *Client) GetSnapMirrorPolicy(ctx context.Context, name string, includeAsyncFlags bool) (ontap.SnapMirrorPolicyConfig, error) {
+func (c *Client) GetSnapMirrorPolicy(ctx context.Context, name, scope, svmName string, includeAsyncFlags bool) (ontap.SnapMirrorPolicyConfig, error) {
 	var data ontap.SnapMirrorPolicyCollection
 	params := url.Values{}
 	fields := snapMirrorPolicyFields
@@ -20,7 +20,10 @@ func (c *Client) GetSnapMirrorPolicy(ctx context.Context, name string, includeAs
 	}
 	params.Set("fields", fields)
 	params.Set("name", name)
-	params.Set("scope", "cluster")
+	params.Set("scope", scope)
+	if scope == "svm" {
+		params.Set("svm.name", svmName)
+	}
 
 	builder := c.baseRequestBuilder("/api/snapmirror/policies", nil, nil).
 		Params(params).
@@ -47,8 +50,8 @@ func (c *Client) CreateSnapMirrorPolicy(ctx context.Context, policy ontap.SnapMi
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) UpdateSnapMirrorPolicy(ctx context.Context, name string, update ontap.SnapMirrorPolicyConfig, includeAsyncFlags bool) error {
-	policy, err := c.GetSnapMirrorPolicy(ctx, name, includeAsyncFlags)
+func (c *Client) UpdateSnapMirrorPolicy(ctx context.Context, name, scope, svmName string, update ontap.SnapMirrorPolicyConfig, includeAsyncFlags bool) error {
+	policy, err := c.GetSnapMirrorPolicy(ctx, name, scope, svmName, includeAsyncFlags)
 	if err != nil {
 		return err
 	}
@@ -62,8 +65,8 @@ func (c *Client) UpdateSnapMirrorPolicy(ctx context.Context, name string, update
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) DeleteSnapMirrorPolicy(ctx context.Context, name string, includeAsyncFlags bool) error {
-	policy, err := c.GetSnapMirrorPolicy(ctx, name, includeAsyncFlags)
+func (c *Client) DeleteSnapMirrorPolicy(ctx context.Context, name, scope, svmName string, includeAsyncFlags bool) error {
+	policy, err := c.GetSnapMirrorPolicy(ctx, name, scope, svmName, includeAsyncFlags)
 	if err != nil {
 		return err
 	}
@@ -72,7 +75,7 @@ func (c *Client) DeleteSnapMirrorPolicy(ctx context.Context, name string, includ
 	params := url.Values{}
 	params.Set("fields", "source.path,destination.path")
 	params.Set("max_records", "10000")
-	params.Set("policy.name", name)
+	params.Set("policy.uuid", policy.UUID)
 	builder := c.baseRequestBuilder("/api/snapmirror/relationships", nil, nil).
 		Params(params).
 		ToJSON(&relationships)
@@ -96,8 +99,8 @@ func (c *Client) DeleteSnapMirrorPolicy(ctx context.Context, name string, includ
 	return c.checkStatus(statusCode)
 }
 
-func (c *Client) AddSnapMirrorPolicyRule(ctx context.Context, name string, rule ontap.SnapMirrorPolicyRetention, includeAsyncFlags bool) error {
-	policy, err := c.GetSnapMirrorPolicy(ctx, name, includeAsyncFlags)
+func (c *Client) AddSnapMirrorPolicyRule(ctx context.Context, name, scope, svmName string, rule ontap.SnapMirrorPolicyRetention, includeAsyncFlags bool) error {
+	policy, err := c.GetSnapMirrorPolicy(ctx, name, scope, svmName, includeAsyncFlags)
 	if err != nil {
 		return err
 	}
@@ -113,8 +116,8 @@ func (c *Client) AddSnapMirrorPolicyRule(ctx context.Context, name string, rule 
 	return c.patchSnapMirrorPolicyRetention(ctx, policy)
 }
 
-func (c *Client) UpdateSnapMirrorPolicyRule(ctx context.Context, name, label string, update ontap.SnapMirrorPolicyRetention, includeAsyncFlags bool) error {
-	policy, err := c.GetSnapMirrorPolicy(ctx, name, includeAsyncFlags)
+func (c *Client) UpdateSnapMirrorPolicyRule(ctx context.Context, name, label, scope, svmName string, update ontap.SnapMirrorPolicyRetention, includeAsyncFlags bool) error {
+	policy, err := c.GetSnapMirrorPolicy(ctx, name, scope, svmName, includeAsyncFlags)
 	if err != nil {
 		return err
 	}
@@ -141,8 +144,8 @@ func (c *Client) UpdateSnapMirrorPolicyRule(ctx context.Context, name, label str
 	return c.patchSnapMirrorPolicyRetention(ctx, policy)
 }
 
-func (c *Client) RemoveSnapMirrorPolicyRule(ctx context.Context, name, label string, includeAsyncFlags bool) error {
-	policy, err := c.GetSnapMirrorPolicy(ctx, name, includeAsyncFlags)
+func (c *Client) RemoveSnapMirrorPolicyRule(ctx context.Context, name, label, scope, svmName string, includeAsyncFlags bool) error {
+	policy, err := c.GetSnapMirrorPolicy(ctx, name, scope, svmName, includeAsyncFlags)
 	if err != nil {
 		return err
 	}

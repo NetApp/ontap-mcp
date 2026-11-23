@@ -11,7 +11,7 @@ import (
 
 const (
 	snapMirrorPoliciesPath     = "/api/snapmirror/policies"
-	snapMirrorPolicyBaseFields = "uuid,name,type,comment,retention,network_compression_enabled,throttle"
+	snapMirrorPolicyBaseFields = "uuid,name,scope,svm.name,type,comment,retention,network_compression_enabled,throttle"
 	snapMirrorPolicyFields     = snapMirrorPolicyBaseFields + ",create_snapshot_on_source,copy_latest_source_snapshot"
 	snapMirrorPolicyUUID       = "policy-uuid"
 	snapMirrorPolicyName       = "daily-retention"
@@ -35,6 +35,15 @@ func snapMirrorPolicyLookupFields(resp, fields string) exchange {
 	return exchange{method: http.MethodGet,
 		path: "/api/snapmirror/policies?fields=" + fields + "&name=" + snapMirrorPolicyName + "&scope=cluster",
 		resp: resp}
+}
+
+//nolint:unparam
+func snapMirrorPolicyLookupInScope(resp, fields, scope, svmName string) exchange {
+	path := "/api/snapmirror/policies?fields=" + fields + "&name=" + snapMirrorPolicyName + "&scope=" + scope
+	if scope == "svm" {
+		path += "&svm.name=" + svmName
+	}
+	return exchange{method: http.MethodGet, path: path, resp: resp}
 }
 
 func TestSnapMirrorPolicyContract(t *testing.T) {
@@ -85,6 +94,21 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			wantText: []string{`SnapMirror policy "daily-retention" created successfully`, `Target cluster "contract-cluster" accepts transfer attributes: network_compression_enabled, throttle.`},
 		},
 		{
+			name: "create same policy name at SVM scope",
+			tool: "create_snapmirror_policy",
+			args: map[string]any{
+				"cluster_name": contractCluster, "name": snapMirrorPolicyName, "scope": "svm", "svm_name": "marketing",
+				"policy_type": "async",
+			},
+			ontap: []exchange{
+				snapMirrorPolicyVersion("9.15"),
+				{method: http.MethodPost, path: snapMirrorPoliciesPath, status: http.StatusCreated,
+					body: `{"name":"daily-retention","scope":"svm","svm":{"name":"marketing"},"type":"async"}`},
+				snapMirrorPolicyLookupInScope(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","scope":"svm","svm":{"name":"marketing"},"type":"async"}]}`, snapMirrorPolicyFields, "svm", "marketing"),
+			},
+			wantText: []string{`SnapMirror policy "daily-retention" created successfully`, `Current policy: scope=svm, svm="marketing"`},
+		},
+		{
 			name: "update policy properties",
 			tool: "update_snapmirror_policy",
 			args: map[string]any{
@@ -101,6 +125,23 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=weekly&fields=uuid&return_records=false", resp: `{"num_records":0}`},
 			},
 			wantText: []string{`SnapMirror policy "daily-retention" updated successfully`, `throttle=60000 KB/s`, `WARNING: no snapshot policy schedule entry`},
+		},
+		{
+			name: "update SVM policy when cluster policy has same name",
+			tool: "update_snapmirror_policy",
+			args: map[string]any{
+				"cluster_name": contractCluster, "policy_name": snapMirrorPolicyName, "scope": "svm", "svm_name": "marketing",
+				"snapmirror_policy_update": map[string]any{"comment": "SVM-specific"},
+			},
+			ontap: []exchange{
+				snapMirrorPolicyVersion("9.15"),
+				snapMirrorPolicyLookupInScope(snapMirrorPolicyState, snapMirrorPolicyFields, "svm", "marketing"),
+				{method: http.MethodPatch, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID, body: `{"comment":"SVM-specific"}`},
+				snapMirrorPolicyLookupInScope(strings.Replace(snapMirrorPolicyState, `"comment":"custom retention"`, `"comment":"SVM-specific"`, 1), snapMirrorPolicyFields, "svm", "marketing"),
+				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=daily&fields=uuid&return_records=false", resp: `{"num_records":1}`},
+				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=weekly&fields=uuid&return_records=false", resp: `{"num_records":0}`},
+			},
+			wantText: []string{`SnapMirror policy "daily-retention" updated successfully`, `Current policy: scope=svm, svm="marketing"`, `comment="SVM-specific"`},
 		},
 		{
 			name: "add retention rule",
@@ -164,17 +205,43 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
 				snapMirrorPolicyLookup(snapMirrorPolicyState),
-				{method: http.MethodGet, path: "/api/snapmirror/relationships?fields=source.path,destination.path&max_records=10000&policy.name=daily-retention",
+				{method: http.MethodGet, path: "/api/snapmirror/relationships?fields=source.path,destination.path&max_records=10000&policy.uuid=policy-uuid",
 					resp: `{"num_records":1,"records":[{"source":{"path":"src:vol"},"destination":{"path":"dst:vol"}}]}`},
 			},
 			wantText: []string{`cannot delete SnapMirror policy "daily-retention" because it is in use`, "src:vol -> dst:vol", "reassign or delete those relationships first"},
 			wantErr:  true,
 		},
 		{
+			name: "delete SVM policy checks relationships by policy UUID",
+			tool: "delete_snapmirror_policy",
+			args: map[string]any{"cluster_name": contractCluster, "name": snapMirrorPolicyName, "scope": "svm", "svm_name": "marketing"},
+			ontap: []exchange{
+				snapMirrorPolicyVersion("9.15"),
+				snapMirrorPolicyLookupInScope(snapMirrorPolicyState, snapMirrorPolicyFields, "svm", "marketing"),
+				{method: http.MethodGet, path: "/api/snapmirror/relationships?fields=source.path,destination.path&max_records=10000&policy.uuid=policy-uuid", resp: `{"num_records":0,"records":[]}`},
+				{method: http.MethodDelete, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID},
+			},
+			wantText: []string{`SnapMirror policy "daily-retention" in SVM "marketing" deleted successfully`},
+		},
+		{
 			name:     "built-in policy cannot be modified",
 			tool:     "update_snapmirror_policy",
 			args:     map[string]any{"cluster_name": contractCluster, "policy_name": "MirrorAndVault", "snapmirror_policy_update": map[string]any{"throttle": 100}},
 			wantText: []string{`SnapMirror policy "MirrorAndVault" is built-in and cannot be modified`, "create a custom policy instead"},
+			wantErr:  true,
+		},
+		{
+			name:     "SVM scope requires an SVM name",
+			tool:     "delete_snapmirror_policy",
+			args:     map[string]any{"cluster_name": contractCluster, "name": snapMirrorPolicyName, "scope": "svm"},
+			wantText: []string{"svm_name is required when scope is svm"},
+			wantErr:  true,
+		},
+		{
+			name:     "cluster scope rejects SVM name",
+			tool:     "delete_snapmirror_policy",
+			args:     map[string]any{"cluster_name": contractCluster, "name": snapMirrorPolicyName, "svm_name": "marketing"},
+			wantText: []string{"svm_name can only be provided when scope is svm"},
 			wantErr:  true,
 		},
 		{
@@ -269,7 +336,7 @@ func TestSnapMirrorPolicyDeleteSucceedsWhenUnused(t *testing.T) {
 	script := []exchange{
 		snapMirrorPolicyVersion("9.15"),
 		snapMirrorPolicyLookup(snapMirrorPolicyState),
-		{method: http.MethodGet, path: "/api/snapmirror/relationships?fields=source.path,destination.path&max_records=10000&policy.name=daily-retention", resp: `{"num_records":0,"records":[]}`},
+		{method: http.MethodGet, path: "/api/snapmirror/relationships?fields=source.path,destination.path&max_records=10000&policy.uuid=policy-uuid", resp: `{"num_records":0,"records":[]}`},
 		{method: http.MethodDelete, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID},
 	}
 	cs := newContractSession(t, "both", script)

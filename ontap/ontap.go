@@ -471,6 +471,8 @@ type SnapMirrorRelationship struct {
 type SnapMirrorPolicyConfig struct {
 	UUID                     string                      `json:"uuid,omitzero"`
 	Name                     string                      `json:"name,omitzero"`
+	Scope                    string                      `json:"scope,omitzero"`
+	SVM                      NameAndUUID                 `json:"svm,omitzero"`
 	Type                     string                      `json:"type,omitzero"`
 	Comment                  *string                     `json:"comment,omitzero"`
 	NetworkCompression       *bool                       `json:"network_compression_enabled,omitzero"`
