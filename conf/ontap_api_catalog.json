@@ -1,6 +1,6 @@
 {
-  "ontap_version": "9.16",
-  "generated_at": "2026-11-23T07:49:05Z",
+  "ontap_version": "9.19",
+  "generated_at": "2026-11-24T06:07:30Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
@@ -152,6 +152,13 @@
         "consistency_groups.application.type": {
           "since": "9.12"
         },
+        "consistency_groups.luns.access_mode": {
+          "since": "9.19"
+        },
+        "consistency_groups.luns.clone.created_as_clone": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "consistency_groups.luns.comment": {},
         "consistency_groups.luns.create_time": {},
         "consistency_groups.luns.enabled": {
@@ -199,6 +206,30 @@
         "consistency_groups.luns.space.size": {
           "type": "integer"
         },
+        "consistency_groups.luns.space.snapshot.autodelete.enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
+        "consistency_groups.luns.space.snapshot.reserve_available": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.luns.space.snapshot.reserve_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.luns.space.snapshot.reserve_size": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.luns.space.snapshot.space_used_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.luns.space.snapshot.used": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "consistency_groups.luns.space.used": {
           "type": "integer"
         },
@@ -239,6 +270,30 @@
         "consistency_groups.namespaces.space.size": {
           "type": "integer",
           "since": "9.12"
+        },
+        "consistency_groups.namespaces.space.snapshot.autodelete.enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
+        "consistency_groups.namespaces.space.snapshot.reserve_available": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.namespaces.space.snapshot.reserve_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.namespaces.space.snapshot.reserve_size": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.namespaces.space.snapshot.space_used_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "consistency_groups.namespaces.space.snapshot.used": {
+          "type": "integer",
+          "since": "9.18"
         },
         "consistency_groups.namespaces.space.used": {
           "type": "integer",
@@ -281,6 +336,16 @@
         },
         "consistency_groups.namespaces.subsystem_map.subsystem.hosts.priority": {
           "since": "9.14"
+        },
+        "consistency_groups.namespaces.subsystem_map.subsystem.hosts.proximity.local_svm": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "consistency_groups.namespaces.subsystem_map.subsystem.hosts.proximity.peer_svms.name": {
+          "since": "9.17"
+        },
+        "consistency_groups.namespaces.subsystem_map.subsystem.hosts.proximity.peer_svms.uuid": {
+          "since": "9.17"
         },
         "consistency_groups.namespaces.subsystem_map.subsystem.hosts.tls.key_type": {
           "since": "9.16"
@@ -404,6 +469,10 @@
           "type": "boolean",
           "since": "9.12"
         },
+        "consistency_groups.volumes.nas.export_policy.rules.allow_nfs_tls_only": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "consistency_groups.volumes.nas.export_policy.rules.allow_suid": {
           "type": "boolean",
           "since": "9.12"
@@ -475,6 +544,13 @@
         },
         "consistency_groups.volumes.tiering.policy": {},
         "consistency_groups.volumes.uuid": {},
+        "luns.access_mode": {
+          "since": "9.19"
+        },
+        "luns.clone.created_as_clone": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "luns.comment": {},
         "luns.create_time": {},
         "luns.enabled": {
@@ -522,6 +598,30 @@
         "luns.space.size": {
           "type": "integer"
         },
+        "luns.space.snapshot.autodelete.enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
+        "luns.space.snapshot.reserve_available": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "luns.space.snapshot.reserve_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "luns.space.snapshot.reserve_size": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "luns.space.snapshot.space_used_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "luns.space.snapshot.used": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "luns.space.used": {
           "type": "integer"
         },
@@ -562,6 +662,30 @@
         "namespaces.space.size": {
           "type": "integer",
           "since": "9.12"
+        },
+        "namespaces.space.snapshot.autodelete.enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
+        "namespaces.space.snapshot.reserve_available": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "namespaces.space.snapshot.reserve_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "namespaces.space.snapshot.reserve_size": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "namespaces.space.snapshot.space_used_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "namespaces.space.snapshot.used": {
+          "type": "integer",
+          "since": "9.18"
         },
         "namespaces.space.used": {
           "type": "integer",
@@ -604,6 +728,16 @@
         },
         "namespaces.subsystem_map.subsystem.hosts.priority": {
           "since": "9.14"
+        },
+        "namespaces.subsystem_map.subsystem.hosts.proximity.local_svm": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "namespaces.subsystem_map.subsystem.hosts.proximity.peer_svms.name": {
+          "since": "9.17"
+        },
+        "namespaces.subsystem_map.subsystem.hosts.proximity.peer_svms.uuid": {
+          "since": "9.17"
         },
         "namespaces.subsystem_map.subsystem.hosts.tls.key_type": {
           "since": "9.16"
@@ -656,6 +790,9 @@
         "svm.uuid": {},
         "tiering.policy": {},
         "uuid": {},
+        "vdisk_type": {
+          "since": "9.17"
+        },
         "volumes.comment": {},
         "volumes.name": {},
         "volumes.nas.cifs.shares.access_based_enumeration": {
@@ -743,6 +880,10 @@
         "volumes.nas.export_policy.rules.allow_device_creation": {
           "type": "boolean",
           "since": "9.12"
+        },
+        "volumes.nas.export_policy.rules.allow_nfs_tls_only": {
+          "type": "boolean",
+          "since": "9.19"
         },
         "volumes.nas.export_policy.rules.allow_suid": {
           "type": "boolean",
@@ -1255,8 +1396,15 @@
         "licenses.active": {
           "type": "boolean"
         },
+        "licenses.capacity.disabled_size": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "licenses.capacity.maximum_size": {
           "type": "integer"
+        },
+        "licenses.capacity.measurement_unit": {
+          "since": "9.18"
         },
         "licenses.capacity.used_size": {
           "type": "integer"
@@ -1291,7 +1439,13 @@
       ],
       "api_introduced": "9.8",
       "filters": {
+        "connection_type": {
+          "since": "9.19"
+        },
         "ip_address": {},
+        "local_mediator_connectivity": {
+          "since": "9.17"
+        },
         "peer_cluster.name": {},
         "peer_cluster.uuid": {},
         "peer_mediator_connectivity": {
@@ -1302,6 +1456,17 @@
         },
         "reachable": {
           "type": "boolean"
+        },
+        "strict_cert_validation": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "type": {
+          "since": "9.17"
+        },
+        "use_http_proxy_local": {
+          "type": "boolean",
+          "since": "9.17"
         },
         "uuid": {}
       }
@@ -1782,6 +1947,14 @@
           "type": "integer",
           "since": "9.10"
         },
+        "external_cache_bypass.enabled": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "external_cache_bypass.large_read_ops_allow_percent": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "ha.auto_giveback": {
           "type": "boolean"
         },
@@ -1845,6 +2018,9 @@
           "type": "boolean",
           "since": "9.14"
         },
+        "ha.type": {
+          "since": "9.17"
+        },
         "hw_assist.status.enabled": {
           "type": "boolean",
           "since": "9.11"
@@ -1890,6 +2066,12 @@
         },
         "model": {},
         "name": {},
+        "nvlog.backing_type": {
+          "since": "9.17"
+        },
+        "nvlog.swap_mode": {
+          "since": "9.17"
+        },
         "nvram.battery_state": {
           "since": "9.9"
         },
@@ -2106,6 +2288,80 @@
         "Cluster"
       ],
       "api_introduced": "9.6",
+      "filters": {
+        "authentication.expiry_time": {
+          "since": "9.19"
+        },
+        "authentication.in_use": {
+          "since": "9.19"
+        },
+        "authentication.passphrase": {
+          "since": "9.19"
+        },
+        "authentication.state": {
+          "since": "9.19"
+        },
+        "encryption.proposed": {
+          "since": "9.19"
+        },
+        "encryption.state": {
+          "since": "9.19"
+        },
+        "initial_allowed_svms.name": {
+          "since": "9.19"
+        },
+        "initial_allowed_svms.uuid": {
+          "since": "9.19"
+        },
+        "ip_address": {
+          "since": "9.19"
+        },
+        "ipspace.name": {
+          "since": "9.19"
+        },
+        "ipspace.uuid": {
+          "since": "9.19"
+        },
+        "name": {
+          "since": "9.19"
+        },
+        "peer_applications": {
+          "since": "9.19"
+        },
+        "remote.ip_addresses": {
+          "since": "9.19"
+        },
+        "remote.name": {
+          "since": "9.19"
+        },
+        "remote.serial_number": {
+          "since": "9.19"
+        },
+        "status.state": {
+          "since": "9.19"
+        },
+        "status.update_time": {
+          "since": "9.19"
+        },
+        "uuid": {
+          "since": "9.19"
+        },
+        "version.full": {
+          "since": "9.19"
+        },
+        "version.generation": {
+          "type": "integer",
+          "since": "9.19"
+        },
+        "version.major": {
+          "type": "integer",
+          "since": "9.19"
+        },
+        "version.minor": {
+          "type": "integer",
+          "since": "9.19"
+        }
+      },
       "fields": {
         "authentication": {},
         "encryption": {},
@@ -2289,14 +2545,14 @@
       "api_introduced": "9.6"
     },
     "/cluster/software/download": {
-      "summary": "Retrieves the software or firmware download status. ### Related ONTAP commands * `cluster image package check-download-progress` ### Learn more * [`DOC /cluster/software`](#docs-cluster-cluster_softwa",
+      "summary": "Retrieves the software or firmware download status. ### Learn more * [`DOC /cluster/software/download`](#docs-cluster-cluster_software_download)",
       "tags": [
         "Cluster"
       ],
       "api_introduced": "9.7"
     },
     "/cluster/software/history": {
-      "summary": "Retrieves the history details for software installation requests. ### Related ONTAP commands * `cluster image show-update-history` ### Learn more * [`DOC /cluster/software`](#docs-cluster-cluster_soft",
+      "summary": "Retrieves the history details for software installation requests. ### Related ONTAP commands * `cluster image show-update-history` ### Learn more * [`DOC /cluster/software/history`](#docs-cluster-clus",
       "tags": [
         "Cluster"
       ],
@@ -2351,7 +2607,7 @@
       }
     },
     "/cluster/software/packages": {
-      "summary": "Retrieves the software packages for a cluster. ### Related ONTAP commands * `cluster image package show-repository` ### Learn more * [`DOC /cluster/software`](#docs-cluster-cluster_software)",
+      "summary": "Retrieves the software packages for a cluster. ### Related ONTAP commands * `cluster image package show-repository` ### Learn more * [`DOC /cluster/software/packages`](#docs-cluster-cluster_software_p",
       "tags": [
         "Cluster"
       ],
@@ -2374,7 +2630,7 @@
       }
     },
     "/cluster/web": {
-      "summary": "Retrieves the web services configuration",
+      "summary": "Retrieves the web services configuration. ### Related ONTAP commands * `system services web show` * `security ssl show`",
       "tags": [
         "Cluster"
       ],
@@ -3455,6 +3711,13 @@
       "filters": {
         "configured": {},
         "duplex_type": {},
+        "identity.breakout.number": {
+          "type": "integer",
+          "since": "9.17"
+        },
+        "identity.breakout.physical_port": {
+          "since": "9.17"
+        },
         "identity.index": {
           "type": "integer"
         },
@@ -3462,12 +3725,19 @@
         "identity.number": {
           "type": "integer"
         },
+        "identity.slot": {
+          "type": "integer",
+          "since": "9.19"
+        },
         "isl": {
           "type": "boolean"
         },
         "mac_address": {},
         "mtu": {
           "type": "integer"
+        },
+        "remote_port.device.discovered_name": {
+          "since": "9.17"
         },
         "remote_port.device.node.name": {},
         "remote_port.device.node.uuid": {},
@@ -3478,10 +3748,23 @@
           "since": "9.12"
         },
         "remote_port.device.shelf.uid": {},
+        "remote_port.functional_roles": {
+          "since": "9.17"
+        },
         "remote_port.mtu": {
           "type": "integer"
         },
         "remote_port.name": {},
+        "roles.dr_group": {
+          "since": "9.17"
+        },
+        "roles.type": {
+          "since": "9.17"
+        },
+        "roles.zone": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "speed": {
           "type": "integer"
         },
@@ -3516,6 +3799,9 @@
         "remote_port": {
           "desc": "Remote port."
         },
+        "roles": {
+          "since": "9.17"
+        },
         "speed": {
           "desc": "Interface Speed(Mbps)."
         },
@@ -3539,7 +3825,7 @@
       }
     },
     "/network/ethernet/switches": {
-      "summary": "Retrieves the ethernet switches attached to the chassis. ### Related ONTAP commands * `system switch ethernet show` ### Learn more * [`DOC /network/ethernet/switches`](#docs-networking-network_etherne",
+      "summary": "Retrieves a collection of Ethernet switches. ### Related ONTAP commands * `system switch ethernet show` ### Learn more * [`DOC /network/ethernet/switches`](#docs-networking-network_ethernet_switches)",
       "tags": [
         "Networking"
       ],
@@ -3559,6 +3845,12 @@
         "monitoring.reason": {},
         "name": {},
         "network": {},
+        "rcf_version": {
+          "since": "9.17"
+        },
+        "role": {
+          "since": "9.17"
+        },
         "serial_number": {},
         "snmp.user": {},
         "snmp.version": {},
@@ -3580,6 +3872,14 @@
         },
         "network": {
           "desc": "Switch Network."
+        },
+        "rcf_version": {
+          "since": "9.17",
+          "desc": "The switch reference configuration file (RCF) version."
+        },
+        "role": {
+          "since": "9.17",
+          "desc": "Switch role based on the interface configurations. Using '+' to combine multiple roles. Available role types are: cluster, multicluster, storage, multistorage, metrocluster."
         },
         "serial_number": {
           "desc": "Serial Number."
@@ -3830,6 +4130,12 @@
         "speed.maximum": {},
         "state": {},
         "supported_protocols": {},
+        "topology.configured": {
+          "since": "9.19"
+        },
+        "topology.supported": {
+          "since": "9.19"
+        },
         "transceiver.capabilities": {
           "type": "integer"
         },
@@ -3879,6 +4185,10 @@
         },
         "supported_protocols": {
           "desc": "The network protocols supported by the FC port."
+        },
+        "topology": {
+          "since": "9.19",
+          "desc": "Properties of the topology of the FC port."
         },
         "transceiver": {
           "desc": "Properties of the transceiver connected to the FC port."
@@ -4100,8 +4410,12 @@
           "since": "9.16",
           "desc": "The UUID of an existing broadcast domain for which to recommend IP interfaces."
         },
+        "recommend.location.port.rdma_protocol": {
+          "since": "9.17",
+          "desc": "The RDMA protocol supported on locations for which to recommend IP interfaces."
+        },
         "recommend.service_policy.name": {
-          "since": "9.16",
+          "since": "9.17",
           "desc": "The name of an IP service policy for which to recommend IP interfaces."
         },
         "recommend.service_policy.uuid": {
@@ -4369,11 +4683,18 @@
       "api_introduced": "9.6",
       "filters": {
         "name": {},
+        "tcp_stack": {
+          "since": "9.19"
+        },
         "uuid": {}
       },
       "fields": {
         "name": {
           "desc": "IPspace name"
+        },
+        "tcp_stack": {
+          "since": "9.19",
+          "desc": "The TCP stack used by the IPspace."
         },
         "uuid": {
           "desc": "The UUID that uniquely identifies the IPspace."
@@ -4400,6 +4721,9 @@
         "organizational_unit": {},
         "preferred_dcs.fqdn": {},
         "preferred_dcs.server_ip": {},
+        "security.advertised_kdc_encryptions": {
+          "since": "9.17"
+        },
         "svm.name": {},
         "svm.uuid": {}
       },
@@ -4424,6 +4748,9 @@
         },
         "preferred_dcs": {
           "desc": "Specifies the preferred domain controller (DC) records."
+        },
+        "security": {
+          "since": "9.17"
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -4929,6 +5256,9 @@
         "authentication_method": {
           "since": "9.15"
         },
+        "azure_cloud_region": {
+          "since": "9.19"
+        },
         "client_id": {
           "since": "9.15"
         },
@@ -5146,6 +5476,10 @@
           "since": "9.15",
           "desc": "Specifies the authentication method. The available values are: * client_secret * certificate"
         },
+        "azure_cloud_region": {
+          "since": "9.19",
+          "desc": "Specifies the azure cloud location of the tenant in case of hybrid-user authentication"
+        },
         "client_certificate": {
           "since": "9.15",
           "desc": "PKCS12 certificate used by the application to prove its identity to AKV."
@@ -5281,7 +5615,7 @@
         },
         "node": {},
         "open_mode": {
-          "desc": "Open mode corresponding to the opened file - r: Opened for read - w: Opened for write - d: Opened for Delete"
+          "desc": "Open mode corresponding to the opened file - r: Opened for read - w: Opened for write - d: Opened for delete - rw: Opened for read and write"
         },
         "path": {
           "desc": "Path from CIFS share."
@@ -5519,12 +5853,14 @@
           "since": "9.10"
         },
         "dir_umask": {
+          "type": "integer",
           "since": "9.10"
         },
         "encryption": {
           "type": "boolean"
         },
         "file_umask": {
+          "type": "integer",
           "since": "9.10"
         },
         "force_group_for_create": {
@@ -5595,7 +5931,7 @@
         },
         "continuously_available": {
           "since": "9.10",
-          "desc": "Specifies whether or not the clients connecting to this share can open files in a persistent manner. Files opened in this way are protected from disruptive events, such as, failover and giveback."
+          "desc": "Specifies whether or not the clients connecting to this share can open files in a persistent manner. Files opened in this way are protected from disruptive events, such as, failover and giveback. If the Vscan ONTAP feature is used, it is not supported in continuous availability (CA) shares."
         },
         "dir_umask": {
           "since": "9.10",
@@ -5743,6 +6079,10 @@
         "engines.keep_alive_interval": {
           "since": "9.13"
         },
+        "engines.max_connection_retries": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "engines.max_server_requests": {
           "type": "integer",
           "since": "9.11"
@@ -5771,6 +6111,9 @@
         "engines.secondary_servers": {},
         "engines.server_progress_timeout": {
           "since": "9.11"
+        },
+        "engines.session_timeout": {
+          "since": "9.17"
         },
         "engines.ssl_option": {
           "since": "9.11"
@@ -6355,6 +6698,10 @@
       ],
       "api_introduced": "9.6",
       "filters": {
+        "are_rules_truncated": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "id": {
           "type": "integer"
         },
@@ -6362,6 +6709,10 @@
         "rules.allow_device_creation": {
           "type": "boolean",
           "since": "9.9"
+        },
+        "rules.allow_nfs_tls_only": {
+          "type": "boolean",
+          "since": "9.19"
         },
         "rules.allow_suid": {
           "type": "boolean",
@@ -6386,6 +6737,10 @@
         "svm.uuid": {}
       },
       "fields": {
+        "are_rules_truncated": {
+          "since": "9.18",
+          "desc": "Indicates whether or not export-policy rules are truncated."
+        },
         "id": {
           "desc": "Export Policy ID"
         },
@@ -6551,6 +6906,10 @@
           "type": "boolean",
           "since": "9.8"
         },
+        "credential_cache.harvest_timeout": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "credential_cache.negative_ttl": {
           "type": "integer",
           "since": "9.11"
@@ -6681,6 +7040,10 @@
         "protocol.v41_features.write_delegation_enabled": {
           "type": "boolean"
         },
+        "protocol.v42_enabled": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "protocol.v42_features.seclabel_enabled": {
           "type": "boolean",
           "since": "9.12"
@@ -6717,6 +7080,10 @@
         "protocol.v4_session_slots": {
           "type": "integer",
           "since": "9.13"
+        },
+        "protocol.v4_subnet_filter_enabled": {
+          "type": "boolean",
+          "since": "9.18"
         },
         "protocol_access_rules.auth_type": {
           "since": "9.10",
@@ -6897,6 +7264,10 @@
         "enabled": {
           "type": "boolean"
         },
+        "enforce_host_authentication": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "interface.ip.address": {},
         "interface.name": {},
         "interface.uuid": {},
@@ -6909,6 +7280,10 @@
         },
         "enabled": {
           "desc": "Indicates whether NFS over TLS is enabled."
+        },
+        "enforce_host_authentication": {
+          "since": "9.19",
+          "desc": "Indicates whether NFS over TLS host authentication is enforced or not."
         },
         "interface": {
           "desc": "Network interface."
@@ -7190,6 +7565,16 @@
         "hosts.priority": {
           "since": "9.14"
         },
+        "hosts.proximity.local_svm": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "hosts.proximity.peer_svms.name": {
+          "since": "9.17"
+        },
+        "hosts.proximity.peer_svms.uuid": {
+          "since": "9.17"
+        },
         "hosts.tls.key_type": {
           "since": "9.16"
         },
@@ -7201,6 +7586,40 @@
         },
         "name": {},
         "os_type": {},
+        "replication.error.subsystem.local_svm": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "replication.error.subsystem.name": {
+          "since": "9.17"
+        },
+        "replication.error.subsystem.uuid": {
+          "since": "9.17"
+        },
+        "replication.error.summary.arguments.code": {
+          "since": "9.17"
+        },
+        "replication.error.summary.arguments.message": {
+          "since": "9.17"
+        },
+        "replication.error.summary.code": {
+          "since": "9.17"
+        },
+        "replication.error.summary.message": {
+          "since": "9.17"
+        },
+        "replication.peer_subsystem.uuid": {
+          "since": "9.17"
+        },
+        "replication.peer_svm.name": {
+          "since": "9.17"
+        },
+        "replication.peer_svm.uuid": {
+          "since": "9.17"
+        },
+        "replication.state": {
+          "since": "9.17"
+        },
         "serial_number": {},
         "subsystem_maps.anagrpid": {},
         "subsystem_maps.namespace.name": {},
@@ -7233,6 +7652,10 @@
         },
         "os_type": {
           "desc": "The host operating system of the NVMe subsystem's hosts. Required in POST."
+        },
+        "replication": {
+          "since": "9.17",
+          "desc": "Properties related to subsystem replication."
         },
         "serial_number": {
           "desc": "The serial number of the NVMe subsystem."
@@ -7294,6 +7717,14 @@
         },
         "encryption.enabled": {
           "type": "boolean"
+        },
+        "is_consistent_etag": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "is_nas_path_mutable": {
+          "type": "boolean",
+          "since": "9.17"
         },
         "lifecycle_management.rules.abort_incomplete_multipart_upload.after_initiation_days": {
           "type": "integer",
@@ -7364,9 +7795,20 @@
         "policy.statements.conditions.delimiters": {
           "since": "9.8"
         },
+        "policy.statements.conditions.if_match": {
+          "since": "9.19"
+        },
+        "policy.statements.conditions.if_none_match": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "policy.statements.conditions.max_keys": {
           "type": "integer",
           "since": "9.8"
+        },
+        "policy.statements.conditions.object_creation_operation": {
+          "type": "boolean",
+          "since": "9.19"
         },
         "policy.statements.conditions.operator": {
           "since": "9.8"
@@ -7408,6 +7850,9 @@
           "type": "boolean",
           "since": "9.10"
         },
+        "qos_policy.max_throughput": {
+          "since": "9.17"
+        },
         "qos_policy.max_throughput_iops": {
           "type": "integer",
           "since": "9.8"
@@ -7415,6 +7860,9 @@
         "qos_policy.max_throughput_mbps": {
           "type": "integer",
           "since": "9.8"
+        },
+        "qos_policy.min_throughput": {
+          "since": "9.17"
         },
         "qos_policy.min_throughput_iops": {
           "type": "integer",
@@ -7447,6 +7895,20 @@
         },
         "snapshot_policy.uuid": {
           "since": "9.16"
+        },
+        "snapshot_restore.objects_remaining": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "snapshot_restore.progress": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "snapshot_restore.snapshot": {
+          "since": "9.18"
+        },
+        "snapshot_restore.state": {
+          "since": "9.18"
         },
         "svm.name": {},
         "svm.uuid": {},
@@ -7483,6 +7945,14 @@
           "desc": "Cross-origin resource sharing (CORS) specifies an object associated with a bucket. The CORS configuration enables the bucket to service the cross-origin requests. A request might typically come from an origin with a domain that is different to that of the bucket. By configuring a CORS rule, you can define a combination of allowed origins, HTTP headers and methods that a bucket can use to filter out the cross-origin requests that it can service successfully."
         },
         "encryption": {},
+        "is_consistent_etag": {
+          "since": "9.17",
+          "desc": "Specifies whether the NAS bucket returns a consistent ETag across different S3 requests."
+        },
+        "is_nas_path_mutable": {
+          "since": "9.17",
+          "desc": "Specifies whether the NAS bucket mapping or association with a NAS volume can change according to the changes in the NAS volume junction-path due to volume operations like mount and unmount and therefore the NAS bucket will have access to any path in a NAS volume that matches the specified nas-path. Or is immutable and therefore the NAS bucket will always have access to the same nas-path that was specified during bucket creation even if the volume junction-path has undergone changes after the bucket creation."
+        },
         "lifecycle_management": {
           "since": "9.13",
           "desc": "Lifecycle management is implemented as an object associated with a bucket. It defines rules to be applied against objects within a bucket. These rules are applied in the background and can delete objects."
@@ -7518,11 +7988,15 @@
           "desc": "Specifies the role of the bucket. This field cannot be specified using a POST method."
         },
         "size": {
-          "desc": "Specifies the bucket size in bytes; ranges from 190MB to 62PB."
+          "desc": "Specifies the bucket size in bytes; ranges from 100GB to 60PB."
         },
         "snapshot_policy": {
           "since": "9.16",
           "desc": "Specifies the bucket snapshot policy."
+        },
+        "snapshot_restore": {
+          "since": "9.18",
+          "desc": "Specifies information regarding a snapshot restore operation on the bucket"
         },
         "storage_service_level": {
           "since": "9.8",
@@ -7558,6 +8032,9 @@
       ],
       "api_introduced": "9.7",
       "filters": {
+        "bucket_create_retention_mode": {
+          "since": "9.19"
+        },
         "buckets.allowed": {
           "type": "boolean",
           "since": "9.12"
@@ -7590,6 +8067,14 @@
         },
         "buckets.encryption.enabled": {
           "type": "boolean"
+        },
+        "buckets.is_consistent_etag": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "buckets.is_nas_path_mutable": {
+          "type": "boolean",
+          "since": "9.17"
         },
         "buckets.lifecycle_management.rules.abort_incomplete_multipart_upload.after_initiation_days": {
           "type": "integer",
@@ -7660,9 +8145,20 @@
         "buckets.policy.statements.conditions.delimiters": {
           "since": "9.8"
         },
+        "buckets.policy.statements.conditions.if_match": {
+          "since": "9.19"
+        },
+        "buckets.policy.statements.conditions.if_none_match": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "buckets.policy.statements.conditions.max_keys": {
           "type": "integer",
           "since": "9.8"
+        },
+        "buckets.policy.statements.conditions.object_creation_operation": {
+          "type": "boolean",
+          "since": "9.19"
         },
         "buckets.policy.statements.conditions.operator": {
           "since": "9.8"
@@ -7704,6 +8200,9 @@
           "type": "boolean",
           "since": "9.10"
         },
+        "buckets.qos_policy.max_throughput": {
+          "since": "9.17"
+        },
         "buckets.qos_policy.max_throughput_iops": {
           "type": "integer",
           "since": "9.8"
@@ -7711,6 +8210,9 @@
         "buckets.qos_policy.max_throughput_mbps": {
           "type": "integer",
           "since": "9.8"
+        },
+        "buckets.qos_policy.min_throughput": {
+          "since": "9.17"
         },
         "buckets.qos_policy.min_throughput_iops": {
           "type": "integer",
@@ -7743,6 +8245,20 @@
         },
         "buckets.snapshot_policy.uuid": {
           "since": "9.16"
+        },
+        "buckets.snapshot_restore.objects_remaining": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "buckets.snapshot_restore.progress": {
+          "type": "integer",
+          "since": "9.18"
+        },
+        "buckets.snapshot_restore.snapshot": {
+          "since": "9.18"
+        },
+        "buckets.snapshot_restore.state": {
+          "since": "9.18"
         },
         "buckets.svm.name": {},
         "buckets.svm.uuid": {},
@@ -7807,11 +8323,28 @@
         "users.key_time_to_live": {
           "since": "9.14"
         },
+        "users.keys.access_key": {
+          "since": "9.19"
+        },
+        "users.keys.expiry_time": {
+          "since": "9.19"
+        },
+        "users.keys.id": {
+          "type": "integer",
+          "since": "9.19"
+        },
+        "users.keys.time_to_live": {
+          "since": "9.19"
+        },
         "users.name": {},
         "users.svm.name": {},
         "users.svm.uuid": {}
       },
       "fields": {
+        "bucket_create_retention_mode": {
+          "since": "9.19",
+          "desc": "The default lock mode that will be applied to a S3 bucket when the bucket is created using S3 API."
+        },
         "buckets": {
           "desc": "This field cannot be specified in a PATCH method."
         },
@@ -8358,6 +8891,10 @@
           "since": "9.15"
         },
         "lun.uuid": {},
+        "replicated": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "reporting_nodes.name": {
           "since": "9.10"
         },
@@ -8376,6 +8913,10 @@
         },
         "lun": {
           "desc": "The LUN to which the initiator group is mapped. Required in POST by supplying either the `lun.uuid`, `lun.name`, or both."
+        },
+        "replicated": {
+          "since": "9.19",
+          "desc": "The `replicated` property only applies when the initiator group is replicated and the mapped LUN is a member of a SnapMirror Synchronous relationship. When these conditions are met, `replicated` defaults to _true_, and maps are replicated. The `replicated` property can be PATCHed to _false_ to disable this replication for a LUN map. When set to _false_, the LUN map on the remote cluster is deleted. When set to _true_, the LUN map on the remote cluster is created. This property is closely related to the `local_delete_only` query parameter that can be used during DELETE. The properties achieve the same result, with the difference being the cluster where the map is deleted. PATCH the `replicated` property to _false_ to keep the local map and delete the remote map. DELETE with `local_delete_only` set to _true_ to delete the local map and keep the remote map."
         },
         "reporting_nodes": {
           "since": "9.10",
@@ -8497,6 +9038,9 @@
           "type": "boolean"
         },
         "on_access_policies.name": {},
+        "on_access_policies.protocol": {
+          "since": "9.18"
+        },
         "on_access_policies.scope.exclude_extensions": {},
         "on_access_policies.scope.exclude_paths": {},
         "on_access_policies.scope.include_extensions": {},
@@ -8570,6 +9114,9 @@
         "ip": {},
         "node.name": {},
         "node.uuid": {},
+        "privileged_user": {
+          "since": "9.19"
+        },
         "state": {},
         "svm.name": {},
         "svm.uuid": {},
@@ -8590,6 +9137,10 @@
           "desc": "IP address of the Vscan server."
         },
         "node": {},
+        "privileged_user": {
+          "since": "9.19",
+          "desc": "Specifies the privileged users that are used to connect to the Vscan servers."
+        },
         "state": {
           "desc": "Specifies the server connection state indicating if it is in the connected or disconnected state. The following is a list of the possible states: * connected - Connected * disconnected - Disconnected enum: - connected - disconnected"
         },
@@ -8716,11 +9267,18 @@
       }
     },
     "/security/anti-ransomware": {
-      "summary": "Retrieves the anti-ransomware version of the nodes in the cluster. ### Related ONTAP commands * `security anti-ransomware show`",
+      "summary": "Retrieves the anti-ransomware package version of the nodes in the cluster. ### Related ONTAP commands * `security anti-ransomware show`",
       "tags": [
         "Security"
       ],
       "api_introduced": "9.16"
+    },
+    "/security/anti-ransomware/auto-enable": {
+      "summary": "Retrieves the current anti-ransomware auto enablement values, including details about warm-up period and auto enablement setting for new and existing volumes",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.18"
     },
     "/security/anti-ransomware/suspects": {
       "summary": "Retrieves information on the suspects generated by the anti-ransomware analytics. ### Related ONTAP commands * `security anti-ransomware volume attack generate-report`",
@@ -8742,6 +9300,26 @@
       "fields": {
         "file": {},
         "volume": {}
+      }
+    },
+    "/security/anti-ransomware/volume/entropy-stats": {
+      "summary": "Retrieves the data-entropy statistics for the volumes",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.17",
+      "filters": {
+        "data_written_in_bytes": {
+          "type": "integer"
+        },
+        "duration": {},
+        "encryption_percentage": {
+          "type": "integer"
+        },
+        "entropy_stats_type": {},
+        "timestamp": {},
+        "volume.name": {},
+        "volume.uuid": {}
       }
     },
     "/security/audit": {
@@ -8833,6 +9411,9 @@
         "message": {},
         "node.name": {},
         "node.uuid": {},
+        "role": {
+          "since": "9.17"
+        },
         "scope": {},
         "session_id": {},
         "state": {},
@@ -8848,7 +9429,7 @@
           "desc": "This is the command ID for this request. Each command received on a CLI session is assigned a command ID. This enables you to correlate a request and response."
         },
         "index": {
-          "desc": "Internal index for accessing records with same time/node. This is a 64 bit unsigned value."
+          "desc": "Internal index for accessing records with the same time and node. This is a 64-bit unsigned value that is used to order the audit log messages before they are displayed. If multiple entries for the same node and timestamp occur simultaneously, the index assigns an order to ensure logical consistency."
         },
         "input": {
           "desc": "The request."
@@ -8861,6 +9442,10 @@
         },
         "node": {
           "desc": "Node where the audit message resides."
+        },
+        "role": {
+          "since": "9.17",
+          "desc": "Role of the remote user."
         },
         "scope": {
           "desc": "Set to \"svm\" when the request is on a data SVM; otherwise set to \"cluster\"."
@@ -8987,6 +9572,35 @@
         }
       }
     },
+    "/security/authentication/cluster/oidc": {
+      "summary": "Retrieves the OIDC configuration in the cluster. ### Related ONTAP commands * `security oidc show`",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.19",
+      "filters": {
+        "access_token_issuer": {},
+        "authorization_endpoint": {},
+        "client_id": {},
+        "client_secret": {},
+        "client_secret_hash": {},
+        "enabled": {
+          "type": "boolean"
+        },
+        "end_session_endpoint": {},
+        "issuer": {},
+        "jwks_refresh_interval": {},
+        "outgoing_proxy": {},
+        "provider": {},
+        "provider_jwks_uri": {},
+        "redirect_ipaddress": {},
+        "remote_user_claim": {},
+        "skip_uri_validation": {
+          "type": "boolean"
+        },
+        "token_endpoint": {}
+      }
+    },
     "/security/authentication/cluster/saml-sp": {
       "summary": "Retrieves a SAML service provider configuration",
       "tags": [
@@ -9013,6 +9627,20 @@
         "idp_uri": {
           "since": "9.7"
         }
+      }
+    },
+    "/security/authentication/cluster/saml-sp/default-metadata": {
+      "summary": "Retrieves the SAML default metadata configuration",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.17",
+      "filters": {
+        "certificate.ca": {},
+        "certificate.common_name": {},
+        "certificate.serial_number": {},
+        "host": {},
+        "scope": {}
       }
     },
     "/security/authentication/duo/groups": {
@@ -9491,6 +10119,111 @@
         }
       }
     },
+    "/security/barbican-kms": {
+      "summary": "Retrieves Barbican KMS configurations for all SVMs. ### Related ONTAP commands * `security key-manager external barbican show` * `security key-manager external barbican check`",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.17",
+      "filters": {
+        "application_cred_id": {},
+        "barbican_reachability.code": {},
+        "barbican_reachability.message": {},
+        "barbican_reachability.reachable": {
+          "type": "boolean"
+        },
+        "configuration.name": {},
+        "configuration.uuid": {},
+        "enabled": {
+          "type": "boolean"
+        },
+        "key_id": {},
+        "keystone_url": {},
+        "proxy_host": {},
+        "proxy_port": {
+          "type": "integer"
+        },
+        "proxy_type": {},
+        "proxy_username": {},
+        "scope": {},
+        "state.cluster_state": {
+          "type": "boolean"
+        },
+        "state.code": {},
+        "state.message": {},
+        "svm.name": {},
+        "svm.uuid": {},
+        "timeout": {
+          "type": "integer"
+        },
+        "uuid": {},
+        "verify": {
+          "type": "boolean"
+        },
+        "verify_host": {
+          "type": "boolean"
+        }
+      },
+      "fields": {
+        "application_cred_id": {
+          "desc": "Keystone application credentials ID required to access the specified Barbican KMS."
+        },
+        "application_cred_secret": {
+          "desc": "Keystone application credentials secret required to access the specified Barbican KMS. It is not audited."
+        },
+        "barbican_reachability": {
+          "desc": "Indicates whether the Barbican KMS is reachable from all nodes in the cluster. This is an advanced property; there is an added computational cost to retrieving its value. The property is not populated for either a collection GET request or an instance GET request unless it is explicitly requested using the field's query parameter or GET for all advanced properties is enabled."
+        },
+        "configuration": {
+          "desc": "Security keystore object reference."
+        },
+        "enabled": {
+          "desc": "Indicates whether the configuration is enabled."
+        },
+        "key_id": {
+          "desc": "Key Identifier URL of the Barbican KMS key encryption key. Must be an HTTPS URL."
+        },
+        "keystone_url": {
+          "desc": "Keystone URL for the access token. Must be an HTTPS URL."
+        },
+        "proxy_host": {
+          "desc": "Proxy host name."
+        },
+        "proxy_password": {
+          "desc": "Proxy password. Password is not audited."
+        },
+        "proxy_port": {
+          "desc": "Proxy port number."
+        },
+        "proxy_type": {
+          "desc": "Type of proxy."
+        },
+        "proxy_username": {
+          "desc": "Proxy username."
+        },
+        "scope": {
+          "desc": "Set to \"svm\" for interfaces owned by an SVM. Otherwise, set to \"cluster\"."
+        },
+        "state": {
+          "desc": "Indicates whether or not the SVM key encryption key (KEK) is available cluster wide. This is an advanced property; there is an added computational cost to retrieving its value. The property is not populated for either a collection GET or an instance GET unless it is explicitly requested using the `fields` query parameter or GET for all advanced properties is enabled."
+        },
+        "svm": {
+          "desc": "SVM, applies only to SVM-scoped objects."
+        },
+        "timeout": {
+          "desc": "Connection timeout in seconds."
+        },
+        "uuid": {
+          "desc": "A unique identifier of the Barbican KMS."
+        },
+        "verify": {
+          "desc": "Verify the identity of the Barbican KMS."
+        },
+        "verify_host": {
+          "desc": "Verify the identity of the Barbican KMS host name."
+        }
+      }
+    },
     "/security/certificates": {
       "summary": "Retrieves security certificates. ### Related ONTAP commands * `security certificate show`",
       "tags": [
@@ -9596,6 +10329,125 @@
         }
       }
     },
+    "/security/cluster-network": {
+      "summary": "Retrieves the cluster network security configuration. ### Related ONTAP commands * 'security cluster-network show'",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.18",
+      "filters": {
+        "enabled": {
+          "type": "boolean",
+          "since": "9.19"
+        },
+        "ipsec_status": {
+          "since": "9.19"
+        },
+        "mode": {
+          "since": "9.19"
+        },
+        "status": {
+          "since": "9.19"
+        }
+      }
+    },
+    "/security/cluster-network/certificates": {
+      "summary": "Retrieves the certificate configuration used for cluster network security. ### Related ONTAP commands * 'security cluster-network certificate show'",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.18",
+      "filters": {
+        "certificate.name": {},
+        "certificate.uuid": {},
+        "node.name": {},
+        "node.uuid": {}
+      }
+    },
+    "/security/cluster-network/ipsec/associations": {
+      "summary": "Retrieves the IPsec and IKE (Internet Key Exchange) security associations for cluster network. ### Related ONTAP commands * `security cluster-network ipsec show-ipsecsa` * `security cluster-network ip",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.19",
+      "filters": {
+        "cipher_suite": {},
+        "ike.authentication": {},
+        "ike.initiator_security_parameter_index": {},
+        "ike.is_initiator": {
+          "type": "boolean"
+        },
+        "ike.responder_security_parameter_index": {},
+        "ike.state": {},
+        "ike.version": {
+          "type": "integer"
+        },
+        "ipsec.action": {},
+        "ipsec.inbound.bytes": {
+          "type": "integer"
+        },
+        "ipsec.inbound.offload_bytes": {
+          "type": "integer"
+        },
+        "ipsec.inbound.offload_packets": {
+          "type": "integer"
+        },
+        "ipsec.inbound.packets": {
+          "type": "integer"
+        },
+        "ipsec.inbound.security_parameter_index": {},
+        "ipsec.outbound.bytes": {
+          "type": "integer"
+        },
+        "ipsec.outbound.offload_bytes": {
+          "type": "integer"
+        },
+        "ipsec.outbound.offload_packets": {
+          "type": "integer"
+        },
+        "ipsec.outbound.packets": {
+          "type": "integer"
+        },
+        "ipsec.outbound.security_parameter_index": {},
+        "ipsec.state": {},
+        "lifetime": {
+          "type": "integer"
+        },
+        "local_address": {},
+        "node.name": {},
+        "node.uuid": {},
+        "policy_name": {},
+        "remote_address": {},
+        "scope": {},
+        "type": {},
+        "uuid": {}
+      }
+    },
+    "/security/cluster-network/ipsec/policies": {
+      "summary": "Retrieves the IPsec policy configurations used for cluster network security. ### Related ONTAP commands * 'security cluster-network ipsec policy show'",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.19",
+      "filters": {
+        "action": {},
+        "authentication_method": {},
+        "certificate.name": {},
+        "certificate.uuid": {},
+        "local_ip.address": {},
+        "local_ip.netmask": {
+          "type": "integer"
+        },
+        "name": {},
+        "node.name": {},
+        "node.uuid": {},
+        "remote_ip.address": {},
+        "remote_ip.netmask": {
+          "type": "integer"
+        },
+        "uuid": {}
+      }
+    },
     "/security/external-role-mappings": {
       "summary": "Retrieves all external-role-mapping entries. ### Related ONTAP commands * `security login external-role-mapping show`",
       "tags": [
@@ -9634,6 +10486,9 @@
       ],
       "api_introduced": "9.9",
       "filters": {
+        "authentication_method": {
+          "since": "9.17"
+        },
         "caller_account": {
           "since": "9.14"
         },
@@ -9646,6 +10501,9 @@
         "ekmip_reachability.node.uuid": {},
         "ekmip_reachability.reachable": {
           "type": "boolean"
+        },
+        "gce_metadata_server": {
+          "since": "9.17"
         },
         "google_reachability.code": {},
         "google_reachability.message": {},
@@ -9695,7 +10553,11 @@
       },
       "fields": {
         "application_credentials": {
-          "desc": "Google Cloud application's service account credentials required to access the specified KMS. The client_email and private_key fields of the service account holder are required."
+          "desc": "The Google Cloud application's service account credentials required to access the specified KMS. The client_email and private_key fields of the service account holder are required. The credentials are required if the `authentication_method` is set to `application_credentials_key`."
+        },
+        "authentication_method": {
+          "since": "9.17",
+          "desc": "Google Cloud KMS authentication method."
         },
         "caller_account": {
           "since": "9.14",
@@ -9706,6 +10568,10 @@
           "desc": "Google Cloud KMS host subdomain."
         },
         "ekmip_reachability": {},
+        "gce_metadata_server": {
+          "since": "9.17",
+          "desc": "A custom metadata server URL used for retrieving short lived authentication tokens if the default service account is not used. This is only applicable when the `authentication_method` is set to `sa_credentials_attachment`."
+        },
         "google_reachability": {
           "desc": "Indicates whether or not the Google Cloud KMS is reachable from all nodes in the cluster. This is an advanced property; there is an added computational cost to retrieving its value. The property is not populated for either a collection GET or an instance GET unless it is explicitly requested using the `fields` query parameter or GET for all advanced properties is enabled."
         },
@@ -9849,6 +10715,13 @@
         }
       }
     },
+    "/security/ha-network": {
+      "summary": "Retrieves the HA network security configuration. ### Related ONTAP commands * 'security ha-network show'",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.18"
+    },
     "/security/ipsec": {
       "summary": "Retrieves IPsec configuration via REST APIs. ### Related ONTAP commands * 'security ipsec config show'",
       "tags": [
@@ -9897,6 +10770,10 @@
         "certificate.uuid": {
           "since": "9.10"
         },
+        "certificate_modify_keepsa": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -9908,6 +10785,9 @@
         "local_endpoint.port": {},
         "local_identity": {},
         "name": {},
+        "ppk.identity": {
+          "since": "9.17"
+        },
         "protocol": {},
         "remote_endpoint.address": {},
         "remote_endpoint.family": {},
@@ -9985,6 +10865,86 @@
         "uuid": {}
       }
     },
+    "/security/jit-privilege-users": {
+      "summary": "Retrieves the JIT privilege user configurations for an SVM. ### Related ONTAP commands * `security jit-privilege user show`",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.17",
+      "filters": {
+        "account.name": {},
+        "application": {},
+        "comment": {},
+        "end_time": {},
+        "jit_state": {},
+        "jit_validity": {},
+        "owner.name": {},
+        "owner.uuid": {},
+        "role.name": {},
+        "session_validity": {},
+        "start_time": {}
+      },
+      "fields": {
+        "account": {
+          "desc": "The name of the user."
+        },
+        "application": {
+          "desc": "The name of the application."
+        },
+        "comment": {
+          "desc": "The description of the elevation rule."
+        },
+        "end_time": {
+          "desc": "The end date and time of the JIT privilege session in UTC."
+        },
+        "jit_state": {
+          "desc": "The current status of the rule: preactive, idle, or active."
+        },
+        "jit_validity": {
+          "desc": "The JIT validity period on this SVM for this user."
+        },
+        "owner": {
+          "desc": "Owner name and UUID that uniquely identifies the JIT settings for a user."
+        },
+        "role": {
+          "desc": "The role the user will be elevated to."
+        },
+        "session_validity": {
+          "desc": "The session validity period on this SVM for this user."
+        },
+        "start_time": {
+          "desc": "The start date and time of the JIT privilege session in UTC."
+        }
+      }
+    },
+    "/security/jit-privileges": {
+      "summary": "Retrieves global JIT privilege configurations on an SVM. ### Related ONTAP commands * `security jit-privilege show`",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.17",
+      "filters": {
+        "application": {},
+        "default_session_validity_period": {},
+        "max_jit_validity_period": {},
+        "owner.name": {},
+        "owner.uuid": {}
+      },
+      "fields": {
+        "application": {
+          "desc": "The name of the application."
+        },
+        "default_session_validity_period": {
+          "desc": "The default session validity period on this SVM."
+        },
+        "max_jit_validity_period": {
+          "desc": "The maximum JIT validity period allowed on this SVM."
+        },
+        "owner": {
+          "desc": "Owner name and UUID that uniquely identifies the JIT privilege global settings."
+        }
+      }
+    },
     "/security/key-manager-configs": {
       "summary": "Retrieves key manager configurations. Retrieves the key manager health monitor policy (fields=health_monitor_policy). ### Related ONTAP commands * `security key-manager config show` * `security key-ma",
       "tags": [
@@ -9993,7 +10953,7 @@
       "api_introduced": "9.10"
     },
     "/security/key-managers": {
-      "summary": "Retrieves key managers. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
+      "summary": "Retrieves key managers. ### Expensive properties There is an added computational cost to retrieving these properties. They are excluded from default GET results and must be explicitly requested using ",
       "tags": [
         "Security"
       ],
@@ -10038,6 +10998,18 @@
           "type": "integer"
         },
         "external.servers.username": {},
+        "external.verify": {
+          "type": "boolean",
+          "since": "9.19"
+        },
+        "external.verify_host": {
+          "type": "boolean",
+          "since": "9.19"
+        },
+        "external.verify_ip": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "is_default_data_at_rest_encryption_disabled": {
           "type": "boolean",
           "since": "9.7"
@@ -10129,6 +11101,10 @@
           "type": "boolean",
           "since": "9.14"
         },
+        "is_svm_kek": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "location": {},
         "scope": {
           "since": "9.14"
@@ -10150,6 +11126,10 @@
           "since": "9.14",
           "desc": "Indicates whether the configuration is enabled."
         },
+        "is_svm_kek": {
+          "since": "9.19",
+          "desc": "Indicates whether the keystore is SVM-KEK based."
+        },
         "location": {
           "desc": "Indicates whether the keystore is onboard or external. * 'onboard' - Onboard Key Database * 'external' - External Key Database, including KMIP and Cloud Key Management Systems"
         },
@@ -10164,7 +11144,7 @@
           "desc": "SVM, applies only to SVM-scoped objects."
         },
         "type": {
-          "desc": "Type of keystore that is configured: * 'okm' - Onboard Key Manager * 'kmip' - External Key Manager * 'akv' - Azure Key Vault Key Management Service * 'gcp' - Google Cloud Platform Key Management Service * 'aws' - Amazon Web Service Key Management Service * 'ikp' - IBM Key Protect Key Management Service"
+          "desc": "Type of keystore that is configured: * 'okm' - Onboard Key Manager * 'kmip' - External Key Manager * 'akv' - Azure Key Vault Key Management Service * 'gcp' - Google Cloud Platform Key Management Service * 'aws' - Amazon Web Service Key Management Service * 'ikp' - IBM Key Protect Key Management Service * 'barbican' - Barbican Key Management Service"
         },
         "uuid": {}
       }
@@ -10242,6 +11222,13 @@
           "desc": "SHA fingerprint for the TOTP secret key."
         }
       }
+    },
+    "/security/login/whoami": {
+      "summary": "Retrieves the username, role, and permissions information for the logged-in user. ### Related ONTAP commands * `security login whoami`",
+      "tags": [
+        "Security"
+      ],
+      "api_introduced": "9.19"
     },
     "/security/multi-admin-verify": {
       "summary": "Retrieves the multi-admin-verify configuration",
@@ -10472,7 +11459,7 @@
       }
     },
     "/security/ssh": {
-      "summary": "Retrieves the cluster SSH server ciphers, MAC algorithms, key exchange algorithms, host key algorithms, connection limits, and _ssh-rsa_ enabled status for public key algorithms. ### Related ONTAP com",
+      "summary": "Retrieves the cluster SSH server ciphers, MAC algorithms, key exchange algorithms, host key algorithms, connection limits, login grace time, and _ssh-rsa_ enabled status for public key algorithms. ###",
       "tags": [
         "Security"
       ],
@@ -10494,6 +11481,10 @@
           "since": "9.16"
         },
         "key_exchange_algorithms": {},
+        "login_grace_time": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "mac_algorithms": {},
         "max_authentication_retry_count": {
           "type": "integer"
@@ -10507,7 +11498,7 @@
         },
         "host_key_algorithms": {
           "since": "9.16",
-          "desc": "Host key algorithms. The host key algorithm 'ssh_ed25519' can be configured only in non-FIPS mode."
+          "desc": "Host key algorithms. The host key algorithms 'ssh_ed25519' and 'ssh_rsa' can be configured only in non-FIPS mode."
         },
         "is_rsa_in_publickey_algorithms_enabled": {
           "since": "9.16",
@@ -10515,6 +11506,10 @@
         },
         "key_exchange_algorithms": {
           "desc": "Key exchange algorithms."
+        },
+        "login_grace_time": {
+          "since": "9.18",
+          "desc": "The login grace time allowed for SSH connection request timeout."
         },
         "mac_algorithms": {
           "desc": "MAC algorithms."
@@ -10579,6 +11574,10 @@
         "resident_key": {
           "desc": "Resident key."
         },
+        "rp_domains": {
+          "since": "9.19",
+          "desc": "List of relying party domains"
+        },
         "scope": {
           "desc": "Scope of the entity. Set to \"cluster\" for cluster owned objects and to \"svm\" for SVM owned objects."
         },
@@ -10631,9 +11630,7 @@
         "network_compression_enabled": {
           "type": "boolean"
         },
-        "retention.count": {
-          "type": "integer"
-        },
+        "retention.count": {},
         "retention.creation_schedule.name": {},
         "retention.creation_schedule.uuid": {},
         "retention.label": {},
@@ -10809,6 +11806,12 @@
         "restore": {
           "type": "boolean"
         },
+        "selective_volumes.mode": {
+          "since": "9.19"
+        },
+        "selective_volumes.name": {
+          "since": "9.19"
+        },
         "source.cluster.name": {
           "since": "9.7"
         },
@@ -10891,7 +11894,7 @@
         },
         "group_type": {
           "since": "9.11",
-          "desc": "Specifies the group type of the top level SnapMirror relationship. The volume relationships are shown as _none_, the SVMDR relationships are shown as _svm_dr_, the Consistency Group relationships are shown as _consistency_group_, and the FlexGroup volume relationships are shown as _flexgroup_."
+          "desc": "Specifies the group type of the top level SnapMirror relationship. The volume relationships are shown as _none_, the SVMDR relationships are shown as _svm_dr_, the Consistency Group relationships are shown as _consistency_group_, FlexGroup volume relationships are shown as _flexgroup_ and in Snapmirror Active Sync NAS relationships the group type is _coordination_group_."
         },
         "healthy": {
           "desc": "Is the relationship healthy?"
@@ -10941,11 +11944,15 @@
         "restore_to_snapshot": {
           "desc": "Specifies the snapshot to restore to on the destination during the break operation. This property is applicable only for SnapMirror relationships with FlexVol volume endpoints and when the PATCH state is being changed to \"broken_off\"."
         },
+        "selective_volumes": {
+          "since": "9.19",
+          "desc": "This field specifies the list of volumes to be protected under a vserver."
+        },
         "source": {
           "desc": "This property is the source endpoint of the relationship. The source endpoint can be a FlexVol volume, FlexGroup volume, Consistency Group, object store, or SVM. To establish a SnapMirror relationship with SVM as source endpoint, the SVM must have only FlexVol volumes. For a Consistency Group this property identifies the source Consistency Group name. When specifying a Consistency Group as the source endpoint, the \"source.consistency_group_volumes\" property must be specified with the FlexVol volumes of type \"RW\". FlexVol volumes of type \"DP\" cannot be specified in the \"source.consistency_group_volumes\" list. Optionally, \"source.luns\" property of source endpoint can be specified with source LUN names during SnapMirror Consistency Group LUN Restore Operation."
         },
         "state": {
-          "desc": "State of the relationship. To initialize the relationship, PATCH the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\". To break the relationship, PATCH the state to \"broken_off\" for relationships with a policy of type \"async\" or \"sync\". SnapMirror relationships with the policy type as \"sync\" and \"sync_type\" as \"automated_failover\" cannot be \"broken_off\". To resync the relationship, PATCH the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\". SnapMirror relationships with the policy type as \"sync\" and \"sync_type\" as \"automated_failover\" can be in \"broken_off\" state due to a failed attempt of SnapMirror failover. To pause the relationship, suspending further transfers, PATCH the state to \"paused\" for relationships with a policy of type \"async\" or \"sync\". SnapMirror relationships with the policy type as \"sync\" and \"sync_type\" as \"automated_failover\" cannot be \"paused\". To resume transfers for a paused relationship, PATCH the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\". The entries \"in_sync\", \"out_of_sync\", \"synchronizing\", and \"expanding\" are only applicable to relationships with a policy of type \"sync\". A PATCH call on the state change only triggers the transition to the specified state. You must poll on the \"state\", \"healthy\" and \"unhealthy_reason\" properties using a GET request to determine if the transition is successful. To automatically initialize the relationship when specifying \"create_destination\" property, set the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\"."
+          "desc": "State of the relationship. To initialize the relationship, PATCH the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\". To break the relationship, PATCH the state to \"broken_off\" for relationships with a policy of type \"async\" or \"sync\". SnapMirror relationships with the policy type as \"sync\" and \"sync_type\" as \"automated_failover\" cannot be \"broken_off\". To resync the relationship, PATCH the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\". SnapMirror relationships with the policy type as \"sync\" and \"sync_type\" as \"automated_failover\" can be in \"broken_off\" state due to a failed attempt of SnapMirror failover. To pause the relationship, suspending further transfers, PATCH the state to \"paused\" for relationships with a policy of type \"async\" or \"sync\". SnapMirror relationships with the policy type as \"sync\" and \"sync_type\" as \"automated_failover\" cannot be \"paused\". To resume transfers for a paused relationship, PATCH the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\". The entries \"in_sync\", \"out_of_sync\", \"synchronizing\", \"expanding\", and \"shrinking\" are only applicable to relationships with a policy of type \"sync\". A PATCH call on the state change only triggers the transition to the specified state. You must poll on the \"state\", \"healthy\" and \"unhealthy_reason\" properties using a GET request to determine if the transition is successful. To automatically initialize the relationship when specifying \"create_destination\" property, set the state to \"snapmirrored\" for relationships with a policy of type \"async\" or to state \"in_sync\" for relationships with a policy of type \"sync\"."
         },
         "svmdr_volumes": {
           "since": "9.13",
@@ -11484,6 +12491,14 @@
         "space.footprint": {
           "type": "integer"
         },
+        "space.logical_used": {
+          "type": "integer",
+          "since": "9.19"
+        },
+        "space.logical_used_percent": {
+          "type": "integer",
+          "since": "9.19"
+        },
         "space.snapshot.available": {
           "type": "integer",
           "since": "9.10"
@@ -11504,6 +12519,10 @@
           "type": "integer",
           "since": "9.10"
         },
+        "space.total_provisioned_space": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "state": {},
         "uuid": {},
         "volume-count": {
@@ -11512,6 +12531,10 @@
         }
       },
       "fields": {
+        "_tags": {
+          "since": "9.13",
+          "desc": "Tags are an optional way to track the uses of a resource. Tag values must be formatted as key:value strings."
+        },
         "block_storage": {
           "desc": "Configuration information for the locally attached portion of the aggregate. When a cloud store is also used by this aggregate, this is referred to as the performance tier."
         },
@@ -12401,6 +13424,73 @@
         }
       }
     },
+    "/storage/flexcache/connection-status": {
+      "summary": "Retrieves attributes of the connection status between cache and origin volumes. ### Related ONTAP commands * `volume flexcache connection-status show` ### Learn more * [`DOC /storage/flexcache/connect",
+      "tags": [
+        "Storage"
+      ],
+      "api_introduced": "9.18",
+      "filters": {
+        "conn_state": {},
+        "last_update_time": {},
+        "local_fg_msid": {
+          "type": "integer"
+        },
+        "node": {},
+        "remote_cluster": {},
+        "remote_endpoint": {},
+        "remote_svm": {},
+        "remote_svm_uuid": {},
+        "remote_vol_const_msid": {
+          "type": "integer"
+        },
+        "remote_volume": {},
+        "svm": {},
+        "svm_uuid": {},
+        "volume": {}
+      },
+      "fields": {
+        "conn_state": {
+          "desc": "Connection Status between the Flexcache and Origin volumes."
+        },
+        "last_update_time": {
+          "desc": "Last update time of the connection status."
+        },
+        "local_fg_msid": {
+          "desc": "The local volume's Master Set ID."
+        },
+        "node": {
+          "desc": "Name of the node."
+        },
+        "remote_cluster": {
+          "desc": "Remote cluster."
+        },
+        "remote_endpoint": {
+          "desc": "Remote endpoint type."
+        },
+        "remote_svm": {
+          "desc": "Remote volume SVM."
+        },
+        "remote_svm_uuid": {
+          "desc": "Remote SVM UUID."
+        },
+        "remote_vol_const_msid": {
+          "desc": "Remote volume's Master Set ID."
+        },
+        "remote_volume": {
+          "desc": "Remote Volume name."
+        },
+        "svm": {
+          "desc": "Volume SVM."
+        },
+        "svm_uuid": {
+          "desc": "Local SVM UUID."
+        },
+        "volume": {
+          "desc": "Local Volume name."
+        }
+      }
+    },
     "/storage/flexcache/flexcaches": {
       "summary": "Retrieves FlexCache in the cluster. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be",
       "tags": [
@@ -12417,6 +13507,10 @@
         "atime_scrub.period": {
           "type": "integer",
           "since": "9.14"
+        },
+        "cifs.enabled": {
+          "type": "boolean",
+          "since": "9.18"
         },
         "cifs_change_notify.enabled": {
           "type": "boolean",
@@ -12436,7 +13530,19 @@
         "guarantee.type": {
           "since": "9.7"
         },
+        "mtime_scrubber.enabled": {
+          "type": "boolean",
+          "since": "9.19"
+        },
+        "mtime_scrubber.threshold": {
+          "type": "integer",
+          "since": "9.19"
+        },
         "name": {},
+        "nfsv4.enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "origins.cluster.name": {},
         "origins.cluster.uuid": {},
         "origins.create_time": {},
@@ -12462,6 +13568,10 @@
           "type": "integer",
           "since": "9.13"
         },
+        "s3.enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "size": {
           "type": "integer"
         },
@@ -12472,6 +13582,10 @@
           "since": "9.8"
         },
         "uuid": {},
+        "write.absorption_enabled": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "writeback.enabled": {
           "type": "boolean",
           "since": "9.12"
@@ -12482,6 +13596,10 @@
         "atime_scrub": {
           "since": "9.14",
           "desc": "FlexCache volume atime-based scrub"
+        },
+        "cifs": {
+          "since": "9.18",
+          "desc": "FlexCache CIFS"
         },
         "cifs_change_notify": {
           "since": "9.14",
@@ -12501,8 +13619,16 @@
         "guarantee": {
           "since": "9.7"
         },
+        "mtime_scrubber": {
+          "since": "9.19",
+          "desc": "Flexcache Mtime Scrubber"
+        },
         "name": {
           "desc": "FlexCache name"
+        },
+        "nfsv4": {
+          "since": "9.18",
+          "desc": "FlexCache NFSv4"
         },
         "origins": {},
         "override_encryption": {
@@ -12520,6 +13646,10 @@
           "since": "9.13",
           "desc": "FlexCache Relative Size"
         },
+        "s3": {
+          "since": "9.18",
+          "desc": "Flexcache S3"
+        },
         "size": {
           "desc": "Physical size of the FlexCache. The recommended size for a FlexCache is 10% of the origin volume. The minimum FlexCache constituent size is 1GB."
         },
@@ -12532,6 +13662,10 @@
         },
         "uuid": {
           "desc": "FlexCache UUID. Unique identifier for the FlexCache."
+        },
+        "write": {
+          "since": "9.19",
+          "desc": "Flexcache Write settings"
         },
         "writeback": {
           "since": "9.12",
@@ -12599,6 +13733,9 @@
       ],
       "api_introduced": "9.6",
       "filters": {
+        "access_mode": {
+          "since": "9.19"
+        },
         "attributes.name": {
           "since": "9.10"
         },
@@ -12609,6 +13746,10 @@
           "type": "boolean"
         },
         "class": {},
+        "clone.created_as_clone": {
+          "type": "boolean",
+          "since": "9.19"
+        },
         "comment": {},
         "consistency_group.name": {
           "since": "9.10"
@@ -12771,6 +13912,9 @@
         "qos_policy.name": {},
         "qos_policy.uuid": {},
         "serial_number": {},
+        "serial_number_hex": {
+          "since": "9.17"
+        },
         "space.efficiency_ratio": {
           "type": "number",
           "since": "9.16"
@@ -12829,6 +13973,10 @@
         }
       },
       "fields": {
+        "access_mode": {
+          "since": "9.19",
+          "desc": "The `access_mode` property controls how SCSI task set management is handled for the LUN. This property is only supported on LUNs with the following `os_type`: * aix A value of _global_ is the default access mode, and indicates that task set operations impact all initiators accessing the LUN. In this mode, if an individual initiator encounters an I/O failure, its recovery can cascade the disruption to other initiators accessing the same LUN. Host operating systems not supported by this property are designed to avoid these cascading disruptions, so this property can be safely ignored. A value of _local_ indicates that task set operations only impact the initiator that requested the operation. When many hosts of a supported `os_type` are accessing the same LUN, the _local_ `access_mode` should be preferred. Modification of this property is only supported while the `status.state` of the LUN is _offline_. If a PATCH is performed while the LUN is _online_, the PATCH will automatically bring the LUN _offline_, perform the `access_mode` modification, and then bring the LUN back _online_. The host must perform a rescan to detect the new `access_mode`."
+        },
         "attributes": {
           "since": "9.10",
           "desc": "An array of name/value pairs optionally stored with the LUN. Attributes are available to callers to persist small amounts of application-specific metadata. They are in no way interpreted by ONTAP. Attribute names and values must be at least one byte and no more than 4091 bytes in length. The sum of the name and value lengths must be no more than 4092 bytes. Valid in POST except when creating a LUN clone. A cloned can already have attributes from its source. You can add, modify, and delete the attributes of a LUN clone in separate requests after creation of the LUN. Attributes can be added/modified/removed for an existing LUN using the /api/storage/luns/{lun.uuid}/attributes endpoint. For further information, see [`DOC /storage/luns/{lun.uuid}/attributes`](#docs-SAN-storage_luns_{lun.uuid}_attributes). There is an added computational cost to retrieving property values for `attributes`. They are not populated for a GET request unless explicitly requested using the `fields` query parameter. See [`Requesting specific fields`](#Requesting_specific_fields) to learn more."
@@ -12868,7 +14016,7 @@
           "desc": "The location of the LUN within the ONTAP cluster. LUNs support rename and move between volumes. Valid in POST and PATCH."
         },
         "lun_maps": {
-          "desc": "The LUN maps with which the LUN is associated. There is an added computational cost to retrieving property values for `lun_maps`. They are not populated for a GET request unless explicitly requested using the `fields` query parameter. See [`Requesting specific fields`](#Requesting_specific_fields) to learn more. These properties are supported for GET only."
+          "desc": "The LUN maps with which the LUN is associated. There is an added computational cost to retrieving property values for `lun_maps`. They are not populated for a GET request unless explicitly requested using the `fields` query parameter. See [`Requesting specific fields`](#Requesting_specific_fields) to learn more. These properties are supported for GET and POST. During POST, it requires the `provisioning_options.auto` property to be set to true. See the `provisioning_options.auto` property for full details."
         },
         "metric": {
           "since": "9.7",
@@ -12892,6 +14040,10 @@
         },
         "serial_number": {
           "desc": "The LUN serial number. The serial number is generated by ONTAP when the LUN is created."
+        },
+        "serial_number_hex": {
+          "since": "9.17",
+          "desc": "The LUN serial number encoded in hexadecimal format. The serial number is generated by ONTAP when the LUN is created."
         },
         "space": {
           "desc": "The storage space related properties of the LUN."
@@ -12924,6 +14076,10 @@
       "filters": {
         "auto_delete": {
           "type": "boolean"
+        },
+        "clone.created_as_clone": {
+          "type": "boolean",
+          "since": "9.19"
         },
         "comment": {},
         "consistency_group.name": {
@@ -13008,6 +14164,16 @@
         "subsystem_map.subsystem.hosts.priority": {
           "since": "9.16"
         },
+        "subsystem_map.subsystem.hosts.proximity.local_svm": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "subsystem_map.subsystem.hosts.proximity.peer_svms.name": {
+          "since": "9.17"
+        },
+        "subsystem_map.subsystem.hosts.proximity.peer_svms.uuid": {
+          "since": "9.17"
+        },
         "subsystem_map.subsystem.hosts.tls.key_type": {
           "since": "9.16"
         },
@@ -13073,7 +14239,7 @@
           "desc": "Status information about the NVMe namespace."
         },
         "subsystem_map": {
-          "desc": "The NVMe subsystem with which the NVMe namespace is associated. A namespace can be mapped to zero (0) or one (1) subsystems. There is an added computational cost to retrieving property values for `subsystem_map`. They are not populated for a GET request unless explicitly requested using the `fields` query parameter. See [`Requesting specific fields`](#Requesting_specific_fields) to learn more. These properties are supported only for GET."
+          "desc": "The NVMe subsystem with which the NVMe namespace is associated. A namespace can be mapped to zero (0) or one (1) subsystems. There is an added computational cost to retrieving property values for `subsystem_map`. They are not populated for a GET request unless explicitly requested using the `fields` query parameter. See [`Requesting specific fields`](#Requesting_specific_fields) to learn more. These properties are supported for GET and POST. During POST, it requires the `provisioning_options.auto` property to be set to true. See the `provisioning_options.auto` property for full details."
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -13297,6 +14463,9 @@
           "since": "9.9"
         },
         "path": {},
+        "qos_policy.max_throughput": {
+          "since": "9.17"
+        },
         "qos_policy.max_throughput_iops": {
           "type": "integer",
           "since": "9.8"
@@ -13304,6 +14473,9 @@
         "qos_policy.max_throughput_mbps": {
           "type": "integer",
           "since": "9.8"
+        },
+        "qos_policy.min_throughput": {
+          "since": "9.17"
         },
         "qos_policy.min_throughput_iops": {
           "type": "integer",
@@ -13335,6 +14507,10 @@
         "volume.uuid": {}
       },
       "fields": {
+        "_tags": {
+          "since": "9.13",
+          "desc": "Tags are an optional way to track the uses of a resource. Tag values must be formatted as key:value strings."
+        },
         "export_policy": {
           "desc": "Export Policy"
         },
@@ -13363,7 +14539,7 @@
         },
         "qos_policy": {
           "since": "9.8",
-          "desc": "When \"min_throughput_iops\", \"min_throughput_mbps\", \"max_throughput_iops\" or \"max_throughput_mbps\" attributes are specified, the storage object is assigned to an auto-generated QoS policy group. If the attributes are later modified, the auto-generated QoS policy-group attributes are modified. Attributes can be removed by specifying \"0\" and policy group by specifying \"none\". Upon deletion of the storage object or if the attributes are removed, then the QoS policy-group is also removed."
+          "desc": "When \"min_throughput_iops\", \"min_throughput_mbps\", \"min_throughput\", \"max_throughput_iops\", \"max_throughput_mbps\" or \"max_throughput\" attributes are specified, the storage object is assigned to an auto-generated QoS policy group. If the attributes are later modified, the auto-generated QoS policy-group attributes are modified. Attributes can be removed by specifying \"0\" and policy group by specifying \"none\". Upon deletion of the storage object or if the attributes are removed, then the QoS policy-group is also removed."
         },
         "security_style": {},
         "statistics": {
@@ -13734,8 +14910,16 @@
         "ports.remote.phy": {},
         "ports.remote.port": {},
         "ports.remote.wwn": {},
+        "ports.speed": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "ports.state": {},
         "ports.wwn": {},
+        "raw_capacity": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "serial_number": {},
         "state": {},
         "temperature_sensors.ambient": {
@@ -13846,6 +15030,10 @@
         "name": {},
         "paths": {},
         "ports": {},
+        "raw_capacity": {
+          "since": "9.17",
+          "desc": "Raw capacity of drives in shelf in 4k blocks"
+        },
         "serial_number": {},
         "state": {},
         "temperature_sensors": {
@@ -14296,6 +15484,12 @@
           "type": "boolean",
           "since": "9.8"
         },
+        "activity_tracking.notices.code": {
+          "since": "9.18"
+        },
+        "activity_tracking.notices.message": {
+          "since": "9.18"
+        },
         "activity_tracking.state": {
           "since": "9.10"
         },
@@ -14314,12 +15508,69 @@
         "aggressive_readahead_mode": {
           "since": "9.13"
         },
+        "analytics.by_accessed_time.bytes_used.aged_data_metric": {
+          "type": "number",
+          "since": "9.17"
+        },
+        "analytics.by_accessed_time.bytes_used.labels": {
+          "since": "9.17"
+        },
+        "analytics.by_accessed_time.bytes_used.newest_label": {
+          "since": "9.17"
+        },
+        "analytics.by_accessed_time.bytes_used.oldest_label": {
+          "since": "9.17"
+        },
+        "analytics.by_accessed_time.bytes_used.percentages": {
+          "type": "number",
+          "since": "9.17"
+        },
+        "analytics.by_accessed_time.bytes_used.values": {
+          "type": "integer",
+          "since": "9.17"
+        },
+        "analytics.by_modified_time.bytes_used.aged_data_metric": {
+          "type": "number",
+          "since": "9.17"
+        },
+        "analytics.by_modified_time.bytes_used.labels": {
+          "since": "9.17"
+        },
+        "analytics.by_modified_time.bytes_used.newest_label": {
+          "since": "9.17"
+        },
+        "analytics.by_modified_time.bytes_used.oldest_label": {
+          "since": "9.17"
+        },
+        "analytics.by_modified_time.bytes_used.percentages": {
+          "type": "number",
+          "since": "9.17"
+        },
+        "analytics.by_modified_time.bytes_used.values": {
+          "type": "integer",
+          "since": "9.17"
+        },
+        "analytics.bytes_used": {
+          "type": "integer",
+          "since": "9.17"
+        },
+        "analytics.file_count": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "analytics.files_scanned": {
           "type": "integer",
           "since": "9.14"
         },
+        "analytics.incomplete_data": {
+          "type": "boolean",
+          "since": "9.17"
+        },
         "analytics.initialization.state": {
           "since": "9.12"
+        },
+        "analytics.report_time": {
+          "since": "9.17"
         },
         "analytics.scan_progress": {
           "type": "integer",
@@ -14337,6 +15588,10 @@
         "analytics.state": {
           "since": "9.8"
         },
+        "analytics.subdir_count": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "analytics.supported": {
           "type": "boolean",
           "since": "9.8"
@@ -14350,6 +15605,9 @@
         },
         "analytics.unsupported_reason.message": {
           "since": "9.8"
+        },
+        "anti_ransomware.attack_detected_by": {
+          "since": "9.17"
         },
         "anti_ransomware.attack_detection_parameters.based_on_file_create_op_rate": {
           "type": "boolean",
@@ -14370,6 +15628,10 @@
         "anti_ransomware.attack_detection_parameters.based_on_never_seen_before_file_extension": {
           "type": "boolean",
           "since": "9.16"
+        },
+        "anti_ransomware.attack_detection_parameters.block_device_auto_learned_encryption_threshold": {
+          "type": "integer",
+          "since": "9.17"
         },
         "anti_ransomware.attack_detection_parameters.file_create_op_rate_surge_notify_percent": {
           "type": "integer",
@@ -14404,6 +15666,18 @@
         },
         "anti_ransomware.attack_reports.time": {
           "since": "9.10"
+        },
+        "anti_ransomware.block_device_detection_start_time": {
+          "since": "9.17"
+        },
+        "anti_ransomware.block_device_detection_state": {
+          "since": "9.17"
+        },
+        "anti_ransomware.clear_suspect.phase": {
+          "since": "9.18"
+        },
+        "anti_ransomware.clear_suspect.start_time": {
+          "since": "9.18"
         },
         "anti_ransomware.dry_run_start_time": {
           "since": "9.10"
@@ -14640,12 +15914,18 @@
         "clone.is_flexclone": {
           "type": "boolean"
         },
+        "clone.lun_name": {
+          "since": "9.18"
+        },
         "clone.parent_snapshot.name": {},
         "clone.parent_snapshot.uuid": {},
         "clone.parent_svm.name": {},
         "clone.parent_svm.uuid": {},
         "clone.parent_volume.name": {},
         "clone.parent_volume.uuid": {},
+        "clone.qtree_name": {
+          "since": "9.18"
+        },
         "clone.split_complete_percent": {
           "type": "integer"
         },
@@ -14694,6 +15974,12 @@
         },
         "constituents.name": {
           "since": "9.9"
+        },
+        "constituents.node.name": {
+          "since": "9.17"
+        },
+        "constituents.node.uuid": {
+          "since": "9.17"
         },
         "constituents.space.afs_total": {
           "type": "integer",
@@ -14861,6 +16147,10 @@
         "efficiency.progress": {
           "since": "9.9"
         },
+        "efficiency.ratio": {
+          "type": "number",
+          "since": "9.17"
+        },
         "efficiency.scanner.compression": {
           "type": "boolean",
           "since": "9.11"
@@ -14942,6 +16232,10 @@
         "error_state.is_inconsistent": {
           "type": "boolean"
         },
+        "files.inodefile_capacity": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "files.maximum": {
           "type": "integer"
         },
@@ -14975,14 +16269,38 @@
           "type": "boolean"
         },
         "guarantee.type": {},
+        "has_dir_index_public": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "has_large_dir": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "is_constituent": {
           "type": "boolean",
           "since": "9.10",
           "desc": "When set to false, only FlexVol and FlexGroup volumes are returned. When set to true, only FlexGroup constituent volumes are returned. Default for GET calls is false."
         },
+        "is_dir_index_transfer_enabled": {
+          "type": "boolean",
+          "since": "9.17"
+        },
+        "is_large_dir_enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "is_object_store": {
           "type": "boolean",
           "since": "9.8"
+        },
+        "is_preserve_unlink_enabled": {
+          "type": "boolean",
+          "since": "9.19"
+        },
+        "is_s3_arbitrary_part_size_enabled": {
+          "type": "boolean",
+          "since": "9.18"
         },
         "is_svm_root": {
           "type": "boolean",
@@ -14992,6 +16310,10 @@
         "max_dir_size": {
           "type": "integer",
           "since": "9.10"
+        },
+        "movement.capacity_tier_optimized": {
+          "type": "boolean",
+          "since": "9.18"
         },
         "movement.cutover_window": {
           "type": "integer"
@@ -15005,6 +16327,9 @@
           "since": "9.9"
         },
         "movement.state": {},
+        "movement.tiering_policy": {
+          "since": "9.18"
+        },
         "msid": {
           "type": "integer",
           "since": "9.11"
@@ -15031,11 +16356,23 @@
         "nas.unix_permissions": {
           "type": "integer"
         },
+        "nodes.name": {
+          "since": "9.17"
+        },
+        "nodes.uuid": {
+          "since": "9.17"
+        },
+        "qos.policy.max_throughput": {
+          "since": "9.17"
+        },
         "qos.policy.max_throughput_iops": {
           "type": "integer"
         },
         "qos.policy.max_throughput_mbps": {
           "type": "integer"
+        },
+        "qos.policy.min_throughput": {
+          "since": "9.17"
         },
         "qos.policy.min_throughput_iops": {
           "type": "integer"
@@ -15261,6 +16598,9 @@
         },
         "size": {
           "type": "integer"
+        },
+        "smas_protection": {
+          "since": "9.19"
         },
         "snaplock.append_mode_enabled": {
           "type": "boolean"
@@ -15559,6 +16899,9 @@
         "style": {},
         "svm.name": {},
         "svm.uuid": {},
+        "svm_dr_protection": {
+          "since": "9.19"
+        },
         "tiering.min_cooling_days": {
           "type": "integer",
           "since": "9.8"
@@ -15575,6 +16918,10 @@
         }
       },
       "fields": {
+        "_tags": {
+          "since": "9.13",
+          "desc": "Tags are an optional way to track the uses of a resource. Tag values must be formatted as key:value strings."
+        },
         "access_time_enabled": {
           "since": "9.8",
           "desc": "Indicates whether or not access time updates are enabled on the volume."
@@ -15583,11 +16930,11 @@
           "since": "9.10"
         },
         "aggregates": {
-          "desc": "Aggregate hosting the volume. Required on POST."
+          "desc": "Aggregate(s) hosting the volume. Optional."
         },
         "aggressive_readahead_mode": {
           "since": "9.13",
-          "desc": "Specifies the `aggressive_readahead_mode` enabled on the volume. When set to _file_prefetch_, on a file read, the system aggressively issues readaheads for all of the blocks in the file and retains those blocks in a cache for a finite period of time. When the option is set to _sequential_read_, the system aggressively prefetches the file completely, or to a certain length based on the file size limit, and continues as the read makes progress. If the option is set to _cross_file_sequential_read_, then the system aggressively prefetches multiple files completely, or to a certain length, and continues as the read makes progress."
+          "desc": "Specifies the `aggressive_readahead_mode` enabled on the volume. When set to _file_prefetch_, on a file read, the system aggressively issues readaheads for all of the blocks in the file and retains those blocks in a cache for a finite period of time. If the option is set to _cross_file_sequential_read_, then the system reads ahead the current file, predicts the next set of files the application would read and aggressively prefetches them up to a fixed length. cross_file_sequential_read mode is enabled by default on AFX platforms starting from ONTAP 9.19.1."
         },
         "analytics": {
           "since": "9.8"
@@ -15654,9 +17001,33 @@
           "desc": "Mode of granular data on the volume. This setting defaults to `basic` when the `granular_data` parameter is set to `true`, but can be specified at the time of creation via a POST request. Earlier versions of ONTAP (pre 9.12) are not compatible with the `basic` setting. Therefore, when set to `basic`, reverting to an earlier version of ONTAP is not possible unless this volume is deleted or restored to a snapshot that was taken before the `basic` mode was enabled. Earlier versions of ONTAP (pre 9.16) are not compatible with the `advanced` setting. Therefore, when set to `advanced`, reverting to an earlier version of ONTAP is not possible unless this volume is deleted or restored to a snapshot that was taken before the `advanced` mode was enabled."
         },
         "guarantee": {},
+        "has_dir_index_public": {
+          "since": "9.17",
+          "desc": "Specifies whether the volume has directories with public index files."
+        },
+        "has_large_dir": {
+          "since": "9.18",
+          "desc": "Specifies whether the volume has directories bigger than 4GB."
+        },
+        "is_dir_index_transfer_enabled": {
+          "since": "9.17",
+          "desc": "When set to true, this field enables support for directory index transfer."
+        },
+        "is_large_dir_enabled": {
+          "since": "9.18",
+          "desc": "When set to true, this field enables the large directory feature on a volume."
+        },
         "is_object_store": {
           "since": "9.8",
           "desc": "Specifies whether the volume is provisioned for an object store server."
+        },
+        "is_preserve_unlink_enabled": {
+          "since": "9.19",
+          "desc": "Specifies that a file removal operation on a file with existing share locks will result in the file getting moved to trash directory. The client will be able to access the file using the file handle. The last close for that file will result in deletion of the file."
+        },
+        "is_s3_arbitrary_part_size_enabled": {
+          "since": "9.18",
+          "desc": "Specifies that the volume should allow Amazon S3 multipart uploads with arbitrary part lengths. This is only supported for FlexGroup volumes with `advanced` granular_data. The default value is `false`. When set to `true`, it cannot be reverted to `false`. Clusters with any volumes where this is `true` cannot be reverted to a release that does not support this feature."
         },
         "is_svm_root": {
           "since": "9.7",
@@ -15673,7 +17044,7 @@
           "desc": "Performance numbers, such as IOPS, latency and throughput."
         },
         "movement": {
-          "desc": "Volume movement. All attributes are modify, that is, not writable through POST. Set PATCH state to destination_aggregate to initiate a volume move operation. Volume movement on FlexGroup volume constituents are not supported."
+          "desc": "Volume movement. All attributes are modify, that is, not writable through POST. Set PATCH state to destination_aggregate to initiate a volume move operation."
         },
         "msid": {
           "since": "9.11",
@@ -15683,6 +17054,10 @@
           "desc": "Volume name. The name of volume must start with an alphabetic character (a to z or A to Z) or an underscore (_). The name must be 197 or fewer characters in length for FlexGroup volumes, and 203 or fewer characters in length for all other types of volumes. Volume names must be unique within an SVM. Required on POST."
         },
         "nas": {},
+        "nodes": {
+          "since": "9.17",
+          "desc": "List of the nodes hosting the volume."
+        },
         "optimize_aggregates": {
           "since": "9.13",
           "desc": "Specifies whether to create the constituents of the FlexGroup volume on the aggregates specified in the order they are specified, or whether the system should optimize the ordering of the aggregates. If this value is 'true', the system optimizes the ordering of the aggregates specified. If this value is false, the order of the aggregates is unchanged. The default value is 'false'."
@@ -15707,6 +17082,14 @@
         },
         "size": {
           "desc": "Physical size of the volume, in bytes. The minimum size for a FlexVol volume is 20MB and the minimum size for a FlexGroup volume is 200MB per constituent. The recommended size for a FlexGroup volume is a minimum of 100GB per constituent. For all volumes, the default size is equal to the minimum size."
+        },
+        "sizing_method": {
+          "since": "9.17",
+          "desc": "When expanding a FlexGroup volume, this specifies whether to add new constituents, or to resize the current constituents."
+        },
+        "smas_protection": {
+          "since": "9.19",
+          "desc": "Specifies the volume should be protected by SnapMirror Active Sync NAS or not"
         },
         "snaplock": {},
         "snapmirror": {
@@ -15740,10 +17123,14 @@
           "desc": "Describes the current status of a volume."
         },
         "style": {
-          "desc": "The style of the volume. If \"style\" is not specified, the volume type is determined based on the specified aggregates or license. Specifying a single aggregate, without \"constituents_per_aggregate\", creates a flexible volume. Specifying multiple aggregates, or a single aggregate with \"constituents_per_aggregate\", creates a FlexGroup volume. When the UDO License is installed, and no aggregates are specified, the system automatically provisions a FlexGroup volume on system selected aggregates. Specifying a volume \"style\" creates a volume of that type. For example, if the style is \"flexvol\", you must specify a single aggregate. If the style is \"flexgroup\", the system either uses the specified aggregates or automatically provisions aggregates if there are no specified aggregates. The style \"flexgroup_constituent\" is not supported when creating a volume. flexvol &dash; flexible volumes and FlexClone volumes flexgroup &dash; FlexGroup volumes flexgroup_constituent &dash; FlexGroup volume constituents."
+          "desc": "The style of the volume. If \"style\" is not specified, the volume type is determined based on the specified aggregates. Specifying a single aggregate, without \"constituents_per_aggregate\", creates a flexible volume. Specifying multiple aggregates, or a single aggregate with \"constituents_per_aggregate\", creates a FlexGroup volume. When the UDO License is installed, and no aggregates are specified, the system automatically provisions a FlexGroup volume on system selected aggregates. Specifying a volume \"style\" creates a volume of that type. For example, if the style is \"flexvol\", you must specify a single aggregate. If the style is \"flexgroup\", the system either uses the specified aggregates or automatically provisions aggregates if there are no specified aggregates. The style \"flexgroup_constituent\" is not supported when creating a volume. flexvol &dash; flexible volumes and FlexClone volumes flexgroup &dash; FlexGroup volumes flexgroup_constituent &dash; FlexGroup volume constituents."
         },
         "svm": {
           "desc": "SVM containing the volume. Required on POST."
+        },
+        "svm_dr_protection": {
+          "since": "9.19",
+          "desc": "Specifies the volume should be protected by Vserver level SnapMirror or not"
         },
         "tiering": {},
         "type": {
@@ -15776,12 +17163,12 @@
         "comment": {},
         "compress_savings": {
           "type": "integer",
-          "since": "9.16"
+          "since": "9.17"
         },
         "create_time": {},
         "dedup_savings": {
           "type": "integer",
-          "since": "9.16"
+          "since": "9.17"
         },
         "delta.size_consumed": {
           "type": "integer",
@@ -15830,7 +17217,7 @@
         "uuid": {},
         "vbn0_savings": {
           "type": "integer",
-          "since": "9.16"
+          "since": "9.17"
         },
         "version_uuid": {
           "since": "9.11"
@@ -15842,14 +17229,14 @@
           "desc": "A comment associated with the snapshot. This is an optional attribute for POST or PATCH."
         },
         "compress_savings": {
-          "since": "9.16",
+          "since": "9.17",
           "desc": "Savings due to compression at the time the snapshot was taken in bytes."
         },
         "create_time": {
           "desc": "Creation time of the snapshot. It is the volume access time when the snapshot was created."
         },
         "dedup_savings": {
-          "since": "9.16",
+          "since": "9.17",
           "desc": "Savings due to dedup at the time the snapshot was taken in bytes."
         },
         "delta": {
@@ -15899,7 +17286,7 @@
           "desc": "The UUID of the snapshot in the volume that uniquely identifies the snapshot in that volume."
         },
         "vbn0_savings": {
-          "since": "9.16",
+          "since": "9.17",
           "desc": "Savings due vbn0 at the time the snapshot was taken in bytes."
         },
         "version_uuid": {
@@ -16277,7 +17664,7 @@
       }
     },
     "/support/ems/events": {
-      "summary": "Retrieves a collection of observed events. ### Related ONTAP commands * `event log show`",
+      "summary": "Retrieves a collection of observed events. ### Note: The default behavior is to filter 'DEBUG' severity events. If those events are required, a severity query must be provided. ### Related ONTAP comma",
       "tags": [
         "Support"
       ],
@@ -16462,6 +17849,10 @@
         "point_of_no_return": {
           "type": "boolean"
         },
+        "post_ponr_retry_count": {
+          "type": "integer",
+          "since": "9.17"
+        },
         "restart_count": {
           "type": "integer"
         },
@@ -16479,6 +17870,9 @@
         "time_metrics.cutover_trigger_time": {},
         "time_metrics.end_time": {},
         "time_metrics.last_pause_time": {},
+        "time_metrics.last_post_ponr_retry_time": {
+          "since": "9.17"
+        },
         "time_metrics.last_resume_time": {},
         "time_metrics.start_time": {},
         "uuid": {}
@@ -16508,6 +17902,10 @@
         },
         "point_of_no_return": {
           "desc": "Indicates if the migration has progressed beyond the point of no return. When true, the migration cannot be aborted or paused. When false, the migration can be paused or aborted."
+        },
+        "post_ponr_retry_count": {
+          "since": "9.17",
+          "desc": "Number of times the migration restarted after the point of no return."
         },
         "restart_count": {
           "desc": "Number of times migrate restarted the transfer, for example, rollback to transfer after starting the cutover."
@@ -16779,8 +18177,19 @@
           "type": "integer",
           "since": "9.16"
         },
+        "san_multipathing": {
+          "since": "9.19"
+        },
+        "snapshot_autodelete_enabled": {
+          "type": "boolean",
+          "since": "9.18"
+        },
         "snapshot_policy.name": {},
         "snapshot_policy.uuid": {},
+        "snapshot_reserve_percent": {
+          "type": "integer",
+          "since": "9.18"
+        },
         "state": {},
         "storage.allocated": {
           "type": "integer",
@@ -16827,31 +18236,31 @@
         },
         "anti_ransomware_auto_switch_duration_without_new_file_extension": {
           "since": "9.13",
-          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that no new file-extensions are observed in the volume in recent time. This parameter optionally specifies the recent time duration (in days) to be considered during which no new file-extension should be observed in a given volume to automatically switch the anti-ransomware state from ‘learning” to “enabled”."
+          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that no new file-extensions are observed in the volume in recent time. This parameter optionally specifies the recent time duration (in days) to be considered during which no new file-extension should be observed in a given volume to automatically switch the anti-ransomware state from “learning” to “enabled”. This field will no longer be supported in a future release."
         },
         "anti_ransomware_auto_switch_from_learning_to_enabled": {
           "since": "9.13",
-          "desc": "This property specifies whether anti-ransomware state of the volumes in this SVM are automatically switched by the system from “learning” (dry-run) to “enabled” (active) state after sufficient learning."
+          "desc": "This property specifies whether anti-ransomware state of the volumes in this SVM are automatically switched by the system from “learning” (dry-run) to “enabled” (active) state after sufficient learning. This field will no longer be supported in a future release."
         },
         "anti_ransomware_auto_switch_minimum_file_count": {
           "since": "9.13",
-          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have a minimum file count in “learning” state. This parameter optionally specifies the minimum number of newly created files in “learning” state in a given volume to automatically switch the anti-ransomware state from “learning” to “enabled”."
+          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have a minimum file count in “learning” state. This parameter optionally specifies the minimum number of newly created files in “learning” state in a given volume to automatically switch the anti-ransomware state from “learning” to “enabled”. This field will no longer be supported in a future release."
         },
         "anti_ransomware_auto_switch_minimum_file_extension": {
           "since": "9.13",
-          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have minimum number of file extensions in “learning” state. This parameter optionally specifies the minimum number of new file extensions in “learning” state in a given volume to automatically switch the anti-ransomware state from “learning” to “enabled”."
+          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have minimum number of file extensions in “learning” state. This parameter optionally specifies the minimum number of new file extensions in “learning” state in a given volume to automatically switch the anti-ransomware state from “learning” to “enabled”. This field will no longer be supported in a future release."
         },
         "anti_ransomware_auto_switch_minimum_incoming_data": {
           "since": "9.16",
-          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have sufficient data ingested to do the learning. This parameter optionally specifies the minimum amount of data (in GB) to be written to a given volume during the learning period to automatically switch the anti-ransomware state from “learning” to “enabled”. The amount of data considered as ingested also includes the data that is deleted or overwritten after ingestion."
+          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have sufficient data ingested to do the learning. This parameter optionally specifies the minimum amount of data (in GB) to be written to a given volume during the learning period to automatically switch the anti-ransomware state from “learning” to “enabled”. The amount of data considered as ingested also includes the data that is deleted or overwritten after ingestion. This field will no longer be supported in a future release."
         },
         "anti_ransomware_auto_switch_minimum_learning_period": {
           "since": "9.13",
-          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should be in “learning” state for sufficient time period. This parameter optionally specifies the minimum number of days a given volume should be in “learning” state to automatically switch the anti-ransomware state from “learning” to “enabled”."
+          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should be in “learning” state for sufficient time period. This parameter optionally specifies the minimum number of days a given volume should be in “learning” state to automatically switch the anti-ransomware state from “learning” to “enabled”. This field will no longer be supported in a future release."
         },
         "anti_ransomware_default_volume_state": {
           "since": "9.10",
-          "desc": "Specifies the default Anti-ransomware state of the volumes in the SVM. Default \"anti_ransomware_default_volume_state\" property is disabled for POST operation. If this value is \"disabled\", Anti-ransomware protection is disabled by default on the new volumes that are created in the SVM. If this value is \"dry_run\", Anti-ransomware protection is in learning mode by default on the new volumes that are created in the SVM. When the Anti-ransomware license is not present, this property is ignored and volumes will be created with the \"disabled\" state."
+          "desc": "Specifies the default anti-ransomware state of the volumes in the SVM. The default \"anti_ransomware_default_volume_state\" property is disabled for POST operations. If this value is \"disabled\", anti-ransomware protection is disabled by default on the new volumes that are created in the SVM. If this value is \"dry_run\", anti-ransomware protection is in learning mode by default on the new volumes that are created in the SVM. When the anti-ransomware license is not present, this property is ignored and volumes will be created with the \"disabled\" state. This value \"dry_run\" will no longer be supported in a future release."
         },
         "anti_ransomware_incoming_write_threshold": {
           "since": "9.13",
@@ -16859,7 +18268,7 @@
         },
         "anti_ransomware_incoming_write_threshold_percent": {
           "since": "9.13",
-          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have sufficient data ingested to do the learning. This parameter optionally specifies the minimum amount of data (in percentage) to be written to a given volume during the learning period to automatically switch the anti-ransomware state from “learning” to “enabled”. The amount of data considered as ingested also includes the data that is deleted or overwritten after ingestion."
+          "desc": "One of the many conditions to be satisfied to automatically switch the anti-ransomware state of the volumes in this SVM from “learning” (dry-run) to “enabled” is that the volume should have sufficient data ingested to do the learning. This parameter optionally specifies the minimum amount of data (in percentage) to be written to a given volume during the learning period to automatically switch the anti-ransomware state from “learning” to “enabled”. The amount of data considered as ingested also includes the data that is deleted or overwritten after ingestion. This field will no longer be supported in a future release."
         },
         "auto_enable_activity_tracking": {
           "since": "9.12",
@@ -16883,7 +18292,7 @@
           "desc": "FC Interface for the SVM"
         },
         "fcp": {
-          "desc": "### Platform Specifics * **Unified ONTAP**: Available for GET, POST and PATCH. * **ASA r2**: Available for GET. All SVMs are provisioned with the FCP service configured."
+          "desc": "Available for GET, POST, and PATCH requests."
         },
         "ip_interfaces": {
           "desc": "IP interfaces for the SVM"
@@ -16900,7 +18309,7 @@
           "desc": "Indicates whether logical space reporting for the SVM is enabled."
         },
         "iscsi": {
-          "desc": "### Platform Specifics * **Unified ONTAP**: Available for GET, POST and PATCH. * **ASA r2**: Available for GET. All SVMs are provisioned with the iSCSI service configured."
+          "desc": "Available for GET, POST, and PATCH requests."
         },
         "language": {
           "desc": "Default volume language code. UTF-8 encoded languages are valid in POST or PATCH. Non UTF-8 language encodings are for backward compatibility and are not valid input for POST and PATCH requests."
@@ -16926,7 +18335,7 @@
           "desc": "Number of volumes in the recovery queue."
         },
         "nvme": {
-          "desc": "### Platform Specifics * **Unified ONTAP**: Available for GET, POST and PATCH. * **ASA r2**: Available for GET. All SVMs are provisioned with the NVMe service configured."
+          "desc": "Available for GET, POST, and PATCH requests."
         },
         "qos_adaptive_policy_group_template": {
           "since": "9.13",
@@ -16946,6 +18355,10 @@
         "s3": {
           "since": "9.7"
         },
+        "san_multipathing": {
+          "since": "9.19",
+          "desc": "Specifies the multipathing mode for SAN and NVMe protocols supported by the SVM. Possible values are: * local_active - Only node-local paths are active/optimized. * active_active - All paths in the HA pair are active/optimized. * active_active_scsi_only - This value is available only on the original edition of ONTAP All SAN Array (ASA r1). This value provides the active-active behavior, but only for the iSCSI and FCP protocols."
+        },
         "snapmirror": {
           "since": "9.7",
           "desc": "Specifies attributes for SVM DR protection."
@@ -16960,7 +18373,7 @@
           "since": "9.13"
         },
         "subtype": {
-          "desc": "SVM subtype. The SVM subtype sync_destination is created automatically when an SVM of subtype sync_source is created on the source MetroCluster cluster. A POST request with sync_destination as SVM subtype is invalid."
+          "desc": "SVM subtype. The SVM subtype sync_destination is created automatically when an SVM of subtype sync_source is created on the source MetroCluster cluster. A POST request with sync_destination as SVM subtype is invalid. SVM of subtype data_engine cannot be explicitly created by the admin and most management changes are not allowed on it."
         },
         "total_volume_size_in_recovery_queue": {
           "since": "9.13",

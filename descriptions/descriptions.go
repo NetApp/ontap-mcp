@@ -193,6 +193,8 @@ const CreateClusterPeer = `Create a cluster peer relationship on source and dest
 const DeleteClusterPeer = `Delete a cluster peer relationship on source and destination registered cluster identifiers.`
 
 const OntapGet = `Execute a read-only GET against any ONTAP REST endpoint.
+Don't know the path? Call search_ontap_endpoints first.
+Unsure which fields exist? Call once with fields=* and max_records=1 to see one full record, then request only the fields you need for the full list.
 
 RULES:
 1. Always specify 'fields' using dot-notation for nested values. Omitting it returns only key fields (usually name and uuid) for collections.
@@ -214,8 +216,8 @@ Parameters:
 - path_params: values for {param} placeholders in templated paths, e.g. {"volume.uuid":"abc-123"}
 - max_records: cap result count; omit to return all
 
-Example — list all IP interfaces:
-{"cluster_name":"dc1","path":"/network/ip/interfaces","fields":"name,ip.address,svm.name,location.node.name,state"}
+Example — list all items (no filters):
+{"cluster_name":"dc1","path":"/storage/volumes","fields":"name,svm.name,state,space.size,space.used"}
 
 Example — collection with filter:
 {"cluster_name":"dc1","path":"/storage/volumes","fields":"name,uuid,svm.name,state","filters":{"svm.name":"vs1"}}

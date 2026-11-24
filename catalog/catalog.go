@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -51,16 +52,17 @@ type File struct {
 	Endpoints    APICatalog `json:"endpoints"`
 }
 
-func Load(path string) (APICatalog, error) {
+// Load returns the catalog endpoints and the ONTAP version the catalog was generated from.
+func Load(path string) (APICatalog, string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("read catalog %s: %w", path, err)
+		return nil, "", fmt.Errorf("read catalog %s: %w", path, err)
 	}
 	var cf File
 	if err := json.Unmarshal(data, &cf); err != nil {
-		return nil, fmt.Errorf("parse catalog %s: %w", path, err)
+		return nil, "", fmt.Errorf("parse catalog %s: %w", path, err)
 	}
-	return cf.Endpoints, nil
+	return cf.Endpoints, cf.ONTAPVersion, nil
 }
 
 func Save(cat APICatalog, ontapVersion string, path string) error {
@@ -87,7 +89,9 @@ type SearchResult struct {
 	Endpoint APIEndpoint `json:"endpoint"`
 }
 
-func (c APICatalog) Search(query string) []SearchResult {
+// Search returns endpoints whose path, summary or tag contains query. If none do, it falls back to
+// the closest paths by word match and reports exact=false.
+func (c APICatalog) Search(query string) ([]SearchResult, bool) {
 	lower := strings.ToLower(query)
 	seen := make(map[string]bool)
 	var results []SearchResult
@@ -110,8 +114,88 @@ func (c APICatalog) Search(query string) []SearchResult {
 			results = append(results, SearchResult{Path: path, Endpoint: ep})
 		}
 	}
+	if len(results) == 0 {
+		for _, p := range c.SuggestPaths(query, 10) {
+			results = append(results, SearchResult{Path: p, Endpoint: c[p]})
+		}
+		return results, false
+	}
 	sort.Slice(results, func(i, j int) bool { return results[i].Path < results[j].Path })
-	return results
+	return results, true
+}
+
+// SuggestPaths returns up to limit catalog paths that share the most words with path.
+func (c APICatalog) SuggestPaths(path string, limit int) []string {
+	want := pathWords(path)
+	type hit struct {
+		path  string
+		score int
+		words int
+	}
+	var hits []hit
+	for p := range c {
+		have := pathWords(p)
+		score := 0
+		for _, w := range want {
+			if slices.ContainsFunc(have, func(h string) bool { return wordsMatch(w, h) }) {
+				score++
+			}
+		}
+		if score > 0 {
+			hits = append(hits, hit{p, score, len(have)})
+		}
+	}
+	sort.Slice(hits, func(i, j int) bool {
+		if hits[i].score != hits[j].score {
+			return hits[i].score > hits[j].score
+		}
+		if hits[i].words != hits[j].words {
+			return hits[i].words < hits[j].words
+		}
+		return hits[i].path < hits[j].path
+	})
+	out := make([]string, 0, min(limit, len(hits)))
+	for _, h := range hits[:min(limit, len(hits))] {
+		out = append(out, h.path)
+	}
+	return out
+}
+
+// wordAliases maps ONTAP CLI terms to the words used in REST paths, so a search for "lif" finds interfaces.
+var wordAliases = map[string]string{
+	"lif":      "interfaces",
+	"lifs":     "interfaces",
+	"vserver":  "svm",
+	"vservers": "svm",
+	"aggr":     "aggregates",
+	"aggrs":    "aggregates",
+}
+
+// pathWords splits a REST path or search query into lowercase words, skipping {placeholders}
+// and mapping CLI aliases (see wordAliases) to their REST equivalents.
+func pathWords(path string) []string {
+	var words []string
+	for w := range strings.FieldsFuncSeq(strings.ToLower(path), func(r rune) bool { return r == '/' || r == '-' || r == '_' || r == ' ' }) {
+		if strings.HasPrefix(w, "{") {
+			continue
+		}
+		if alias, ok := wordAliases[w]; ok {
+			w = alias
+		}
+		words = append(words, w)
+	}
+	return words
+}
+
+// wordsMatch treats singular and plural forms as the same word. Short words must match exactly.
+func wordsMatch(a, b string) bool {
+	if a == b {
+		return true
+	}
+	if len(a) < 4 || len(b) < 4 {
+		return false
+	}
+	return strings.HasPrefix(a, b) || strings.HasPrefix(b, a)
 }
 
 func (c APICatalog) ListAll() []SearchResult {

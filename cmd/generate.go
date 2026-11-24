@@ -214,8 +214,8 @@ func extractFieldDescs(op *swaggerOperation, defs map[string]swaggerDef, apiVers
 	}
 	result := make(map[string]catalog.FieldInfo, len(itemDef.Properties))
 	for name, prop := range itemDef.Properties {
-		if strings.HasPrefix(name, "_") {
-			continue // skip _links, _tags etc.
+		if name == "_links" {
+			continue
 		}
 		if prop.Visibility.Type == "private" {
 			continue

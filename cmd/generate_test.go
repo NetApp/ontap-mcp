@@ -26,6 +26,8 @@ definitions:
     properties:
       _links:
         $ref: "#/definitions/self_link"
+      _tags:
+        description: Tags
       name:
         description: Interface name
       ip:
@@ -40,10 +42,12 @@ func TestGenerateAPICatalogKeepsUndescribedFields(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "catalog.json")
 	assert.Nil(t, generateAPICatalog([]byte(testSwagger), "9.16", out))
 
-	cat, err := catalog.Load(out)
+	cat, ver, err := catalog.Load(out)
 	assert.Nil(t, err)
+	assert.Equal(t, ver, "9.16")
 	assert.Equal(t, cat["/network/ip/interfaces"].Fields, map[string]catalog.FieldInfo{
-		"name": {Desc: "Interface name"},
-		"ip":   {},
+		"_tags": {Desc: "Tags"},
+		"name":  {Desc: "Interface name"},
+		"ip":    {},
 	})
 }

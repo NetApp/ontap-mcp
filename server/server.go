@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"maps"
 	"net"
 	"net/http"
 	"net/url"
@@ -49,28 +50,29 @@ type Options struct {
 }
 
 type App struct {
-	logger       *slog.Logger
-	cfg          *config.ONTAP
-	options      Options
-	locks        *lock.Map
-	catalog      catalog.APICatalog
-	jwksURI      string
-	algOverride  []string
-	scope        string
-	oauthEnabled bool
-	audience     string
-	issuer       string
-	jwksMu       sync.RWMutex
-	jwksKeys     map[string]any
-	derivedAlgs  map[string]bool
-	keyAlg       map[string]string
-	jwksFetched  time.Time
-	jwksRefresh  singleflight.Group
-	httpClient   *http.Client
-	versionCache sync.Map
-	clusterIndex map[string]string // lowercase name → canonical config name
-	certFile     string
-	keyFile      string
+	logger         *slog.Logger
+	cfg            *config.ONTAP
+	options        Options
+	locks          *lock.Map
+	catalog        catalog.APICatalog
+	catalogVersion string
+	jwksURI        string
+	algOverride    []string
+	scope          string
+	oauthEnabled   bool
+	audience       string
+	issuer         string
+	jwksMu         sync.RWMutex
+	jwksKeys       map[string]any
+	derivedAlgs    map[string]bool
+	keyAlg         map[string]string
+	jwksFetched    time.Time
+	jwksRefresh    singleflight.Group
+	httpClient     *http.Client
+	versionCache   sync.Map
+	clusterIndex   map[string]string // lowercase name → canonical config name
+	certFile       string
+	keyFile        string
 }
 
 type cachedVersion struct {
@@ -184,9 +186,10 @@ func NewApp(cfg *config.ONTAP, o Options, logger *slog.Logger) (*App, error) {
 	}
 
 	const catalogPath = "conf/ontap_api_catalog.json"
-	if cat, err := catalog.Load(catalogPath); err == nil {
+	if cat, ver, err := catalog.Load(catalogPath); err == nil {
 		app.catalog = cat
-		logger.Info("loaded API catalog", slog.Int("endpoints", len(cat)), slog.String("path", catalogPath))
+		app.catalogVersion = ver
+		logger.Info("loaded API catalog", slog.Int("endpoints", len(cat)), slog.String("ontap_version", ver), slog.String("path", catalogPath))
 	} else {
 		logger.Warn("API catalog not found — catalog tools disabled", slog.String("path", catalogPath))
 	}
@@ -559,7 +562,7 @@ func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.L
 func (a *App) ListOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p tool.ListEndpointsParams) (*mcp.CallToolResult, any, error) {
 	var results []catalog.SearchResult
 	if p.Match != "" {
-		results = a.catalog.Search(p.Match)
+		results, _ = a.catalog.Search(p.Match)
 	} else {
 		results = a.catalog.ListAll()
 	}
@@ -579,7 +582,7 @@ func (a *App) SearchOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p 
 	if p.Query == "" {
 		return errorResult(errors.New("query parameter is required")), nil, nil
 	}
-	results := a.catalog.Search(p.Query)
+	results, exact := a.catalog.Search(p.Query)
 	if len(results) == 0 {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "No endpoints found matching: " + p.Query}},
@@ -587,7 +590,11 @@ func (a *App) SearchOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p 
 	}
 
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Found %d endpoints matching %q:\n", len(results), p.Query)
+	if exact {
+		fmt.Fprintf(&sb, "Found %d endpoints matching %q:\n", len(results), p.Query)
+	} else {
+		fmt.Fprintf(&sb, "No exact match for %q. Closest endpoints:\n", p.Query)
+	}
 	for _, r := range results {
 		fmt.Fprintf(&sb, "%s — %s\n", r.Path, r.Endpoint.Summary)
 	}
@@ -640,7 +647,7 @@ func (a *App) DescribeOntapEndpoint(ctx context.Context, _ *mcp.CallToolRequest,
 			names = append(names, k)
 		}
 		sort.Strings(names)
-		sb.WriteString("Filters (each name is also valid in 'fields'):\n")
+		sb.WriteString("Filters (a name whose part before the first dot is listed under Fields is also valid in 'fields'):\n")
 		for _, name := range names {
 			f := ep.Filters[name]
 			typ := f.Type
@@ -698,6 +705,8 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	if !strings.HasPrefix(p.Path, "/") {
 		return errorResult(fmt.Errorf("path must start with /, got %q", p.Path)), nil, nil
 	}
+	var query string
+	p.Path, query = normalizePath(p.Path)
 
 	if p.PathParams == nil {
 		p.PathParams = make(map[string]string)
@@ -705,9 +714,14 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	if p.Filters == nil {
 		p.Filters = make(map[string]string)
 	}
+	if query != "" {
+		if err := applyPathQuery(&p, query); err != nil {
+			return errorResult(err), nil, nil
+		}
+	}
 
-	// The catalog is keyed by the template path, so look up unknown fields before resolving placeholders.
-	unknown := a.unknownFields(p.Path, p.Fields)
+	// The catalog is keyed by the template path, not the resolved one.
+	templatePath := p.Path
 
 	// Resolve any path-parameter placeholders (e.g. {volume.uuid}) before making the request.
 	resolvedPath := p.Path
@@ -739,32 +753,140 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 		params.Set("max_records", strconv.Itoa(p.MaxRecords))
 	}
 	// ignore_unknown_fields was introduced in ONTAP 9.11. skip for older clusters.
-	if ver, _, err := a.getClusterVersion(ctx, p.Cluster); err != nil || catalog.CompareVersions(ver, "9.11") >= 0 {
+	ver, _, _ := a.getClusterVersion(ctx, p.Cluster)
+	if ver == "" || catalog.CompareVersions(ver, "9.11") >= 0 {
 		params.Set("ignore_unknown_fields", "true")
+	}
+	unknown := a.unknownFields(templatePath, p.Fields, ver)
+	var fieldsHint string
+	if p.Fields == "" {
+		fieldsHint = a.availableFieldsHint(templatePath, ver)
 	}
 
 	raw, err := client.GenericGet(ctx, p.Path, params, p.MaxRecords)
 	if err != nil {
+		err = a.withPathSuggestions(err, templatePath)
 		return errorResult(err), nil, err
 	}
 
+	// Hints go in separate content items so the JSON in the first one stays parseable.
 	content := []mcp.Content{&mcp.TextContent{Text: string(stripLinks(raw))}}
 	if len(unknown) > 0 {
-		// A separate content item keeps the JSON in the first one parseable.
 		content = append(content, &mcp.TextContent{
-			Text: "Ignored unknown fields: " + strings.Join(unknown, ", ") + ". Call describe_ontap_endpoint for valid fields.",
+			Text: "Ignored fields not available on this cluster: " + strings.Join(unknown, ", ") + ". Call describe_ontap_endpoint for valid fields.",
 		})
+	}
+	if fieldsHint != "" {
+		content = append(content, &mcp.TextContent{Text: fieldsHint})
+	}
+	if hint := largeResultHint(p.Fields, p.MaxRecords, raw); hint != "" {
+		content = append(content, &mcp.TextContent{Text: hint})
 	}
 	return &mcp.CallToolResult{Content: content}, nil, nil
 }
 
-// unknownFields returns requested fields whose top-level name is not in the catalog entry for path.
-func (a *App) unknownFields(path, fields string) []string {
-	if fields == "" {
+// largeResultRecords is how many records a wildcard query may return before ontap_get suggests narrowing fields.
+const largeResultRecords = 5
+
+// largeResultHint suggests listing specific fields when a wildcard query without max_records returned many records.
+func largeResultHint(fields string, maxRecords int, raw json.RawMessage) string {
+	if maxRecords > 0 || !strings.Contains(fields, "*") {
+		return ""
+	}
+	var page struct {
+		NumRecords int `json:"num_records"`
+	}
+	if json.Unmarshal(raw, &page) != nil || page.NumRecords <= largeResultRecords {
+		return ""
+	}
+	return fmt.Sprintf("Large response: %d full records for fields=%q. Next time list only the fields you need as a comma-separated string; call describe_ontap_endpoint to see the valid fields.",
+		page.NumRecords, fields)
+}
+
+// normalizePath removes a leading /api (GenericGet adds it) and a trailing slash, and splits off any query string.
+func normalizePath(path string) (string, string) {
+	path, query, _ := strings.Cut(path, "?")
+	if strings.HasPrefix(path, "/api/") {
+		path = path[len("/api"):]
+	}
+	if len(path) > 1 {
+		path = strings.TrimSuffix(path, "/")
+	}
+	return path, query
+}
+
+// applyPathQuery moves query parameters written in the path into fields, max_records and filters,
+// without overriding values set explicitly.
+func applyPathQuery(p *tool.OntapGetParams, query string) error {
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		return fmt.Errorf("invalid query string in path %q: put query parameters in fields and filters instead", query)
+	}
+	for k, v := range values {
+		switch k {
+		case "fields":
+			if p.Fields == "" {
+				p.Fields = v[0]
+			}
+		case "max_records":
+			if n, err := strconv.Atoi(v[0]); err == nil && p.MaxRecords == 0 {
+				p.MaxRecords = n
+			}
+		default:
+			if _, ok := p.Filters[k]; !ok {
+				p.Filters[k] = v[0]
+			}
+		}
+	}
+	return nil
+}
+
+// withPathSuggestions adds catalog paths similar to path when ONTAP reports that the API does not exist.
+func (a *App) withPathSuggestions(err error, path string) error {
+	var ce ontap.ClusterError
+	if a.catalog == nil || !errors.As(err, &ce) || ce.StatusCode != http.StatusNotFound || ce.Err.Code != "3" {
+		return err
+	}
+	suggestions := a.catalog.SuggestPaths(path, 5)
+	if len(suggestions) == 0 {
+		return err
+	}
+	return fmt.Errorf("%w. Did you mean: %s? Call search_ontap_endpoints to find valid paths",
+		err, strings.Join(suggestions, ", "))
+}
+
+// availableFieldsHint lists the catalog's top-level fields for path on version ver, or "" if none.
+func (a *App) availableFieldsHint(path, ver string) string {
+	ep, ok := a.catalog[path]
+	if !ok {
+		return ""
+	}
+	if ver != "" {
+		ep = ep.FilterByVersion(ver)
+	}
+	if len(ep.Fields) == 0 {
+		return ""
+	}
+	names := slices.Sorted(maps.Keys(ep.Fields))
+	return "Only key fields were returned. Available fields: " + strings.Join(names, ", ") +
+		". Use dot-notation for nested values (e.g. svm.name) and call describe_ontap_endpoint for sub-fields."
+}
+
+// unknownFields returns requested fields whose top-level name is not in the catalog for path on version ver.
+// It returns nil when ver is unknown, older than 9.11 (no ignore_unknown_fields), or newer than the catalog.
+func (a *App) unknownFields(path, fields, ver string) []string {
+	if fields == "" || ver == "" || catalog.CompareVersions(ver, "9.11") < 0 {
+		return nil
+	}
+	if a.catalogVersion != "" && catalog.CompareVersions(ver, a.catalogVersion) > 0 {
 		return nil
 	}
 	ep, ok := a.catalog[path]
-	if !ok || len(ep.Fields) == 0 {
+	if !ok {
+		return nil
+	}
+	ep = ep.FilterByVersion(ver)
+	if len(ep.Fields) == 0 {
 		return nil
 	}
 	var unknown []string
