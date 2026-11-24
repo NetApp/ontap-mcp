@@ -204,7 +204,7 @@ func interclusterLIFCheck(scope, cluster string, lifs []rest.InterclusterLIF, er
 		return check
 	}
 	check.Passed = true
-	check.Message = fmt.Sprintf("%s cluster %s has %d enabled and up intercluster LIF(s)", scope, cluster, len(lifs))
+	check.Message = fmt.Sprintf("%s cluster %s has %d enabled and up intercluster LIF(s)", scope, cluster, len(lifs)-len(unavailable))
 	return check
 }
 

@@ -66,7 +66,7 @@ func (c *Client) GetInterclusterLIFs(ctx context.Context) ([]InterclusterLIF, er
 
 func (c *Client) GetClusterPeers(ctx context.Context, peerCluster string) ([]ClusterPeer, error) {
 	params := url.Values{}
-	params.Set("name", peerCluster)
+	params.Set("remote.name", peerCluster)
 	params.Set("fields", "name,uuid,status")
 
 	var result struct {

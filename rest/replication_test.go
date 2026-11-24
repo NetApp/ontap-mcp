@@ -44,8 +44,8 @@ func TestReplicationQueries(t *testing.T) {
 			name: "cluster peers",
 			path: "/api/cluster/peers",
 			wantQuery: map[string]string{
-				"name":   "cluster-b",
-				"fields": "name,uuid,status",
+				"remote.name": "cluster-b",
+				"fields":      "name,uuid,status",
 			},
 			response: `{"records":[{"name":"cluster-b","uuid":"peer-1","status":{"state":"available"}}],"num_records":1}`,
 			invoke: func(ctx context.Context, client *Client) error {

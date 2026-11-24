@@ -18,7 +18,7 @@ func TestValidateReplicationContract(t *testing.T) {
 		sourceSVM          = "source-svm"
 		destinationSVM     = "destination-svm"
 		lifFields          = "fields=name%2Cenabled%2Cstate%2Cip.address%2Clocation.node.name&max_records=500&services=intercluster_core"
-		clusterPeerFields  = "fields=name%2Cuuid%2Cstatus&max_records=500&name="
+		clusterPeerFields  = "fields=name%2Cuuid%2Cstatus&max_records=500&remote.name="
 		svmPeerFields      = "fields=uuid%2Cstate%2Capplications%2Csvm.name%2Cpeer.cluster.name%2Cpeer.svm.name&max_records=500&peer.cluster.name="
 	)
 	clusterInfo := func(name string, major, minor int) exchange {
