@@ -1,6 +1,6 @@
 {
   "ontap_version": "9.19",
-  "generated_at": "2026-11-24T15:46:37Z",
+  "generated_at": "2026-11-24T17:05:46Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
@@ -41,9 +41,6 @@
       "fields": {
         "creation_timestamp": {
           "desc": "The time when the application was created."
-        },
-        "delete_data": {
-          "desc": "Should application storage elements be deleted? An application is considered to use storage elements from a shared storage pool. Possible values are 'true' and 'false'. If the value is 'true', the application will be deleted in its entirety. If the value is 'false', the storage elements will be disassociated from the application and preserved. The application will then be deleted."
         },
         "generation": {
           "desc": "The generation number of the application. This indicates which features are supported on the application. For example, generation 1 applications do not support Snapshot copies. Support for Snapshot copies was added at generation 2. Any future generation numbers and their feature set will be documented."
@@ -989,9 +986,6 @@
         "parent_consistency_group": {
           "desc": "The parent consistency group."
         },
-        "provisioning_options": {
-          "desc": "Options that are applied to the operation."
-        },
         "qos": {},
         "replicated": {
           "desc": "Indicates whether or not replication has been enabled on this consistency group."
@@ -1002,9 +996,6 @@
         },
         "replication_source": {
           "desc": "Since support for this field is to be removed in the next release, use replication_relationships.is_source instead."
-        },
-        "restore_to": {
-          "desc": "Use to restore a consistency group to a previous snapshot"
         },
         "snapshot_policy": {
           "desc": "The snapshot policy of the consistency group. This is the dedicated consistency group snapshot policy, not an aggregation of the volume granular snapshot policy."
@@ -1146,17 +1137,6 @@
         "azure_account": {
           "desc": "Azure account"
         },
-        "azure_msi_token": {
-          "since": "9.16",
-          "desc": "Managed Service Identity (MSI) token required to authenticate to the Azure object store. This form of authentication is only supported on Azure NetApp Files."
-        },
-        "azure_private_key": {
-          "desc": "Azure access key"
-        },
-        "azure_sas_token": {
-          "since": "9.12",
-          "desc": "Shared access signature token to access Azure containers and blobs."
-        },
         "cap_url": {
           "desc": "This parameter is available only when auth-type is CAP. It specifies a full URL of the request to a CAP server for retrieving temporary credentials (access-key, secret-password, and session token) for accessing the object store."
         },
@@ -1191,9 +1171,6 @@
         "scope": {
           "since": "9.12",
           "desc": "If the cloud target is owned by a data SVM, then the scope is set to svm. Otherwise it will be set to cluster."
-        },
-        "secret_password": {
-          "desc": "Secret access key for AWS_S3 and other S3 compatible provider types."
         },
         "server": {
           "desc": "Fully qualified domain name of the object store server. Required on POST. For Amazon S3, server name must be an AWS regional endpoint in the format s3.amazonaws.com or s3- .amazonaws.com, for example, s3-us-west-2.amazonaws.com. The region of the server and the bucket must match. For Azure, if the server is a \"blob.core.windows.net\" or a \"blob.core.usgovcloudapi.net\", then a value of azure-account followed by a period is added in front of the server."
@@ -1539,7 +1516,6 @@
         "entitlement": {
           "since": "9.11"
         },
-        "keys": {},
         "licenses": {
           "desc": "Installed licenses of the package."
         },
@@ -1593,28 +1569,9 @@
         "uuid": {}
       },
       "fields": {
-        "account_token": {
-          "since": "9.19",
-          "desc": "NetApp Console account token. This field is only applicable to the ONTAP cloud mediator."
-        },
-        "bluexp_account_token": {
-          "since": "9.17",
-          "desc": "BlueXP account token. This field is only applicable to the ONTAP cloud mediator. This has been replaced by account_token. Support for this field will be removed in a future release."
-        },
-        "bluexp_org_id": {
-          "since": "9.17",
-          "desc": "BlueXP organization ID. This field is only applicable to the ONTAP cloud mediator. This has been replaced by org_id. Support for this field will be removed in a future release."
-        },
-        "ca_certificate": {
-          "desc": "CA certificate for ONTAP Mediator. This is optional if the certificate is already installed."
-        },
         "connection_type": {
           "since": "9.19",
           "desc": "Connection type from ONTAP MetroCluster to mediator. Applicable only to on-prem mediator used in ONTAP MetroCluster configurations."
-        },
-        "dr_group": {
-          "since": "9.9",
-          "desc": "DR group reference."
         },
         "ip_address": {
           "desc": "The IP address of the mediator."
@@ -1622,14 +1579,6 @@
         "local_mediator_connectivity": {
           "since": "9.17",
           "desc": "Indicates the mediator connectivity status of the local cluster. Possible values are connected, unreachable, unusable and down-high-latency. This field is only applicable to the mediators in SnapMirror active sync configuration."
-        },
-        "org_id": {
-          "since": "9.19",
-          "desc": "NetApp Console organization ID. This field is only applicable to the ONTAP cloud mediator."
-        },
-        "password": {
-          "since": "9.6",
-          "desc": "The password used to connect to the REST server on the mediator."
         },
         "peer_cluster": {
           "desc": "The peer cluster that the mediator service is used for."
@@ -1644,14 +1593,6 @@
         "reachable": {
           "desc": "Indicates the connectivity status of the mediator."
         },
-        "service_account_client_id": {
-          "since": "9.17",
-          "desc": "Client ID of the NetApp Console service account. This field is only applicable to the ONTAP cloud mediator."
-        },
-        "service_account_client_secret": {
-          "since": "9.17",
-          "desc": "Client secret token of the NetApp Console service account. This field is only applicable to the ONTAP cloud mediator."
-        },
         "strict_cert_validation": {
           "since": "9.17",
           "desc": "Indicates if strict validation of certificates is performed while making REST API calls to the mediator. This field is only applicable to the ONTAP Cloud Mediator."
@@ -1663,13 +1604,6 @@
         "use_http_proxy_local": {
           "since": "9.17",
           "desc": "Indicates if the local cluster should use an http-proxy server while making REST API calls to the mediator. This field is only applicable to the ONTAP cloud mediator."
-        },
-        "use_http_proxy_remote": {
-          "since": "9.17",
-          "desc": "Indicates if the remote cluster should use an http-proxy server while making REST API calls to the mediator. This field is only applicable to the ONTAP cloud mediator."
-        },
-        "user": {
-          "desc": "The username used to connect to the REST server on the mediator."
         },
         "uuid": {
           "since": "9.6",
@@ -1783,10 +1717,6 @@
         "dr_pairs": {},
         "id": {
           "desc": "DR Group ID"
-        },
-        "mccip_ports": {
-          "since": "9.9",
-          "desc": "List of Port specifications."
         },
         "partner_cluster": {
           "desc": "Partner cluster information."
@@ -2458,9 +2388,6 @@
           "since": "9.16",
           "desc": "Anti ransomware version."
         },
-        "cluster_interface": {
-          "desc": "The cluster network IP address of the node to be added."
-        },
         "cluster_interfaces": {},
         "controller": {
           "desc": "Controller information"
@@ -2486,9 +2413,6 @@
           "desc": "Specifies whether or not the node is in spares low condition."
         },
         "location": {},
-        "management_interface": {
-          "desc": "The management interface of the node to be added. The subnet mask is set based on the management interface of the cluster or the management interfaces of other nodes."
-        },
         "management_interfaces": {},
         "membership": {
           "desc": "Possible values: * available - A node is detected on the internal cluster network and can be added to the cluster. Nodes that have a membership of \"available\" are not returned when a GET request is called when the cluster exists. Provide a query on the \"membership\" property for available to scan for nodes on the cluster network. Nodes that have a membership of \"available\" are returned automatically before a cluster is created. * joining - Joining nodes are in the process of being added to the cluster. The node might be progressing through the steps to become a member or might have failed. The job to add the node or create the cluster provides details on the current progress of the node. * member - Nodes that are members have successfully joined the cluster."
@@ -2704,9 +2628,6 @@
         },
         "ipspace": {
           "desc": "The IPspace of the local intercluster LIFs."
-        },
-        "local_network": {
-          "desc": "Cluster peering requires an intercluster LIF on each local node. These can be optionally created by specifying a list of IP addresses corresponding to each node."
         },
         "name": {
           "desc": "Optional name for the cluster peer relationship. By default, it is the name of the remote cluster, or a temporary name might be autogenerated for anonymous cluster peer offers."
@@ -3276,10 +3197,6 @@
           "since": "9.14",
           "desc": "List of IP addresses for a DNS service. Addresses can be IPv4, IPv6 or both."
         },
-        "skip_config_validation": {
-          "since": "9.9",
-          "desc": "Indicates whether or not the validation for the specified DNS configuration is disabled."
-        },
         "source_address_match": {
           "since": "9.9",
           "desc": "Indicates whether or not the DNS responses are from a different IP address to the IP address the request was sent to."
@@ -3475,9 +3392,6 @@
         "bind_dn": {
           "desc": "Specifies the user that binds to the LDAP servers."
         },
-        "bind_password": {
-          "desc": "Specifies the bind password for the LDAP servers."
-        },
         "group_dn": {
           "since": "9.9",
           "desc": "Specifies the group Distinguished Name (DN) that is used as the starting point in the LDAP directory tree for group lookups."
@@ -3543,10 +3457,6 @@
         "servers": {},
         "session_security": {
           "desc": "Specifies the level of security to be used for LDAP communications: * none - no signing or sealing * sign - sign LDAP traffic * seal - seal and sign LDAP traffic"
-        },
-        "skip_config_validation": {
-          "since": "9.9",
-          "desc": "Indicates whether or not the validation for the specified LDAP configuration is disabled."
         },
         "status": {
           "since": "9.9"
@@ -3638,9 +3548,6 @@
         "rfc2307bis": {},
         "scope": {
           "desc": "Scope of the entity. Set to \"cluster\" for cluster owned objects and to \"svm\" for SVM owned objects."
-        },
-        "template": {
-          "desc": "The existing schema template you want to copy."
         }
       }
     },
@@ -3785,9 +3692,6 @@
         "name": {
           "desc": "UNIX group name to be added to the local database."
         },
-        "skip_name_validation": {
-          "desc": "Indicates whether or not the validation for the specified UNIX group name is disabled."
-        },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
@@ -3824,9 +3728,6 @@
         },
         "primary_gid": {
           "desc": "Primary group ID to which the user belongs."
-        },
-        "skip_name_validation": {
-          "desc": "Indicates whether or not the validation for the specified UNIX user name is disabled."
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -4588,10 +4489,6 @@
         "ipspace": {
           "desc": "Applies to both SVM and cluster-scoped objects. Either the UUID or name is supplied on input. This is mutually exclusive with SVM during POST and PATCH."
         },
-        "password": {
-          "since": "9.9",
-          "desc": "Password to authenticate with the HTTP proxy server when authentication_enabled is set to \"true\"."
-        },
         "port": {
           "desc": "The port number on which the HTTP proxy service is configured on the proxy server."
         },
@@ -4603,10 +4500,6 @@
         },
         "svm": {
           "desc": "This is mutually exclusive with IPspace during POST and PATCH."
-        },
-        "username": {
-          "since": "9.9",
-          "desc": "Username to authenticate with the HTTP proxy server when authentication_enabled is set to \"true\"."
         },
         "uuid": {
           "desc": "The UUID that uniquely identifies the HTTP proxy."
@@ -4798,10 +4691,6 @@
         "enabled": {
           "desc": "The administrative state of the interface."
         },
-        "fail_if_subnet_conflicts": {
-          "since": "9.11",
-          "desc": "This command fails if the specified IP address falls within the address range of a named subnet. Set this value to false to use the specified IP address and to assign the subnet owning that address to the interface."
-        },
         "ip": {},
         "ipspace": {
           "desc": "Either the UUID or name must be supplied on POST for cluster-scoped objects."
@@ -4984,9 +4873,6 @@
         "broadcast_domain": {
           "desc": "The broadcast domain that the subnet is associated with. Either the UUID or name must be supplied on POST."
         },
-        "fail_if_lifs_conflict": {
-          "desc": "This action will fail if any existing interface is using an IP address in the ranges provided. Set this to false to associate any manually addressed interfaces with the subnet and allow the action to succeed."
-        },
         "gateway": {
           "desc": "The IP address of the gateway for this subnet."
         },
@@ -5061,9 +4947,6 @@
         "discovered_servers": {
           "desc": "Specifies the discovered servers records."
         },
-        "force_account_overwrite": {
-          "desc": "If set to true and a machine account exists with the same name as specified in \"name\" in Active Directory, it will be overwritten and reused."
-        },
         "fqdn": {
           "desc": "Fully qualified domain name."
         },
@@ -5073,9 +4956,6 @@
         "organizational_unit": {
           "desc": "Organizational unit under which the Active Directory account will be created."
         },
-        "password": {
-          "desc": "Administrator password required for Active Directory account creation, modification and deletion."
-        },
         "preferred_dcs": {
           "desc": "Specifies the preferred domain controller (DC) records."
         },
@@ -5084,9 +4964,6 @@
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        },
-        "username": {
-          "desc": "Administrator username required for Active Directory account creation, modification and deletion."
         }
       }
     },
@@ -5285,10 +5162,6 @@
         "ad_domain": {
           "since": "9.14",
           "desc": "Specifies the credentials of a user with permissions to reset the password in the organizational unit for the machine account."
-        },
-        "client_certificate": {
-          "since": "9.16",
-          "desc": "PKCS12 certificate used by the application to prove its identity to AKV."
         },
         "client_id": {
           "since": "9.16",
@@ -5494,10 +5367,6 @@
         "name": {
           "since": "9.10",
           "desc": "Local user name. The maximum supported length of an user name is 20 characters."
-        },
-        "password": {
-          "since": "9.10",
-          "desc": "Password for the local user."
         },
         "sid": {
           "since": "9.10",
@@ -5810,17 +5679,9 @@
           "since": "9.19",
           "desc": "Specifies the azure cloud location of the tenant in case of hybrid-user authentication"
         },
-        "client_certificate": {
-          "since": "9.15",
-          "desc": "PKCS12 certificate used by the application to prove its identity to AKV."
-        },
         "client_id": {
           "since": "9.15",
           "desc": "Application client ID of the deployed Azure application with appropriate access to an AKV or EntraId."
-        },
-        "client_secret": {
-          "since": "9.15",
-          "desc": "Secret used by the application to prove its identity to AKV."
         },
         "comment": {
           "desc": "A descriptive text comment for the CIFS server. SMB clients can see the CIFS server comment when browsing servers on the network. If there is a space in the comment, you must enclose the entire string in quotation marks."
@@ -5857,10 +5718,6 @@
         "proxy_host": {
           "since": "9.15",
           "desc": "Proxy host."
-        },
-        "proxy_password": {
-          "since": "9.15",
-          "desc": "Proxy password. Password is not audited."
         },
         "proxy_port": {
           "since": "9.15",
@@ -6095,28 +5952,16 @@
         "client_uuid": {
           "desc": "The universally-unique identifier of the client's shadow copy."
         },
-        "destination_dir": {
-          "desc": "The path of the destination directory. The path is in UTF8 and uses forward slash as a directory separator. The path is relative to the root of the volume."
-        },
         "files": {
           "desc": "The list of files to shadow copy in the share. The path is in UTF8 and uses forward slash as a directory separator. The path is relative to the root of the share."
         },
         "shadowcopy_set": {},
         "share": {},
-        "source_dir": {
-          "desc": "The path of the source directory. The path is in UTF8 and uses forward slash as a directory separator. The path is relative to the root of the volume."
-        },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
         "uuid": {
           "desc": "The universally-unique identifier of the storage's shadow copy."
-        },
-        "volume": {
-          "desc": "The name of the volume where the source and destination directories reside."
-        },
-        "with_content": {
-          "desc": "Specifies what needs to be restored. False specifies the directory only. True indicates the directory and its content."
         }
       }
     },
@@ -6776,9 +6621,6 @@
         "node": {
           "desc": "Storage system node"
         },
-        "password": {
-          "desc": "NDMP password. This can only be set and cannot be read back."
-        },
         "user": {
           "desc": "NDMP user ID"
         }
@@ -7111,34 +6953,18 @@
           "desc": "Specifies if Kerberos is enabled."
         },
         "encryption_types": {},
-        "force": {
-          "since": "9.13",
-          "desc": "Specifies whether the server should ignore any error encountered while deleting the corresponding machine account on the KDC and also disables Kerberos on the LIF."
-        },
         "interface": {
           "desc": "Network interface"
-        },
-        "keytab_uri": {
-          "desc": "Load keytab from URI"
         },
         "machine_account": {
           "since": "9.12",
           "desc": "Specifies the machine account to create in Active Directory."
-        },
-        "organizational_unit": {
-          "desc": "Organizational unit"
-        },
-        "password": {
-          "desc": "Account creation password"
         },
         "spn": {
           "desc": "Service principal name. Valid in PATCH."
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
-        },
-        "user": {
-          "desc": "Account creation user name"
         }
       }
     },
@@ -8253,9 +8079,6 @@
         "volume.uuid": {}
       },
       "fields": {
-        "aggregates": {
-          "desc": "A list of aggregates for FlexGroup volume constituents where the bucket is hosted. If this option is not specified, the bucket is auto-provisioned as a FlexGroup volume."
-        },
         "allowed": {
           "since": "9.12",
           "desc": "If this is set to true, an SVM administrator can manage the S3 service. If it is false, only the cluster administrator can manage the service. This field cannot be specified in a POST method."
@@ -8266,9 +8089,6 @@
         },
         "comment": {
           "desc": "Can contain any additional information about the bucket being created or modified."
-        },
-        "constituents_per_aggregate": {
-          "desc": "Specifies the number of constituents or FlexVol volumes per aggregate. A FlexGroup volume consisting of all such constituents across all specified aggregates is created. This option is used along with the aggregates option and cannot be used independently."
         },
         "cors": {
           "since": "9.16",
@@ -8328,20 +8148,12 @@
           "since": "9.18",
           "desc": "Specifies information regarding a snapshot restore operation on the bucket"
         },
-        "storage_service_level": {
-          "since": "9.8",
-          "desc": "Specifies the storage service level of the FlexGroup volume on which the bucket should be created. Valid values are \"value\", \"performance\" or \"extreme\"."
-        },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
         },
         "type": {
           "since": "9.12",
           "desc": "Specifies the bucket type. Valid values are \"s3\"and \"nas\"."
-        },
-        "use_mirrored_aggregates": {
-          "since": "9.14",
-          "desc": "Specifies whether mirrored aggregates are selected when provisioning a FlexGroup. Only mirrored aggregates are used if this parameter is set to \"true\" and only unmirrored aggregates are used if this parameter is set to \"false\". The default value is \"true\" for a MetroCluster configuration and is \"false\" for a non-MetroCluster configuration."
         },
         "uuid": {
           "desc": "Specifies the unique identifier of the bucket."
@@ -8982,9 +8794,6 @@
         "name": {
           "desc": "The name of the initiator group."
         },
-        "records": {
-          "desc": "An array of initiator groups specified to add multiple nested initiator groups to an initiator group in a single API call. Not allowed when the `name` property is used."
-        },
         "uuid": {
           "desc": "The unique identifier of the initiator group."
         }
@@ -9031,9 +8840,6 @@
         "proximity": {
           "since": "9.15",
           "desc": "Properties that define to what SVMs the initiator is proximal. This information is used to properly report active optimized and active non-optimized network paths via ALUA. If no configuration has been specified for an initiator, the sub-object will not be present in GET. These properties can be set via initiator group POST and PATCH and apply to all instances of the initiator in all initiator groups in the SVM and its peers. The `proximity` sub-object for an initiator is set in POST and PATCH in its entirety and replaces any previously set proximity for the initiator within the SVM for the initiator within the SVM. The `local_svm` property must always be set to `true` or `false` when setting the `proximity` property. To clear any previously set proximity, POST or PATCH the `proximity` object to `null`."
-        },
-        "records": {
-          "desc": "An array of initiators specified to add multiple initiators to an initiator group in a single API call. Not allowed when the `name` property is used."
         }
       }
     },
@@ -9420,9 +9226,6 @@
         "svm.uuid": {}
       },
       "fields": {
-        "cache_clear": {
-          "desc": "Discards the cached information of the files that have been successfully scanned. Once the cache is cleared, files are scanned again when they are accessed. PATCH only"
-        },
         "enabled": {
           "desc": "Specifies whether or not Vscan is enabled on the SVM."
         },
@@ -9592,9 +9395,6 @@
         },
         "owner": {
           "desc": "Owner name and UUID that uniquely identifies the user account."
-        },
-        "password": {
-          "desc": "Password for the account. The password can contain a mix of lower and upper case alphabetic characters, digits, and special characters."
         },
         "password_hash_algorithm": {
           "since": "9.11",
@@ -9899,9 +9699,6 @@
         "client_id": {
           "desc": "The OAuth 2.0 client ID. Required in POST operations for remote introspection."
         },
-        "client_secret": {
-          "desc": "The OAuth 2.0 client secret. Required in POST operations for remote introspection."
-        },
         "hashed_client_secret": {
           "desc": "The OAuth 2.0 client secret as a SHA256 HMAC hashed value created with the cluster UUID as its HMAC secret key."
         },
@@ -9922,9 +9719,6 @@
         },
         "remote_user_claim": {
           "desc": "The remote user claim."
-        },
-        "skip_uri_validation": {
-          "desc": "Indicates whether or not to validate the input URIs. Default value is false."
         },
         "use_local_roles_if_present": {
           "desc": "Indicates whether or not to use locally configured roles, if present. Default value is false."
@@ -10096,9 +9890,6 @@
         "push_info": {
           "desc": "Additional information sent along with the push notification for Duo authentication."
         },
-        "secret_key": {
-          "desc": "The Secret Key associated with the Duo profile."
-        },
         "status": {
           "desc": "Information on the reachability status of Duo."
         }
@@ -10268,9 +10059,6 @@
         "proxy_host": {
           "desc": "Proxy host."
         },
-        "proxy_password": {
-          "desc": "Proxy password. Password is not audited."
-        },
         "proxy_port": {
           "desc": "Proxy port."
         },
@@ -10285,9 +10073,6 @@
         },
         "scope": {
           "desc": "Set to \"svm\" for interfaces owned by an SVM. Otherwise, set to \"cluster\"."
-        },
-        "secret_access_key": {
-          "desc": "AWS Secret Access Key for the provided access key ID."
         },
         "service": {
           "desc": "AWS service type."
@@ -10400,15 +10185,8 @@
         "azure_reachability": {
           "desc": "Indicates whether or not the AKV service is reachable from all the nodes in the cluster. This is an advanced property; there is an added computational cost to retrieving its value. The property is not populated for either a collection GET or an instance GET unless it is explicitly requested using the `fields` query parameter or GET for all advanced properties is enabled."
         },
-        "client_certificate": {
-          "since": "9.10",
-          "desc": "PKCS12 Certificate used by the application to prove its identity to AKV."
-        },
         "client_id": {
           "desc": "Application client ID of the deployed Azure application with appropriate access to an AKV."
-        },
-        "client_secret": {
-          "desc": "Secret used by the application to prove its identity to AKV."
         },
         "configuration": {
           "since": "9.14",
@@ -10435,9 +10213,6 @@
         },
         "proxy_host": {
           "desc": "Proxy host."
-        },
-        "proxy_password": {
-          "desc": "Proxy password. Password is not audited."
         },
         "proxy_port": {
           "desc": "Proxy port."
@@ -10530,9 +10305,6 @@
         "application_cred_id": {
           "desc": "Keystone application credentials ID required to access the specified Barbican KMS."
         },
-        "application_cred_secret": {
-          "desc": "Keystone application credentials secret required to access the specified Barbican KMS. It is not audited."
-        },
         "barbican_reachability": {
           "desc": "Indicates whether the Barbican KMS is reachable from all nodes in the cluster. This is an advanced property; there is an added computational cost to retrieving its value. The property is not populated for either a collection GET request or an instance GET request unless it is explicitly requested using the field's query parameter or GET for all advanced properties is enabled."
         },
@@ -10550,9 +10322,6 @@
         },
         "proxy_host": {
           "desc": "Proxy host name."
-        },
-        "proxy_password": {
-          "desc": "Proxy password. Password is not audited."
         },
         "proxy_port": {
           "desc": "Proxy port number."
@@ -10653,18 +10422,12 @@
         "hash_function": {
           "desc": "Hashing function. Can be provided on POST when creating a self-signed certificate. Hash functions md5 and sha1 are not allowed on POST."
         },
-        "intermediate_certificates": {
-          "desc": "Chain of intermediate Certificates in PEM format. Only valid in POST when installing a certificate."
-        },
         "key_size": {
           "desc": "Key size of requested Certificate in bits. One of 512, 1024, 1536, 2048, 3072. Can be provided on POST if creating self-signed certificate with a minimum permissible value of 2048."
         },
         "name": {
           "since": "9.8",
           "desc": "Certificate name or name of the certificate to be downloaded from the Azure Key Vault (AKV). If not provided in POST, a unique name specific to the SVM is automatically generated."
-        },
-        "private_key": {
-          "desc": "Private key Certificate in PEM format. Only valid for create when installing a CA-signed certificate. This is not audited."
         },
         "public_certificate": {
           "desc": "Public key Certificate in PEM format. If this is not provided in POST, a self-signed certificate is created."
@@ -10998,9 +10761,6 @@
         }
       },
       "fields": {
-        "application_credentials": {
-          "desc": "The Google Cloud application's service account credentials required to access the specified KMS. The client_email and private_key fields of the service account holder are required. The credentials are required if the `authentication_method` is set to `application_credentials_key`."
-        },
         "authentication_method": {
           "since": "9.17",
           "desc": "Google Cloud KMS authentication method."
@@ -11051,9 +10811,6 @@
         },
         "proxy_host": {
           "desc": "Proxy host name."
-        },
-        "proxy_password": {
-          "desc": "Proxy password. Password is not audited."
         },
         "proxy_port": {
           "desc": "Proxy port number."
@@ -11292,9 +11049,6 @@
         },
         "scope": {
           "since": "9.6"
-        },
-        "secret_key": {
-          "desc": "Pre-shared key for IKE negotiation."
         },
         "svm": {
           "desc": "SVM, applies only to SVM-scoped objects."
@@ -12475,20 +12229,8 @@
           "since": "9.14",
           "desc": "Specifies the Primary Site of the SnapMirror active sync relationship."
         },
-        "preserve": {
-          "desc": "Set to true on resync to preserve snapshots on the destination that are newer than the latest common snapshot. This property is applicable only for relationships with FlexVol volume or FlexGroup volume endpoints and when the PATCH state is being changed to \"snapmirrored\"."
-        },
-        "quick_resync": {
-          "desc": "Set to true to reduce resync time by not preserving storage efficiency. This property is applicable only for relationships with FlexVol volume endpoints and SVMDR relationships when the PATCH state is being changed to \"snapmirrored\"."
-        },
-        "recover_after_break": {
-          "desc": "Set to true to recover from a failed SnapMirror break operation on a FlexGroup volume relationship. This restores all destination FlexGroup constituent volumes to the latest snapshot, and any writes to the read-write constituents are lost. This property is applicable only for SnapMirror relationships with FlexGroup volume endpoints and when the PATCH state is being changed to \"broken_off\"."
-        },
         "restore": {
           "desc": "Set to true to create a relationship for restore. To trigger restore-transfer, use transfers POST on the restore relationship. SnapMirror relationships with the policy type \"async\" can be restored. SnapMirror relationships with the policy type \"sync\" cannot be restored."
-        },
-        "restore_to_snapshot": {
-          "desc": "Specifies the snapshot to restore to on the destination during the break operation. This property is applicable only for SnapMirror relationships with FlexVol volume endpoints and when the PATCH state is being changed to \"broken_off\"."
         },
         "selective_volumes": {
           "since": "9.19",
@@ -12615,9 +12357,6 @@
           "since": "9.10",
           "desc": "Error information for the transfer."
         },
-        "files": {
-          "desc": "This is supported for transfer of restore relationship only. This specifies the list of files or LUNs to be restored. Can contain up to eight files or LUNs."
-        },
         "last_updated_time": {
           "since": "9.14",
           "desc": "Last updated time of the bytes transferred in an active transfer."
@@ -12630,22 +12369,12 @@
           "since": "9.13",
           "desc": "Specifies whether or not an on-demand restore is being carried out. This is only supported for the transfer of restore relationships for entire volumes from the object store. A value for read_write_with_user_data_pull should be provided to start an on-demand restore. A file restore from the object store does not support this option."
         },
-        "options": {
-          "since": "9.14",
-          "desc": "Options for snapmirror transfer."
-        },
         "relationship": {},
         "snapshot": {
           "desc": "Name of snapshot being transferred."
         },
-        "source_snapshot": {
-          "desc": "Specifies the snapshot on the source to be transferred to the destination."
-        },
         "state": {
           "desc": "Status of the transfer. Set PATCH state to \"aborted\" to abort the transfer. Set PATCH state to \"hard_aborted\" to abort the transfer and discard the restart checkpoint. To find \"queued\" transfers refer to relationships GET API."
-        },
-        "storage_efficiency_enabled": {
-          "desc": "This is supported for transfer of restore relationship only. Set this property to \"false\" to turn off storage efficiency for data transferred over the wire and written to the destination."
         },
         "throttle": {
           "since": "9.9",
@@ -13661,10 +13390,6 @@
           "since": "9.9",
           "desc": "Effective Disk type"
         },
-        "encryption_operation": {
-          "since": "9.7",
-          "desc": "This field should only be set as a query parameter in a PATCH operation. It is input only and won't be returned by a subsequent GET."
-        },
         "error": {
           "since": "9.9",
           "desc": "List of disk errors information."
@@ -13722,10 +13447,6 @@
         },
         "rpm": {
           "desc": "Revolutions per minute"
-        },
-        "sanitize_spare": {
-          "since": "9.16",
-          "desc": "Confirms spare disk sanitization (non-cryptographically)."
         },
         "sector_count": {
           "since": "9.9",
@@ -13926,10 +13647,6 @@
         "failure": {
           "desc": "Contains the most recent failure reason for move operation."
         },
-        "files_to_move": {
-          "since": "9.8",
-          "desc": "A list of source files along with the destination file they are moved to. If the terminal path component of the destination is a directory, then the source file's basename is replicated in that directory. This is only used for FlexVol volume file move operations."
-        },
         "index": {
           "desc": "An additional unique element identifying one file among many that could possibly be moved as part of a job. File index is an identifier ordered by the file path arrays provided during create. For file move operations that involve only one file, the file-index value of zero is always correct."
         },
@@ -13951,9 +13668,6 @@
         },
         "node": {
           "desc": "Node hosting the destination of this move operation."
-        },
-        "reference": {
-          "desc": "Reference file information."
         },
         "scanner": {},
         "source": {
@@ -14183,10 +13897,6 @@
         },
         "path": {
           "desc": "The fully-qualified path in the owning SVM's namespace at which the FlexCache is mounted. The path is case insensitive and must be unique within a SVM's namespace. Path must begin with '/' and must not end with '/'. Only one FlexCache be mounted at any given junction path."
-        },
-        "prepopulate": {
-          "since": "9.8",
-          "desc": "FlexCache prepopulate"
         },
         "relative_size": {
           "since": "9.13",
@@ -14543,10 +14253,6 @@
           "since": "9.10",
           "desc": "The LUN's consistency group. This property is populated for LUNs that are members of a consistency group. If the LUN is a member of a child consistency group, the parent consistency group is reported. A LUN's consistency group is the consistency group of its containing volume."
         },
-        "convert": {
-          "since": "9.11",
-          "desc": "This sub-object is used in POST to convert a valid in-place NVMe namespace to a LUN. Setting a property in this sub-object indicates that a conversion from the specified NVMe namespace to LUN is desired."
-        },
         "copy": {
           "since": "9.10",
           "desc": "This sub-object applies to LUN copy operations. A LUN can be copied with a POST request that supplies `copy.source` properties. Copying a LUN is an asynchronous activity begun by a POST request that specifies the source of the copy in the `copy.source` properties. The data for the LUN is then asynchronously copied from the source to the destination. The time required to complete the copy depends on the size of the LUN and the load on the cluster. The `copy` sub-object is populated while a LUN copy is in progress and for two (2) minutes following completion of a copy. While LUNs are being copied, the status of the LUN copy operations can be obtained using a GET of the source or destination LUN that requests the `copy` properties. If the LUN is the source LUN for one or more copy operations, the `copy.destinations` array is populated in GET. If the containing LUN is the destination LUN for a copy operation, the `copy.source` sub-object is populated in GET. The LUN copy operation can be further modified using a PATCH on the properties on the `copy.source` sub-object of the copy destination LUN. There is an added computational cost to retrieving property values for `copy`. They are not populated for a GET request unless explicitly requested using the `fields` query parameter. See [`Requesting specific fields`](#Requesting_specific_fields) to learn more."
@@ -14576,10 +14282,6 @@
         },
         "os_type": {
           "desc": "The operating system type of the LUN. Required in POST when creating a LUN that is not a clone of another. Disallowed in POST when creating a LUN clone."
-        },
-        "provisioning_options": {
-          "since": "9.16",
-          "desc": "Options that are applied to the operation."
         },
         "qos_policy": {
           "desc": "The QoS policy for the LUN. Both traditional and adaptive QoS policies are supported. If both property `qos_policy.uuid` and `qos_policy.name` are specified in the same request, they must refer to the same QoS policy. To remove the QoS policy from a LUN, leaving it with no QoS policy, set the property `qos_policy.name` to an empty string (\"\") in a PATCH request. Valid in POST and PATCH."
@@ -14746,10 +14448,6 @@
           "since": "9.16",
           "desc": "The namespace's consistency group. This property is populated for namespaces that are members of a consistency group. If the namespace is a member of a child consistency group, the parent consistency group is reported. A namespace's consistency group is the consistency group of its containing volume."
         },
-        "convert": {
-          "since": "9.11",
-          "desc": "This sub-object is used in POST to convert a valid in-place LUN to an NVMe namespace. Setting a property in this sub-object indicates that a conversion from the specified LUN to NVMe namespace is desired."
-        },
         "create_time": {
           "since": "9.7",
           "desc": "The time the NVMe namespace was created."
@@ -14769,10 +14467,6 @@
         },
         "os_type": {
           "desc": "The operating system type of the NVMe namespace. Required in POST when creating an NVMe namespace that is not a clone of another. Disallowed in POST when creating a namespace clone."
-        },
-        "provisioning_options": {
-          "since": "9.16",
-          "desc": "Options that are applied to the operation."
         },
         "space": {
           "desc": "The storage space related properties of the NVMe namespace."
@@ -14940,9 +14634,6 @@
         "error": {},
         "firmware_version": {
           "since": "9.9"
-        },
-        "force": {
-          "since": "9.11"
         },
         "in_use": {
           "since": "9.9",
@@ -15938,9 +15629,6 @@
         },
         "node": {},
         "online": {
-          "since": "9.11"
-        },
-        "position": {
           "since": "9.11"
         },
         "reservation_type": {},
@@ -17515,9 +17203,6 @@
           "since": "9.9",
           "desc": "FlexGroup volume constituents. FlexGroup volume constituents can be retrieved more efficiently by specifying \"is_constituent=true\" or \"is_constituent=true&flexgroup.uuid= \" as query parameters."
         },
-        "constituents_per_aggregate": {
-          "desc": "Specifies the number of times to iterate over the aggregates listed with the \"aggregates.name\" or \"aggregates.uuid\" when creating or expanding a FlexGroup volume. If a volume is being created on a single aggregate, the system creates a flexible volume if the \"constituents_per_aggregate\" field is not specified, or a FlexGroup volume if it is specified. If a volume is being created on multiple aggregates, the system always creates a FlexGroup volume. If a volume is being created on multiple aggregates and the \"constituents_per_aggregate\" field is not specified, the default value of the \"constituents_per_aggregate\" field is 4. The root constituent of a FlexGroup volume is always placed on the first aggregate in the list, unless 'optimize_aggregates' is specified as 'true'. If the \"aggregates.name\" or \"aggregates.uuid\" is specified in a PATCH request to expand an existing FlexGroup volume, the default value of the \"constituents_per_aggregate\" field is 1. The volume expand operation is only supported on FlexGroup volumes."
-        },
         "convert_unicode": {
           "since": "9.10",
           "desc": "Specifies whether directory Unicode format conversion is enabled when directories are accessed by NFS clients."
@@ -17604,10 +17289,6 @@
           "since": "9.17",
           "desc": "List of the nodes hosting the volume."
         },
-        "optimize_aggregates": {
-          "since": "9.13",
-          "desc": "Specifies whether to create the constituents of the FlexGroup volume on the aggregates specified in the order they are specified, or whether the system should optimize the ordering of the aggregates. If this value is 'true', the system optimizes the ordering of the aggregates specified. If this value is false, the order of the aggregates is unchanged. The default value is 'false'."
-        },
         "qos": {
           "desc": "QoS information"
         },
@@ -17628,10 +17309,6 @@
         },
         "size": {
           "desc": "Physical size of the volume, in bytes. The minimum size for a FlexVol volume is 20MB and the minimum size for a FlexGroup volume is 200MB per constituent. The recommended size for a FlexGroup volume is a minimum of 100GB per constituent. For all volumes, the default size is equal to the minimum size."
-        },
-        "sizing_method": {
-          "since": "9.17",
-          "desc": "When expanding a FlexGroup volume, this specifies whether to add new constituents, or to resize the current constituents."
         },
         "smas_protection": {
           "since": "9.19",
@@ -17681,9 +17358,6 @@
         "tiering": {},
         "type": {
           "desc": "Type of the volume. rw &dash; read-write volume. dp &dash; data-protection volume. ls &dash; load-sharing `dp` volume. Valid in GET."
-        },
-        "use_mirrored_aggregates": {
-          "desc": "Specifies whether mirrored aggregates are selected when provisioning a FlexGroup without specifying \"aggregates.name\" or \"aggregates.uuid\". Only mirrored aggregates are used if this parameter is set to 'true' and only unmirrored aggregates are used if this parameter is set to 'false'. Aggregate level mirroring for a FlexGroup volume can be changed by moving all of the constituents to the required aggregates. The default value is 'true' for a MetroCluster configuration and is 'false' for a non-MetroCluster configuration."
         },
         "uuid": {
           "desc": "Unique identifier for the volume. This corresponds to the instance-uuid that is exposed in the CLI and ONTAPI. It does not change due to a volume move."
@@ -17921,9 +17595,6 @@
         "uuid": {}
       },
       "fields": {
-        "action": {
-          "desc": "Action to be applied to the automatic update."
-        },
         "content_category": {
           "desc": "Category of the update"
         },
@@ -17953,9 +17624,6 @@
         },
         "remaining_time": {
           "desc": "The time remaining for the update processing to complete in an ISO-8601 duration formatted string."
-        },
-        "schedule_time": {
-          "desc": "Date and time when an automatic update action is scheduled. This field is required when the action field is set to \"schedule\"."
         },
         "scheduled_time": {
           "desc": "The date and time at which the update request is currently scheduled for."
@@ -18015,21 +17683,12 @@
         "index": {
           "desc": "Sequence number of the AutoSupport"
         },
-        "message": {
-          "desc": "Message included in the AutoSupport subject"
-        },
         "node": {},
         "state": {
           "desc": "State of AutoSupport delivery"
         },
         "subject": {
           "desc": "Subject line for the AutoSupport"
-        },
-        "type": {
-          "desc": "Type of AutoSupport collection to issue"
-        },
-        "uri": {
-          "desc": "Alternate destination for the AutoSupport"
         }
       }
     },
@@ -18525,16 +18184,9 @@
         "auto_source_cleanup": {
           "desc": "Optional property that when set to true automatically cleans up the SVM on the source cluster after the migration cutover."
         },
-        "check_only": {
-          "desc": "Optional property that when set to true performs only migration pre-checks not the actual migration."
-        },
         "current_operation": {},
         "destination": {
           "desc": "Destination cluster details for the SVM migration."
-        },
-        "ip_interface_placement": {
-          "since": "9.12",
-          "desc": "Optional property used to specify the IP interface placement in the destination. It is input only and is not returned by a subsequent GET."
         },
         "last_failed_state": {},
         "last_operation": {},
@@ -18613,10 +18265,6 @@
       "fields": {
         "applications": {
           "desc": "A list of applications for an SVM peer relationship."
-        },
-        "force": {
-          "since": "9.11",
-          "desc": "Use this to suspend, resume or delete the SVM peer relationship even if the remote cluster is not accessible due to, for example, network connectivity issues."
         },
         "name": {
           "desc": "A peer SVM alias name to avoid a name conflict on the local cluster."
@@ -18989,9 +18637,6 @@
         "qos_policy_group_template": {
           "since": "9.16",
           "desc": "This optionally specifies which QoS non-shared policy group to apply to the SVM as a template. This policy group is then assigned to volumes created or rehosted into this SVM. This policy group defines measurable service level objectives (SLOs) and Service Level Agreements (SLAs)."
-        },
-        "routes": {
-          "desc": "Optional array of routes for the SVM"
         },
         "s3": {
           "since": "9.7"

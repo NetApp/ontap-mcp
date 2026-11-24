@@ -778,38 +778,13 @@ func (a *App) OntapGet(ctx context.Context, _ *mcp.CallToolRequest, p tool.Ontap
 	content := []mcp.Content{&mcp.TextContent{Text: string(stripLinks(raw))}}
 	if len(unknown) > 0 {
 		content = append(content, &mcp.TextContent{
-			Text: "Ignored fields not available on this cluster: " + strings.Join(unknown, ", ") + ". Call describe_ontap_endpoint for valid fields.",
+			Text: "Not in the ONTAP API schema for this version, so likely ignored: " + strings.Join(unknown, ", ") + ". Call describe_ontap_endpoint for valid fields.",
 		})
 	}
 	if fieldsHint != "" {
 		content = append(content, &mcp.TextContent{Text: fieldsHint})
 	}
-	if hint := largeResultHint(p.Fields, p.MaxRecords, raw); hint != "" {
-		content = append(content, &mcp.TextContent{Text: hint})
-	}
 	return &mcp.CallToolResult{Content: content}, nil, nil
-}
-
-// largeResultRecords is how many records a wildcard query may return before ontap_get suggests narrowing fields.
-const largeResultRecords = 5
-
-// largeResultHint suggests listing specific fields when a wildcard query without max_records returned many records.
-func largeResultHint(fields string, maxRecords int, raw json.RawMessage) string {
-	wildcard := slices.ContainsFunc(strings.Split(fields, ","), func(f string) bool {
-		f = strings.TrimSpace(f)
-		return f == "*" || f == "**"
-	})
-	if maxRecords > 0 || !wildcard {
-		return ""
-	}
-	var page struct {
-		NumRecords int `json:"num_records"`
-	}
-	if json.Unmarshal(raw, &page) != nil || page.NumRecords <= largeResultRecords {
-		return ""
-	}
-	return fmt.Sprintf("Large response: %d full records for fields=%q. Next time list only the fields you need as a comma-separated string; call describe_ontap_endpoint to see the valid fields.",
-		page.NumRecords, fields)
 }
 
 // normalizePath removes a leading /api (GenericGet adds it) and a trailing slash, and splits off any query string.

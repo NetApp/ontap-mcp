@@ -641,7 +641,7 @@ type OntapGetParams struct {
 }
 
 type ListEndpointsParams struct {
-	Match string `json:"match,omitzero" jsonschema:"optional substring or regex to filter endpoint paths and summaries; omit to return all"`
+	Match string `json:"match,omitzero" jsonschema:"optional substring or keyword to filter endpoint paths and summaries; omit to return all"`
 }
 
 type SearchEndpointsParams struct {

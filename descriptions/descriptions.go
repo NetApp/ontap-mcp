@@ -167,7 +167,7 @@ const ResyncSnapMirror = `Resync a SnapMirror relationship on a cluster by clust
 
 const ListOntapEndpoints = `List ONTAP REST collection endpoints in the catalog.
 The catalog contains all endpoints — can be large. Prefer search_ontap_endpoints for targeted discovery.
-Use the optional 'match' parameter to filter by substring or regex pattern (e.g. "snapshot", "lun", ".*nfs.*export.*").
+Use the optional 'match' parameter to filter by substring or keyword (e.g. "snapshot", "lun", "export").
 Omit 'match' only when you want a full overview of all available endpoints.`
 
 const SearchOntapEndpoints = `Search the catalog by keyword across endpoint paths, summaries, and tags (e.g. "snapshot", "lun", "nfs").`

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -34,6 +33,7 @@ func TestDescribeOntapEndpointFields(t *testing.T) {
 	text := res.Content[0].(*mcp.TextContent).Text
 	assert.Contains(t, text, "Filters (a name whose part before the first dot is listed under Fields is also valid in 'fields'):\n  location.node.name\n  recommend.ip.family\n")
 	assert.Contains(t, text, "\n  ip\n")
+	assert.Contains(t, text, "\n  rdma_protocols(9.17)\n")
 }
 
 func TestNormalizePath(t *testing.T) {
@@ -50,16 +50,6 @@ func TestNormalizePath(t *testing.T) {
 	assert.Equal(t, p.Fields, "name")
 	assert.Equal(t, p.MaxRecords, 2)
 	assert.Equal(t, p.Filters, map[string]string{"state": "down"})
-}
-
-func TestLargeResultHint(t *testing.T) {
-	many := json.RawMessage(`{"num_records":23,"records":[]}`)
-	few := json.RawMessage(`{"num_records":3,"records":[]}`)
-	assert.Contains(t, largeResultHint("*", 0, many), "Large response: 23 full records")
-	assert.Equal(t, largeResultHint("*", 0, few), "")
-	assert.Equal(t, largeResultHint("*", 1, many), "")
-	assert.Equal(t, largeResultHint("name,svm.name", 0, many), "")
-	assert.Equal(t, largeResultHint("name,space.*", 0, many), "")
 }
 
 func TestWithPathSuggestions(t *testing.T) {

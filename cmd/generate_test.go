@@ -66,6 +66,12 @@ definitions:
             date:
               description: The current or "wall clock" time of the node
               x-ntap-introduced: "9.10"
+            cluster_interface:
+              x-ntap-createOnly: true
+            password:
+              x-ntap-writeOnly: true
+            optimize_aggregates:
+              x-ntap-modifyOnly: true
 `
 
 func TestGenerateAPICatalogInlineRecords(t *testing.T) {

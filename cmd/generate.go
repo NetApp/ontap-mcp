@@ -100,6 +100,9 @@ type swaggerProp struct {
 	Introduced  string                 `yaml:"x-ntap-introduced"`
 	Visibility  swaggerVisibility      `yaml:"x-ntap-visibility"`
 	Properties  map[string]swaggerProp `yaml:"properties"`
+	CreateOnly  bool                   `yaml:"x-ntap-createOnly"`
+	WriteOnly   bool                   `yaml:"x-ntap-writeOnly"`
+	ModifyOnly  bool                   `yaml:"x-ntap-modifyOnly"`
 }
 
 // skipParams are query params present on every collection GET.
@@ -219,7 +222,8 @@ func extractFieldDescs(op *swaggerOperation, defs map[string]swaggerDef, apiVers
 		if name == "_links" {
 			continue
 		}
-		if prop.Visibility.Type == "private" {
+		// ONTAP rejects fields that are not readable on GET, even with ignore_unknown_fields.
+		if prop.Visibility.Type == "private" || prop.CreateOnly || prop.WriteOnly || prop.ModifyOnly {
 			continue
 		}
 		fi := catalog.FieldInfo{Desc: stripHTML(strings.TrimSpace(prop.Description))}
