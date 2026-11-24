@@ -13,17 +13,10 @@ Use the swagger-catalog tools + ontap_get for any listing or read request:
 
   list_ontap_endpoints   → discover available REST paths (optionally filter by tag)
   search_ontap_endpoints → find paths by keyword (e.g. "snapshot", "lun", "nfs")
-  describe_ontap_endpoint→ get filterable fields for one path
+  describe_ontap_endpoint→ list fields, filters and path params for one path
   ontap_get              → execute the GET and return raw JSON results
 
-### ONTAP REST query syntax (for ontap_get filters)
-- Exact match:     "svm.name": "vs1"
-- Wildcard:        "name": "vol*"
-- Greater than:    "space.size": ">1073741824"
-- Less than:       "space.size": "<1073741824"
-- OR values:       "state": "online|offline"
-- NOT:             "state": "!offline"
-- Comma list for fields param: "name,svm.name,space.size,state"
+Filter and fields syntax: see the ontap_get description.
 
 ## Write operations
 Create/update/delete operations remain as dedicated typed tools
@@ -179,7 +172,7 @@ Omit 'match' only when you want a full overview of all available endpoints.`
 
 const SearchOntapEndpoints = `Search the catalog by keyword across endpoint paths, summaries, and tags (e.g. "snapshot", "lun", "nfs").`
 
-const DescribeOntapEndpoint = `Get filterable query params for an endpoint. Call before ontap_get to learn valid filter names and which sub-objects need explicit fields (e.g. "space.*", "efficiency.*").
+const DescribeOntapEndpoint = `List the fields, filters and path parameters of an endpoint. Call before ontap_get to learn valid filter names and which sub-objects need explicit fields (e.g. "space.*", "efficiency.*").
 Pass cluster_name to automatically filter out fields and filters not available in that cluster's ONTAP version.`
 
 const CreateSVM = `Create an SVM on a cluster by cluster name.`

@@ -561,8 +561,9 @@ func (a *App) ListClusters(ctx context.Context, _ *mcp.CallToolRequest, _ tool.L
 
 func (a *App) ListOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p tool.ListEndpointsParams) (*mcp.CallToolResult, any, error) {
 	var results []catalog.SearchResult
+	exact := true
 	if p.Match != "" {
-		results, _ = a.catalog.Search(p.Match)
+		results, exact = a.catalog.Search(p.Match)
 	} else {
 		results = a.catalog.ListAll()
 	}
@@ -571,7 +572,11 @@ func (a *App) ListOntapEndpoints(_ context.Context, _ *mcp.CallToolRequest, p to
 	}
 
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Found %d endpoints:\n", len(results))
+	if exact {
+		fmt.Fprintf(&sb, "Found %d endpoints:\n", len(results))
+	} else {
+		fmt.Fprintf(&sb, "No exact match for %q. Closest endpoints:\n", p.Match)
+	}
 	for _, r := range results {
 		fmt.Fprintf(&sb, "%s — %s\n", r.Path, r.Endpoint.Summary)
 	}
@@ -790,7 +795,11 @@ const largeResultRecords = 5
 
 // largeResultHint suggests listing specific fields when a wildcard query without max_records returned many records.
 func largeResultHint(fields string, maxRecords int, raw json.RawMessage) string {
-	if maxRecords > 0 || !strings.Contains(fields, "*") {
+	wildcard := slices.ContainsFunc(strings.Split(fields, ","), func(f string) bool {
+		f = strings.TrimSpace(f)
+		return f == "*" || f == "**"
+	})
+	if maxRecords > 0 || !wildcard {
 		return ""
 	}
 	var page struct {
@@ -872,7 +881,9 @@ func (a *App) availableFieldsHint(path, ver string) string {
 		". Use dot-notation for nested values (e.g. svm.name) and call describe_ontap_endpoint for sub-fields."
 }
 
-// unknownFields returns requested fields whose top-level name is not in the catalog for path on version ver.
+// unknownFields returns requested fields whose top-level name is not a field of the response schema
+// in the catalog for path on version ver. Filters are not consulted: some are query-only (e.g. is_constituent)
+// and do not appear in the response.
 // It returns nil when ver is unknown, older than 9.11 (no ignore_unknown_fields), or newer than the catalog.
 func (a *App) unknownFields(path, fields, ver string) []string {
 	if fields == "" || ver == "" || catalog.CompareVersions(ver, "9.11") < 0 {

@@ -2,17 +2,21 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/netapp/ontap-mcp/assert"
 	"github.com/netapp/ontap-mcp/catalog"
+	"github.com/netapp/ontap-mcp/ontap"
 	"github.com/netapp/ontap-mcp/tool"
 )
 
 var interfacesCatalog = catalog.APICatalog{
 	"/network/ip/interfaces": {
-		Filters: map[string]catalog.FilterInfo{"location.node.name": {}},
+		Filters: map[string]catalog.FilterInfo{"location.node.name": {}, "recommend.ip.family": {}},
 		Fields: map[string]catalog.FieldInfo{
 			"name":           {Desc: "Interface name"},
 			"ip":             {},
@@ -28,7 +32,7 @@ func TestDescribeOntapEndpointFields(t *testing.T) {
 	assert.Nil(t, err)
 
 	text := res.Content[0].(*mcp.TextContent).Text
-	assert.Contains(t, text, "Filters (a name whose part before the first dot is listed under Fields is also valid in 'fields'):\n  location.node.name\n")
+	assert.Contains(t, text, "Filters (a name whose part before the first dot is listed under Fields is also valid in 'fields'):\n  location.node.name\n  recommend.ip.family\n")
 	assert.Contains(t, text, "\n  ip\n")
 }
 
@@ -55,6 +59,33 @@ func TestLargeResultHint(t *testing.T) {
 	assert.Equal(t, largeResultHint("*", 0, few), "")
 	assert.Equal(t, largeResultHint("*", 1, many), "")
 	assert.Equal(t, largeResultHint("name,svm.name", 0, many), "")
+	assert.Equal(t, largeResultHint("name,space.*", 0, many), "")
+}
+
+func TestWithPathSuggestions(t *testing.T) {
+	a := &App{catalog: interfacesCatalog}
+	notFound := ontap.ClusterError{StatusCode: http.StatusNotFound, Err: ontap.OErr{Message: "API not found", Code: "3"}}
+	tests := []struct {
+		name    string
+		err     error
+		suggest bool
+	}{
+		{"api not found", fmt.Errorf("get failed: %w", notFound), true},
+		{"other code", ontap.ClusterError{StatusCode: http.StatusNotFound, Err: ontap.OErr{Code: "4"}}, false},
+		{"other status", ontap.ClusterError{StatusCode: http.StatusInternalServerError, Err: ontap.OErr{Code: "3"}}, false},
+		{"not a cluster error", errors.New("timeout"), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := a.withPathSuggestions(tt.err, "/network/interfaces")
+			if tt.suggest {
+				assert.Contains(t, got.Error(), "Did you mean: /network/ip/interfaces")
+				assert.ErrorIs(t, got, notFound)
+			} else {
+				assert.Equal(t, got, tt.err)
+			}
+		})
+	}
 }
 
 func TestAvailableFieldsHint(t *testing.T) {
@@ -74,6 +105,7 @@ func TestUnknownFields(t *testing.T) {
 	}{
 		{"known fields and dot-paths", "/network/ip/interfaces", "name, ip.address,location.node.name", "9.16", nil},
 		{"unknown fields", "/network/ip/interfaces", "name,address,node.name", "9.16", []string{"address", "node.name"}},
+		{"query-only filter is not a field", "/network/ip/interfaces", "name,recommend", "9.16", []string{"recommend"}},
 		{"wildcard skipped", "/network/ip/interfaces", "*", "9.16", nil},
 		{"path not in catalog", "/storage/volumes", "bogus", "9.16", nil},
 		{"field newer than cluster", "/network/ip/interfaces", "name,rdma_protocols", "9.16", []string{"rdma_protocols"}},

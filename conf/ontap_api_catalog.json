@@ -1,6 +1,6 @@
 {
   "ontap_version": "9.19",
-  "generated_at": "2026-11-24T06:07:30Z",
+  "generated_at": "2026-11-24T15:46:37Z",
   "endpoints": {
     "/application/applications": {
       "summary": "Retrieves applications. ### Expensive properties There is an added computational cost to retrieving values for these properties. They are not included by default in GET results and must be explicitly ",
@@ -956,6 +956,84 @@
         },
         "volumes.tiering.policy": {},
         "volumes.uuid": {}
+      },
+      "fields": {
+        "_tags": {
+          "since": "9.15",
+          "desc": "Tags are an optional way to track the uses of a resource. Tag values must be formatted as key:value strings."
+        },
+        "application": {
+          "since": "9.12"
+        },
+        "clone": {
+          "since": "9.12",
+          "desc": "Creates a clone of an existing consistency group from the current contents or an existing snapshot."
+        },
+        "consistency_groups": {
+          "desc": "A consistency group is a mutually exclusive aggregation of volumes or other consistency groups. A consistency group can only be associated with one direct parent consistency group."
+        },
+        "luns": {
+          "desc": "The LUNs array can be used to create or modify LUNs in a consistency group on a new or existing volume that is a member of the consistency group. LUNs are considered members of a consistency group if they are located on a volume that is a member of the consistency group. The maximum number of items for this array is 16."
+        },
+        "metric": {
+          "since": "9.8",
+          "desc": "Performance and capacity numbers, such as, IOPS, latency, throughput, used space, and available space."
+        },
+        "name": {
+          "since": "9.6",
+          "desc": "Name of the consistency group. The consistency group name must be unique within an SVM. If not provided and the consistency group contains only one volume, the name will be generated based on the volume name. If the consistency group contains more than one volume, the name is required."
+        },
+        "namespaces": {
+          "desc": "An NVMe namespace is a collection of addressable logical blocks presented to hosts connected to the SVM using the NVMe over Fabrics protocol. In ONTAP, an NVMe namespace is located within a volume. Optionally, it can be located within a qtree in a volume. An NVMe namespace is created to a specified size using thin or thick provisioning as determined by the volume on which it is created. NVMe namespaces support being cloned. An NVMe namespace cannot be renamed, resized, or moved to a different volume. NVMe namespaces do not support the assignment of a QoS policy for performance management, but a QoS policy can be assigned to the volume containing the namespace. See the NVMe namespace object model to learn more about each of the properties supported by the NVMe namespace REST API. An NVMe namespace must be mapped to an NVMe subsystem to grant access to the subsystem's hosts. Hosts can then access the NVMe namespace and perform I/O using the NVMe over Fabrics protocol. The maximum number of items for this array is 16."
+        },
+        "parent_consistency_group": {
+          "desc": "The parent consistency group."
+        },
+        "provisioning_options": {
+          "desc": "Options that are applied to the operation."
+        },
+        "qos": {},
+        "replicated": {
+          "desc": "Indicates whether or not replication has been enabled on this consistency group."
+        },
+        "replication_relationships": {
+          "since": "9.13",
+          "desc": "Indicates the SnapMirror relationship of this consistency group."
+        },
+        "replication_source": {
+          "desc": "Since support for this field is to be removed in the next release, use replication_relationships.is_source instead."
+        },
+        "restore_to": {
+          "desc": "Use to restore a consistency group to a previous snapshot"
+        },
+        "snapshot_policy": {
+          "desc": "The snapshot policy of the consistency group. This is the dedicated consistency group snapshot policy, not an aggregation of the volume granular snapshot policy."
+        },
+        "space": {
+          "desc": "Space information for the consistency group."
+        },
+        "statistics": {
+          "since": "9.8",
+          "desc": "These are raw performance and space numbers, such as, IOPS, latency, throughput, used space, and available space. These numbers are aggregated across all nodes in the cluster and increase with the uptime of the cluster."
+        },
+        "svm": {
+          "since": "9.8",
+          "desc": "The Storage Virtual Machine (SVM) in which the consistency group is located."
+        },
+        "tiering": {
+          "desc": "The tiering placement and policy definitions for volumes in this consistency group."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "The unique identifier of the consistency group. The UUID is generated by ONTAP when the consistency group is created."
+        },
+        "vdisk_type": {
+          "since": "9.17",
+          "desc": "Type of objects in the consistency group."
+        },
+        "volumes": {
+          "desc": "A consistency group is a mutually exclusive aggregation of volumes or other consistency groups. A volume can only be associated with one direct parent consistency group. The volumes array can be used to create new volumes in the consistency group, add existing volumes to the consistency group, or modify existing volumes that are already members of the consistency group. The total number of volumes across all child consistency groups contained in a consistency group is constrained by the same limit."
+        }
       }
     },
     "/application/templates": {
@@ -1361,6 +1439,18 @@
           "type": "integer"
         },
         "serial_number": {}
+      },
+      "fields": {
+        "license_manager": {
+          "desc": "License manager instance where this capacity pool license in installed."
+        },
+        "nodes": {
+          "desc": "Nodes in the cluster associated with this capacity pool."
+        },
+        "serial_number": {
+          "since": "9.6",
+          "desc": "Serial number of the capacity pool license."
+        }
       }
     },
     "/cluster/licensing/license-managers": {
@@ -1375,6 +1465,17 @@
         },
         "uri.host": {},
         "uuid": {}
+      },
+      "fields": {
+        "default": {
+          "desc": "Flag that indicates whether it's the default license manager instance used by the cluster.' When a capacity pool is created and if the license manager field is omitted, it is assumed that the license of the capacity pool is installed on the default license manager instance."
+        },
+        "uri": {
+          "desc": "License manager URI."
+        },
+        "uuid": {
+          "since": "9.6"
+        }
       }
     },
     "/cluster/licensing/licenses": {
@@ -1430,6 +1531,27 @@
         "name": {},
         "scope": {},
         "state": {}
+      },
+      "fields": {
+        "description": {
+          "desc": "License description"
+        },
+        "entitlement": {
+          "since": "9.11"
+        },
+        "keys": {},
+        "licenses": {
+          "desc": "Installed licenses of the package."
+        },
+        "name": {
+          "desc": "Name of the license."
+        },
+        "scope": {
+          "desc": "Scope of the license."
+        },
+        "state": {
+          "desc": "Summary state of package based on all installed licenses."
+        }
       }
     },
     "/cluster/mediators": {
@@ -1469,6 +1591,90 @@
           "since": "9.17"
         },
         "uuid": {}
+      },
+      "fields": {
+        "account_token": {
+          "since": "9.19",
+          "desc": "NetApp Console account token. This field is only applicable to the ONTAP cloud mediator."
+        },
+        "bluexp_account_token": {
+          "since": "9.17",
+          "desc": "BlueXP account token. This field is only applicable to the ONTAP cloud mediator. This has been replaced by account_token. Support for this field will be removed in a future release."
+        },
+        "bluexp_org_id": {
+          "since": "9.17",
+          "desc": "BlueXP organization ID. This field is only applicable to the ONTAP cloud mediator. This has been replaced by org_id. Support for this field will be removed in a future release."
+        },
+        "ca_certificate": {
+          "desc": "CA certificate for ONTAP Mediator. This is optional if the certificate is already installed."
+        },
+        "connection_type": {
+          "since": "9.19",
+          "desc": "Connection type from ONTAP MetroCluster to mediator. Applicable only to on-prem mediator used in ONTAP MetroCluster configurations."
+        },
+        "dr_group": {
+          "since": "9.9",
+          "desc": "DR group reference."
+        },
+        "ip_address": {
+          "desc": "The IP address of the mediator."
+        },
+        "local_mediator_connectivity": {
+          "since": "9.17",
+          "desc": "Indicates the mediator connectivity status of the local cluster. Possible values are connected, unreachable, unusable and down-high-latency. This field is only applicable to the mediators in SnapMirror active sync configuration."
+        },
+        "org_id": {
+          "since": "9.19",
+          "desc": "NetApp Console organization ID. This field is only applicable to the ONTAP cloud mediator."
+        },
+        "password": {
+          "since": "9.6",
+          "desc": "The password used to connect to the REST server on the mediator."
+        },
+        "peer_cluster": {
+          "desc": "The peer cluster that the mediator service is used for."
+        },
+        "peer_mediator_connectivity": {
+          "since": "9.10",
+          "desc": "Indicates the mediator connectivity status of the peer cluster. Possible values are connected, unreachable, unknown and down-high-latency."
+        },
+        "port": {
+          "desc": "The REST server's port number on the mediator."
+        },
+        "reachable": {
+          "desc": "Indicates the connectivity status of the mediator."
+        },
+        "service_account_client_id": {
+          "since": "9.17",
+          "desc": "Client ID of the NetApp Console service account. This field is only applicable to the ONTAP cloud mediator."
+        },
+        "service_account_client_secret": {
+          "since": "9.17",
+          "desc": "Client secret token of the NetApp Console service account. This field is only applicable to the ONTAP cloud mediator."
+        },
+        "strict_cert_validation": {
+          "since": "9.17",
+          "desc": "Indicates if strict validation of certificates is performed while making REST API calls to the mediator. This field is only applicable to the ONTAP Cloud Mediator."
+        },
+        "type": {
+          "since": "9.6",
+          "desc": "Mediator type. This field is only applicable to the mediators in SnapMirror active sync configuration."
+        },
+        "use_http_proxy_local": {
+          "since": "9.17",
+          "desc": "Indicates if the local cluster should use an http-proxy server while making REST API calls to the mediator. This field is only applicable to the ONTAP cloud mediator."
+        },
+        "use_http_proxy_remote": {
+          "since": "9.17",
+          "desc": "Indicates if the remote cluster should use an http-proxy server while making REST API calls to the mediator. This field is only applicable to the ONTAP cloud mediator."
+        },
+        "user": {
+          "desc": "The username used to connect to the REST server on the mediator."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "The unique identifier for the mediator service."
+        }
       }
     },
     "/cluster/metrics": {
@@ -1520,6 +1726,26 @@
           "type": "integer"
         },
         "timestamp": {}
+      },
+      "fields": {
+        "duration": {
+          "desc": "The duration over which this sample is calculated. The time durations are represented in the ISO-8601 standard format. Samples can be calculated over the following durations:"
+        },
+        "iops": {
+          "desc": "The rate of I/O operations observed at the storage object."
+        },
+        "latency": {
+          "desc": "The round trip latency in microseconds observed at the storage object."
+        },
+        "status": {
+          "desc": "Errors associated with the sample. For example, if the aggregation of data over multiple nodes fails, then any partial errors might return \"ok\" on success or \"error\" on an internal uncategorized failure. Whenever a sample collection is missed but done at a later time, it is back filled to the previous 15 second timestamp and tagged with \"backfilled_data\". \"Inconsistent_ delta_time\" is encountered when the time between two collections is not the same for all nodes. Therefore, the aggregated value might be over or under inflated. \"Negative_delta\" is returned when an expected monotonically increasing value has decreased in value. \"Inconsistent_old_data\" is returned when one or more nodes do not have the latest data."
+        },
+        "throughput": {
+          "desc": "The rate of throughput bytes per second observed at the storage object."
+        },
+        "timestamp": {
+          "desc": "The timestamp of the performance data."
+        }
       }
     },
     "/cluster/metrocluster": {
@@ -2224,6 +2450,110 @@
           "type": "integer"
         },
         "vm.provider_type": {
+          "since": "9.7"
+        }
+      },
+      "fields": {
+        "anti_ransomware_version": {
+          "since": "9.16",
+          "desc": "Anti ransomware version."
+        },
+        "cluster_interface": {
+          "desc": "The cluster network IP address of the node to be added."
+        },
+        "cluster_interfaces": {},
+        "controller": {
+          "desc": "Controller information"
+        },
+        "date": {
+          "desc": "The current or \"wall clock\" time of the node in ISO-8601 date, time, and time zone format. The ISO-8601 date and time are localized based on the ONTAP cluster's timezone setting."
+        },
+        "external_cache": {
+          "since": "9.10",
+          "desc": "Cache used for buffer management."
+        },
+        "external_cache_bypass": {
+          "since": "9.17",
+          "desc": "External cache bypass management."
+        },
+        "ha": {},
+        "hw_assist": {
+          "since": "9.11",
+          "desc": "The hardware assist information."
+        },
+        "is_spares_low": {
+          "since": "9.10",
+          "desc": "Specifies whether or not the node is in spares low condition."
+        },
+        "location": {},
+        "management_interface": {
+          "desc": "The management interface of the node to be added. The subnet mask is set based on the management interface of the cluster or the management interfaces of other nodes."
+        },
+        "management_interfaces": {},
+        "membership": {
+          "desc": "Possible values: * available - A node is detected on the internal cluster network and can be added to the cluster. Nodes that have a membership of \"available\" are not returned when a GET request is called when the cluster exists. Provide a query on the \"membership\" property for available to scan for nodes on the cluster network. Nodes that have a membership of \"available\" are returned automatically before a cluster is created. * joining - Joining nodes are in the process of being added to the cluster. The node might be progressing through the steps to become a member or might have failed. The job to add the node or create the cluster provides details on the current progress of the node. * member - Nodes that are members have successfully joined the cluster."
+        },
+        "metric": {
+          "since": "9.8",
+          "desc": "CPU performance for the nodes."
+        },
+        "metrocluster": {
+          "since": "9.8",
+          "desc": "Metrocluster"
+        },
+        "model": {},
+        "name": {},
+        "nvlog": {
+          "since": "9.17",
+          "desc": "Non-volatile write log settings."
+        },
+        "nvram": {
+          "since": "9.9"
+        },
+        "owner": {
+          "since": "9.9",
+          "desc": "Owner of the node."
+        },
+        "serial_number": {},
+        "service_processor": {},
+        "snaplock": {
+          "since": "9.12",
+          "desc": "SnapLock-related properties."
+        },
+        "state": {
+          "desc": "State of the node: * up - Node is up and operational. * booting - Node is booting up. * down - Node has stopped or is dumping core. * taken_over - Node has been taken over by its HA partner and is not yet waiting for giveback. * waiting_for_giveback - Node has been taken over by its HA partner and is waiting for the HA partner to giveback disks. * degraded - Node has one or more critical services offline. * unknown - Node or its HA partner cannot be contacted and there is no information on the node's state."
+        },
+        "statistics": {
+          "since": "9.8",
+          "desc": "Raw CPU performance for the nodes."
+        },
+        "storage_configuration": {
+          "since": "9.9",
+          "desc": "The storage configuration in the system. Possible values: * mixed_path * single_path * multi_path * tri_path * quad_path * mixed_path_ha * single_path_ha * multi_path_ha * tri_path_ha * quad_path_ha * unknown * virtual"
+        },
+        "system_aggregate": {
+          "since": "9.14",
+          "desc": "Aggregate"
+        },
+        "system_id": {
+          "since": "9.7"
+        },
+        "system_machine_type": {
+          "since": "9.7",
+          "desc": "OEM system machine type."
+        },
+        "uptime": {
+          "desc": "The total time, in seconds, that the node has been up."
+        },
+        "uuid": {},
+        "vendor_serial_number": {
+          "since": "9.7",
+          "desc": "OEM vendor serial number."
+        },
+        "version": {
+          "desc": "This returns the cluster version information. When the cluster has more than one node, the cluster version is equivalent to the lowest of generation, major, and minor versions on all nodes."
+        },
+        "vm": {
           "since": "9.7"
         }
       }
@@ -8665,7 +8995,17 @@
       "tags": [
         "SAN"
       ],
-      "api_introduced": "9.9"
+      "api_introduced": "9.9",
+      "fields": {
+        "name": {
+          "since": "9.6",
+          "desc": "The name of the initiator group."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "The unique identifier of the initiator group."
+        }
+      }
     },
     "/protocols/san/igroups/{igroup.uuid}/initiators": {
       "summary": "Retrieves initiators of an initiator group. This API only reports initiators owned directly by the initiator group. Initiators of nested initiator groups are not included in this collection. ### Expen",
@@ -9320,6 +9660,28 @@
         "timestamp": {},
         "volume.name": {},
         "volume.uuid": {}
+      },
+      "fields": {
+        "data_written_in_bytes": {
+          "desc": "The amount of data written."
+        },
+        "duration": {
+          "since": "9.6",
+          "desc": "The duration of the interval associated with this statistic. The duration is represented in ISO-8601 standard format."
+        },
+        "encryption_percentage": {
+          "desc": "The percentage of data that is encrypted."
+        },
+        "entropy_stats_type": {
+          "desc": "Volume metrics are retrieved based on this statistic type."
+        },
+        "timestamp": {
+          "since": "9.6",
+          "desc": "Start time in date-time format."
+        },
+        "volume": {
+          "since": "9.16"
+        }
       }
     },
     "/security/audit": {
@@ -10362,6 +10724,14 @@
         "certificate.uuid": {},
         "node.name": {},
         "node.uuid": {}
+      },
+      "fields": {
+        "certificate": {
+          "since": "9.6"
+        },
+        "node": {
+          "since": "9.6"
+        }
       }
     },
     "/security/cluster-network/ipsec/associations": {
@@ -10421,6 +10791,51 @@
         "scope": {},
         "type": {},
         "uuid": {}
+      },
+      "fields": {
+        "cipher_suite": {
+          "since": "9.8",
+          "desc": "Cipher suite for the security association."
+        },
+        "ike": {
+          "since": "9.8",
+          "desc": "Objects containing parameters specific to IKE (Internet Key Exchange) security association for cluster network."
+        },
+        "ipsec": {
+          "since": "9.8",
+          "desc": "Objects containing parameters specific to IPsec security association for cluster network."
+        },
+        "lifetime": {
+          "since": "9.8",
+          "desc": "Lifetime for the security association in seconds."
+        },
+        "local_address": {
+          "since": "9.8",
+          "desc": "Local address of the security association."
+        },
+        "node": {
+          "since": "9.6",
+          "desc": "Node with the security association."
+        },
+        "policy_name": {
+          "since": "9.8",
+          "desc": "Policy name for the security association."
+        },
+        "remote_address": {
+          "since": "9.8",
+          "desc": "Remote address of the security association."
+        },
+        "scope": {
+          "since": "9.6"
+        },
+        "type": {
+          "since": "9.6",
+          "desc": "Type of security association, it can be IPsec or IKE (Internet Key Exchange)."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "Unique identifier of the security association."
+        }
       }
     },
     "/security/cluster-network/ipsec/policies": {
@@ -10446,6 +10861,37 @@
           "type": "integer"
         },
         "uuid": {}
+      },
+      "fields": {
+        "action": {
+          "since": "9.8",
+          "desc": "Action for the IPsec policy."
+        },
+        "authentication_method": {
+          "since": "9.10",
+          "desc": "Authentication method for the IPsec policy. Must be PKI for cluster security."
+        },
+        "certificate": {
+          "since": "9.6",
+          "desc": "Certificate for the IPsec policy."
+        },
+        "local_ip": {
+          "desc": "Local IP endpoint for the IPsec policy."
+        },
+        "name": {
+          "since": "9.6",
+          "desc": "IPsec policy name."
+        },
+        "node": {
+          "since": "9.6"
+        },
+        "remote_ip": {
+          "desc": "Remote IP endpoint for the IPsec policy."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "Unique identifier for the IPsec policy."
+        }
       }
     },
     "/security/external-role-mappings": {
@@ -10798,6 +11244,65 @@
         "svm.name": {},
         "svm.uuid": {},
         "uuid": {}
+      },
+      "fields": {
+        "action": {
+          "desc": "Action for the IPsec policy."
+        },
+        "authentication_method": {
+          "since": "9.10",
+          "desc": "Authentication method for the IPsec policy."
+        },
+        "certificate": {
+          "since": "9.6",
+          "desc": "Certificate for the IPsec policy."
+        },
+        "certificate_modify_keepsa": {
+          "since": "9.18",
+          "desc": "Indicates whether old security associations are kept upon certificate modification."
+        },
+        "enabled": {
+          "desc": "Indicates whether or not the policy is enabled."
+        },
+        "ipspace": {
+          "desc": "Applies to both SVM and cluster-scoped objects. Either the UUID or name may be supplied on input."
+        },
+        "local_endpoint": {
+          "desc": "Local endpoint for the IPsec policy."
+        },
+        "local_identity": {
+          "desc": "Local Identity"
+        },
+        "name": {
+          "since": "9.6",
+          "desc": "IPsec policy name."
+        },
+        "ppk": {
+          "since": "9.17",
+          "desc": "Post-quantum pre-shared key information."
+        },
+        "protocol": {
+          "desc": "Lower layer protocol to be covered by the IPsec policy."
+        },
+        "remote_endpoint": {
+          "desc": "Remote endpoint for the IPsec policy."
+        },
+        "remote_identity": {
+          "desc": "Remote Identity"
+        },
+        "scope": {
+          "since": "9.6"
+        },
+        "secret_key": {
+          "desc": "Pre-shared key for IKE negotiation."
+        },
+        "svm": {
+          "desc": "SVM, applies only to SVM-scoped objects."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "Unique identifier of the IPsec policy."
+        }
       }
     },
     "/security/ipsec/security-associations": {
@@ -10863,6 +11368,47 @@
         "svm.uuid": {},
         "type": {},
         "uuid": {}
+      },
+      "fields": {
+        "cipher_suite": {
+          "desc": "Cipher suite for the security association."
+        },
+        "ike": {
+          "desc": "Objects containing parameters specific to IKE (Internet Key Exchange) security association."
+        },
+        "ipsec": {
+          "desc": "Objects containing parameters specific to IPsec security association."
+        },
+        "lifetime": {
+          "desc": "Lifetime for the security association in seconds."
+        },
+        "local_address": {
+          "desc": "Local address of the security association."
+        },
+        "node": {
+          "since": "9.6",
+          "desc": "Node with the security association."
+        },
+        "policy_name": {
+          "desc": "Policy name for the security association."
+        },
+        "remote_address": {
+          "desc": "Remote address of the security association."
+        },
+        "scope": {
+          "since": "9.6"
+        },
+        "svm": {
+          "desc": "SVM, applies only to SVM-scoped objects."
+        },
+        "type": {
+          "since": "9.6",
+          "desc": "Type of security association, it can be IPsec or IKE (Internet Key Exchange)."
+        },
+        "uuid": {
+          "since": "9.6",
+          "desc": "Unique identifier of the security association."
+        }
       }
     },
     "/security/jit-privilege-users": {
@@ -17661,6 +18207,35 @@
           "since": "9.10"
         },
         "type": {}
+      },
+      "fields": {
+        "access_control_role": {
+          "since": "9.13",
+          "desc": "Indicates the access control role that created the event destination and is used to control access to the destination based on role-based access control (RBAC) rules. If created by the 'admin' user, the field is unset."
+        },
+        "certificate": {
+          "desc": "Specifies the client-side certificate used by the ONTAP system when mutual authentication is required. This object is only applicable for __rest_api__ type destinations. Both the `ca` and `serial_number` fields must be specified when configuring a certificate in a PATCH or POST request. The `name` field is read-only and cannot be used to configure a client-side certificate."
+        },
+        "connectivity": {
+          "since": "9.7"
+        },
+        "destination": {
+          "desc": "Event destination"
+        },
+        "filters": {},
+        "name": {
+          "desc": "Destination name. Valid in POST."
+        },
+        "syslog": {
+          "since": "9.12"
+        },
+        "system_defined": {
+          "since": "9.10",
+          "desc": "Flag indicating system-defined destinations."
+        },
+        "type": {
+          "desc": "Type of destination. Valid in POST."
+        }
       }
     },
     "/support/ems/events": {
@@ -17686,6 +18261,25 @@
         "parameters.value": {},
         "source": {},
         "time": {}
+      },
+      "fields": {
+        "index": {
+          "desc": "Index of the event. Returned by default."
+        },
+        "log_message": {
+          "desc": "A formatted text string populated with parameter details. Returned by default. When changing the state of an event instance, include the 'state' property and this property in a PATCH request. The value of this property should describe why the state is changed."
+        },
+        "message": {},
+        "node": {},
+        "parameters": {
+          "desc": "A list of parameters provided with the EMS event."
+        },
+        "source": {
+          "desc": "Source"
+        },
+        "time": {
+          "desc": "Timestamp of the event. Returned by default."
+        }
       }
     },
     "/support/ems/filters": {
@@ -17716,6 +18310,22 @@
           "type": "boolean",
           "since": "9.10"
         }
+      },
+      "fields": {
+        "access_control_role": {
+          "since": "9.13",
+          "desc": "Indicates the access control role that created the event filter and is used to control access to the filter based on role-based access control (RBAC) rules. If created by the 'admin' user, the field is unset."
+        },
+        "name": {
+          "desc": "Filter name"
+        },
+        "rules": {
+          "desc": "Array of event filter rules on which to match."
+        },
+        "system_defined": {
+          "since": "9.10",
+          "desc": "Flag indicating system-defined filters."
+        }
       }
     },
     "/support/ems/messages": {
@@ -17737,6 +18347,26 @@
         "name": {},
         "severity": {},
         "snmp_trap_type": {}
+      },
+      "fields": {
+        "corrective_action": {
+          "desc": "Corrective action"
+        },
+        "deprecated": {
+          "desc": "Is deprecated?"
+        },
+        "description": {
+          "desc": "Description of the event."
+        },
+        "name": {
+          "desc": "Name of the event."
+        },
+        "severity": {
+          "desc": "Severity"
+        },
+        "snmp_trap_type": {
+          "desc": "SNMP trap type"
+        }
       }
     },
     "/support/ems/role-configs": {
@@ -17750,6 +18380,17 @@
         "event_filter.name": {},
         "limit_access_to_global_configs": {
           "type": "boolean"
+        }
+      },
+      "fields": {
+        "access_control_role": {
+          "desc": "Access control role that the event filter is assigned to."
+        },
+        "event_filter": {
+          "desc": "Event filter that is assigned to the access control role."
+        },
+        "limit_access_to_global_configs": {
+          "desc": "Indicates whether the access control has limited access to global EMS configurations."
         }
       }
     },
