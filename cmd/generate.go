@@ -94,11 +94,15 @@ type swaggerDef struct {
 }
 
 type swaggerProp struct {
-	Description string            `yaml:"description"`
-	Ref         string            `yaml:"$ref"`
-	Items       *swaggerProp      `yaml:"items"`
-	Introduced  string            `yaml:"x-ntap-introduced"`
-	Visibility  swaggerVisibility `yaml:"x-ntap-visibility"`
+	Description string                 `yaml:"description"`
+	Ref         string                 `yaml:"$ref"`
+	Items       *swaggerProp           `yaml:"items"`
+	Introduced  string                 `yaml:"x-ntap-introduced"`
+	Visibility  swaggerVisibility      `yaml:"x-ntap-visibility"`
+	Properties  map[string]swaggerProp `yaml:"properties"`
+	CreateOnly  bool                   `yaml:"x-ntap-createOnly"`
+	WriteOnly   bool                   `yaml:"x-ntap-writeOnly"`
+	ModifyOnly  bool                   `yaml:"x-ntap-modifyOnly"`
 }
 
 // skipParams are query params present on every collection GET.
@@ -203,28 +207,26 @@ func extractFieldDescs(op *swaggerOperation, defs map[string]swaggerDef, apiVers
 	if !ok || recordsProp.Items == nil {
 		return nil
 	}
-	itemRef := recordsProp.Items.Ref
-	if itemRef == "" {
-		return nil
-	}
-	itemDefName := strings.TrimPrefix(itemRef, "#/definitions/")
-	itemDef, ok := defs[itemDefName]
-	if !ok {
-		return nil
-	}
-	result := make(map[string]catalog.FieldInfo, len(itemDef.Properties))
-	for name, prop := range itemDef.Properties {
-		if strings.HasPrefix(name, "_") {
-			continue // skip _links, _tags etc.
+	// Record items are usually a $ref to a definition, but some endpoints (e.g. /cluster/nodes)
+	// define the record schema inline.
+	props := recordsProp.Items.Properties
+	if itemRef := recordsProp.Items.Ref; itemRef != "" {
+		itemDef, ok := defs[strings.TrimPrefix(itemRef, "#/definitions/")]
+		if !ok {
+			return nil
 		}
-		if prop.Visibility.Type == "private" {
+		props = itemDef.Properties
+	}
+	result := make(map[string]catalog.FieldInfo, len(props))
+	for name, prop := range props {
+		if name == "_links" {
 			continue
 		}
-		desc := strings.TrimSpace(prop.Description)
-		if desc == "" {
+		// ONTAP rejects fields that are not readable on GET, even with ignore_unknown_fields.
+		if prop.Visibility.Type == "private" || prop.CreateOnly || prop.WriteOnly || prop.ModifyOnly {
 			continue
 		}
-		fi := catalog.FieldInfo{Desc: stripHTML(desc)}
+		fi := catalog.FieldInfo{Desc: stripHTML(strings.TrimSpace(prop.Description))}
 		if v := prop.Introduced; v != "" && v != "DO_NOT_DISPLAY" && v != apiVersion {
 			fi.Since = v
 		}
