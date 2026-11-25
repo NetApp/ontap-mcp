@@ -40,6 +40,18 @@ func TestIGroupLUNMap(t *testing.T) {
 			verifyAPI:        ontapVerifier{api: "api/protocols/san/iscsi/services?svm.name=" + rn("marketing"), validationFunc: createObject},
 		},
 		{
+			name:             "Clean svm scope network interface with ip 1",
+			input:            ClusterStr + "delete svm scope network interface with ip address 10.63.41.117",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?ip.address=10.63.41.117&scope=svm", validationFunc: deleteObject},
+		},
+		{
+			name:             "Clean svm scope network interface with ip 2",
+			input:            ClusterStr + "delete svm scope network interface with ip address 10.63.41.118",
+			expectedOntapErr: "because it does not exist",
+			verifyAPI:        ontapVerifier{api: "api/network/ip/interfaces?ip.address=10.63.41.118&scope=svm", validationFunc: deleteObject},
+		},
+		{
 			name:             "Create svm scope network interface with ip 1",
 			input:            ClusterStr + "create network interface named " + rn("svg1") + " in " + rn("marketing") + " svm with ip address 10.63.41.117 and netmask 18 on node umeng-aff300-05 with service policy as blocks",
 			expectedOntapErr: "",
