@@ -402,6 +402,32 @@ FlexGroup create is for Unified NAS (AFF/FAS) only. Classic ASA rejects FlexGrou
 
 ### Manage SnapMirror Relationships
 
+**Manage SnapMirror retention policies**
+
+- On the umeng-aff300-05-06 cluster, create a mirror_vault SnapMirror policy named daily-retention with cluster scope that keeps 7 snapshots with the daily label and 4 snapshots with the weekly label. Enable network compression and set the throttle to 50000 KB/s.
+- <span class="key">Expected Response</span>: Created the cluster-scoped daily-retention policy with daily retention 7, weekly retention 4, network compression enabled, and a 50,000 KB/s throttle.
+
+- On the umeng-aff300-05-06 cluster, create a async SnapMirror policy named weekly-retention with marketing svm that keeps 2 snapshots with the weekly label. set the throttle to 20000 KB/s.
+- <span class="key">Expected Response</span>: Created weekly-retention on umeng-aff300-05-06: async type, scoped to the marketing SVM, retaining 2 weekly snapshots, with a throttle of 20,000 KB/s.
+
+- On the umeng-aff300-05-06 cluster, add rule in the weekly-retention snapmirror policy in marketing svm with daily to keep 3 snapshots.
+- <span class="key">Expected Response</span>: Added the daily SnapMirror retention rule to weekly-retention in the marketing SVM on umeng-aff300-05-06, retaining 3 snapshots.
+
+- On the umeng-aff300-05-06 cluster, update rule in the weekly-retention snapmirror policy in marketing svm with daily to keep 8 snapshots.
+- <span class="key">Expected Response</span>: Updated the daily rule in the marketing SVM’s weekly-retention SnapMirror policy on umeng-aff300-05-06 to keep 8 snapshots. 
+
+- On the umeng-aff300-05-06 cluster, delete rule in the weekly-retention snapmirror policy in marketing svm of weekly label.
+- <span class="key">Expected Response</span>: Removed the weekly retention rule from the weekly-retention SnapMirror policy in the marketing SVM. The policy now retains daily snapshots, keeping 8.
+
+- On the umeng-aff300-05-06 cluster, update rule in the daily-retention SnapMirror policy with daily to keep 2 snapshots and delete weekly label.
+- <span class="key">Expected Response</span>: Updated the daily rule in the cluster-scoped daily-retention SnapMirror policy to keep 2 snapshots and removed the weekly rule. The policy now has only daily: 2 (label matched).
+
+- On the umeng-aff300-05-06 cluster, delete the daily-retention SnapMirror policy.
+- <span class="key">Expected Response</span>: Deleted the cluster-scoped daily-retention SnapMirror policy from umeng-aff300-05-06.
+
+- On the umeng-aff300-05-06 cluster, delete the weekly-retention snapmirror policy in marketing svm.
+- <span class="key">Expected Response</span>: Deleted the weekly-retention SnapMirror policy from the marketing SVM on umeng-aff300-05-06.
+
 **Create a SnapMirror relationship**
 
 - On the umeng-aff300-05-06 cluster, create a snapmirror relationship from source svm srsvm and source volume srvol to destination svm dtsvm and destination volume dtvol with policy name XDPDefault
