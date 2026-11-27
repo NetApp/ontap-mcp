@@ -484,7 +484,7 @@ type SnapMirrorPolicyConfig struct {
 
 type SnapMirrorPolicyRetention struct {
 	Label    string `json:"label"`
-	Count    int    `json:"count"`
+	Count    string `json:"count"`
 	Preserve *bool  `json:"preserve,omitzero"`
 	Warn     *int   `json:"warn,omitzero"`
 }

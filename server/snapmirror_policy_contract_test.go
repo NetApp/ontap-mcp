@@ -15,7 +15,7 @@ const (
 	snapMirrorPolicyFields     = snapMirrorPolicyBaseFields + ",create_snapshot_on_source,copy_latest_source_snapshot"
 	snapMirrorPolicyUUID       = "policy-uuid"
 	snapMirrorPolicyName       = "daily-retention"
-	snapMirrorPolicyState      = `{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","comment":"custom retention","network_compression_enabled":true,"throttle":50000,"retention":[{"label":"daily","count":7},{"label":"weekly","count":4,"preserve":true,"warn":2}]}]}`
+	snapMirrorPolicyState      = `{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","comment":"custom retention","network_compression_enabled":true,"throttle":50000,"retention":[{"label":"daily","count":"7"},{"label":"weekly","count":"4","preserve":true,"warn":2}]}]}`
 )
 
 func snapMirrorPolicyVersion(version string) exchange {
@@ -33,7 +33,7 @@ func snapMirrorPolicyLookup(resp string) exchange {
 
 func snapMirrorPolicyLookupFields(resp, fields string) exchange {
 	return exchange{method: http.MethodGet,
-		path: "/api/snapmirror/policies?fields=" + fields + "&name=" + snapMirrorPolicyName + "&scope=cluster",
+		path: "/api/snapmirror/policies?fields=" + fields + "&name=" + snapMirrorPolicyName + "&scope=",
 		resp: resp}
 }
 
@@ -69,7 +69,7 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
 				{method: http.MethodPost, path: snapMirrorPoliciesPath, status: http.StatusCreated,
-					body: `{"name":"daily-retention","type":"async","comment":"custom retention","network_compression_enabled":true,"throttle":50000,"retention":[{"label":"daily","count":7},{"label":"weekly","count":4,"preserve":true,"warn":2}]}`},
+					body: `{"name":"daily-retention","svm":{"name":"contract-cluster"},"type":"async","comment":"custom retention","network_compression_enabled":true,"throttle":50000,"retention":[{"label":"daily","count":"7"},{"label":"weekly","count":"4","preserve":true,"warn":2}]}`},
 				snapMirrorPolicyLookup(snapMirrorPolicyState),
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=daily&fields=uuid&return_records=false", resp: `{"num_records":1}`},
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=weekly&fields=uuid&return_records=false", resp: `{"num_records":0}`},
@@ -88,7 +88,7 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.10"),
 				{method: http.MethodPost, path: snapMirrorPoliciesPath, status: http.StatusCreated,
-					body: `{"name":"daily-retention","type":"async"}`},
+					body: `{"name":"daily-retention","svm":{"name":"contract-cluster"},"type":"async"}`},
 				snapMirrorPolicyLookupFields(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async"}]}`, snapMirrorPolicyBaseFields),
 			},
 			wantText: []string{`SnapMirror policy "daily-retention" created successfully`, `Target cluster "contract-cluster" accepts transfer attributes: network_compression_enabled, throttle.`},
@@ -103,7 +103,7 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
 				{method: http.MethodPost, path: snapMirrorPoliciesPath, status: http.StatusCreated,
-					body: `{"name":"daily-retention","scope":"svm","svm":{"name":"marketing"},"type":"async"}`},
+					body: `{"name":"daily-retention","svm":{"name":"marketing"},"type":"async"}`},
 				snapMirrorPolicyLookupInScope(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","scope":"svm","svm":{"name":"marketing"},"type":"async"}]}`, snapMirrorPolicyFields, "svm", "marketing"),
 			},
 			wantText: []string{`SnapMirror policy "daily-retention" created successfully`, `Current policy: scope=svm, svm="marketing"`},
@@ -149,10 +149,10 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			args: map[string]any{"cluster_name": contractCluster, "policy_name": snapMirrorPolicyName, "rule_label": "monthly", "keep_count": 3},
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":7}]}]}`),
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"7"}]}]}`),
 				{method: http.MethodPatch, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID,
-					body: `{"retention":[{"label":"daily","count":7},{"label":"monthly","count":3}]}`},
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":7},{"label":"monthly","count":3}]}]}`),
+					body: `{"retention":[{"label":"daily","count":"7"},{"label":"monthly","count":"3"}]}`},
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"7"},{"label":"monthly","count":"3"}]}]}`),
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=daily&fields=uuid&return_records=false", resp: `{"num_records":1}`},
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=monthly&fields=uuid&return_records=false", resp: `{"num_records":1}`},
 			},
@@ -164,10 +164,10 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			args: map[string]any{"cluster_name": contractCluster, "policy_name": snapMirrorPolicyName, "rule_label": "daily", "keep_count": 14},
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":7}]}]}`),
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"7"}]}]}`),
 				{method: http.MethodPatch, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID,
-					body: `{"retention":[{"label":"daily","count":14}]}`},
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":14}]}]}`),
+					body: `{"retention":[{"label":"daily","count":"14"}]}`},
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"14"}]}]}`),
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=daily&fields=uuid&return_records=false", resp: `{"num_records":1}`},
 			},
 			wantText: []string{`Retention rule updated in SnapMirror policy "daily-retention" successfully`, `label="daily", keep=14; snapshot schedule label: matched`},
@@ -178,10 +178,10 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			args: map[string]any{"cluster_name": contractCluster, "policy_name": snapMirrorPolicyName, "rule_label": "daily", "preserve": true},
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":7}]}]}`),
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"7"}]}]}`),
 				{method: http.MethodPatch, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID,
-					body: `{"retention":[{"label":"daily","count":7,"preserve":true}]}`},
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":7,"preserve":true}]}]}`),
+					body: `{"retention":[{"label":"daily","count":"7","preserve":true}]}`},
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"7","preserve":true}]}]}`),
 				{method: http.MethodGet, path: "/api/storage/snapshot-policies?copies.snapmirror_label=daily&fields=uuid&return_records=false", resp: `{"num_records":1}`},
 			},
 			wantText: []string{`Retention rule updated in SnapMirror policy "daily-retention" successfully`, `label="daily", keep=7, preserve=true; snapshot schedule label: matched`},
@@ -192,7 +192,7 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			args: map[string]any{"cluster_name": contractCluster, "policy_name": snapMirrorPolicyName, "rule_label": "daily"},
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
-				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":7}]}]}`),
+				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[{"label":"daily","count":"7"}]}]}`),
 				{method: http.MethodPatch, path: snapMirrorPoliciesPath + "/" + snapMirrorPolicyUUID, body: `{"retention":[]}`},
 				snapMirrorPolicyLookup(`{"num_records":1,"records":[{"uuid":"policy-uuid","name":"daily-retention","type":"async","retention":[]}]}`),
 			},
@@ -260,7 +260,7 @@ func TestSnapMirrorPolicyContract(t *testing.T) {
 			args: map[string]any{"cluster_name": contractCluster, "name": snapMirrorPolicyName, "policy_type": "mirror_vault"},
 			ontap: []exchange{
 				snapMirrorPolicyVersion("9.15"),
-				{method: http.MethodPost, path: snapMirrorPoliciesPath, body: `{"name":"daily-retention","type":"async"}`, status: http.StatusBadRequest,
+				{method: http.MethodPost, path: snapMirrorPoliciesPath, body: `{"name":"daily-retention","svm":{"name":"contract-cluster"},"type":"async"}`, status: http.StatusBadRequest,
 					resp: `{"error":{"message":"invalid retention policy","code":"12345"}}`},
 			},
 			wantText: []string{"message: invalid retention policy code: 12345"},

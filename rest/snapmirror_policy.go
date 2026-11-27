@@ -127,7 +127,7 @@ func (c *Client) UpdateSnapMirrorPolicyRule(ctx context.Context, name, label, sc
 			continue
 		}
 		found = true
-		if update.Count != 0 {
+		if update.Count != "" {
 			policy.Retention[i].Count = update.Count
 		}
 		if update.Preserve != nil {

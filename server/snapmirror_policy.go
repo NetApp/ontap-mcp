@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -42,11 +43,11 @@ func (a *App) CreateSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolRequest
 	if name == "" {
 		return nil, nil, errors.New("SnapMirror policy name is required")
 	}
-	scope, svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName)
+	svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName, p.Cluster)
 	if err != nil {
 		return nil, nil, err
 	}
-	p.Scope, p.SVMName = scope, svmName
+	p.SVMName = svmName
 	remote, err := a.snapMirrorPolicyRemote(ctx, p.Cluster)
 	if err != nil {
 		return errorResult(err), nil, err
@@ -75,11 +76,11 @@ func (a *App) UpdateSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolRequest
 	if name == "" {
 		return nil, nil, errors.New("SnapMirror policy name is required")
 	}
-	scope, svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName)
+	svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName, p.Cluster)
 	if err != nil {
 		return nil, nil, err
 	}
-	p.Scope, p.SVMName = scope, svmName
+	p.SVMName = svmName
 	if isBuiltInSnapMirrorPolicy(name) {
 		return errorResult(fmt.Errorf("SnapMirror policy %q is built-in and cannot be modified; create a custom policy instead", name)), nil, nil
 	}
@@ -119,11 +120,11 @@ func (a *App) DeleteSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolRequest
 	if name == "" {
 		return nil, nil, errors.New("SnapMirror policy name is required")
 	}
-	scope, svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName)
+	svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName, p.Cluster)
 	if err != nil {
 		return nil, nil, err
 	}
-	p.Scope, p.SVMName = scope, svmName
+	p.SVMName = svmName
 	if isBuiltInSnapMirrorPolicy(name) {
 		return errorResult(fmt.Errorf("SnapMirror policy %q is built-in and cannot be deleted; create a custom policy instead", name)), nil, nil
 	}
@@ -155,11 +156,11 @@ func (a *App) AddRuleInSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolRequ
 	if p.Name == "" {
 		return nil, nil, errors.New("SnapMirror policy name is required")
 	}
-	scope, svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName)
+	svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName, p.Cluster)
 	if err != nil {
 		return nil, nil, err
 	}
-	p.Scope, p.SVMName = scope, svmName
+	p.SVMName = svmName
 	if isBuiltInSnapMirrorPolicy(p.Name) {
 		return errorResult(fmt.Errorf("SnapMirror policy %q is built-in and cannot be modified; create a custom policy instead", p.Name)), nil, nil
 	}
@@ -167,7 +168,7 @@ func (a *App) AddRuleInSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolRequ
 	if err != nil {
 		return errorResult(err), nil, err
 	}
-	rule := ontap.SnapMirrorPolicyRetention{Label: p.Label, Count: p.Keep, Preserve: p.Preserve, Warn: p.Warn}
+	rule := ontap.SnapMirrorPolicyRetention{Label: p.Label, Count: strconv.Itoa(p.Keep), Preserve: p.Preserve, Warn: p.Warn}
 	if err := validateSnapMirrorPolicyRule(rule, remote); err != nil {
 		return errorResult(err), nil, nil
 	}
@@ -193,11 +194,11 @@ func (a *App) UpdateRuleInSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolR
 	if p.Name == "" {
 		return nil, nil, errors.New("SnapMirror policy name is required")
 	}
-	scope, svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName)
+	svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName, p.Cluster)
 	if err != nil {
 		return nil, nil, err
 	}
-	p.Scope, p.SVMName = scope, svmName
+	p.SVMName = svmName
 	if isBuiltInSnapMirrorPolicy(p.Name) {
 		return errorResult(fmt.Errorf("SnapMirror policy %q is built-in and cannot be modified; create a custom policy instead", p.Name)), nil, nil
 	}
@@ -209,7 +210,7 @@ func (a *App) UpdateRuleInSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolR
 		if *p.Keep <= 0 {
 			return nil, nil, errors.New("retention rule keep count must be greater than zero")
 		}
-		update.Count = *p.Keep
+		update.Count = strconv.Itoa(*p.Keep)
 	}
 	remote, err := a.snapMirrorPolicyRemote(ctx, p.Cluster)
 	if err != nil {
@@ -240,11 +241,11 @@ func (a *App) RemoveRuleInSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolR
 	if p.Name == "" {
 		return nil, nil, errors.New("SnapMirror policy name is required")
 	}
-	scope, svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName)
+	svmName, err := normalizeSnapMirrorPolicyScope(p.Scope, p.SVMName, p.Cluster)
 	if err != nil {
 		return nil, nil, err
 	}
-	p.Scope, p.SVMName = scope, svmName
+	p.SVMName = svmName
 	if isBuiltInSnapMirrorPolicy(p.Name) {
 		return errorResult(fmt.Errorf("SnapMirror policy %q is built-in and cannot be modified; create a custom policy instead", p.Name)), nil, nil
 	}
@@ -263,7 +264,7 @@ func (a *App) RemoveRuleInSnapMirrorPolicy(ctx context.Context, _ *mcp.CallToolR
 	return a.snapMirrorPolicyResult(ctx, client, p.Cluster, p.Name, p.Scope, p.SVMName, "rule_removed", includeAsyncFlags)
 }
 
-func normalizeSnapMirrorPolicyScope(scope, svmName string) (string, string, error) {
+func normalizeSnapMirrorPolicyScope(scope, svmName, clusterName string) (string, error) {
 	scope = strings.ToLower(strings.TrimSpace(scope))
 	svmName = strings.TrimSpace(svmName)
 	if scope == "" {
@@ -272,16 +273,17 @@ func normalizeSnapMirrorPolicyScope(scope, svmName string) (string, string, erro
 	switch scope {
 	case "cluster":
 		if svmName != "" {
-			return "", "", errors.New("svm_name can only be provided when scope is svm")
+			return "", errors.New("svm_name can only be provided when scope is svm")
 		}
+		svmName = clusterName
 	case "svm":
 		if svmName == "" {
-			return "", "", errors.New("svm_name is required when scope is svm")
+			return "", errors.New("svm_name is required when scope is svm")
 		}
 	default:
-		return "", "", fmt.Errorf("unsupported SnapMirror policy scope %q; supported values: cluster, svm", scope)
+		return "", fmt.Errorf("unsupported SnapMirror policy scope %q; supported values: cluster, svm", scope)
 	}
-	return scope, svmName, nil
+	return svmName, nil
 }
 
 func (a *App) snapMirrorPolicyRemote(ctx context.Context, cluster string) (ontap.Remote, error) {
@@ -309,8 +311,11 @@ func validateSnapMirrorPolicyRuleOptions(rule ontap.SnapMirrorPolicyRetention, r
 	if strings.TrimSpace(rule.Label) == "" {
 		return errors.New("SnapMirror retention rule label is required")
 	}
-	if requireCount && rule.Count <= 0 {
-		return errors.New("retention rule keep count must be greater than zero")
+	if requireCount {
+		count, err := strconv.Atoi(rule.Count)
+		if err != nil || count <= 0 {
+			return errors.New("retention rule keep count must be greater than zero")
+		}
 	}
 	if (rule.Preserve != nil || rule.Warn != nil) && remote.Version.Generation == 9 && remote.Version.Major < 13 {
 		return fmt.Errorf("ONTAP %d.%d does not support SnapMirror retention rule preserve or warn settings; these require ONTAP 9.13 or later",
@@ -351,10 +356,9 @@ func newSnapMirrorPolicy(p tool.SnapMirrorPolicyCreate, remote ontap.Remote) (on
 		NetworkCompression: p.NetworkCompression,
 		Throttle:           p.Throttle,
 	}
-	if strings.EqualFold(strings.TrimSpace(p.Scope), "svm") {
-		policy.Scope = "svm"
-		policy.SVM.Name = strings.TrimSpace(p.SVMName)
-	}
+
+	policy.SVM.Name = strings.TrimSpace(p.SVMName)
+
 	if p.Comment != "" {
 		comment := p.Comment
 		policy.Comment = &comment
@@ -370,7 +374,7 @@ func newSnapMirrorPolicy(p tool.SnapMirrorPolicyCreate, remote ontap.Remote) (on
 	for _, rule := range p.RetentionRules {
 		converted := ontap.SnapMirrorPolicyRetention{
 			Label:    rule.Label,
-			Count:    rule.Keep,
+			Count:    strconv.Itoa(rule.Keep),
 			Preserve: rule.Preserve,
 			Warn:     rule.Warn,
 		}
@@ -435,7 +439,7 @@ func (a *App) snapMirrorPolicyResult(ctx context.Context, client interface {
 		b.WriteString("- none\n")
 	} else {
 		for _, rule := range policy.Retention {
-			fmt.Fprintf(&b, "- label=%q, keep=%d", rule.Label, rule.Count)
+			fmt.Fprintf(&b, "- label=%q, keep=%s", rule.Label, rule.Count)
 			if rule.Preserve != nil {
 				fmt.Fprintf(&b, ", preserve=%t", *rule.Preserve)
 			}
